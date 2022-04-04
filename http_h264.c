@@ -46,7 +46,9 @@ void http_video(http_worker_t *worker, FILE *stream)
     }
 
     if (had_key_frame) {
-      fwrite(buf->start, buf->used, 1, stream);
+      if (!fwrite(buf->start, buf->used, 1, stream)) {
+        goto error;
+      }
     } else if (!requested_key_frame) {
       device_force_key(buf->buf_list->device);
       requested_key_frame = true;

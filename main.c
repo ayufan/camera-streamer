@@ -103,10 +103,6 @@ bool check_streaming()
   return http_jpeg_needs_buffer() || http_h264_needs_buffer();
 }
 
-void write_h264(buffer_t *buf)
-{
-}
-
 int main(int argc, char *argv[])
 {
   if (open_camera() < 0) {
