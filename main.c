@@ -22,6 +22,10 @@ device_t *codec_h264 = NULL;
 
 int open_isp(buffer_list_t *src, const char *srgb_path, const char *yuuv_path, const char *yuuv_low_path)
 {
+  DEVICE_SET_OPTION(isp_srgb, RED_BALANCE, 2120);
+  DEVICE_SET_OPTION(isp_srgb, BLUE_BALANCE, 1472);
+  DEVICE_SET_OPTION(isp_srgb, DIGITAL_GAIN, 1007);
+
   if (device_open_buffer_list(isp_srgb, false, src->fmt_width, src->fmt_height, src->fmt_format, camera_nbufs) < 0 ||
     device_open_buffer_list(isp_yuuv, true, src->fmt_width, src->fmt_height, V4L2_PIX_FMT_YUYV, camera_nbufs) < 0 ||
     device_open_buffer_list(isp_yuuv_low, true, src->fmt_width / 2, src->fmt_height / 2, V4L2_PIX_FMT_YUYV, camera_nbufs) < 0) {
@@ -33,28 +37,28 @@ int open_isp(buffer_list_t *src, const char *srgb_path, const char *yuuv_path, c
 
 int open_jpeg(buffer_list_t *src, const char *tmp)
 {
+  DEVICE_SET_OPTION2(codec_jpeg, JPEG, COMPRESSION_QUALITY, 80);
+
   if (device_open_buffer_list(codec_jpeg, false, src->fmt_width, src->fmt_height, src->fmt_format, camera_nbufs) < 0 ||
     device_open_buffer_list(codec_jpeg, true, src->fmt_width, src->fmt_height, V4L2_PIX_FMT_JPEG, camera_nbufs) < 0) {
     return -1;
   }
-
-  DEVICE_SET_OPTION(codec_jpeg, JPEG, COMPRESSION_QUALITY, 80);
   return 0;
 }
 
 int open_h264(buffer_list_t *src, const char *tmp)
 {
+  DEVICE_SET_OPTION2(codec_h264, MPEG_VIDEO, BITRATE, 5000 * 1000);
+  DEVICE_SET_OPTION2(codec_h264, MPEG_VIDEO, H264_I_PERIOD, 30);
+  DEVICE_SET_OPTION2(codec_h264, MPEG_VIDEO, H264_LEVEL, V4L2_MPEG_VIDEO_H264_LEVEL_4_0);
+  DEVICE_SET_OPTION2(codec_h264, MPEG_VIDEO, REPEAT_SEQ_HEADER, 1);
+  DEVICE_SET_OPTION2(codec_h264, MPEG_VIDEO, H264_MIN_QP, 16);
+  DEVICE_SET_OPTION2(codec_h264, MPEG_VIDEO, H264_MIN_QP, 32);
+
   if (device_open_buffer_list(codec_h264, false, src->fmt_width, src->fmt_height, src->fmt_format, camera_nbufs) < 0 ||
     device_open_buffer_list(codec_h264, true, src->fmt_width, src->fmt_height, V4L2_PIX_FMT_H264, camera_nbufs) < 0) {
     return -1;
   }
-
-  DEVICE_SET_OPTION(codec_h264, MPEG_VIDEO, BITRATE, 5000 * 1000);
-  DEVICE_SET_OPTION(codec_h264, MPEG_VIDEO, H264_I_PERIOD, 30);
-  DEVICE_SET_OPTION(codec_h264, MPEG_VIDEO, H264_LEVEL, V4L2_MPEG_VIDEO_H264_LEVEL_4_0);
-  DEVICE_SET_OPTION(codec_h264, MPEG_VIDEO, REPEAT_SEQ_HEADER, 1);
-  DEVICE_SET_OPTION(codec_h264, MPEG_VIDEO, H264_MIN_QP, 16);
-  DEVICE_SET_OPTION(codec_h264, MPEG_VIDEO, H264_MIN_QP, 32);
   return 0;
 }
 
@@ -65,6 +69,10 @@ int open_camera()
   if (device_open_buffer_list(camera, true, camera_width, camera_height, camera_format, camera_nbufs) < 0) {
     return -1;
   }
+
+  DEVICE_SET_OPTION(camera, EXPOSURE, 1148);
+  DEVICE_SET_OPTION(camera, ANALOGUE_GAIN, 938);
+  DEVICE_SET_OPTION(camera, DIGITAL_GAIN, 256);
 
   isp_srgb = device_open("ISP-SRGB", "/dev/video13");
   //isp_srgb->allow_dma = false;

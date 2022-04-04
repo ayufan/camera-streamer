@@ -182,7 +182,7 @@ int device_set_option(device_t *dev, const char *name, uint32_t id, int32_t valu
   struct v4l2_control ctl = {0};
   ctl.id = id;
   ctl.value = value;
-  E_LOG_DEBUG(dev, "Configuring option %s ...", name);
+  E_LOG_DEBUG(dev, "Configuring option %s (%08x) = %d", name, id, value);
   E_XIOCTL(dev, dev->fd, VIDIOC_S_CTRL, &ctl, "Can't set option %s", name);
   return 0;
 error:
