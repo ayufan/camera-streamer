@@ -151,3 +151,40 @@ int device_consume_event(device_t *dev)
 error:
   return -1;
 }
+
+int device_force_key(device_t *dev)
+{
+  struct v4l2_control ctl = {0};
+  ctl.id = V4L2_CID_MPEG_VIDEO_FORCE_KEY_FRAME;
+  ctl.value = 1;
+  E_LOG_DEBUG(dev, "Forcing keyframe ...");
+  E_XIOCTL(dev, dev->fd, VIDIOC_S_CTRL, &ctl, "Can't force keyframe");
+  return 0;
+error:
+  return -1;
+}
+
+int device_set_fps(device_t *dev, int desired_fps)
+{
+  struct v4l2_streamparm setfps = {0};
+  setfps.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+  setfps.parm.output.timeperframe.numerator = 1;
+  setfps.parm.output.timeperframe.denominator = desired_fps;
+  E_LOG_DEBUG(dev, "Configuring FPS ...");
+  E_XIOCTL(dev, dev->fd, VIDIOC_S_PARM, &setfps, "Can't set FPS");
+  return 0;
+error:
+  return -1;
+}
+
+int device_set_option(device_t *dev, const char *name, uint32_t id, int32_t value)
+{
+  struct v4l2_control ctl = {0};
+  ctl.id = id;
+  ctl.value = value;
+  E_LOG_DEBUG(dev, "Configuring option %s ...", name);
+  E_XIOCTL(dev, dev->fd, VIDIOC_S_CTRL, &ctl, "Can't set option %s", name);
+  return 0;
+error:
+  return -1;
+}

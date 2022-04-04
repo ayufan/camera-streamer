@@ -5,6 +5,8 @@
 #include "v4l2.h"
 #include "http.h"
 
+#include <signal.h>
+
 int camera_width = 1920;
 int camera_height = 1080;
 int camera_format = V4L2_PIX_FMT_SRGGB10P;
@@ -36,6 +38,7 @@ int open_jpeg(buffer_list_t *src, const char *tmp)
     return -1;
   }
 
+  DEVICE_SET_OPTION(codec_jpeg, JPEG, COMPRESSION_QUALITY, 80);
   return 0;
 }
 
@@ -46,6 +49,12 @@ int open_h264(buffer_list_t *src, const char *tmp)
     return -1;
   }
 
+  DEVICE_SET_OPTION(codec_h264, MPEG_VIDEO, BITRATE, 5000 * 1000);
+  DEVICE_SET_OPTION(codec_h264, MPEG_VIDEO, H264_I_PERIOD, 30);
+  DEVICE_SET_OPTION(codec_h264, MPEG_VIDEO, H264_LEVEL, V4L2_MPEG_VIDEO_H264_LEVEL_4_0);
+  DEVICE_SET_OPTION(codec_h264, MPEG_VIDEO, REPEAT_SEQ_HEADER, 1);
+  DEVICE_SET_OPTION(codec_h264, MPEG_VIDEO, H264_MIN_QP, 16);
+  DEVICE_SET_OPTION(codec_h264, MPEG_VIDEO, H264_MIN_QP, 32);
   return 0;
 }
 
@@ -126,7 +135,7 @@ int main(int argc, char *argv[])
     {
       codec_h264,
       { },
-      { NULL, check_streaming }
+      { http_h264_capture, check_streaming }
     },
     { NULL }
   };
@@ -137,8 +146,11 @@ int main(int argc, char *argv[])
     { "GET /stream ", http_stream },
     { "GET /?action=snapshot ", http_snapshot },
     { "GET /?action=stream ", http_stream },
+    { "GET /video ", http_video },
     { NULL, NULL }
   };
+
+  sigaction(SIGPIPE, &(struct sigaction){SIG_IGN}, NULL);
 
   int http_fd = http_server(9092, 5, http_methods);
 

@@ -104,8 +104,6 @@ static void http_client(http_worker_t *worker)
 
 static int http_worker(http_worker_t *worker)
 {
-  printf("http_worker=%d\n", worker->listen_fd);
-
   while (1) {
     int addrlen = sizeof(worker->client_addr);
     worker->client_fd = accept(worker->listen_fd, (struct sockaddr *)&worker->client_addr, &addrlen);
