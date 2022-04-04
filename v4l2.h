@@ -37,11 +37,11 @@ typedef struct {
 
 fourcc_string fourcc_to_string(unsigned format);
 unsigned fourcc_to_stride(unsigned width, unsigned format);
-int xioctl(int fd, int request, void *arg);
+int xioctl(const char *name, int fd, int request, void *arg);
 
 #define E_XIOCTL(dev, _fd, _request, _value, _msg, ...) do { \
 		int ret; \
-		if ((ret = xioctl(_fd, _request, _value)) < 0) { \
+		if ((ret = xioctl(dev_name(dev), _fd, _request, _value)) < 0) { \
 			E_LOG_ERROR(dev, "xioctl(ret=%d): " _msg, ret, ##__VA_ARGS__); \
 		} \
 	} while(0)

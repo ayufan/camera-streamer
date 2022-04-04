@@ -34,9 +34,6 @@ int _build_fds(link_t *all_links, struct pollfd *fds, link_t **links, buffer_lis
       if (!output || !output->output_list || n >= max_n) {
         return -EINVAL;
       }
-      if (output->output_list->do_mmap) {
-        continue;
-      }
       if (!output->output_list->streaming) {
         continue;
       }
@@ -70,7 +67,7 @@ int links_step(link_t *all_links, int timeout)
 
     if (fds[i].revents & POLLIN) {
       E_LOG_DEBUG(buf_list, "POLLIN");
-      if (buf = buffer_list_dequeue(buf_list, true)) {
+      if (buf = buffer_list_dequeue(buf_list)) {
         for (int j = 0; link->outputs[j]; j++) {
           buffer_list_enqueue(link->outputs[j]->output_list, buf);
         }
@@ -84,9 +81,7 @@ int links_step(link_t *all_links, int timeout)
     }
     if (fds[i].revents & POLLOUT) {
       E_LOG_DEBUG(buf_list, "POLLOUT");
-      if (buf = buffer_list_dequeue(buf_list, false)) {
-        buffer_consumed(buf);
-      }
+      buffer_list_dequeue(buf_list);
     }
   }
   return 0;

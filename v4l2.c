@@ -1,6 +1,6 @@
 #include "v4l2.h"
 
-int xioctl(int fd, int request, void *arg)
+int xioctl(const char *name, int fd, int request, void *arg)
 {
 	int retries = XIOCTL_RETRIES;
 	int retval = -1;
@@ -19,7 +19,7 @@ int xioctl(int fd, int request, void *arg)
 
 	// cppcheck-suppress knownConditionTrueFalse
 	if (retval && retries <= 0) {
-		E_LOG_PERROR(NULL, "ioctl(%d) retried %u times; giving up", request, XIOCTL_RETRIES);
+		E_LOG_PERROR(NULL, "%s: ioctl(%08x) retried %u times; giving up", name, request, XIOCTL_RETRIES);
 	}
 	return retval;
 }

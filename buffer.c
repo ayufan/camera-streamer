@@ -10,20 +10,24 @@ buffer_t *buffer_open(const char *name, buffer_list_t *buf_list, int index) {
   buf->index = index;
   buf->buf_list = buf_list;
   buf->dma_fd = -1;
-
-  if (!buf_list->do_mmap) {
-    // nothing to do here
-    return buf;
-  }
+  buf->mmap_reflinks = 1;
+  buf->used = 0;
 
   buf->v4l2_buffer.type = buf_list->type;
-  buf->v4l2_buffer.memory = V4L2_MEMORY_MMAP;
   buf->v4l2_buffer.index = index;
 
   if (buf_list->do_mplanes) {
     buf->v4l2_buffer.length = 1;
     buf->v4l2_buffer.m.planes = &buf->v4l2_plane;
   }
+
+  if (!buf_list->do_mmap) {
+    // nothing to do here
+    buf->v4l2_buffer.memory = V4L2_MEMORY_DMABUF;
+    return buf;
+  }
+
+  buf->v4l2_buffer.memory = V4L2_MEMORY_MMAP;
 
   E_XIOCTL(buf_list, dev->fd, VIDIOC_QUERYBUF, &buf->v4l2_buffer, "Cannot query buffer %d", index);
 
@@ -49,10 +53,9 @@ buffer_t *buffer_open(const char *name, buffer_list_t *buf_list, int index) {
     buf->dma_fd = v4l2_exp.fd;
   }
 
-  // enqueue buffer
-  buf->used = 0;
-  buf->mmap_reflinks = 1;
-  buffer_consumed(buf);
+  if (buf_list->do_capture) {
+    buffer_consumed(buf);
+  }
 
   return buf;
 

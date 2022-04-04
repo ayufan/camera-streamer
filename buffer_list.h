@@ -29,6 +29,7 @@ int buffer_list_request(buffer_list_t *buf_list, int nbufs);
 
 int buffer_list_stream(buffer_list_t *buf_list, bool do_on);
 
-buffer_t *buffer_list_dequeue(buffer_list_t *buf_list, int mmap);
+buffer_t *buffer_list_find_slot(buffer_list_t *buf_list);
+buffer_t *buffer_list_dequeue(buffer_list_t *buf_list);
 
-buffer_t *buffer_list_enqueue(buffer_list_t *buf_list, buffer_t *dma_buf);
+int buffer_list_enqueue(buffer_list_t *buf_list, buffer_t *dma_buf);
