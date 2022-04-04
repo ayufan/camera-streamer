@@ -16,20 +16,11 @@ device_t *isp_yuuv = NULL;
 device_t *isp_yuuv_low = NULL;
 device_t *codec_jpeg = NULL;
 
-int open_camera(const char *path)
-{
-  if (device_open_buffer_list(camera, true, camera_width, camera_height, camera_format, camera_nbufs, true) < 0) {
-    return -1;
-  }
-
-  return 0;
-}
-
 int open_isp(buffer_list_t *src, const char *srgb_path, const char *yuuv_path, const char *yuuv_low_path)
 {
-  if (device_open_buffer_list(isp_srgb, false, src->fmt_width, src->fmt_height, src->fmt_format, camera_nbufs, true) < 0 ||
-    device_open_buffer_list(isp_yuuv, true, src->fmt_width, src->fmt_height, V4L2_PIX_FMT_YUYV, camera_nbufs, true) < 0 ||
-    device_open_buffer_list(isp_yuuv_low, true, src->fmt_width / 2, src->fmt_height / 2, V4L2_PIX_FMT_YUYV, camera_nbufs, true) < 0) {
+  if (device_open_buffer_list(isp_srgb, false, src->fmt_width, src->fmt_height, src->fmt_format, camera_nbufs) < 0 ||
+    device_open_buffer_list(isp_yuuv, true, src->fmt_width, src->fmt_height, V4L2_PIX_FMT_YUYV, camera_nbufs) < 0 ||
+    device_open_buffer_list(isp_yuuv_low, true, src->fmt_width / 2, src->fmt_height / 2, V4L2_PIX_FMT_YUYV, camera_nbufs) < 0) {
     return -1;
   }
 
@@ -38,8 +29,8 @@ int open_isp(buffer_list_t *src, const char *srgb_path, const char *yuuv_path, c
 
 int open_jpeg(buffer_list_t *src, const char *tmp)
 {
-  if (device_open_buffer_list(codec_jpeg, false, src->fmt_width, src->fmt_height, src->fmt_format, camera_nbufs, false) < 0 ||
-    device_open_buffer_list(codec_jpeg, true, src->fmt_width, src->fmt_height, V4L2_PIX_FMT_JPEG, camera_nbufs, false) < 0) {
+  if (device_open_buffer_list(codec_jpeg, false, src->fmt_width, src->fmt_height, src->fmt_format, camera_nbufs) < 0 ||
+    device_open_buffer_list(codec_jpeg, true, src->fmt_width, src->fmt_height, V4L2_PIX_FMT_JPEG, camera_nbufs) < 0) {
     return -1;
   }
 
@@ -60,18 +51,20 @@ void write_jpeg(buffer_t *buf)
 int main(int argc, char *argv[])
 {
   camera = device_open("CAMERA", "/dev/video0");
-  isp_srgb = device_open("ISP-SRGB", "/dev/video13");
-  isp_yuuv = device_open("ISP-YUUV", "/dev/video14");
-  isp_yuuv_low = device_open("ISP-YUUV-LOW", "/dev/video15");
-  codec_jpeg = device_open("JPEG", "/dev/video31");
 
-  if (device_open_buffer_list(camera, true, camera_width, camera_height, camera_format, camera_nbufs, true) < 0) {
+  if (device_open_buffer_list(camera, true, camera_width, camera_height, camera_format, camera_nbufs) < 0) {
     return -1;
   }
 
-  if (open_camera("/dev/video0") < 0) {
-    goto error;
-  }
+  isp_srgb = device_open("ISP-SRGB", "/dev/video13");
+  isp_srgb->allow_dma = false;
+  isp_yuuv = device_open("ISP-YUUV", "/dev/video14");
+  isp_yuuv->upstream_device = isp_srgb;
+  isp_yuuv_low = device_open("ISP-YUUV-LOW", "/dev/video15");
+  isp_yuuv_low->upstream_device = isp_srgb;
+  codec_jpeg = device_open("JPEG", "/dev/video31");
+  codec_jpeg->allow_dma = false;
+
   if (open_isp(camera->capture_list, "/dev/video13", "/dev/video14", "/dev/video15") < 0) {
     goto error;
   }
@@ -82,30 +75,33 @@ int main(int argc, char *argv[])
   link_t links[] = {
     {
       camera,
-      {isp_srgb},
+      { isp_srgb },
       NULL
     },
     {
       isp_yuuv,
       { camera_use_low ? NULL : codec_jpeg },
-      NULL
+      NULL,
+      V4L2_PIX_FMT_YUYV
     },
     {
       isp_yuuv_low,
       { camera_use_low ? codec_jpeg : NULL },
-      NULL
+      NULL,
+      V4L2_PIX_FMT_YUYV
     },
     {
       codec_jpeg,
-      {},
-      write_jpeg
+      { },
+      write_jpeg,
+      V4L2_PIX_FMT_JPEG
     },
     { NULL }
   };
 
-  if (links_init(links) < 0) {
-    return -1;
-  }
+  // if (links_init(links) < 0) {
+  //   return -1;
+  // }
 
   bool running = false;
   links_loop(links, &running);

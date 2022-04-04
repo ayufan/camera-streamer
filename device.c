@@ -7,6 +7,7 @@ device_t *device_open(const char *name, const char *path) {
   dev->name = strdup(name);
   dev->path = strdup(path);
   dev->fd = open(path, O_RDWR|O_NONBLOCK);
+  dev->allow_dma = true;
   if(dev->fd < 0) {
 		E_LOG_ERROR(dev, "Can't open device");
 	}
@@ -48,7 +49,7 @@ void device_close(device_t *dev) {
   free(dev);
 }
 
-int device_open_buffer_list(device_t *dev, bool do_capture, unsigned width, unsigned height, unsigned format, int nbufs, bool allow_dma)
+int device_open_buffer_list(device_t *dev, bool do_capture, unsigned width, unsigned height, unsigned format, int nbufs)
 {
   unsigned type;
   char name[64];
@@ -58,6 +59,10 @@ int device_open_buffer_list(device_t *dev, bool do_capture, unsigned width, unsi
   if (do_capture) {
     buf_list = &dev->capture_list;
     do_mmap = true;
+
+    if (dev->capture_list) {
+      E_LOG_ERROR(dev, "The capture_list is already created.");
+    }
 
     if (dev->v4l2_cap.capabilities & V4L2_CAP_VIDEO_CAPTURE) {
       type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
@@ -70,7 +75,11 @@ int device_open_buffer_list(device_t *dev, bool do_capture, unsigned width, unsi
     }
   } else {
     buf_list = &dev->output_list;
-    do_mmap = !allow_dma;
+    do_mmap = !dev->allow_dma;
+
+    if (dev->output_list) {
+      E_LOG_ERROR(dev, "The output_list is already created.");
+    }
 
     if (dev->v4l2_cap.capabilities & V4L2_CAP_VIDEO_OUTPUT) {
       type = V4L2_BUF_TYPE_VIDEO_OUTPUT;
