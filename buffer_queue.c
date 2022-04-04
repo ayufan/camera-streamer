@@ -38,6 +38,7 @@ bool buffer_consumed(buffer_t *buf)
     // update used bytes
     if (buf->buf_list->do_mplanes) {
       buf->v4l2_plane.bytesused = buf->used;
+      buf->v4l2_plane.length = buf->length;
     } else {
       buf->v4l2_buffer.bytesused = buf->used;
     }
@@ -121,10 +122,14 @@ int buffer_list_enqueue(buffer_list_t *buf_list, buffer_t *dma_buf)
         dma_buf->name, dma_buf->used, buf->length);
     }
 
-    E_LOG_DEBUG(buf, "mmap copy: dest=%p, src=%p (%s), size=%zu, space=%zu",
-      buf->start, dma_buf->start, dma_buf->name, dma_buf->used, buf->length);
-
+    struct timespec before, after;
+    clock_gettime(CLOCK_MONOTONIC, &before);
     memcpy(buf->start, dma_buf->start, dma_buf->used);
+    clock_gettime(CLOCK_MONOTONIC, &after);
+    uint64_t time_diff = after.tv_sec * 1000000LL + after.tv_nsec / 1000 - before.tv_sec * 1000000LL - before.tv_nsec / 1000;
+
+    E_LOG_DEBUG(buf, "mmap copy: dest=%p, src=%p (%s), size=%zu, space=%zu, time=%dllus",
+      buf->start, dma_buf->start, dma_buf->name, dma_buf->used, buf->length, time_diff);
   } else {
     if (buf_list->do_mplanes) {
       buf->v4l2_plane.m.fd = dma_buf->dma_fd;
@@ -136,6 +141,7 @@ int buffer_list_enqueue(buffer_list_t *buf_list, buffer_t *dma_buf)
       buf->start, dma_buf->start, dma_buf->name, dma_buf->dma_fd, dma_buf->used);
 
     buf->mmap_source = dma_buf;
+    buf->length = dma_buf->length;
     dma_buf->mmap_reflinks++;
   }
 
