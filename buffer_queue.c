@@ -13,11 +13,7 @@ bool buffer_output_dequeue(buffer_t *buf)
 
 bool buffer_consumed(buffer_t *buf)
 {
-  if (buf->buf_list->do_mmap) {
-    if (buf->mmap_reflinks <= 0) {
-      return true;
-    }
-
+  if (buf->mmap_reflinks > 0) {
     buf->mmap_reflinks--;
 
     // update used bytes
@@ -31,11 +27,11 @@ bool buffer_consumed(buffer_t *buf)
       E_LOG_DEBUG(buf, "Queuing buffer...");
       E_XIOCTL(buf, buf->buf_list->device->fd, VIDIOC_QBUF, &buf->v4l2_buffer, "Can't queue buffer.");
     }
-  } else {
-    if (buf->mmap_source) {
-      buffer_consumed(buf->mmap_source);
-      buf->mmap_source = NULL;
-    }
+  }
+
+  if (buf->mmap_source) {
+    buffer_consumed(buf->mmap_source);
+    buf->mmap_source = NULL;
   }
 
   return true;

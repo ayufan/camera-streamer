@@ -70,7 +70,7 @@ int device_open_buffer_list(device_t *dev, bool do_capture, unsigned width, unsi
     }
   } else {
     buf_list = &dev->output_list;
-    do_mmap = true;
+    //do_mmap = true;
 
     if (dev->v4l2_cap.capabilities & V4L2_CAP_VIDEO_OUTPUT) {
       type = V4L2_BUF_TYPE_VIDEO_OUTPUT;
