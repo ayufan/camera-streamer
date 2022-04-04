@@ -7,7 +7,7 @@
 
 int _build_fds(link_t *all_links, struct pollfd *fds, link_t **links, buffer_list_t **buf_lists, int max_n)
 {
-  int n;
+  int n = 0;
 
   for (int i = 0; all_links[i].capture; i++) {
     link_t *link = &all_links[i];
@@ -16,6 +16,9 @@ int _build_fds(link_t *all_links, struct pollfd *fds, link_t **links, buffer_lis
       return -EINVAL;
     }
     if (!link->capture->capture_list->do_mmap) {
+      continue;
+    }
+    if (!link->capture->capture_list->streaming) {
       continue;
     }
 
@@ -32,6 +35,9 @@ int _build_fds(link_t *all_links, struct pollfd *fds, link_t **links, buffer_lis
         return -EINVAL;
       }
       if (output->output_list->do_mmap) {
+        continue;
+      }
+      if (!output->output_list->streaming) {
         continue;
       }
 
@@ -91,6 +97,12 @@ int links_stream(link_t *all_links, bool do_stream)
   for (int i = 0; all_links[i].capture; i++) {
     if (device_stream(all_links[i].capture, true) < 0) {
       E_LOG_ERROR(all_links[i].capture, "Failed to start streaming");
+    }
+
+    for (int j = 0; all_links[i].outputs[j]; j++) {
+      if (device_stream(all_links[i].outputs[j], true) < 0) {
+        E_LOG_ERROR(all_links[i].outputs[j], "Failed to start streaming");
+      }
     }
   }
 

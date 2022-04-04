@@ -17,6 +17,7 @@ typedef struct buffer_list_s {
 
   unsigned fmt_width, fmt_height, fmt_format;
 
+  bool streaming;
   int frames;
 } buffer_list_t;
 

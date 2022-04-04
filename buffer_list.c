@@ -157,6 +157,7 @@ int buffer_list_stream(buffer_list_t *buf_list, bool do_on)
 	enum v4l2_buf_type type = buf_list->type;
   
   E_XIOCTL(buf_list, buf_list->device->fd, do_on ? VIDIOC_STREAMON : VIDIOC_STREAMOFF, &type, "Cannot set streaming state");
+  buf_list->streaming = do_on;
 
   return 0;
 
