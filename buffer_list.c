@@ -154,10 +154,20 @@ error:
 
 int buffer_list_stream(buffer_list_t *buf_list, bool do_on)
 {
+  if (!buf_list) {
+    return -1;
+  }
+
+  if (buf_list->streaming == do_on) {
+    return 0;
+  }
+
 	enum v4l2_buf_type type = buf_list->type;
   
   E_XIOCTL(buf_list, buf_list->device->fd, do_on ? VIDIOC_STREAMON : VIDIOC_STREAMOFF, &type, "Cannot set streaming state");
   buf_list->streaming = do_on;
+
+  E_LOG_DEBUG(buf_list, "Streaming %s...", do_on ? "started" : "stopped");
 
   return 0;
 

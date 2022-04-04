@@ -12,7 +12,7 @@ typedef struct device_s {
   struct buffer_list_s *capture_list;
   struct buffer_list_s *output_list;
 
-  struct device_s *upstream_device;
+  struct device_s *output_device;
 } device_t;
 
 device_t *device_open(const char *name, const char *path);

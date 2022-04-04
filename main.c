@@ -16,6 +16,7 @@ device_t *isp_srgb = NULL;
 device_t *isp_yuuv = NULL;
 device_t *isp_yuuv_low = NULL;
 device_t *codec_jpeg = NULL;
+device_t *codec_h264 = NULL;
 
 int open_isp(buffer_list_t *src, const char *srgb_path, const char *yuuv_path, const char *yuuv_low_path)
 {
@@ -38,6 +39,16 @@ int open_jpeg(buffer_list_t *src, const char *tmp)
   return 0;
 }
 
+int open_h264(buffer_list_t *src, const char *tmp)
+{
+  if (device_open_buffer_list(codec_h264, false, src->fmt_width, src->fmt_height, src->fmt_format, camera_nbufs) < 0 ||
+    device_open_buffer_list(codec_h264, true, src->fmt_width, src->fmt_height, V4L2_PIX_FMT_H264, camera_nbufs) < 0) {
+    return -1;
+  }
+
+  return 0;
+}
+
 void write_jpeg(buffer_t *buf)
 {
   FILE *fp = fopen("/tmp/capture.jpg.tmp", "wb");
@@ -47,6 +58,22 @@ void write_jpeg(buffer_t *buf)
     E_LOG_DEBUG(buf, "Wrote JPEG: %d", buf->used);
   }
   rename("/tmp/capture.jpg.tmp", "/tmp/capture.jpg");
+}
+
+bool check_streaming()
+{
+  return true;
+}
+
+void write_h264(buffer_t *buf)
+{
+  FILE *fp = fopen("/tmp/capture.h264.tmp", "wb");
+  if (fp) {
+    fwrite(buf->start, 1, buf->used, fp);
+    fclose(fp);
+    E_LOG_DEBUG(buf, "Wrote H264: %d", buf->used);
+  }
+  rename("/tmp/capture.h264.tmp", "/tmp/capture.h264");
 }
 
 int main(int argc, char *argv[])
@@ -60,11 +87,13 @@ int main(int argc, char *argv[])
   isp_srgb = device_open("ISP-SRGB", "/dev/video13");
   //isp_srgb->allow_dma = false;
   isp_yuuv = device_open("ISP-YUUV", "/dev/video14");
-  isp_yuuv->upstream_device = isp_srgb;
+  isp_yuuv->output_device = isp_srgb;
   isp_yuuv_low = device_open("ISP-YUUV-LOW", "/dev/video15");
-  isp_yuuv_low->upstream_device = isp_srgb;
+  isp_yuuv_low->output_device = isp_srgb;
   codec_jpeg = device_open("JPEG", "/dev/video31");
   codec_jpeg->allow_dma = false;
+  codec_h264 = device_open("H264", "/dev/video11");
+  codec_h264->allow_dma = false;
 
   if (open_isp(camera->capture_list, "/dev/video13", "/dev/video14", "/dev/video15") < 0) {
     goto error;
@@ -72,30 +101,41 @@ int main(int argc, char *argv[])
   if (open_jpeg(camera_use_low ? isp_yuuv_low->capture_list : isp_yuuv->capture_list, "/dev/video31") < 0) {
     goto error;
   }
+  if (open_h264(camera_use_low ? isp_yuuv_low->capture_list : isp_yuuv->capture_list, "/dev/video11") < 0) {
+    goto error;
+  }
 
   link_t links[] = {
     {
       camera,
       { isp_srgb },
-      NULL
+      { NULL, NULL }
     },
     {
       isp_yuuv,
-      { camera_use_low ? NULL : codec_jpeg },
-      NULL,
-      V4L2_PIX_FMT_YUYV
+      {
+        camera_use_low ? NULL : codec_jpeg,
+        camera_use_low ? NULL : codec_h264,
+      },
+      { NULL, NULL }
     },
     {
       isp_yuuv_low,
-      { camera_use_low ? codec_jpeg : NULL },
-      NULL,
-      V4L2_PIX_FMT_YUYV
+      {
+        camera_use_low ? codec_jpeg : NULL,
+        camera_use_low ? codec_h264 : NULL,
+      },
+      { NULL, NULL }
     },
     {
       codec_jpeg,
       { },
-      write_jpeg,
-      V4L2_PIX_FMT_JPEG
+      { write_jpeg, check_streaming }
+    },
+    {
+      codec_h264,
+      { },
+      { write_h264, check_streaming }
     },
     { NULL }
   };

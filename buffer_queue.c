@@ -2,6 +2,16 @@
 #include "buffer_list.h"
 #include "device.h"
 
+bool buffer_use(buffer_t *buf)
+{
+  if (buf->enqueued) {
+    return false;
+  }
+
+  buf->mmap_reflinks += 1;
+  return true;
+}
+
 bool buffer_consumed(buffer_t *buf)
 {
   if (buf->mmap_reflinks > 0) {
@@ -35,6 +45,10 @@ bool buffer_consumed(buffer_t *buf)
   return true;
 
 error:
+  if (buf->mmap_source) {
+    buffer_consumed(buf->mmap_source);
+    buf->mmap_source = NULL;
+  }
   return false;
 }
 
