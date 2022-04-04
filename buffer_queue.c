@@ -40,42 +40,11 @@ error:
   return false;
 }
 
-buffer_t *buffer_list_output_enqueue(buffer_list_t *buf_list, buffer_t *dma_buf)
-{
-  // if (dma_buf->enqueued || dma_buf->dma_fd < 0) {
-  //   return NULL;
-  // }
-
-	// struct v4l2_buffer v4l2_buf = {0};
-	// struct v4l2_plane v4l2_plane = {0};
-
-	// v4l2_buf.type = buf_list->type;
-  // v4l2_buf.memory = V4L2_MEMORY_MMAP;
-
-	// if (buf_list->do_mplanes) {
-	// 	v4l2_buf.length = 1;
-	// 	v4l2_buf.m.planes = &v4l2_plane;
-	// }
-
-	// E_XIOCTL(buf_list, buf_list->device->fd, VIDIOC_DQBUF, &v4l2_buf, "Can't grab capture buffer");
-	// E_LOG_DEBUG(buf_list, "Grabbed INPUT buffer=%u", v4l2_buf.index);
-
-  return NULL;
-}
-
-buffer_t *buffer_list_mmap_enqueue(buffer_list_t *buf_list, buffer_t *dma_buf)
+buffer_t *_buffer_list_enqueue_mmap(buffer_list_t *buf_list, buffer_t *dma_buf)
 {
   buffer_t *buf = NULL;
 
-  if (!buf_list->do_mmap && !dma_buf->buf_list->do_mmap) {
-    E_LOG_PERROR(buf_list, "Cannot enqueue non-mmap to non-mmap: %s.", dma_buf->name);
-  }
-
-  if (!buf_list->do_mmap) {
-    E_LOG_PERROR(buf_list, "Not yet supported: %s.", dma_buf->name);
-  }
-
-  buf = buffer_list_mmap_dequeue(buf_list);
+  buf = buffer_list_dequeue(buf_list, true);
   if (!buf) {
     return NULL;
   }
@@ -91,14 +60,84 @@ buffer_t *buffer_list_mmap_enqueue(buffer_list_t *buf_list, buffer_t *dma_buf)
   buffer_consumed(buf);
 
   return NULL;
+error:
+  return NULL;
+}
+
+buffer_t *_buffer_list_enqueue_dmabuf(buffer_list_t *buf_list, buffer_t *dma_buf)
+{
+  buffer_t *buf = NULL;
+
+  for (int i = 0; i < buf_list->nbufs; i++) {
+    if (!buf_list->bufs[i]->mmap_source) {
+      buf = buf_list->bufs[i];
+      break;
+    }
+  }
+  if (!buf) {
+    return NULL;
+  }
+
+  struct v4l2_buffer v4l2_buf = {0};
+  struct v4l2_plane v4l2_plane = {0};
+
+  v4l2_buf.type = buf_list->type;
+  v4l2_buf.memory = V4L2_MEMORY_DMABUF;
+  v4l2_buf.index = buf->index;
+
+  if (buf_list->do_mplanes) {
+    v4l2_buf.length = 1;
+    v4l2_buf.m.planes = &v4l2_plane;
+    v4l2_plane.m.fd = dma_buf->dma_fd;
+		v4l2_plane.bytesused = dma_buf->used;
+		v4l2_plane.length = dma_buf->used;
+  } else {
+    v4l2_buf.m.fd = dma_buf->dma_fd;
+		v4l2_buf.bytesused = dma_buf->used;
+		v4l2_buf.length = dma_buf->used;
+  }
+
+	// uint64_t now = get_now_monotonic_u64();
+	// struct timeval ts = {
+	// 	.tv_sec = now / 1000000,
+	// 	.tv_usec = now % 1000000,
+	// };
+
+	// v4l2_buf.timestamp.tv_sec = ts.tv_sec;
+	// v4l2_buf.timestamp.tv_usec = ts.tv_usec;
+
+  E_LOG_DEBUG(buf, "dmabuf copy: dest=%p, src=%p (%s, dma_fd=%d), size=%zu",
+    buf->start, dma_buf->start, dma_buf->name, dma_buf->dma_fd, dma_buf->used);
+
+  E_XIOCTL(buf_list, buf_list->device->fd, VIDIOC_QBUF, &v4l2_buf, "Can't push DMA buffer");
+
+  buf->mmap_source = dma_buf;
+  return buf;
+error:
+  return NULL;
+}
+
+buffer_t *buffer_list_enqueue(buffer_list_t *buf_list, buffer_t *dma_buf)
+{
+  buffer_t *buf = NULL;
+
+  if (!buf_list->do_mmap && !dma_buf->buf_list->do_mmap) {
+    E_LOG_PERROR(buf_list, "Cannot enqueue non-mmap to non-mmap: %s.", dma_buf->name);
+  }
+
+  if (buf_list->do_mmap) {
+    return _buffer_list_enqueue_mmap(buf_list, dma_buf);
+  } else {
+    return _buffer_list_enqueue_dmabuf(buf_list, dma_buf);
+  }
 
 error:
   return NULL;
 }
 
-buffer_t *buffer_list_mmap_dequeue(buffer_list_t *buf_list)
+buffer_t *buffer_list_dequeue(buffer_list_t *buf_list, int mmap)
 {
-  if (!buf_list->do_mmap) {
+  if (mmap != buf_list->do_mmap) {
     return NULL;
   }
 
@@ -128,7 +167,11 @@ buffer_t *buffer_list_mmap_dequeue(buffer_list_t *buf_list)
 	E_LOG_DEBUG(buf_list, "Grabbed mmap buffer=%u, bytes=%d, used=%d",
     buf->index, buf->length, buf->used);
 
-  buf->mmap_reflinks = 1;
+  if (buf_list->do_mmap) {
+    buf->mmap_reflinks = 1;
+  } else {
+    buf->mmap_reflinks = 0;
+  }
 
   return buf;
 
@@ -136,8 +179,8 @@ error:
   return NULL;
 }
 
-bool buffer_list_wait_pool(buffer_list_t *buf_list, int timeout) {
-  struct pollfd fds = {buf_list->device->fd, POLLIN, 0};
+bool buffer_list_wait_pool(buffer_list_t *buf_list, int timeout, int mmap) {
+  struct pollfd fds = {buf_list->device->fd, mmap ? POLLIN : POLLOUT, 0};
 
   if (poll(&fds, 1, timeout) < 0 && errno != EINTR) {
     E_LOG_ERROR(buf_list, "Can't poll encoder");
@@ -151,7 +194,7 @@ bool buffer_list_wait_pool(buffer_list_t *buf_list, int timeout) {
     E_LOG_DEBUG(buf_list, "fd POLLPRI");
   }
   if (fds.revents & POLLOUT) {
-    E_LOG_DEBUG(buf_list, "fd POLLOUT");
+    return true;
   }
   if (fds.revents & POLLERR) {
     E_LOG_DEBUG(buf_list, "fd POLLERR");
