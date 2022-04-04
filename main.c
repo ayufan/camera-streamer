@@ -49,34 +49,7 @@ int open_h264(buffer_list_t *src, const char *tmp)
   return 0;
 }
 
-void write_jpeg(buffer_t *buf)
-{
-  FILE *fp = fopen("/tmp/capture.jpg.tmp", "wb");
-  if (fp) {
-    fwrite(buf->start, 1, buf->used, fp);
-    fclose(fp);
-    E_LOG_DEBUG(buf, "Wrote JPEG: %d", buf->used);
-  }
-  rename("/tmp/capture.jpg.tmp", "/tmp/capture.jpg");
-}
-
-bool check_streaming()
-{
-  return true;
-}
-
-void write_h264(buffer_t *buf)
-{
-  FILE *fp = fopen("/tmp/capture.h264.tmp", "wb");
-  if (fp) {
-    fwrite(buf->start, 1, buf->used, fp);
-    fclose(fp);
-    E_LOG_DEBUG(buf, "Wrote H264: %d", buf->used);
-  }
-  rename("/tmp/capture.h264.tmp", "/tmp/capture.h264");
-}
-
-int main(int argc, char *argv[])
+int open_camera()
 {
   camera = device_open("CAMERA", "/dev/video0");
 
@@ -96,13 +69,31 @@ int main(int argc, char *argv[])
   codec_h264->allow_dma = false;
 
   if (open_isp(camera->capture_list, "/dev/video13", "/dev/video14", "/dev/video15") < 0) {
-    goto error;
+    return -1;
   }
   if (open_jpeg(camera_use_low ? isp_yuuv_low->capture_list : isp_yuuv->capture_list, "/dev/video31") < 0) {
-    goto error;
+    return -1;
   }
   if (open_h264(camera_use_low ? isp_yuuv_low->capture_list : isp_yuuv->capture_list, "/dev/video11") < 0) {
-    goto error;
+    return -1;
+  }
+
+  return 0;
+}
+
+bool check_streaming()
+{
+  return true;
+}
+
+void write_h264(buffer_t *buf)
+{
+}
+
+int main(int argc, char *argv[])
+{
+  if (open_camera() < 0) {
+    return -1;
   }
 
   link_t links[] = {
@@ -130,27 +121,31 @@ int main(int argc, char *argv[])
     {
       codec_jpeg,
       { },
-      { write_jpeg, check_streaming }
+      { http_jpeg_capture, check_streaming }
     },
     {
       codec_h264,
       { },
-      { write_h264, check_streaming }
+      { NULL, check_streaming }
     },
     { NULL }
   };
 
-  // if (links_init(links) < 0) {
-  //   return -1;
-  // }
+  http_method_t http_methods[] = {
+    { "GET / ", http_index },
+    { "GET /snapshot ", http_snapshot },
+    { "GET /stream ", http_stream },
+    { "GET /?action=snapshot ", http_snapshot },
+    { "GET /?action=stream ", http_stream },
+    { NULL, NULL }
+  };
 
-  int httpfd = http_listen(9090, 5);
-  if (httpfd >= 0) {
-    http_worker_threads(httpfd, 8);
-  }
+  int http_fd = http_server(9092, 5, http_methods);
 
   bool running = false;
   links_loop(links, &running);
+
+  close(http_fd);
 
 error:
   device_close(isp_yuuv_low);

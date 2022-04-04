@@ -2,18 +2,34 @@
 #include "buffer_list.h"
 #include "device.h"
 
+#include <pthread.h>
+
+pthread_mutex_t buffer_lock = PTHREAD_MUTEX_INITIALIZER;
+
 bool buffer_use(buffer_t *buf)
 {
-  if (buf->enqueued) {
+  if (!buf) {
+    return false;
+  }
+
+  pthread_mutex_lock(&buffer_lock);
+  if (!buf->enqueued) {
+    pthread_mutex_unlock(&buffer_lock);
     return false;
   }
 
   buf->mmap_reflinks += 1;
+  pthread_mutex_unlock(&buffer_lock);
   return true;
 }
 
 bool buffer_consumed(buffer_t *buf)
 {
+  if (!buf) {
+    return false;
+  }
+
+  pthread_mutex_lock(&buffer_lock);
   if (buf->mmap_reflinks > 0) {
     buf->mmap_reflinks--;
   }
@@ -42,13 +58,22 @@ bool buffer_consumed(buffer_t *buf)
     buf->enqueued = true;
   }
 
+  pthread_mutex_unlock(&buffer_lock);
   return true;
 
+
 error:
-  if (buf->mmap_source) {
-    buffer_consumed(buf->mmap_source);
+  {
+    buffer_t *mmap_source = buf->mmap_source;
     buf->mmap_source = NULL;
+
+    pthread_mutex_unlock(&buffer_lock);
+
+    if (mmap_source) {
+      buffer_consumed(mmap_source);
+    }
   }
+
   return false;
 }
 
