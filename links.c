@@ -137,7 +137,7 @@ int links_init(link_t *all_links)
     if (!link->capture) {
       E_LOG_ERROR(NULL, "Missing link capture.");
     }
-  
+
     if (link->capture_format) {
       int ret = links_open_buffer_list_from(
         link->capture,
