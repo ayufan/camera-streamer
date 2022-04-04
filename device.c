@@ -53,34 +53,37 @@ int device_open_buffer_list(device_t *dev, bool do_capture, unsigned width, unsi
   unsigned type;
   char name[64];
   struct buffer_list_s **buf_list = NULL;
+  bool do_mmap = false;
 
   if (do_capture) {
     buf_list = &dev->capture_list;
+    do_mmap = true;
 
     if (dev->v4l2_cap.capabilities & V4L2_CAP_VIDEO_CAPTURE) {
       type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
       sprintf(name, "%s:capture", dev->name);
-    } else if (dev->v4l2_cap.capabilities & V4L2_CAP_VIDEO_CAPTURE_MPLANE) {
+    } else if (dev->v4l2_cap.capabilities & (V4L2_CAP_VIDEO_CAPTURE_MPLANE | V4L2_CAP_VIDEO_M2M_MPLANE)) {
       type = V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE;
       sprintf(name, "%s:capture:mplane", dev->name);
     } else {
-      E_LOG_ERROR(dev, "Video capture is not supported by device");
+      E_LOG_ERROR(dev, "Video capture is not supported by device: %08x", dev->v4l2_cap.capabilities);
     }
   } else {
-    buf_list = &dev->capture_list;
+    buf_list = &dev->output_list;
+    do_mmap = true;
 
     if (dev->v4l2_cap.capabilities & V4L2_CAP_VIDEO_OUTPUT) {
       type = V4L2_BUF_TYPE_VIDEO_OUTPUT;
       sprintf(name, "%s:output", dev->name);
-    } else if (dev->v4l2_cap.capabilities & V4L2_CAP_VIDEO_OUTPUT_MPLANE) {
+    } else if (dev->v4l2_cap.capabilities & (V4L2_CAP_VIDEO_OUTPUT_MPLANE | V4L2_CAP_VIDEO_M2M_MPLANE)) {
       type = V4L2_BUF_TYPE_VIDEO_OUTPUT_MPLANE;
       sprintf(name, "%s:output:mplane", dev->name);
     } else {
-      E_LOG_ERROR(dev, "Video output is not supported by device");
+      E_LOG_ERROR(dev, "Video output is not supported by device: %08x", dev->v4l2_cap.capabilities);
     }
   }
 
-  *buf_list = buffer_list_open(name, dev, type);
+  *buf_list = buffer_list_open(name, dev, type, do_mmap);
   if (!*buf_list) {
     goto error;
   }

@@ -11,19 +11,37 @@ bool buffer_output_dequeue(buffer_t *buf)
   return false;
 }
 
-bool buffer_capture_enqueue(buffer_t *buf)
+bool buffer_consumed(buffer_t *buf)
 {
-  if (buf->enqueued || !buf->buf_list->do_mmap || !buf->buf_list->do_capture) {
-    return false;
+  if (buf->buf_list->do_mmap) {
+    if (buf->mmap_reflinks <= 0) {
+      return true;
+    }
+
+    buf->mmap_reflinks--;
+
+    // update used bytes
+    if (buf->buf_list->do_mplanes) {
+      buf->v4l2_plane.bytesused = buf->used;
+    } else {
+      buf->v4l2_buffer.bytesused = buf->used;
+    }
+
+    if (buf->mmap_reflinks == 0) {
+      E_LOG_DEBUG(buf, "Queuing buffer...");
+      E_XIOCTL(buf, buf->buf_list->device->fd, VIDIOC_QBUF, &buf->v4l2_buffer, "Can't queue buffer.");
+    }
+  } else {
+    if (buf->mmap_source) {
+      buffer_consumed(buf->mmap_source);
+      buf->mmap_source = NULL;
+    }
   }
 
-  E_LOG_DEBUG(buf, "Queuing buffer...");
-  E_XIOCTL(buf, buf->buf_list->device->fd, VIDIOC_QBUF, &buf->v4l2_buffer, "Can't queue buffer.");
-
-  buf->enqueued = true;
+  return true;
 
 error:
-  return true;
+  return false;
 }
 
 buffer_t *buffer_list_output_enqueue(buffer_list_t *buf_list, buffer_t *dma_buf)
@@ -49,9 +67,42 @@ buffer_t *buffer_list_output_enqueue(buffer_list_t *buf_list, buffer_t *dma_buf)
   return NULL;
 }
 
-buffer_t *buffer_list_capture_dequeue(buffer_list_t *buf_list)
+buffer_t *buffer_list_mmap_enqueue(buffer_list_t *buf_list, buffer_t *dma_buf)
 {
-  if (!buf_list->do_mmap || !buf_list->do_capture) {
+  buffer_t *buf = NULL;
+
+  if (!buf_list->do_mmap && !dma_buf->buf_list->do_mmap) {
+    E_LOG_PERROR(buf_list, "Cannot enqueue non-mmap to non-mmap: %s.", dma_buf->name);
+  }
+
+  if (!buf_list->do_mmap) {
+    E_LOG_PERROR(buf_list, "Not yet supported: %s.", dma_buf->name);
+  }
+
+  buf = buffer_list_mmap_dequeue(buf_list);
+  if (!buf) {
+    return NULL;
+  }
+
+  if (dma_buf->used > buf->length) {
+    E_LOG_PERROR(buf_list, "The dma_buf (%s) is too long: %zu vs space=%zu",
+      dma_buf->name, dma_buf->used, buf->length);
+  }
+
+  E_LOG_DEBUG(buf, "mmap copy: dest=%p, src=%p (%s), size=%zu, space=%zu",
+    buf->start, dma_buf->start, dma_buf->name, dma_buf->used, buf->length);
+  memcpy(buf->start, dma_buf->start, dma_buf->used);
+  buffer_consumed(buf);
+
+  return NULL;
+
+error:
+  return NULL;
+}
+
+buffer_t *buffer_list_mmap_dequeue(buffer_list_t *buf_list)
+{
+  if (!buf_list->do_mmap) {
     return NULL;
   }
 
@@ -67,17 +118,21 @@ buffer_t *buffer_list_capture_dequeue(buffer_list_t *buf_list)
 	}
 
 	E_XIOCTL(buf_list, buf_list->device->fd, VIDIOC_DQBUF, &v4l2_buf, "Can't grab capture buffer");
-	E_LOG_DEBUG(buf_list, "Grabbed INPUT buffer=%u, bytes=%d",
-    v4l2_buf.index, v4l2_buf.length);
 
   buffer_t *buf = buf_list->bufs[v4l2_buf.index];
   buf->v4l2_plane = v4l2_plane;
   buf->v4l2_buffer = v4l2_buf;
 	if (buf_list->do_mplanes) {
 		buf->v4l2_buffer.m.planes = &buf->v4l2_plane;
+    buf->used = buf->v4l2_plane.bytesused;
+  } else {
+    buf->used = buf->v4l2_buffer.bytesused;
   }
 
-  buf->enqueued = false;
+	E_LOG_DEBUG(buf_list, "Grabbed mmap buffer=%u, bytes=%d, used=%d",
+    buf->index, buf->length, buf->used);
+
+  buf->mmap_reflinks = 1;
 
   return buf;
 

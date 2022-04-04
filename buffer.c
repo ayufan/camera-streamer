@@ -11,30 +11,33 @@ buffer_t *buffer_open(const char *name, buffer_list_t *buf_list, int index) {
   buf->buf_list = buf_list;
   buf->dma_fd = -1;
 
-  if (buf_list->do_mmap) {
-    buf->v4l2_buffer.type = buf_list->type;
-    buf->v4l2_buffer.memory = V4L2_MEMORY_MMAP;
-    buf->v4l2_buffer.index = index;
+  if (!buf_list->do_mmap) {
+    // nothing to do here
+    return buf;
+  }
 
-    if (buf_list->do_mplanes) {
-      buf->v4l2_buffer.length = 1;
-      buf->v4l2_buffer.m.planes = &buf->v4l2_plane;
-    }
+  buf->v4l2_buffer.type = buf_list->type;
+  buf->v4l2_buffer.memory = V4L2_MEMORY_MMAP;
+  buf->v4l2_buffer.index = index;
 
-    E_XIOCTL(buf_list, dev->fd, VIDIOC_QUERYBUF, &buf->v4l2_buffer, "Cannot query buffer %d", index);
+  if (buf_list->do_mplanes) {
+    buf->v4l2_buffer.length = 1;
+    buf->v4l2_buffer.m.planes = &buf->v4l2_plane;
+  }
 
-    if (buf_list->do_mplanes) {
-      buf->offset = buf->v4l2_plane.m.mem_offset;
-      buf->length = buf->v4l2_plane.length;
-    } else {
-      buf->offset = buf->v4l2_buffer.m.offset;
-      buf->length = buf->v4l2_buffer.length;
-    }
+  E_XIOCTL(buf_list, dev->fd, VIDIOC_QUERYBUF, &buf->v4l2_buffer, "Cannot query buffer %d", index);
 
-    buf->start = mmap(NULL, buf->length, PROT_READ | PROT_WRITE, MAP_SHARED, dev->fd, buf->offset);
-    if (buf->start == MAP_FAILED) {
-      goto error;
-    }
+  if (buf_list->do_mplanes) {
+    buf->offset = buf->v4l2_plane.m.mem_offset;
+    buf->length = buf->v4l2_plane.length;
+  } else {
+    buf->offset = buf->v4l2_buffer.m.offset;
+    buf->length = buf->v4l2_buffer.length;
+  }
+
+  buf->start = mmap(NULL, buf->length, PROT_READ | PROT_WRITE, MAP_SHARED, dev->fd, buf->offset);
+  if (buf->start == MAP_FAILED) {
+    goto error;
   }
 
   if (buf_list->do_dma) {
@@ -46,7 +49,10 @@ buffer_t *buffer_open(const char *name, buffer_list_t *buf_list, int index) {
     buf->dma_fd = v4l2_exp.fd;
   }
 
-  buffer_capture_enqueue(buf);
+  // enqueue buffer
+  buf->used = 0;
+  buf->mmap_reflinks = 1;
+  buffer_consumed(buf);
 
   return buf;
 

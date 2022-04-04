@@ -2,7 +2,7 @@
 #include "buffer_list.h"
 #include "device.h"
 
-buffer_list_t *buffer_list_open(const char *name, struct device_s *dev, unsigned type)
+buffer_list_t *buffer_list_open(const char *name, struct device_s *dev, unsigned type, bool do_mmap)
 {
   buffer_list_t *buf_list = calloc(1, sizeof(buffer_list_t));
 
@@ -12,21 +12,23 @@ buffer_list_t *buffer_list_open(const char *name, struct device_s *dev, unsigned
 
   switch(type) {
   case V4L2_BUF_TYPE_VIDEO_OUTPUT:
+    buf_list->do_mmap = do_mmap;
     break;
 
   case V4L2_BUF_TYPE_VIDEO_OUTPUT_MPLANE:
+    buf_list->do_mmap = do_mmap;
     buf_list->do_mplanes = true;
     break;
 
   case V4L2_BUF_TYPE_VIDEO_CAPTURE:
-    buf_list->do_dma = true;
-    buf_list->do_mmap = true;
+    buf_list->do_dma = do_mmap;
+    buf_list->do_mmap = do_mmap;
     buf_list->do_capture = true;
     break;
 
   case V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE:
-    buf_list->do_dma = true;
-    buf_list->do_mmap = true;
+    buf_list->do_dma = do_mmap;
+    buf_list->do_mmap = do_mmap;
     buf_list->do_mplanes = true;
     buf_list->do_capture = true;
     break;
@@ -69,27 +71,27 @@ int buffer_list_set_format(buffer_list_t *buf_list, unsigned width, unsigned hei
   fmt->type = buf_list->type;
 
   if (buf_list->do_mplanes) {
-    fmt->fmt.pix.colorspace = V4L2_COLORSPACE_RAW;
-    fmt->fmt.pix.width = width;
-    fmt->fmt.pix.height = height;
-    fmt->fmt.pix.pixelformat = format;
-    fmt->fmt.pix.field = V4L2_FIELD_ANY;
-    fmt->fmt.pix.bytesperline = fourcc_to_stride(width, format);
-  } else {
     fmt->fmt.pix_mp.colorspace = V4L2_COLORSPACE_JPEG;
     fmt->fmt.pix_mp.width = width;
     fmt->fmt.pix_mp.height = height;
     fmt->fmt.pix_mp.pixelformat = format;
     fmt->fmt.pix_mp.field = V4L2_FIELD_ANY;
     fmt->fmt.pix_mp.num_planes = 1;
-    fmt->fmt.pix_mp.plane_fmt[0].bytesperline = fourcc_to_stride(width, format);
+    //fmt->fmt.pix_mp.plane_fmt[0].bytesperline = fourcc_to_stride(width, format);
+  } else {
+    fmt->fmt.pix.colorspace = V4L2_COLORSPACE_RAW;
+    fmt->fmt.pix.width = width;
+    fmt->fmt.pix.height = height;
+    fmt->fmt.pix.pixelformat = format;
+    fmt->fmt.pix.field = V4L2_FIELD_ANY;
+    fmt->fmt.pix.bytesperline = fourcc_to_stride(width, format);
   }
 
   E_LOG_DEBUG(buf_list, "Configuring format ...");
   E_XIOCTL(buf_list, buf_list->device->fd, VIDIOC_S_FMT, fmt, "Can't set format");
 
   if (fmt->fmt.pix.width != width || fmt->fmt.pix.height != height) {
-		E_LOG_ERROR(buf_list, "Requested resolution=%ux%u is unavailable. Got %ux%u.",
+		E_LOG_INFO(buf_list, "Requested resolution=%ux%u is unavailable. Got %ux%u.",
       width, height, fmt->fmt.pix.width, fmt->fmt.pix.height);
   }
 
@@ -101,6 +103,11 @@ int buffer_list_set_format(buffer_list_t *buf_list, unsigned width, unsigned hei
 
 	E_LOG_INFO(buf_list, "Using: %ux%u/%s",
     fmt->fmt.pix.width, fmt->fmt.pix.height, fourcc_to_string(fmt->fmt.pix.pixelformat).buf);
+
+
+  buf_list->fmt_width = fmt->fmt.pix.width;
+  buf_list->fmt_height = fmt->fmt.pix.height;
+  buf_list->fmt_format = fmt->fmt.pix.pixelformat;
 
   return 0;
 
