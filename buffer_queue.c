@@ -112,6 +112,7 @@ buffer_t *_buffer_list_enqueue_dmabuf(buffer_list_t *buf_list, buffer_t *dma_buf
   E_XIOCTL(buf_list, buf_list->device->fd, VIDIOC_QBUF, &v4l2_buf, "Can't push DMA buffer");
 
   buf->mmap_source = dma_buf;
+  buf_list->frames++;
   return buf;
 error:
   return NULL;
@@ -164,11 +165,12 @@ buffer_t *buffer_list_dequeue(buffer_list_t *buf_list, int mmap)
     buf->used = buf->v4l2_buffer.bytesused;
   }
 
-	E_LOG_DEBUG(buf_list, "Grabbed mmap buffer=%u, bytes=%d, used=%d",
-    buf->index, buf->length, buf->used);
+	E_LOG_DEBUG(buf_list, "Grabbed mmap buffer=%u, bytes=%d, used=%d, frame=%d",
+    buf->index, buf->length, buf->used, buf_list->frames);
 
   if (buf_list->do_mmap) {
     buf->mmap_reflinks = 1;
+    buf_list->frames++;
   } else {
     buf->mmap_reflinks = 0;
   }
@@ -177,38 +179,4 @@ buffer_t *buffer_list_dequeue(buffer_list_t *buf_list, int mmap)
 
 error:
   return NULL;
-}
-
-bool buffer_list_wait_pool(buffer_list_t *buf_list, int timeout, int mmap) {
-  struct pollfd fds = {buf_list->device->fd, mmap ? POLLIN : POLLOUT, 0};
-
-  if (poll(&fds, 1, timeout) < 0 && errno != EINTR) {
-    E_LOG_ERROR(buf_list, "Can't poll encoder");
-  }
-
-  E_LOG_DEBUG(buf_list, "Polling encoder %d, %d...", errno, fds.revents);
-	if (fds.revents & POLLIN) {
-    return true;
-  }
-  if (fds.revents & POLLPRI) {
-    E_LOG_DEBUG(buf_list, "fd POLLPRI");
-  }
-  if (fds.revents & POLLOUT) {
-    return true;
-  }
-  if (fds.revents & POLLERR) {
-    E_LOG_DEBUG(buf_list, "fd POLLERR");
-    device_consume_event(buf_list->device);
-  }
-  if (fds.revents & POLLHUP) {
-    E_LOG_DEBUG(buf_list, "fd POLLHUP");
-  }
-  if (fds.revents & POLLNVAL) {
-    E_LOG_DEBUG(buf_list, "fd POLLNVAL");
-  }
-
-  return false;
-
-error:
-  return false;
 }

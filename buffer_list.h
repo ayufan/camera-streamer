@@ -16,6 +16,8 @@ typedef struct buffer_list_s {
   bool do_capture;
 
   unsigned fmt_width, fmt_height, fmt_format;
+
+  int frames;
 } buffer_list_t;
 
 buffer_list_t *buffer_list_open(const char *name, struct device_s *dev, unsigned type, bool do_mmap);
@@ -23,8 +25,6 @@ void buffer_list_close(buffer_list_t *buf_list);
 
 int buffer_list_set_format(buffer_list_t *buffer_list, unsigned width, unsigned height, unsigned format);
 int buffer_list_request(buffer_list_t *buf_list, int nbufs);
-
-bool buffer_list_wait_pool(buffer_list_t *buf_list, int timeout, int mmap);
 
 int buffer_list_stream(buffer_list_t *buf_list, bool do_on);
 
