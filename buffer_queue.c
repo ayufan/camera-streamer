@@ -91,6 +91,19 @@ buffer_t *buffer_list_find_slot(buffer_list_t *buf_list)
   return buf;
 }
 
+int buffer_list_count_enqueued(buffer_list_t *buf_list)
+{
+  int n = 0;
+
+  for (int i = 0; i < buf_list->nbufs; i++) {
+    if (buf_list->bufs[i]->enqueued) {
+      n++;
+    }
+  }
+
+  return n;
+}
+
 int buffer_list_enqueue(buffer_list_t *buf_list, buffer_t *dma_buf)
 {
   if (!buf_list->do_mmap && !dma_buf->buf_list->do_mmap) {

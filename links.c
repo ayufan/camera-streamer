@@ -22,11 +22,7 @@ int _build_fds(link_t *all_links, struct pollfd *fds, link_t **links, buffer_lis
       continue;
     }
 
-    struct pollfd fd = {link->capture->fd, POLLIN};
-    fds[n] = fd;
-    buf_lists[n] = link->capture->capture_list;
-    links[n] = link;
-    n++;
+    bool can_consume = true;
 
     for (int j = 0; link->outputs[j]; j++) {
       device_t *output = link->outputs[j];
@@ -38,9 +34,30 @@ int _build_fds(link_t *all_links, struct pollfd *fds, link_t **links, buffer_lis
         continue;
       }
 
+      int count_enqueued = buffer_list_count_enqueued(output->output_list);
+
+      if (count_enqueued == output->output_list->nbufs) {
+        E_LOG_DEBUG(link->capture->capture_list, "Cannot consume due to %s using %d of %d",
+          output->output_list->name, count_enqueued, output->output_list->nbufs);
+        can_consume = false;
+      }
+
+      // Can something be dequeued?
+      if (count_enqueued == 0) {
+        continue;
+      }
+
       struct pollfd fd = {output->fd, POLLOUT};
       fds[n] = fd;
       buf_lists[n] = output->output_list;
+      links[n] = link;
+      n++;
+    }
+
+    if (can_consume) {
+      struct pollfd fd = {link->capture->fd, POLLIN};
+      fds[n] = fd;
+      buf_lists[n] = link->capture->capture_list;
       links[n] = link;
       n++;
     }
@@ -56,14 +73,20 @@ int links_step(link_t *all_links, int timeout)
   buffer_list_t *buf_lists[N_FDS];
   buffer_t *buf;
   int n = _build_fds(all_links, fds, links, buf_lists, N_FDS);
+  int ret = poll(fds, n, timeout);
 
-  if (poll(fds, n, timeout) < 0 && errno != EINTR) {
+  if (ret < 0 && errno != EINTR) {
     return errno;
   }
+
+  printf("links_step n=%d, ret=%d\n", n, ret);
 
   for (int i = 0; i < n; i++) {
     buffer_list_t *buf_list = buf_lists[i];
     link_t *link = links[i];
+
+    E_LOG_DEBUG(buf_list, "pool i=%d revents=%08x streaming=%d enqueued=%d/%d", i, fds[i].revents, buf_list->streaming,
+      buffer_list_count_enqueued(buf_list), buf_list->nbufs);
 
     if (fds[i].revents & POLLIN) {
       E_LOG_DEBUG(buf_list, "POLLIN");
@@ -82,6 +105,13 @@ int links_step(link_t *all_links, int timeout)
     if (fds[i].revents & POLLOUT) {
       E_LOG_DEBUG(buf_list, "POLLOUT");
       buffer_list_dequeue(buf_list);
+    }
+    if (fds[i].revents & POLLERR) {
+      E_LOG_DEBUG(buf_list, "POLLERR");
+      device_consume_event(buf_list->device);
+    }
+    if (fds[i].revents & ~(POLLIN|POLLOUT|POLLERR)) {
+      E_LOG_DEBUG(buf_list, "POLL%08x", fds[i].revents);
     }
   }
   return 0;
@@ -181,15 +211,16 @@ int links_loop(link_t *all_links, bool *running)
 {
   *running = true;
 
-  while(*running) {
     if (links_stream(all_links, true) < 0) {
       return -1;
     }
 
+  while(*running) {
     if (links_step(all_links, 1000) < 0) {
       links_stream(all_links, false);
       return -1;
     }
+    //usleep(100*1000);
   }
 
   links_stream(all_links, false);

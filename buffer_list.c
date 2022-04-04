@@ -171,16 +171,16 @@ int buffer_list_stream(buffer_list_t *buf_list, bool do_on)
     buffer_t *buf = buf_list->bufs[i];
 
     // dequeue buffers (when stream off)
-    if (buf->enqueued) {
-      if (buf->mmap_source) {
-        buf->mmap_source->used = 0;
-        buffer_consumed(buf->mmap_source);
-        buf->mmap_source = NULL;
-      }
+    // if (buf->enqueued) {
+    //   if (buf->mmap_source) {
+    //     buf->mmap_source->used = 0;
+    //     buffer_consumed(buf->mmap_source);
+    //     buf->mmap_source = NULL;
+    //   }
 
-      buf->enqueued = false;
-      buf->mmap_reflinks = 1;
-    }
+    //   buf->enqueued = false;
+    //   buf->mmap_reflinks = 1;
+    // }
 
     // re-enqueue buffers on stream start
     if (buf_list->streaming && buf_list->do_capture && !buf->enqueued && buf->mmap_reflinks == 1) {
