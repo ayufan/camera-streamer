@@ -3,6 +3,7 @@
 #include "device.h"
 #include "links.h"
 #include "v4l2.h"
+#include "http.h"
 
 int camera_width = 1920;
 int camera_height = 1080;
@@ -102,6 +103,11 @@ int main(int argc, char *argv[])
   // if (links_init(links) < 0) {
   //   return -1;
   // }
+
+  int httpfd = http_listen(9090, 5);
+  if (httpfd >= 0) {
+    http_worker_threads(httpfd, 8);
+  }
 
   bool running = false;
   links_loop(links, &running);
