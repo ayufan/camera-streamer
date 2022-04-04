@@ -167,8 +167,28 @@ int buffer_list_stream(buffer_list_t *buf_list, bool do_on)
   E_XIOCTL(buf_list, buf_list->device->fd, do_on ? VIDIOC_STREAMON : VIDIOC_STREAMOFF, &type, "Cannot set streaming state");
   buf_list->streaming = do_on;
 
-  E_LOG_DEBUG(buf_list, "Streaming %s...", do_on ? "started" : "stopped");
+  for (int i = 0; i < buf_list->nbufs; i++) {
+    buffer_t *buf = buf_list->bufs[i];
 
+    // dequeue buffers (when stream off)
+    if (buf->enqueued) {
+      if (buf->mmap_source) {
+        buf->mmap_source->used = 0;
+        buffer_consumed(buf->mmap_source);
+        buf->mmap_source = NULL;
+      }
+
+      buf->enqueued = false;
+      buf->mmap_reflinks = 1;
+    }
+
+    // re-enqueue buffers on stream start
+    if (buf_list->streaming && buf_list->do_capture && !buf->enqueued && buf->mmap_reflinks == 1) {
+      buffer_consumed(buf);
+    }
+  }
+
+  E_LOG_DEBUG(buf_list, "Streaming %s...", do_on ? "started" : "stopped");
   return 0;
 
 error:

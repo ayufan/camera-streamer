@@ -42,6 +42,7 @@ void http_jpeg_capture(buffer_t *buf)
 void http_snapshot(http_worker_t *worker, FILE *stream)
 {
   int counter = 0;
+  buffer_lock_use(&http_jpeg, 1);
   buffer_t *buf = buffer_lock_get(&http_jpeg, 1, &counter);
 
   if (!buf) {
@@ -56,25 +57,37 @@ void http_snapshot(http_worker_t *worker, FILE *stream)
   fprintf(stream, "\r\n");
   fwrite(buf->start, buf->used, 1, stream);
   buffer_consumed(buf);
+error:
+  buffer_lock_use(&http_jpeg, -1);
 }
 
 void http_stream(http_worker_t *worker, FILE *stream)
 {
   int counter = 0;
   fprintf(stream, STREAM_HEADER);
+  buffer_lock_use(&http_jpeg, 1);
 
   while (!feof(stream)) {
     buffer_t *buf = buffer_lock_get(&http_jpeg, 3, &counter);
 
     if (!buf) {
       fprintf(stream, STREAM_ERROR, -1, "No frames.");
-      return;
+      goto error;
     }
 
-    fprintf(stream, STREAM_PART, buf->used);
-    fwrite(buf->start, buf->used, 1, stream);
-    fprintf(stream, STREAM_BOUNDARY);
+    if (!fprintf(stream, STREAM_PART, buf->used)) {
+      goto error;
+    }
+    if (!fwrite(buf->start, buf->used, 1, stream)) {
+      goto error;
+    }
+    if (!fprintf(stream, STREAM_BOUNDARY)) {
+      goto error;
+    }
 
     buffer_consumed(buf);
   }
+
+error:
+  buffer_lock_use(&http_jpeg, -1);
 }
