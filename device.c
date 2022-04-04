@@ -1,0 +1,141 @@
+#include "device.h"
+#include "buffer.h"
+#include "buffer_list.h"
+
+device_t *device_open(const char *name, const char *path) {
+  device_t *dev = calloc(1, sizeof(device_t));
+  dev->name = strdup(name);
+  dev->path = strdup(path);
+  dev->fd = open(path, O_RDWR|O_NONBLOCK);
+  if(dev->fd < 0) {
+		E_LOG_ERROR(dev, "Can't open device");
+	}
+
+	E_LOG_DEBUG(dev, "Querying device capabilities ...");
+  E_XIOCTL(dev, dev->fd, VIDIOC_QUERYCAP, &dev->v4l2_cap, "Can't query device capabilities");\
+
+	if (!(dev->v4l2_cap.capabilities & V4L2_CAP_STREAMING)) {
+		E_LOG_ERROR(dev, "Device doesn't support streaming IO");
+	}
+
+	E_LOG_INFO(dev, "Device path=%s fd=%d opened", dev->path, dev->fd);
+  return dev;
+
+error:
+  device_close(dev);
+  return NULL;
+}
+
+void device_close(device_t *dev) {
+  if(dev == NULL) {
+    return;
+  }
+
+  if (dev->capture_list) {
+    buffer_list_close(dev->capture_list);
+    dev->capture_list = NULL;
+  }
+
+  if (dev->output_list) {
+    buffer_list_close(dev->output_list);
+    dev->output_list = NULL;
+  }
+
+  if(dev->fd >= 0) {
+    close(dev->fd);
+  }
+
+  free(dev);
+}
+
+int device_open_buffer_list(device_t *dev, bool do_capture, unsigned width, unsigned height, unsigned format, int nbufs)
+{
+  unsigned type;
+  char name[64];
+  struct buffer_list_s **buf_list = NULL;
+
+  if (do_capture) {
+    buf_list = &dev->capture_list;
+
+    if (dev->v4l2_cap.capabilities & V4L2_CAP_VIDEO_CAPTURE) {
+      type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+      sprintf(name, "%s:capture", dev->name);
+    } else if (dev->v4l2_cap.capabilities & V4L2_CAP_VIDEO_CAPTURE_MPLANE) {
+      type = V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE;
+      sprintf(name, "%s:capture:mplane", dev->name);
+    } else {
+      E_LOG_ERROR(dev, "Video capture is not supported by device");
+    }
+  } else {
+    buf_list = &dev->capture_list;
+
+    if (dev->v4l2_cap.capabilities & V4L2_CAP_VIDEO_OUTPUT) {
+      type = V4L2_BUF_TYPE_VIDEO_OUTPUT;
+      sprintf(name, "%s:output", dev->name);
+    } else if (dev->v4l2_cap.capabilities & V4L2_CAP_VIDEO_OUTPUT_MPLANE) {
+      type = V4L2_BUF_TYPE_VIDEO_OUTPUT_MPLANE;
+      sprintf(name, "%s:output:mplane", dev->name);
+    } else {
+      E_LOG_ERROR(dev, "Video output is not supported by device");
+    }
+  }
+
+  *buf_list = buffer_list_open(name, dev, type);
+  if (!*buf_list) {
+    goto error;
+  }
+
+  if (buffer_list_set_format(*buf_list, width, height, format) < 0) {
+    goto error;
+  }
+
+  if (buffer_list_request(*buf_list, nbufs) < 0) {
+    goto error;
+  }
+
+  return 0;
+
+error:
+  buffer_list_close(*buf_list);
+  *buf_list = NULL;
+  return -1;
+}
+
+int device_stream(device_t *dev, bool do_on)
+{
+  if (dev->capture_list) {
+    if (buffer_list_stream(dev->capture_list, do_on) < 0) {
+      return -1;
+    }
+  }
+
+  if (dev->output_list) {
+    if (buffer_list_stream(dev->output_list, do_on) < 0) {
+      return -1;
+    }
+  }
+
+  return 0;
+}
+
+int device_consume_event(device_t *dev)
+{
+	struct v4l2_event event;
+
+	E_LOG_DEBUG(dev, "Consuming V4L2 event ...");
+  E_XIOCTL(dev, dev->fd, VIDIOC_DQEVENT, &event, "Got some V4L2 device event, but where is it?");
+
+  switch (event.type) {
+    case V4L2_EVENT_SOURCE_CHANGE:
+      E_LOG_INFO(dev, "Got V4L2_EVENT_SOURCE_CHANGE: source changed");
+      return -1;
+    case V4L2_EVENT_EOS:
+      E_LOG_INFO(dev, "Got V4L2_EVENT_EOS: end of stream (ignored)");
+      return 0;
+  }
+
+  return 0;
+
+error:
+  return -1;
+}
