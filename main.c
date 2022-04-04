@@ -154,7 +154,9 @@ int main(int argc, char *argv[])
     { "GET /stream ", http_stream },
     { "GET /?action=snapshot ", http_snapshot },
     { "GET /?action=stream ", http_stream },
-    { "GET /video ", http_video },
+    { "GET /video ", http_video_html },
+    { "GET /video.h264 ", http_video },
+    { "GET /jmuxer.min.js ", http_jmuxer_js },
     { NULL, NULL }
   };
 

@@ -1,0 +1,83 @@
+<!doctype html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title></title>
+<link rel="icon" href="data:;base64,iVBORw0KGgo=">
+<style>
+body{
+margin:0;
+padding:0;
+background-color:#303030;
+}
+
+#streamStage{
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+}
+
+#streamStage:before {
+content: '';
+box-sizing: border-box;
+position: absolute;
+top: 50%;
+left: 50%;
+width: 2rem;
+height: 2rem;
+margin-top: -1rem;
+margin-left: -1rem;
+}
+
+#stream{
+max-height: 100%;
+max-width: 100%;
+margin: auto;
+position: absolute;
+top: 0; left: 0; bottom: 0; right: 0;
+}
+</style>
+<script src="/jmuxer.min.js"></script>
+</head>
+<body>
+	<div id="streamtage">
+		 <video controls autoplay muted id="stream"></video>	
+	</div>
+<body>
+    <script>
+	window.onload = function() {
+		var jmuxer = new JMuxer({
+			node: 'stream',
+			mode: 'video',
+			flushingTime: 0,
+			fps: 30,
+			debug: false
+		 });
+
+    fetch('/video.h264').then(function(response) {
+      console.log(response);
+
+      const reader = response.body.getReader();
+
+      function go() {
+        reader.read().then(function(result) {
+          if (!result.done) {
+            if (!document.hidden){
+              jmuxer.feed({
+                video: new Uint8Array(result.value)
+              });
+            }
+            go ();
+          }
+        })
+      }
+
+      go ();
+    })
+	}     
+    </script>
+</body>
+</html>

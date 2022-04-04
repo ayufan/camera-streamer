@@ -29,6 +29,8 @@ typedef struct http_worker_s {
 int http_server(int listen_port, int maxcons, http_method_t *methods);
 
 void http_index(http_worker_t *worker, FILE *stream);
+void http_video_html(http_worker_t *worker, FILE *stream);
+void http_jmuxer_js(http_worker_t *worker, FILE *stream);
 void http_404_header(http_worker_t *worker, FILE *stream);
 void http_404(http_worker_t *worker, FILE *stream);
 
