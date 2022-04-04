@@ -1,2 +1,2 @@
 camera_stream: *.c *.h
-	gcc -o camera_stream *.c
+	gcc -g -o camera_stream *.c

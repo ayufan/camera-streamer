@@ -8,6 +8,7 @@ int camera_width = 1920;
 int camera_height = 1080;
 int camera_format = V4L2_PIX_FMT_SRGGB10P;
 int camera_nbufs = 4;
+bool camera_use_low = false;
 
 device_t *camera = NULL;
 device_t *isp_srgb = NULL;
@@ -17,11 +18,6 @@ device_t *codec_jpeg = NULL;
 
 int open_camera(const char *path)
 {
-  camera = device_open("CAMERA", path);
-  if (!camera) {
-    return -1;
-  }
-
   if (device_open_buffer_list(camera, true, camera_width, camera_height, camera_format, camera_nbufs, true) < 0) {
     return -1;
   }
@@ -31,14 +27,6 @@ int open_camera(const char *path)
 
 int open_isp(buffer_list_t *src, const char *srgb_path, const char *yuuv_path, const char *yuuv_low_path)
 {
-  isp_srgb = device_open("ISP-SRGB", srgb_path);
-  isp_yuuv = device_open("ISP-YUUV", yuuv_path);
-  isp_yuuv_low = device_open("ISP-YUUV-LOW", yuuv_low_path);
-
-  if (!isp_srgb || !isp_yuuv || !isp_yuuv_low) {
-    return -1;
-  }
-
   if (device_open_buffer_list(isp_srgb, false, src->fmt_width, src->fmt_height, src->fmt_format, camera_nbufs, true) < 0 ||
     device_open_buffer_list(isp_yuuv, true, src->fmt_width, src->fmt_height, V4L2_PIX_FMT_YUYV, camera_nbufs, true) < 0 ||
     device_open_buffer_list(isp_yuuv_low, true, src->fmt_width / 2, src->fmt_height / 2, V4L2_PIX_FMT_YUYV, camera_nbufs, true) < 0) {
@@ -48,13 +36,8 @@ int open_isp(buffer_list_t *src, const char *srgb_path, const char *yuuv_path, c
   return 0;
 }
 
-int open_jpeg(buffer_list_t *src, const char *jpeg_codec)
+int open_jpeg(buffer_list_t *src, const char *tmp)
 {
-  codec_jpeg = device_open("JPEG", jpeg_codec);
-  if (!codec_jpeg) {
-    return -1;
-  }
-
   if (device_open_buffer_list(codec_jpeg, false, src->fmt_width, src->fmt_height, src->fmt_format, camera_nbufs, false) < 0 ||
     device_open_buffer_list(codec_jpeg, true, src->fmt_width, src->fmt_height, V4L2_PIX_FMT_JPEG, camera_nbufs, false) < 0) {
     return -1;
@@ -63,31 +46,36 @@ int open_jpeg(buffer_list_t *src, const char *jpeg_codec)
   return 0;
 }
 
+void write_jpeg(buffer_t *buf)
+{
+  FILE *fp = fopen("/tmp/capture.jpg.tmp", "wb");
+  if (fp) {
+    fwrite(buf->start, 1, buf->used, fp);
+    fclose(fp);
+    E_LOG_DEBUG(buf, "Wrote JPEG: %d", buf->used);
+  }
+  rename("/tmp/capture.jpg.tmp", "/tmp/capture.jpg");
+}
+
 int main(int argc, char *argv[])
 {
+  camera = device_open("CAMERA", "/dev/video0");
+  isp_srgb = device_open("ISP-SRGB", "/dev/video13");
+  isp_yuuv = device_open("ISP-YUUV", "/dev/video14");
+  isp_yuuv_low = device_open("ISP-YUUV-LOW", "/dev/video15");
+  codec_jpeg = device_open("JPEG", "/dev/video31");
+
+  if (device_open_buffer_list(camera, true, camera_width, camera_height, camera_format, camera_nbufs, true) < 0) {
+    return -1;
+  }
+
   if (open_camera("/dev/video0") < 0) {
     goto error;
   }
   if (open_isp(camera->capture_list, "/dev/video13", "/dev/video14", "/dev/video15") < 0) {
     goto error;
   }
-  if (open_jpeg(isp_yuuv->capture_list, "/dev/video31") < 0) {
-    goto error;
-  }
-
-  if (device_stream(camera, true) < 0) {
-    goto error;
-  }
-  if (device_stream(isp_srgb, true) < 0) {
-    goto error;
-  }
-  if (device_stream(isp_yuuv, true) < 0) {
-    goto error;
-  }
-  if (device_stream(isp_yuuv_low, true) < 0) {
-    goto error;
-  }
-  if (device_stream(codec_jpeg, true) < 0) {
+  if (open_jpeg(camera_use_low ? isp_yuuv_low->capture_list : isp_yuuv->capture_list, "/dev/video31") < 0) {
     goto error;
   }
 
@@ -99,27 +87,28 @@ int main(int argc, char *argv[])
     },
     {
       isp_yuuv,
-      {codec_jpeg},
+      { camera_use_low ? NULL : codec_jpeg },
       NULL
     },
     {
       isp_yuuv_low,
-      {},
+      { camera_use_low ? codec_jpeg : NULL },
       NULL
     },
     {
       codec_jpeg,
       {},
-      NULL
+      write_jpeg
     },
     { NULL }
   };
 
-  while(true) {
-    handle_links(links, 100);
-
-    usleep(10*1000);
+  if (links_init(links) < 0) {
+    return -1;
   }
+
+  bool running = false;
+  links_loop(links, &running);
 
 error:
   device_close(isp_yuuv_low);

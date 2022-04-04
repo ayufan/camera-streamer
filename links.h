@@ -8,4 +8,6 @@ typedef struct link_s {
   void (*on_buffer)(struct buffer_s *buf);
 } link_t;
 
-int handle_links(link_t *all_links, int timeout);
+int links_init(link_t *all_links);
+int links_step(link_t *all_links, int timeout);
+int links_loop(link_t *all_links, bool *running);

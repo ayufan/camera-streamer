@@ -90,8 +90,8 @@ int buffer_list_set_format(buffer_list_t *buf_list, unsigned width, unsigned hei
   E_LOG_DEBUG(buf_list, "Configuring format ...");
   E_XIOCTL(buf_list, buf_list->device->fd, VIDIOC_S_FMT, fmt, "Can't set format");
 
-  if (fmt->fmt.pix.width != width || fmt->fmt.pix.height != height) {
-		E_LOG_INFO(buf_list, "Requested resolution=%ux%u is unavailable. Got %ux%u.",
+  if (fmt->fmt.pix.width != width || fmt->fmt.pix.height < height) {
+		E_LOG_ERROR(buf_list, "Requested resolution=%ux%u is unavailable. Got %ux%u.",
       width, height, fmt->fmt.pix.width, fmt->fmt.pix.height);
   }
 

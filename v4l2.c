@@ -64,6 +64,6 @@ unsigned fourcc_to_stride(unsigned width, unsigned format)
 			return align_size(width * 5 / 4, 32);
 
 		default:
-			E_LOG_PERROR(NULL, "Unknown format: %s", fourcc_to_string(format));
+			E_LOG_PERROR(NULL, "Unknown format: %s", fourcc_to_string(format).buf);
 	}
 }

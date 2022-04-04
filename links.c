@@ -46,7 +46,7 @@ int _build_fds(link_t *all_links, struct pollfd *fds, link_t **links, buffer_lis
   return n;
 }
 
-int handle_links(link_t *all_links, int timeout)
+int links_step(link_t *all_links, int timeout)
 {
   struct pollfd fds[N_FDS] = {0};
   link_t *links[N_FDS];
@@ -83,5 +83,76 @@ int handle_links(link_t *all_links, int timeout)
       }
     }
   }
+  return 0;
+}
+
+int links_stream(link_t *all_links, bool do_stream)
+{
+  for (int i = 0; all_links[i].capture; i++) {
+    if (device_stream(all_links[i].capture, true) < 0) {
+      E_LOG_ERROR(all_links[i].capture, "Failed to start streaming");
+    }
+  }
+
+  return 0;
+
+error:
+  return -1;
+}
+
+int links_init(link_t *all_links)
+{
+  // create all outputs (sinks)
+  for (int i = 0; all_links[i].capture; i++) {
+    link_t *link = &all_links[i];
+
+    if (!link->capture) {
+      E_LOG_ERROR(NULL, "Missing link capture.");
+    }
+    if (!link->capture->capture_list) {
+      E_LOG_ERROR(link->capture, "Missing capture device.");
+    }
+
+    for (int j = 0; link->outputs[j]; j++) {
+      device_t *output = link->outputs[j];
+
+      if (output->output_list) {
+        E_LOG_ERROR(output, "Device already has output created. Duplicate?");
+      }
+
+      int ret = device_open_buffer_list(output, false,
+        link->capture->capture_list->fmt_width,
+        link->capture->capture_list->fmt_height,
+        link->capture->capture_list->fmt_format,
+        link->capture->capture_list->nbufs,
+        true
+      );
+
+      if (ret < 0) {
+        E_LOG_ERROR(output, "Failed to create capture.");
+      }
+    }
+  }
+
+  return 0;
+
+error:
+  return -1;
+}
+
+int links_loop(link_t *all_links, bool *running)
+{
+  if (links_stream(all_links, true) < 0) {
+    return -1;
+  }
+
+  *running = true;
+
+  while(*running) {
+    if (links_step(all_links, 1000) < 0) {
+      return -1;
+    }
+  }
+
   return 0;
 }
