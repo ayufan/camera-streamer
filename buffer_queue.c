@@ -154,6 +154,7 @@ buffer_t *buffer_list_dequeue(buffer_list_t *buf_list)
   } else {
     buf->used = v4l2_buf.bytesused;
   }
+  buf->v4l2_buffer.flags = v4l2_buf.flags;
 
   buf->enqueued = false;
   buf->mmap_reflinks = 1;
