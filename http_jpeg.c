@@ -29,6 +29,10 @@ static const char *const STREAM_PART = "Content-Type: " CONTENT_TYPE "\r\n" CONT
 static const char *const STREAM_BOUNDARY = "\r\n"
                                            "--" PART_BOUNDARY "\r\n";
 
+bool http_jpeg_needs_buffer()
+{
+  return buffer_lock_needs_buffer(&http_jpeg);
+}
 
 void http_jpeg_capture(buffer_t *buf)
 {

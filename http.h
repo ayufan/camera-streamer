@@ -36,7 +36,10 @@ void http_404(http_worker_t *worker, FILE *stream);
 void http_snapshot(http_worker_t *worker, FILE *stream);
 void http_stream(http_worker_t *worker, FILE *stream);
 void http_jpeg_capture(struct buffer_s *buf);
+bool http_jpeg_needs_buffer();
 
 // H264
 void http_h264_capture(buffer_t *buf);
 void http_video(http_worker_t *worker, FILE *stream);
+bool http_h264_needs_buffer();
+

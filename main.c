@@ -100,7 +100,7 @@ int open_camera()
 
 bool check_streaming()
 {
-  return true;
+  return http_jpeg_needs_buffer() || http_h264_needs_buffer();
 }
 
 void write_h264(buffer_t *buf)
@@ -117,7 +117,7 @@ int main(int argc, char *argv[])
     {
       camera,
       { isp_srgb },
-      { NULL, NULL }
+      { NULL, check_streaming }
     },
     {
       isp_yuuv,
@@ -138,12 +138,12 @@ int main(int argc, char *argv[])
     {
       codec_jpeg,
       { },
-      { http_jpeg_capture, check_streaming }
+      { http_jpeg_capture, http_jpeg_needs_buffer }
     },
     {
       codec_h264,
       { },
-      { http_h264_capture, check_streaming }
+      { http_h264_capture, http_h264_needs_buffer }
     },
     { NULL }
   };

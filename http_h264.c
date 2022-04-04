@@ -20,6 +20,11 @@ void http_h264_capture(buffer_t *buf)
   buffer_lock_capture(&http_h264, buf);
 }
 
+bool http_h264_needs_buffer()
+{
+  return buffer_lock_needs_buffer(&http_h264);
+}
+
 void http_video(http_worker_t *worker, FILE *stream)
 {
   bool had_key_frame = false;
