@@ -1,6 +1,7 @@
 #include "buffer.h"
 #include "buffer_list.h"
 #include "device.h"
+#include "links.h"
 #include "v4l2.h"
 
 int camera_width = 1920;
