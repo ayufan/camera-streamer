@@ -57,7 +57,7 @@ int main(int argc, char *argv[])
   }
 
   isp_srgb = device_open("ISP-SRGB", "/dev/video13");
-  isp_srgb->allow_dma = false;
+  //isp_srgb->allow_dma = false;
   isp_yuuv = device_open("ISP-YUUV", "/dev/video14");
   isp_yuuv->upstream_device = isp_srgb;
   isp_yuuv_low = device_open("ISP-YUUV-LOW", "/dev/video15");
