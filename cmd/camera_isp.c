@@ -8,13 +8,11 @@
 #include "hw/buffer_list.h"
 #include "http/http.h"
 
-extern bool check_streaming();
-
 void write_yuvu(buffer_t *buffer);
 
-int camera_configure_srgb_isp(camera_t *camera, float high_div, float low_div)
+int camera_configure_isp(camera_t *camera, float high_div, float low_div)
 {
-  if (device_open_buffer_list(camera->camera, true, camera->width, camera->height, V4L2_PIX_FMT_SRGGB10P, 0, camera->nbufs) < 0) {
+  if (device_open_buffer_list(camera->camera, true, camera->width, camera->height, camera->format, 0, camera->nbufs) < 0) {
     return -1;
   }
 
@@ -60,7 +58,7 @@ int camera_configure_srgb_isp(camera_t *camera, float high_div, float low_div)
 
   link_t *links = camera->links;
 
-  *links++ = (link_t){ camera->camera, { camera->isp.isp_srgb }, { NULL, check_streaming } };
+  *links++ = (link_t){ camera->camera, { camera->isp.isp_srgb } };
 
   if (camera->isp.isp_yuuv_low) {
     *links++ = (link_t){ camera->isp.isp_yuuv, { } };

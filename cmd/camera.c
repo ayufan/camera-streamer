@@ -10,6 +10,9 @@ void camera_init(camera_t *camera)
   camera->width = 1280;
   camera->height = 720;
   camera->nbufs = 4;
+  camera->format = V4L2_PIX_FMT_SRGGB10P;
+  camera->allow_dma = true;
+  camera->fps = 30;
 }
 
 void camera_close(camera_t *camera)
@@ -36,6 +39,8 @@ int camera_open(camera_t *camera, const char *path)
 
 int camera_set_params(camera_t *camera)
 {
+  device_set_fps(camera->camera, camera->fps);
+
   DEVICE_SET_OPTION(camera->camera, EXPOSURE, 2684);
   DEVICE_SET_OPTION(camera->camera, ANALOGUE_GAIN, 938);
   DEVICE_SET_OPTION(camera->camera, DIGITAL_GAIN, 512);

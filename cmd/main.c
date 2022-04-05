@@ -32,18 +32,25 @@ int main(int argc, char *argv[])
   camera.width = 2328; camera.height = 1748; // 1164x874
   //camera.width = 4656; camera.height = 3496;
   //camera.width = 3840; camera.height = 2160;
+  //camera.width = 1280; camera.height = 720;
   camera.nbufs = 4;
+  camera.format = V4L2_PIX_FMT_SRGGB10P;
+  //camera.format = V4L2_PIX_FMT_YUYV; camera.allow_dma = false;
 
-  if (camera_open(&camera, "/dev/video0") < 0) {
+  if (camera_open(&camera, "/dev/video2") < 0) {
     goto error;
   }
 
-#if 1
-  if (camera_configure_srgb_isp(&camera, 1.5, 0) < 0) {
+#if 0
+  if (camera_configure_direct(&camera) < 0) {
+    goto error;
+  }
+#elif 1
+  if (camera_configure_isp(&camera, 3, 0) < 0) {
     goto error;
   }
 #else
-  if (camera_configure_srgb_legacy_isp(&camera, 1.3) < 0) {
+  if (camera_configure_legacy_isp(&camera, 1.3) < 0) {
     goto error;
   }
 #endif
