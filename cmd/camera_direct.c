@@ -17,9 +17,9 @@ int camera_configure_direct(camera_t *camera)
   buffer_list_t *src = camera->camera->capture_list;
 
   camera->codec_jpeg = device_open("JPEG", "/dev/video31");
-  camera->codec_jpeg->allow_dma = false;
+  camera->codec_jpeg->buf_sink = true;
   camera->codec_h264 = device_open("H264", "/dev/video11");
-  camera->codec_h264->allow_dma = false;
+  camera->codec_h264->buf_sink = true;
 
   if (device_open_buffer_list(camera->codec_jpeg, false, src->fmt_width, src->fmt_height, src->fmt_format, src->fmt_bytesperline, camera->nbufs) < 0 ||
     device_open_buffer_list(camera->codec_jpeg, true, src->fmt_width, src->fmt_height, V4L2_PIX_FMT_JPEG, 0, camera->nbufs) < 0) {

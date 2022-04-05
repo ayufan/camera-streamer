@@ -8,6 +8,7 @@ typedef struct device_s {
   int fd;
   struct v4l2_capability v4l2_cap;
   bool allow_dma;
+  bool buf_sink;
 
   struct buffer_list_s *capture_list;
   struct buffer_list_s *output_list;

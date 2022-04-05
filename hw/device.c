@@ -62,7 +62,12 @@ int device_open_buffer_list(device_t *dev, bool do_capture, unsigned width, unsi
 
   if (do_capture) {
     buf_list = &dev->capture_list;
-    do_mmap = true;
+
+    if (dev->buf_sink) {
+      do_mmap = true;
+    } else {
+      do_mmap = dev->allow_dma;
+    }
 
     if (dev->capture_list) {
       E_LOG_ERROR(dev, "The capture_list is already created.");

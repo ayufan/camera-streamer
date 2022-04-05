@@ -30,7 +30,9 @@ int camera_configure_legacy_isp(camera_t *camera, float div)
 
   camera->legacy_isp.isp = device_open("ISP", "/dev/video12");
   camera->codec_jpeg = device_open("JPEG", "/dev/video31");
+  camera->codec_jpeg->buf_sink = true;
   camera->codec_h264 = device_open("H264", "/dev/video11");
+  camera->codec_h264->buf_sink = true;
 
   if (device_open_buffer_list(camera->legacy_isp.isp, false, src->fmt_width, src->fmt_height, src->fmt_format, src->fmt_bytesperline, camera->nbufs) < 0 ||
     device_open_buffer_list(camera->legacy_isp.isp, true, src->fmt_width / div, src->fmt_height / div, V4L2_PIX_FMT_YUYV, 0, camera->nbufs) < 0) {
