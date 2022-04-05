@@ -66,6 +66,10 @@ unsigned fourcc_to_stride(unsigned width, unsigned format)
 		case V4L2_PIX_FMT_SRGGB10P:
 			return align_size(width * 5 / 4, 32);
 
+		case V4L2_PIX_FMT_JPEG:
+		case V4L2_PIX_FMT_H264:
+			return 0;
+
 		default:
 			E_LOG_PERROR(NULL, "Unknown format: %s", fourcc_to_string(format).buf);
 	}

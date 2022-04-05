@@ -70,6 +70,20 @@ int buffer_list_set_format(buffer_list_t *buf_list, unsigned width, unsigned hei
 
   fmt->type = buf_list->type;
 
+  bool retried = false;
+  unsigned orig_width = width;
+  unsigned orig_height = height;
+  unsigned stride = 0;
+
+retry:
+
+  if (strstr(buf_list->name, "JPEG")) {
+    width = (width) / 16 * 16;
+    height = (height) / 16 * 16;
+    stride = orig_width * 2;
+    printf("JPEG: %dx%d vs %dx%d\n", orig_width, orig_height, width, height);
+  }
+
   if (buf_list->do_mplanes) {
     fmt->fmt.pix_mp.colorspace = V4L2_COLORSPACE_JPEG;
     fmt->fmt.pix_mp.width = width;
@@ -77,7 +91,7 @@ int buffer_list_set_format(buffer_list_t *buf_list, unsigned width, unsigned hei
     fmt->fmt.pix_mp.pixelformat = format;
     fmt->fmt.pix_mp.field = V4L2_FIELD_ANY;
     fmt->fmt.pix_mp.num_planes = 1;
-    //fmt->fmt.pix_mp.plane_fmt[0].bytesperline = width; // fourcc_to_stride(width, format);
+    fmt->fmt.pix_mp.plane_fmt[0].bytesperline = stride;// fourcc_to_stride(orig_width, format);
   } else {
     fmt->fmt.pix.colorspace = V4L2_COLORSPACE_RAW;
     fmt->fmt.pix.width = width;
@@ -90,9 +104,14 @@ int buffer_list_set_format(buffer_list_t *buf_list, unsigned width, unsigned hei
   E_LOG_DEBUG(buf_list, "Configuring format ...");
   E_XIOCTL(buf_list, buf_list->device->fd, VIDIOC_S_FMT, fmt, "Can't set format");
 
-  if (fmt->fmt.pix.width != width || fmt->fmt.pix.height < height) {
-		E_LOG_ERROR(buf_list, "Requested resolution=%ux%u is unavailable. Got %ux%u.",
+  if (fmt->fmt.pix.width != width || fmt->fmt.pix.height != height) {
+		E_LOG_INFO(buf_list, "Requested resolution=%ux%u is unavailable. Got %ux%u.",
       width, height, fmt->fmt.pix.width, fmt->fmt.pix.height);
+    if (retried) {
+      E_LOG_ERROR(buf_list, "Did retry.");
+    }
+    retried = true;
+    goto retry;
   }
 
 	if (fmt->fmt.pix.pixelformat != format) {

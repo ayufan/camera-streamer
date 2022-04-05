@@ -7,8 +7,8 @@
 
 #include <signal.h>
 
-int camera_width = 1280;
-int camera_height = 720;
+int camera_width = 2328;
+int camera_height = 1748;
 int camera_format = V4L2_PIX_FMT_SRGGB10P;
 int camera_nbufs = 1;
 bool camera_use_low = true;
