@@ -7,6 +7,8 @@
 #include <netinet/ip.h>
 #include <netinet/tcp.h>
 #include <arpa/inet.h>
+#include <pthread.h>
+#include <signal.h>
 
 #include "http/http.h"
 
@@ -126,6 +128,8 @@ int http_server(int listen_port, int maxcons, http_method_t *methods)
   if (listen_fd < 0) {
     return -1;
   }
+
+  sigaction(SIGPIPE, &(struct sigaction){ SIG_IGN }, NULL);
 
   while (maxcons-- > 0) {
     char name[20];

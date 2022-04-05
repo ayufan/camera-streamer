@@ -56,6 +56,10 @@ int device_open_buffer_list(device_t *dev, bool do_capture, unsigned width, unsi
   struct buffer_list_s **buf_list = NULL;
   bool do_mmap = false;
 
+  if (!dev) {
+    return -1;
+  }
+
   if (do_capture) {
     buf_list = &dev->capture_list;
     do_mmap = true;
@@ -134,6 +138,10 @@ int device_consume_event(device_t *dev)
 {
 	struct v4l2_event event;
 
+  if (!dev) {
+    return -1;
+  }
+
 	E_LOG_DEBUG(dev, "Consuming V4L2 event ...");
   E_XIOCTL(dev, dev->fd, VIDIOC_DQEVENT, &event, "Got some V4L2 device event, but where is it?");
 
@@ -154,6 +162,10 @@ error:
 
 int device_video_force_key(device_t *dev)
 {
+  if (!dev) {
+    return -1;
+  }
+
   struct v4l2_control ctl = {0};
   ctl.id = V4L2_CID_MPEG_VIDEO_FORCE_KEY_FRAME;
   ctl.value = 1;
@@ -167,6 +179,11 @@ error:
 int device_set_fps(device_t *dev, int desired_fps)
 {
   struct v4l2_streamparm setfps = {0};
+
+  if (!dev) {
+    return -1;
+  }
+
   setfps.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
   setfps.parm.output.timeperframe.numerator = 1;
   setfps.parm.output.timeperframe.denominator = desired_fps;
@@ -180,6 +197,11 @@ error:
 int device_set_option(device_t *dev, const char *name, uint32_t id, int32_t value)
 {
   struct v4l2_control ctl = {0};
+
+  if (!dev) {
+    return -1;
+  }
+
   ctl.id = id;
   ctl.value = value;
   E_LOG_DEBUG(dev, "Configuring option %s (%08x) = %d", name, id, value);

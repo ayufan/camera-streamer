@@ -2,7 +2,9 @@
 
 #include "v4l2.h"
 
-typedef void (*link_on_buffer)(struct buffer_s *buf);
+typedef struct buffer_s buffer_t;
+
+typedef void (*link_on_buffer)(buffer_t *buf);
 typedef bool (*link_check_streaming)();
 
 typedef struct link_s {
