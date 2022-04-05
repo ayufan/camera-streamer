@@ -77,7 +77,7 @@ int buffer_list_set_format(buffer_list_t *buf_list, unsigned width, unsigned hei
     fmt->fmt.pix_mp.pixelformat = format;
     fmt->fmt.pix_mp.field = V4L2_FIELD_ANY;
     fmt->fmt.pix_mp.num_planes = 1;
-    //fmt->fmt.pix_mp.plane_fmt[0].bytesperline = fourcc_to_stride(width, format);
+    //fmt->fmt.pix_mp.plane_fmt[0].bytesperline = width; // fourcc_to_stride(width, format);
   } else {
     fmt->fmt.pix.colorspace = V4L2_COLORSPACE_RAW;
     fmt->fmt.pix.width = width;
@@ -184,7 +184,9 @@ int buffer_list_stream(buffer_list_t *buf_list, bool do_on)
 
     // re-enqueue buffers on stream start
     if (buf_list->streaming && buf_list->do_capture && !buf->enqueued && buf->mmap_reflinks == 1) {
-      buffer_consumed(buf);
+      if (buf_list->do_mmap) {
+        buffer_consumed(buf);
+      }
     }
   }
 

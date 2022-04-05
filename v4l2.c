@@ -57,6 +57,9 @@ unsigned fourcc_to_stride(unsigned width, unsigned format)
 		case V4L2_PIX_FMT_RGB565:
 			return align_size(width * 2, 32);
 
+		case V4L2_PIX_FMT_YUV420:
+			return align_size(width * 3 / 2, 32);
+
 		case V4L2_PIX_FMT_RGB24:
 			return align_size(width * 3, 32);
 

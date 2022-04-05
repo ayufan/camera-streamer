@@ -39,6 +39,7 @@ bool buffer_consumed(buffer_t *buf)
     if (buf->buf_list->do_mplanes) {
       buf->v4l2_plane.bytesused = buf->used;
       buf->v4l2_plane.length = buf->length;
+      buf->v4l2_plane.data_offset = 0;
     } else {
       buf->v4l2_buffer.bytesused = buf->used;
     }

@@ -19,15 +19,14 @@ buffer_t *buffer_open(const char *name, buffer_list_t *buf_list, int index) {
   if (buf_list->do_mplanes) {
     buf->v4l2_buffer.length = 1;
     buf->v4l2_buffer.m.planes = &buf->v4l2_plane;
+    buf->v4l2_plane.data_offset = 0;
   }
 
-  if (!buf_list->do_mmap) {
-    // nothing to do here
+  if (buf_list->do_mmap) {
+    buf->v4l2_buffer.memory = V4L2_MEMORY_MMAP;
+  } else {
     buf->v4l2_buffer.memory = V4L2_MEMORY_DMABUF;
-    return buf;
   }
-
-  buf->v4l2_buffer.memory = V4L2_MEMORY_MMAP;
 
   E_XIOCTL(buf_list, dev->fd, VIDIOC_QUERYBUF, &buf->v4l2_buffer, "Cannot query buffer %d", index);
 
@@ -39,9 +38,11 @@ buffer_t *buffer_open(const char *name, buffer_list_t *buf_list, int index) {
     buf->length = buf->v4l2_buffer.length;
   }
 
-  buf->start = mmap(NULL, buf->length, PROT_READ | PROT_WRITE, MAP_SHARED, dev->fd, buf->offset);
-  if (buf->start == MAP_FAILED) {
-    goto error;
+  if (buf_list->do_mmap) {
+    buf->start = mmap(NULL, buf->length, PROT_READ | PROT_WRITE, MAP_SHARED, dev->fd, buf->offset);
+    if (buf->start == MAP_FAILED) {
+      goto error;
+    }
   }
 
   if (buf_list->do_dma) {

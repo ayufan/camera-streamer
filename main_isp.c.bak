@@ -7,11 +7,11 @@
 
 #include <signal.h>
 
-int camera_width = 1920;
-int camera_height = 1080;
+int camera_width = 1280;
+int camera_height = 720;
 int camera_format = V4L2_PIX_FMT_SRGGB10P;
-int camera_nbufs = 4;
-bool camera_use_low = false;
+int camera_nbufs = 1;
+bool camera_use_low = true;
 
 device_t *camera = NULL;
 device_t *isp_srgb = NULL;
@@ -40,7 +40,7 @@ int open_jpeg(buffer_list_t *src, const char *tmp)
   DEVICE_SET_OPTION2(codec_jpeg, JPEG, COMPRESSION_QUALITY, 80);
 
   if (device_open_buffer_list(codec_jpeg, false, src->fmt_width, src->fmt_height, src->fmt_format, camera_nbufs) < 0 ||
-    device_open_buffer_list(codec_jpeg, true, src->fmt_width, src->fmt_height, V4L2_PIX_FMT_JPEG, camera_nbufs) < 0) {
+    device_open_buffer_list(codec_jpeg, true, codec_jpeg->output_list->fmt_width, codec_jpeg->output_list->fmt_height, V4L2_PIX_FMT_JPEG, camera_nbufs) < 0) {
     return -1;
   }
   return 0;
@@ -81,9 +81,9 @@ int open_camera()
   isp_yuuv_low = device_open("ISP-YUUV-LOW", "/dev/video15");
   isp_yuuv_low->output_device = isp_srgb;
   codec_jpeg = device_open("JPEG", "/dev/video31");
-  codec_jpeg->allow_dma = false;
+  //codec_jpeg->allow_dma = false;
   codec_h264 = device_open("H264", "/dev/video11");
-  codec_h264->allow_dma = false;
+  //codec_h264->allow_dma = false;
 
   if (open_isp(camera->capture_list, "/dev/video13", "/dev/video14", "/dev/video15") < 0) {
     return -1;
@@ -119,7 +119,7 @@ int main(int argc, char *argv[])
       isp_yuuv,
       {
         camera_use_low ? NULL : codec_jpeg,
-        camera_use_low ? NULL : codec_h264,
+        //camera_use_low ? NULL : codec_h264,
       },
       { NULL, NULL }
     },
@@ -127,7 +127,7 @@ int main(int argc, char *argv[])
       isp_yuuv_low,
       {
         camera_use_low ? codec_jpeg : NULL,
-        camera_use_low ? codec_h264 : NULL,
+        //camera_use_low ? codec_h264 : NULL,
       },
       { NULL, NULL }
     },
@@ -137,9 +137,9 @@ int main(int argc, char *argv[])
       { http_jpeg_capture, http_jpeg_needs_buffer }
     },
     {
-      codec_h264,
-      { },
-      { http_h264_capture, http_h264_needs_buffer }
+      // codec_h264,
+      // { },
+      // { http_h264_capture, http_h264_needs_buffer }
     },
     { NULL }
   };
