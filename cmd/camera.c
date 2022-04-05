@@ -1,6 +1,7 @@
 #include "camera.h"
 
 #include "hw/device.h"
+#include "hw/buffer_list.h"
 #include "hw/links.h"
 #include "hw/v4l2.h"
 
@@ -8,13 +9,13 @@ void camera_init(camera_t *camera)
 {
   memset(camera, 0, sizeof(*camera));
   camera->name = "CAMERA";
-  strcpy(camera->path, "/dev/video0");
-  camera->width = 1280;
-  camera->height = 720;
-  camera->nbufs = 4;
-  camera->format = V4L2_PIX_FMT_SRGGB10P;
-  camera->allow_dma = true;
-  camera->fps = 30;
+  strcpy(camera->options.path, "/dev/video0");
+  camera->options.width = 1280;
+  camera->options.height = 720;
+  camera->options.nbufs = 4;
+  camera->options.format = V4L2_PIX_FMT_SRGGB10P;
+  camera->options.allow_dma = true;
+  camera->options.fps = 30;
 }
 
 void camera_close(camera_t *camera)
@@ -31,14 +32,18 @@ void camera_close(camera_t *camera)
 
 int camera_open(camera_t *camera)
 {
-  camera->camera = device_open("CAMERA", camera->path);
+  camera->camera = device_open("CAMERA", camera->options.path);
   if (!camera->camera) {
     return -1;
   }
 
-  camera->camera->allow_dma = camera->allow_dma;
+  camera->camera->allow_dma = camera->options.allow_dma;
 
-  switch (camera->format) {
+  if (device_open_buffer_list(camera->camera, true, camera->options.width, camera->options.height, camera->options.format, 0, camera->options.nbufs, true) < 0) {
+    return -1;
+  }
+
+  switch (camera->camera->capture_list->fmt_format) {
   case V4L2_PIX_FMT_YUYV:
     if (camera_configure_direct(camera) < 0) {
       goto error;
@@ -65,7 +70,7 @@ int camera_open(camera_t *camera)
     break;
 
   default:
-    E_LOG_ERROR(camera, "Unsupported camera format=%s", fourcc_to_string(camera->format).buf);
+    E_LOG_ERROR(camera, "Unsupported camera format=%s", fourcc_to_string(camera->options.format).buf);
     break;
   }
 
@@ -77,7 +82,7 @@ error:
 
 int camera_set_params(camera_t *camera)
 {
-  device_set_fps(camera->camera, camera->fps);
+  device_set_fps(camera->camera, camera->options.fps);
 
   DEVICE_SET_OPTION(camera->camera, EXPOSURE, 2684);
   DEVICE_SET_OPTION(camera->camera, ANALOGUE_GAIN, 938);

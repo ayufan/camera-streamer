@@ -8,8 +8,17 @@
 
 #define CAMERA_DEVICE_CAMERA 0
 
+typedef struct camera_options_s {
+  char path[256];
+  unsigned width, height, format;
+  unsigned nbufs, fps;
+  bool allow_dma;
+} camera_options_t;
+
 typedef struct camera_s {
   const char *name;
+
+  camera_options_t options;
 
   union {
     device_t *devices[MAX_DEVICES];
@@ -25,11 +34,6 @@ typedef struct camera_s {
     };
   };
   link_t links[MAX_DEVICES];
-
-  char path[256];
-  unsigned width, height, format;
-  unsigned nbufs, fps;
-  bool allow_dma;
 } camera_t;
 
 #define CAMERA(DEVICE) camera->devices[DEVICE]

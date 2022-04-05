@@ -12,10 +12,6 @@ void write_yuvu(buffer_t *buffer);
 
 int camera_configure_isp(camera_t *camera, float high_div, float low_div)
 {
-  if (device_open_buffer_list(camera->camera, true, camera->width, camera->height, camera->format, 0, camera->nbufs, true) < 0) {
-    return -1;
-  }
-
   buffer_list_t *src = camera->camera->capture_list;
 
   camera->isp_srgb = device_open("ISP", "/dev/video13");

@@ -34,12 +34,12 @@ int main(int argc, char *argv[])
   camera_init(&camera);
 
   //camera.width = 1920; camera.height = 1080;
-  strcpy(camera.path, "/dev/video2"); camera.width = 2328; camera.height = 1748; camera.format = V4L2_PIX_FMT_SRGGB10P; // 1164x874
+  strcpy(camera.options.path, "/dev/video2"); camera.options.width = 2328; camera.options.height = 1748; camera.options.format = V4L2_PIX_FMT_SRGGB10P; // 1164x874
   //camera.width = 4656; camera.height = 3496;
   //camera.width = 3840; camera.height = 2160;
   //camera.width = 1280; camera.height = 720;
-  strcpy(camera.path, "/dev/video0"); camera.width = 1920; camera.height = 1080; camera.format = V4L2_PIX_FMT_YUYV; camera.format = V4L2_PIX_FMT_MJPEG;  camera.allow_dma = false;
-  camera.nbufs = 1;
+  strcpy(camera.options.path, "/dev/video0"); camera.options.width = 1920; camera.options.height = 1080; camera.options.format = V4L2_PIX_FMT_YUYV; camera.options.format = V4L2_PIX_FMT_MJPEG; camera.options.allow_dma = false;
+  camera.options.nbufs = 1;
 
   if (camera_open(&camera) < 0) {
     goto error;

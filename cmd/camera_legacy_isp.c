@@ -22,10 +22,6 @@ void write_yuvu(buffer_t *buffer)
 
 int camera_configure_legacy_isp(camera_t *camera, float div)
 {
-  if (device_open_buffer_list(camera->camera, true, camera->width, camera->height, camera->format, 0, camera->nbufs, true) < 0) {
-    return -1;
-  }
-
   buffer_list_t *src = camera->camera->capture_list;
 
   camera->legacy_isp = device_open("ISP", "/dev/video12");

@@ -10,10 +10,6 @@
 
 int camera_configure_direct(camera_t *camera)
 {
-  if (device_open_buffer_list(camera->camera, true, camera->width, camera->height, camera->format, 0, camera->nbufs, true) < 0) {
-    return -1;
-  }
-
   buffer_list_t *src = camera->camera->capture_list;
 
   camera->codec_jpeg = device_open("JPEG", "/dev/video31");
