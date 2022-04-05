@@ -33,13 +33,23 @@ int main(int argc, char *argv[])
 
   camera_init(&camera);
 
+  // camera.width = 2328;
+  // camera.height = 1748;
+  // camera.nbufs = 4;
+
   if (camera_open(&camera, "/dev/video0") < 0) {
     goto error;
   }
 
+#if 0
   if (camera_configure_srgb_isp(&camera, true) < 0) {
     goto error;
   }
+#else
+  if (camera_configure_srgb_legacy_isp(&camera) < 0) {
+    goto error;
+  }
+#endif
 
   if (camera_set_params(&camera) < 0) {
     goto error;

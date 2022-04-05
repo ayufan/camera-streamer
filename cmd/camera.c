@@ -7,8 +7,8 @@
 void camera_init(camera_t *camera)
 {
   memset(camera, 0, sizeof(*camera));
-  camera->width = 2328;
-  camera->height = 1748;
+  camera->width = 1280;
+  camera->height = 720;
   camera->nbufs = 4;
 }
 
