@@ -22,6 +22,7 @@ int camera_configure_srgb_isp(camera_t *camera, float high_div, float low_div)
 
   camera->isp.isp_srgb = device_open("ISP", "/dev/video13");
   camera->isp.isp_yuuv = device_open("ISP-YUUV", "/dev/video14");
+  camera->isp.isp_yuuv->output_device = camera->isp.isp_srgb;
   camera->codec_jpeg = device_open("JPEG", "/dev/video31");
   camera->codec_h264 = device_open("H264", "/dev/video11");
 
@@ -32,6 +33,7 @@ int camera_configure_srgb_isp(camera_t *camera, float high_div, float low_div)
 
   if (low_div >= 1) {
     camera->isp.isp_yuuv_low = device_open("ISP-YUUV-LOW", "/dev/video15");
+    camera->isp.isp_yuuv_low->output_device = camera->isp.isp_srgb;
 
     if (device_open_buffer_list(camera->isp.isp_yuuv_low, true, src->fmt_width / low_div, src->fmt_height / low_div, V4L2_PIX_FMT_YUYV, 0, camera->nbufs) < 0) {
       return -1;

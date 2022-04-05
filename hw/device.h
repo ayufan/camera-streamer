@@ -13,6 +13,7 @@ typedef struct device_s {
   struct buffer_list_s *output_list;
 
   struct device_s *output_device;
+  bool paused;
 } device_t;
 
 device_t *device_open(const char *name, const char *path);

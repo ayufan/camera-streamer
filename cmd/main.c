@@ -33,8 +33,8 @@ int main(int argc, char *argv[])
 
   camera_init(&camera);
 
-  // camera.width = 1920; camera.height = 1080;
-  camera.width = 2328; camera.height = 1748; // 1164x874
+  camera.width = 1920; camera.height = 1080;
+  //camera.width = 2328; camera.height = 1748; // 1164x874
   //camera.width = 4656; camera.height = 3496;
   //camera.width = 3840; camera.height = 2160;
   camera.nbufs = 4;
@@ -44,7 +44,7 @@ int main(int argc, char *argv[])
   }
 
 #if 1
-  if (camera_configure_srgb_isp(&camera, 1.6, 0) < 0) {
+  if (camera_configure_srgb_isp(&camera, 1, 0) < 0) {
     goto error;
   }
 #else
