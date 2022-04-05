@@ -49,25 +49,22 @@ void device_close(device_t *dev) {
   free(dev);
 }
 
-int device_open_buffer_list(device_t *dev, bool do_capture, unsigned width, unsigned height, unsigned format, unsigned bytesperline, int nbufs)
+int device_open_buffer_list(device_t *dev, bool do_capture, unsigned width, unsigned height, unsigned format, unsigned bytesperline, int nbufs, bool do_mmap)
 {
   unsigned type;
   char name[64];
   struct buffer_list_s **buf_list = NULL;
-  bool do_mmap = false;
 
   if (!dev) {
     return -1;
   }
 
+  if (!dev->allow_dma) {
+    do_mmap = true;
+  }
+
   if (do_capture) {
     buf_list = &dev->capture_list;
-
-    if (dev->buf_sink) {
-      do_mmap = true;
-    } else {
-      do_mmap = dev->allow_dma;
-    }
 
     if (dev->capture_list) {
       E_LOG_ERROR(dev, "The capture_list is already created.");
@@ -84,7 +81,6 @@ int device_open_buffer_list(device_t *dev, bool do_capture, unsigned width, unsi
     }
   } else {
     buf_list = &dev->output_list;
-    do_mmap = !dev->allow_dma;
 
     if (dev->output_list) {
       E_LOG_ERROR(dev, "The output_list is already created.");
@@ -120,6 +116,20 @@ error:
   buffer_list_close(*buf_list);
   *buf_list = NULL;
   return -1;
+}
+
+int device_open_buffer_list_output(device_t *dev, buffer_list_t *capture_list)
+{
+  return device_open_buffer_list(dev, false,
+    capture_list->fmt_width, capture_list->fmt_height,
+    capture_list->fmt_format, capture_list->fmt_bytesperline, capture_list->nbufs, !capture_list->do_mmap);
+}
+
+int device_open_buffer_list_capture(device_t *dev, buffer_list_t *output_list, float div, unsigned format, bool do_mmap)
+{
+  return device_open_buffer_list(dev, true,
+    output_list->fmt_width / div, output_list->fmt_height / div,
+    format, 0, output_list->nbufs, do_mmap);
 }
 
 int device_stream(device_t *dev, bool do_on)

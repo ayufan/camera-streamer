@@ -8,7 +8,6 @@ typedef struct device_s {
   int fd;
   struct v4l2_capability v4l2_cap;
   bool allow_dma;
-  bool buf_sink;
 
   struct buffer_list_s *capture_list;
   struct buffer_list_s *output_list;
@@ -20,7 +19,9 @@ typedef struct device_s {
 device_t *device_open(const char *name, const char *path);
 void device_close(device_t *device);
 
-int device_open_buffer_list(device_t *dev, bool do_capture, unsigned width, unsigned height, unsigned format, unsigned bytesperline, int nbufs);
+int device_open_buffer_list(device_t *dev, bool do_capture, unsigned width, unsigned height, unsigned format, unsigned bytesperline, int nbufs, bool do_mmap);
+int device_open_buffer_list_output(device_t *dev, struct buffer_list_s *capture_list);
+int device_open_buffer_list_capture(device_t *dev, struct buffer_list_s *output_list, float div, unsigned format, bool do_mmap);
 int device_consume_event(device_t *device);
 
 int device_stream(device_t *dev, bool do_on);

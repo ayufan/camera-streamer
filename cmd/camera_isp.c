@@ -12,7 +12,7 @@ void write_yuvu(buffer_t *buffer);
 
 int camera_configure_isp(camera_t *camera, float high_div, float low_div)
 {
-  if (device_open_buffer_list(camera->camera, true, camera->width, camera->height, camera->format, 0, camera->nbufs) < 0) {
+  if (device_open_buffer_list(camera->camera, true, camera->width, camera->height, camera->format, 0, camera->nbufs, true) < 0) {
     return -1;
   }
 
@@ -22,12 +22,10 @@ int camera_configure_isp(camera_t *camera, float high_div, float low_div)
   camera->isp.isp_yuuv = device_open("ISP-YUUV", "/dev/video14");
   camera->isp.isp_yuuv->output_device = camera->isp.isp_srgb;
   camera->codec_jpeg = device_open("JPEG", "/dev/video31");
-  camera->codec_jpeg->buf_sink = true;
   camera->codec_h264 = device_open("H264", "/dev/video11");
-  camera->codec_h264->buf_sink = true;
 
-  if (device_open_buffer_list(camera->isp.isp_srgb, false, src->fmt_width, src->fmt_height, src->fmt_format, src->fmt_bytesperline, camera->nbufs) < 0 ||
-    device_open_buffer_list(camera->isp.isp_yuuv, true, src->fmt_width / high_div, src->fmt_height / high_div, V4L2_PIX_FMT_YUYV, 0, camera->nbufs) < 0) {
+  if (device_open_buffer_list_output(camera->isp.isp_srgb, src) < 0 ||
+    device_open_buffer_list_capture(camera->isp.isp_yuuv, src, high_div, V4L2_PIX_FMT_YUYV, true) < 0) {
     return -1;
   }
 
@@ -35,7 +33,7 @@ int camera_configure_isp(camera_t *camera, float high_div, float low_div)
     camera->isp.isp_yuuv_low = device_open("ISP-YUUV-LOW", "/dev/video15");
     camera->isp.isp_yuuv_low->output_device = camera->isp.isp_srgb;
 
-    if (device_open_buffer_list(camera->isp.isp_yuuv_low, true, src->fmt_width / low_div, src->fmt_height / low_div, V4L2_PIX_FMT_YUYV, 0, camera->nbufs) < 0) {
+    if (device_open_buffer_list_capture(camera->isp.isp_yuuv_low, src, low_div, V4L2_PIX_FMT_YUYV, true) < 0) {
       return -1;
     }
 
@@ -44,13 +42,13 @@ int camera_configure_isp(camera_t *camera, float high_div, float low_div)
     src = camera->isp.isp_yuuv->capture_list;
   }
 
-  if (device_open_buffer_list(camera->codec_jpeg, false, src->fmt_width, src->fmt_height, src->fmt_format, src->fmt_bytesperline, camera->nbufs) < 0 ||
-    device_open_buffer_list(camera->codec_jpeg, true, src->fmt_width, src->fmt_height, V4L2_PIX_FMT_JPEG, 0, camera->nbufs) < 0) {
+  if (device_open_buffer_list_output(camera->codec_jpeg, src) < 0 ||
+    device_open_buffer_list_capture(camera->codec_jpeg, src, 1.0, V4L2_PIX_FMT_JPEG, true) < 0) {
     return -1;
   }
 
-  if (device_open_buffer_list(camera->codec_h264, false, src->fmt_width, src->fmt_height, src->fmt_format, src->fmt_bytesperline, camera->nbufs) < 0 ||
-    device_open_buffer_list(camera->codec_h264, true, src->fmt_width, src->fmt_height, V4L2_PIX_FMT_H264, 0, camera->nbufs) < 0) {
+  if (device_open_buffer_list_output(camera->codec_h264, src) < 0 ||
+    device_open_buffer_list_capture(camera->codec_h264, src, 1.0, V4L2_PIX_FMT_H264, true) < 0) {
     return -1;
   }
 
