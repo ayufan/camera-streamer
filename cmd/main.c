@@ -24,20 +24,28 @@ http_method_t http_methods[] = {
 camera_options_t camera_options = {
   .path = "/dev/video0",
   .width = 1920,
-  .height = 720,
-  .format = 0,
+  .height = 1080,
+  .format = V4L2_PIX_FMT_SRGGB10P,
   .nbufs = 4,
   .fps = 30,
   .allow_dma = true
 };
 
 http_server_options_t http_options = {
-  .listen_port = 9092,
+  .port = 9092,
   .maxcons = 10
 };
 
 option_t all_options[] = {
-  DEFINE_OPTION(camera, width, "%d"),
+  DEFINE_OPTION_PTR(camera, path, "%s"),
+  DEFINE_OPTION(camera, width, uint),
+  DEFINE_OPTION(camera, height, uint),
+  DEFINE_OPTION(camera, format, uint),
+  DEFINE_OPTION(camera, nbufs, uint),
+  DEFINE_OPTION(camera, fps, uint),
+  DEFINE_OPTION(camera, allow_dma, bool),
+  DEFINE_OPTION(http, port, uint),
+  DEFINE_OPTION(http, maxcons, uint),
   {}
 };
 
@@ -48,6 +56,10 @@ int main(int argc, char *argv[])
   int ret = -1;
   const char *env;
 
+  if (parse_opts(all_options, argc, argv) < 0) {
+    return -1;
+  }
+
   if (env = getenv("DEBUG")) {
     log_debug = strstr(env, "1") ? 1 : 0;
   }
@@ -55,13 +67,13 @@ int main(int argc, char *argv[])
   camera_init(&camera);
   camera.options = camera_options;
 
-  //camera.width = 1920; camera.height = 1080;
-  strcpy(camera.options.path, "/dev/video2"); camera.options.width = 2328; camera.options.height = 1748; camera.options.format = V4L2_PIX_FMT_SRGGB10P; // 1164x874
-  //camera.width = 4656; camera.height = 3496;
-  //camera.width = 3840; camera.height = 2160;
-  //camera.width = 1280; camera.height = 720;
-  strcpy(camera.options.path, "/dev/video0"); camera.options.width = 1920; camera.options.height = 1080; camera.options.format = V4L2_PIX_FMT_YUYV; camera.options.format = V4L2_PIX_FMT_MJPEG; camera.options.allow_dma = false;
-  camera.options.nbufs = 1;
+  // //camera.width = 1920; camera.height = 1080;
+  // strcpy(camera.options.path, "/dev/video2"); camera.options.width = 2328; camera.options.height = 1748; camera.options.format = V4L2_PIX_FMT_SRGGB10P; // 1164x874
+  // //camera.width = 4656; camera.height = 3496;
+  // //camera.width = 3840; camera.height = 2160;
+  // //camera.width = 1280; camera.height = 720;
+  // strcpy(camera.options.path, "/dev/video0"); camera.options.width = 1920; camera.options.height = 1080; camera.options.format = V4L2_PIX_FMT_YUYV; camera.options.format = V4L2_PIX_FMT_MJPEG; camera.options.allow_dma = false;
+  // camera.options.nbufs = 1;
 
   if (camera_open(&camera) < 0) {
     goto error;

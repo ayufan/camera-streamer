@@ -14,7 +14,7 @@
 
 #define BUFSIZE 256
 
-static int http_listen(int listen_port, int maxcons)
+static int http_listen(int port, int maxcons)
 {
   struct sockaddr_in server = {0};
   int listenfd = -1;
@@ -22,7 +22,7 @@ static int http_listen(int listen_port, int maxcons)
   // getaddrinfo for host
   server.sin_family = AF_INET;
   server.sin_addr.s_addr = INADDR_ANY;
-  server.sin_port = htons(listen_port);
+  server.sin_port = htons(port);
 
   listenfd = socket(AF_INET, SOCK_STREAM, 0);
   if (listenfd < 0) {
@@ -124,7 +124,7 @@ error:
 
 int http_server(http_server_options_t *options, http_method_t *methods)
 {
-  int listen_fd = http_listen(options->listen_port, options->maxcons);
+  int listen_fd = http_listen(options->port, options->maxcons);
   if (listen_fd < 0) {
     return -1;
   }
@@ -133,7 +133,7 @@ int http_server(http_server_options_t *options, http_method_t *methods)
 
   for (int worker = 0; worker < options->maxcons; worker++) {
     char name[20];
-    sprintf(name, "HTTP%d/%d", options->listen_port, worker);
+    sprintf(name, "HTTP%d/%d", options->port, worker);
 
     http_worker_t *worker = calloc(1, sizeof(http_worker_t));
     worker->name = strdup(name);

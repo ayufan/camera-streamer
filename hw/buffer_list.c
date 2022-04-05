@@ -89,11 +89,15 @@ retry:
     bytesperline = 0;
   }
 
+  E_LOG_DEBUG(buf_list, "Get current format ...");
+  E_XIOCTL(buf_list, buf_list->device->fd, VIDIOC_G_FMT, fmt, "Can't set format");
+
   if (buf_list->do_mplanes) {
     fmt->fmt.pix_mp.colorspace = V4L2_COLORSPACE_JPEG;
     fmt->fmt.pix_mp.width = width;
     fmt->fmt.pix_mp.height = height;
-    fmt->fmt.pix_mp.pixelformat = format;
+    if (format)
+      fmt->fmt.pix_mp.pixelformat = format;
     fmt->fmt.pix_mp.field = V4L2_FIELD_ANY;
     fmt->fmt.pix_mp.num_planes = 1;
     fmt->fmt.pix_mp.plane_fmt[0].bytesperline = bytesperline;
@@ -102,7 +106,8 @@ retry:
     fmt->fmt.pix.colorspace = V4L2_COLORSPACE_RAW;
     fmt->fmt.pix.width = width;
     fmt->fmt.pix.height = height;
-    fmt->fmt.pix.pixelformat = format;
+    if (format)
+      fmt->fmt.pix.pixelformat = format;
     fmt->fmt.pix.field = V4L2_FIELD_ANY;
     fmt->fmt.pix.bytesperline = bytesperline;
     //fmt->fmt.pix.sizeimage = bytesperline * orig_height;
@@ -138,7 +143,7 @@ retry:
     }
   }
 
-	if (buf_list->fmt_format != format) {
+	if (format && buf_list->fmt_format != format) {
 		E_LOG_ERROR(buf_list, "Could not obtain the requested format=%s; driver gave us %s",
 			fourcc_to_string(format).buf,
 			fourcc_to_string(buf_list->fmt_format).buf);

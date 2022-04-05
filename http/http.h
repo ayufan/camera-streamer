@@ -29,7 +29,7 @@ typedef struct http_worker_s {
 } http_worker_t;
 
 typedef struct http_server_options_s {
-  int listen_port;
+  int port;
   int maxcons;
 } http_server_options_t;
 
