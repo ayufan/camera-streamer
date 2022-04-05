@@ -64,7 +64,7 @@ void buffer_list_close(buffer_list_t *buf_list)
   free(buf_list);
 }
 
-int buffer_list_set_format(buffer_list_t *buf_list, unsigned width, unsigned height, unsigned format)
+int buffer_list_set_format(buffer_list_t *buf_list, unsigned width, unsigned height, unsigned format, unsigned bytesperline)
 {
 	struct v4l2_format *fmt = &buf_list->v4l2_format;
 
@@ -120,9 +120,13 @@ retry:
 			fourcc_to_string(fmt->fmt.pix.pixelformat).buf);
 	}
 
-	E_LOG_INFO(buf_list, "Using: %ux%u/%s",
-    fmt->fmt.pix.width, fmt->fmt.pix.height, fourcc_to_string(fmt->fmt.pix.pixelformat).buf);
-
+	E_LOG_INFO(
+    buf_list,
+    "Using: %ux%u/%s, bytesperline=%d",
+    fmt->fmt.pix.width, fmt->fmt.pix.height,
+    fourcc_to_string(fmt->fmt.pix.pixelformat).buf,
+    fmt->fmt.pix.bytesperline
+  );
 
   buf_list->fmt_width = fmt->fmt.pix.width;
   buf_list->fmt_height = fmt->fmt.pix.height;

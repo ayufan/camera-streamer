@@ -49,7 +49,7 @@ void device_close(device_t *dev) {
   free(dev);
 }
 
-int device_open_buffer_list(device_t *dev, bool do_capture, unsigned width, unsigned height, unsigned format, int nbufs)
+int device_open_buffer_list(device_t *dev, bool do_capture, unsigned width, unsigned height, unsigned format, unsigned bytesperline, int nbufs)
 {
   unsigned type;
   char name[64];
@@ -101,7 +101,7 @@ int device_open_buffer_list(device_t *dev, bool do_capture, unsigned width, unsi
     goto error;
   }
 
-  if (buffer_list_set_format(*buf_list, width, height, format) < 0) {
+  if (buffer_list_set_format(*buf_list, width, height, format, bytesperline) < 0) {
     goto error;
   }
 
