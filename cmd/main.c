@@ -36,6 +36,11 @@ http_server_options_t http_options = {
   .maxcons = 10
 };
 
+log_options_t log_options = {
+  .debug = false,
+  .verbose = false
+};
+
 option_t all_options[] = {
   DEFINE_OPTION_PTR(camera, path, "%s"),
   DEFINE_OPTION(camera, width, uint),
@@ -46,6 +51,8 @@ option_t all_options[] = {
   DEFINE_OPTION(camera, allow_dma, bool),
   DEFINE_OPTION(http, port, uint),
   DEFINE_OPTION(http, maxcons, uint),
+  DEFINE_OPTION(log, debug, bool),
+  DEFINE_OPTION(log, verbose, bool),
   {}
 };
 
@@ -60,20 +67,8 @@ int main(int argc, char *argv[])
     return -1;
   }
 
-  if (env = getenv("DEBUG")) {
-    log_debug = strstr(env, "1") ? 1 : 0;
-  }
-
   camera_init(&camera);
   camera.options = camera_options;
-
-  // //camera.width = 1920; camera.height = 1080;
-  // strcpy(camera.options.path, "/dev/video2"); camera.options.width = 2328; camera.options.height = 1748; camera.options.format = V4L2_PIX_FMT_SRGGB10P; // 1164x874
-  // //camera.width = 4656; camera.height = 3496;
-  // //camera.width = 3840; camera.height = 2160;
-  // //camera.width = 1280; camera.height = 720;
-  // strcpy(camera.options.path, "/dev/video0"); camera.options.width = 1920; camera.options.height = 1080; camera.options.format = V4L2_PIX_FMT_YUYV; camera.options.format = V4L2_PIX_FMT_MJPEG; camera.options.allow_dma = false;
-  // camera.options.nbufs = 1;
 
   if (camera_open(&camera) < 0) {
     goto error;
