@@ -20,11 +20,6 @@ http_method_t http_methods[] = {
   { NULL, NULL }
 };
 
-bool check_streaming()
-{
-  return http_jpeg_needs_buffer() || http_h264_needs_buffer();
-}
-
 int main(int argc, char *argv[])
 {
   camera_t camera;

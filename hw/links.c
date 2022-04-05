@@ -14,13 +14,15 @@ void _update_paused(link_t *all_links)
   for (int i = n; i-- > 0; ) {
     link_t *link = &all_links[i];
 
-    bool paused = false;
 
     if (!link->capture->capture_list->streaming) {
       continue;
     }
-    if (link->callbacks.check_streaming) {
-      paused = !link->callbacks.check_streaming();
+
+    bool paused = true;
+
+    if (link->callbacks.check_streaming && link->callbacks.check_streaming()) {
+      paused = false;
     }
 
     for (int j = 0; link->outputs[j]; j++) {
@@ -34,8 +36,8 @@ void _update_paused(link_t *all_links)
       }
 
       int count_enqueued = buffer_list_count_enqueued(output->output_list);
-      if (count_enqueued == output->output_list->nbufs) {
-        paused = true;
+      if (count_enqueued < output->output_list->nbufs) {
+        paused = false;
       }
     }
 

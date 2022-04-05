@@ -109,8 +109,9 @@ int buffer_list_enqueue(buffer_list_t *buf_list, buffer_t *dma_buf)
 
   if (buf_list->do_mmap) {
     if (dma_buf->used > buf->length) {
-      E_LOG_PERROR(buf_list, "The dma_buf (%s) is too long: %zu vs space=%zu",
+      E_LOG_INFO(buf_list, "The dma_buf (%s) is too long: %zu vs space=%zu",
         dma_buf->name, dma_buf->used, buf->length);
+      dma_buf->used = buf->length;
     }
 
     uint64_t before = get_monotonic_time_us(NULL, NULL);

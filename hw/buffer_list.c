@@ -91,6 +91,7 @@ retry:
     fmt->fmt.pix_mp.field = V4L2_FIELD_ANY;
     fmt->fmt.pix_mp.num_planes = 1;
     fmt->fmt.pix_mp.plane_fmt[0].bytesperline = bytesperline;
+    //fmt->fmt.pix_mp.plane_fmt[0].sizeimage = bytesperline * orig_height;
   } else {
     fmt->fmt.pix.colorspace = V4L2_COLORSPACE_RAW;
     fmt->fmt.pix.width = width;
@@ -98,6 +99,7 @@ retry:
     fmt->fmt.pix.pixelformat = format;
     fmt->fmt.pix.field = V4L2_FIELD_ANY;
     fmt->fmt.pix.bytesperline = bytesperline;
+    //fmt->fmt.pix.sizeimage = bytesperline * orig_height;
   }
 
   E_LOG_DEBUG(buf_list, "Configuring format ...");
@@ -116,7 +118,7 @@ retry:
   }
 
   if (bytesperline > 0 && buf_list->fmt_bytesperline != bytesperline) {
-		E_LOG_ERROR(buf_list, "Requested bytesperline=%u. Got %ux%u.",
+		E_LOG_ERROR(buf_list, "Requested bytesperline=%u. Got %u.",
       bytesperline, buf_list->fmt_bytesperline);
   }
 
