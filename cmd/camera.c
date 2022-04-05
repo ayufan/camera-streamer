@@ -34,6 +34,8 @@ int camera_open(camera_t *camera, const char *path)
     return -1;
   }
 
+  camera->camera->allow_dma = camera->allow_dma;
+
   return 0;;
 }
 

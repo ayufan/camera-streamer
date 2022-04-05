@@ -122,7 +122,9 @@ int device_open_buffer_list_output(device_t *dev, buffer_list_t *capture_list)
 {
   return device_open_buffer_list(dev, false,
     capture_list->fmt_width, capture_list->fmt_height,
-    capture_list->fmt_format, capture_list->fmt_bytesperline, capture_list->nbufs, !capture_list->do_mmap);
+    capture_list->fmt_format, capture_list->fmt_bytesperline,
+    capture_list->nbufs,
+    capture_list->device->allow_dma ? !capture_list->do_mmap : true);
 }
 
 int device_open_buffer_list_capture(device_t *dev, buffer_list_t *output_list, float div, unsigned format, bool do_mmap)
