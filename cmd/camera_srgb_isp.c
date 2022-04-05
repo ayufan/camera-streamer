@@ -10,6 +10,8 @@
 
 extern bool check_streaming();
 
+void write_yuvu(buffer_t *buffer);
+
 int camera_configure_srgb_isp(camera_t *camera, bool use_half)
 {
   if (device_open_buffer_list(camera->camera, true, camera->width, camera->height, V4L2_PIX_FMT_SRGGB10P, 0, camera->nbufs) < 0) {
@@ -60,9 +62,9 @@ int camera_configure_srgb_isp(camera_t *camera, bool use_half)
 
   if (use_half) {
     *links++ = (link_t){ camera->isp.isp_yuuv, { } };
-    *links++ = (link_t){ camera->isp.isp_yuuv_low, { camera->codec_jpeg, camera->codec_h264 } };
+    *links++ = (link_t){ camera->isp.isp_yuuv_low, { camera->codec_jpeg, camera->codec_h264 }, { write_yuvu } };
   } else {
-    *links++ = (link_t){ camera->isp.isp_yuuv, { camera->codec_jpeg, camera->codec_h264 } };
+    *links++ = (link_t){ camera->isp.isp_yuuv, { camera->codec_jpeg, camera->codec_h264 }, { write_yuvu } };
   }
 
   *links++ = (link_t){ camera->codec_jpeg, { }, { http_jpeg_capture, http_jpeg_needs_buffer } };

@@ -10,6 +10,18 @@
 
 extern bool check_streaming();
 
+void write_yuvu(buffer_t *buffer)
+{
+#if 1
+  FILE *fp = fopen("/tmp/capture-yuyv.raw.tmp", "wb");
+  if (fp) {
+    fwrite(buffer->start, 1, buffer->used, fp);
+    fclose(fp);
+  }
+  rename("/tmp/capture-yuyv.raw.tmp", "/tmp/capture-yuyv.raw");
+#endif
+}
+
 int camera_configure_srgb_legacy_isp(camera_t *camera)
 {
   if (device_open_buffer_list(camera->camera, true, camera->width, camera->height, V4L2_PIX_FMT_SRGGB10P, 0, camera->nbufs) < 0) {
@@ -42,7 +54,7 @@ int camera_configure_srgb_legacy_isp(camera_t *camera)
   link_t *links = camera->links;
 
   *links++ = (link_t){ camera->camera, { camera->legacy_isp.isp }, { NULL, check_streaming } };
-  *links++ = (link_t){ camera->legacy_isp.isp, { camera->codec_jpeg, camera->codec_h264 } };
+  *links++ = (link_t){ camera->legacy_isp.isp, { camera->codec_jpeg, camera->codec_h264 }, { write_yuvu, NULL } };
   *links++ = (link_t){ camera->codec_jpeg, { }, { http_jpeg_capture, http_jpeg_needs_buffer } };
   *links++ = (link_t){ camera->codec_h264, { }, { http_h264_capture, http_h264_needs_buffer } };
   return 0;
