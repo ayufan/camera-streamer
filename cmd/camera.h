@@ -15,27 +15,13 @@ typedef struct camera_s {
     device_t *devices[MAX_DEVICES];
     struct {
       device_t *camera;
-
-      struct {
-        device_t *codec_jpeg;
-        device_t *codec_h264;
-      };
-
-      union {
-        struct {
-          device_t *isp_srgb;
-          device_t *isp_yuuv;
-          device_t *isp_yuuv_low;
-        } isp;
-
-        struct {
-          device_t *isp;
-        } legacy_isp;
-
-        struct {
-          device_t *decoder;
-        } decoder;
-      };
+      device_t *codec_jpeg;
+      device_t *codec_h264;
+      device_t *legacy_isp;
+      device_t *isp_srgb;
+      device_t *isp_yuuv;
+      device_t *isp_yuuv_low;
+      device_t *decoder;
     };
   };
   link_t links[MAX_DEVICES];
