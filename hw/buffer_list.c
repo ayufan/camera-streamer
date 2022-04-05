@@ -72,7 +72,6 @@ int buffer_list_set_format(buffer_list_t *buf_list, unsigned width, unsigned hei
 
   unsigned orig_width = width;
   unsigned orig_height = height;
-  unsigned *pix_bytesperline;
 
 retry:
 
@@ -91,54 +90,60 @@ retry:
     fmt->fmt.pix_mp.pixelformat = format;
     fmt->fmt.pix_mp.field = V4L2_FIELD_ANY;
     fmt->fmt.pix_mp.num_planes = 1;
-    pix_bytesperline = &fmt->fmt.pix_mp.plane_fmt[0].bytesperline;
-    *pix_bytesperline = bytesperline;
+    fmt->fmt.pix_mp.plane_fmt[0].bytesperline = bytesperline;
   } else {
     fmt->fmt.pix.colorspace = V4L2_COLORSPACE_RAW;
     fmt->fmt.pix.width = width;
     fmt->fmt.pix.height = height;
     fmt->fmt.pix.pixelformat = format;
     fmt->fmt.pix.field = V4L2_FIELD_ANY;
-    pix_bytesperline = &fmt->fmt.pix.bytesperline;
-    *pix_bytesperline = bytesperline; // stride;// fourcc_to_stride(width, format);
+    fmt->fmt.pix.bytesperline = bytesperline;
   }
 
   E_LOG_DEBUG(buf_list, "Configuring format ...");
   E_XIOCTL(buf_list, buf_list->device->fd, VIDIOC_S_FMT, fmt, "Can't set format");
 
-  if (bytesperline > 0 && *pix_bytesperline != bytesperline) {
-		E_LOG_ERROR(buf_list, "Requested bytesperline=%u. Got %ux%u.",
-      bytesperline, *pix_bytesperline);
+  if (buf_list->do_mplanes) {
+    buf_list->fmt_width = fmt->fmt.pix_mp.width;
+    buf_list->fmt_height = fmt->fmt.pix_mp.height;
+    buf_list->fmt_format = fmt->fmt.pix_mp.pixelformat;
+    buf_list->fmt_bytesperline = fmt->fmt.pix_mp.plane_fmt[0].bytesperline;
+  } else {
+    buf_list->fmt_width = fmt->fmt.pix.width;
+    buf_list->fmt_height = fmt->fmt.pix.height;
+    buf_list->fmt_format = fmt->fmt.pix.pixelformat;
+    buf_list->fmt_bytesperline = fmt->fmt.pix.bytesperline;
   }
 
-  if (fmt->fmt.pix.width != width || fmt->fmt.pix.height != height) {
+  if (bytesperline > 0 && buf_list->fmt_bytesperline != bytesperline) {
+		E_LOG_ERROR(buf_list, "Requested bytesperline=%u. Got %ux%u.",
+      bytesperline, buf_list->fmt_bytesperline);
+  }
+
+  if (buf_list->fmt_width != width || buf_list->fmt_height != height) {
     if (bytesperline) {
       E_LOG_ERROR(buf_list, "Requested resolution=%ux%u is unavailable. Got %ux%u.",
-        width, height, fmt->fmt.pix.width, fmt->fmt.pix.height);
+        width, height, buf_list->fmt_width, buf_list->fmt_height);
     } else {
       E_LOG_INFO(buf_list, "Requested resolution=%ux%u is unavailable. Got %ux%u. Accepted",
-        width, height, fmt->fmt.pix.width, fmt->fmt.pix.height);
+        width, height, buf_list->fmt_width, buf_list->fmt_height);
     }
   }
 
-	if (fmt->fmt.pix.pixelformat != format) {
+	if (buf_list->fmt_format != format) {
 		E_LOG_ERROR(buf_list, "Could not obtain the requested format=%s; driver gave us %s",
 			fourcc_to_string(format).buf,
-			fourcc_to_string(fmt->fmt.pix.pixelformat).buf);
+			fourcc_to_string(buf_list->fmt_format).buf);
 	}
 
 	E_LOG_INFO(
     buf_list,
     "Using: %ux%u/%s, bytesperline=%d",
-    fmt->fmt.pix.width, fmt->fmt.pix.height,
-    fourcc_to_string(fmt->fmt.pix.pixelformat).buf,
-    *pix_bytesperline
+    buf_list->fmt_width,
+    buf_list->fmt_height,
+    fourcc_to_string(buf_list->fmt_format).buf,
+    buf_list->fmt_bytesperline
   );
-
-  buf_list->fmt_width = fmt->fmt.pix.width;
-  buf_list->fmt_height = fmt->fmt.pix.height;
-  buf_list->fmt_format = fmt->fmt.pix.pixelformat;
-  buf_list->fmt_bytesperline = *pix_bytesperline;
 
   return 0;
 
