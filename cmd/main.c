@@ -4,6 +4,7 @@
 #include "hw/links.h"
 #include "hw/v4l2.h"
 #include "http/http.h"
+#include "opts/opts.h"
 #include "camera.h"
 
 #include <signal.h>
@@ -30,9 +31,14 @@ camera_options_t camera_options = {
   .allow_dma = true
 };
 
-http_server_options_t http_server_options = {
+http_server_options_t http_options = {
   .listen_port = 9092,
   .maxcons = 10
+};
+
+option_t all_options[] = {
+  DEFINE_OPTION(camera, width, "%d"),
+  {}
 };
 
 int main(int argc, char *argv[])
@@ -65,7 +71,7 @@ int main(int argc, char *argv[])
     goto error;
   }
 
-  http_fd = http_server(&http_server_options, http_methods);
+  http_fd = http_server(&http_options, http_methods);
   if (http_fd < 0) {
     goto error;
   }
