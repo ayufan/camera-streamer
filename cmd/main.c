@@ -33,15 +33,31 @@ int main(int argc, char *argv[])
   //camera.width = 4656; camera.height = 3496;
   //camera.width = 3840; camera.height = 2160;
   //camera.width = 1280; camera.height = 720;
-  camera.nbufs = 4;
+  camera.nbufs = 1;
+  
+#if 1
   camera.format = V4L2_PIX_FMT_SRGGB10P;
-  //camera.format = V4L2_PIX_FMT_YUYV; camera.allow_dma = false;
 
   if (camera_open(&camera, "/dev/video2") < 0) {
     goto error;
   }
+#else
+  //camera.width = 1920; camera.height = 1080;
+  camera.width = 1280; camera.height = 720;
+  // camera.format = V4L2_PIX_FMT_YUYV;
+  camera.format = V4L2_PIX_FMT_MJPEG;
+  camera.allow_dma = false;
+
+  if (camera_open(&camera, "/dev/video0") < 0) {
+    goto error;
+  }
+#endif
 
 #if 0
+  if (camera_configure_decoder(&camera) < 0) {
+    goto error;
+  }
+#elif 0
   if (camera_configure_direct(&camera) < 0) {
     goto error;
   }
