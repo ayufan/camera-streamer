@@ -82,7 +82,7 @@ retry:
   if (strstr(buf_list->name, "JPEG") || strstr(buf_list->name, "H264") || buf_list->do_capture && strstr(buf_list->name, "ISP")) {
     width = shrink_to_block(width, 32);
     height = shrink_to_block(height, 32);
-    E_LOG_INFO(buf_list, "Adapting size to 32x32 block: %dx%d vs %dx%d", orig_width, orig_height, width, height);
+    E_LOG_VERBOSE(buf_list, "Adapting size to 32x32 block: %dx%d vs %dx%d", orig_width, orig_height, width, height);
   }
 
   if (format == V4L2_PIX_FMT_H264) {

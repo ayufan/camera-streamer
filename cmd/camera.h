@@ -9,6 +9,8 @@
 #define CAMERA_DEVICE_CAMERA 0
 
 typedef struct camera_s {
+  const char *name;
+
   union {
     device_t *devices[MAX_DEVICES];
     struct {
@@ -38,6 +40,7 @@ typedef struct camera_s {
   };
   link_t links[MAX_DEVICES];
 
+  char path[256];
   unsigned width, height, format;
   unsigned nbufs, fps;
   bool allow_dma;
@@ -47,7 +50,7 @@ typedef struct camera_s {
 
 void camera_init(camera_t *camera);
 void camera_close(camera_t *camera);
-int camera_open(camera_t *camera, const char *path);
+int camera_open(camera_t *camera);
 int camera_set_params(camera_t *camera);
 int camera_run(camera_t *camera);
 

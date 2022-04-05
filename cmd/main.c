@@ -34,47 +34,16 @@ int main(int argc, char *argv[])
   camera_init(&camera);
 
   //camera.width = 1920; camera.height = 1080;
-  camera.width = 2328; camera.height = 1748; // 1164x874
+  strcpy(camera.path, "/dev/video2"); camera.width = 2328; camera.height = 1748; camera.format = V4L2_PIX_FMT_SRGGB10P; // 1164x874
   //camera.width = 4656; camera.height = 3496;
   //camera.width = 3840; camera.height = 2160;
   //camera.width = 1280; camera.height = 720;
+  strcpy(camera.path, "/dev/video0"); camera.width = 1920; camera.height = 1080; camera.format = V4L2_PIX_FMT_YUYV; camera.format = V4L2_PIX_FMT_MJPEG;  camera.allow_dma = false;
   camera.nbufs = 1;
-  
-#if 1
-  camera.format = V4L2_PIX_FMT_SRGGB10P;
 
-  if (camera_open(&camera, "/dev/video2") < 0) {
+  if (camera_open(&camera) < 0) {
     goto error;
   }
-#else
-  //camera.width = 1920; camera.height = 1080;
-  camera.width = 1280; camera.height = 720;
-  // camera.format = V4L2_PIX_FMT_YUYV;
-  camera.format = V4L2_PIX_FMT_MJPEG;
-  camera.allow_dma = false;
-
-  if (camera_open(&camera, "/dev/video0") < 0) {
-    goto error;
-  }
-#endif
-
-#if 0
-  if (camera_configure_decoder(&camera) < 0) {
-    goto error;
-  }
-#elif 0
-  if (camera_configure_direct(&camera) < 0) {
-    goto error;
-  }
-#elif 1
-  if (camera_configure_isp(&camera, 3, 0) < 0) {
-    goto error;
-  }
-#else
-  if (camera_configure_legacy_isp(&camera, 1.3) < 0) {
-    goto error;
-  }
-#endif
 
   if (camera_set_params(&camera) < 0) {
     goto error;

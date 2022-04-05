@@ -7,6 +7,8 @@
 void camera_init(camera_t *camera)
 {
   memset(camera, 0, sizeof(*camera));
+  camera->name = "CAMERA";
+  strcpy(camera->path, "/dev/video0");
   camera->width = 1280;
   camera->height = 720;
   camera->nbufs = 4;
@@ -27,16 +29,50 @@ void camera_close(camera_t *camera)
   memset(camera->links, 0, sizeof(camera->links));
 }
 
-int camera_open(camera_t *camera, const char *path)
+int camera_open(camera_t *camera)
 {
-  camera->camera = device_open("CAMERA", path);
+  camera->camera = device_open("CAMERA", camera->path);
   if (!camera->camera) {
     return -1;
   }
 
   camera->camera->allow_dma = camera->allow_dma;
 
-  return 0;;
+  switch (camera->format) {
+  case V4L2_PIX_FMT_YUYV:
+    if (camera_configure_direct(camera) < 0) {
+      goto error;
+    }
+    break;
+
+  case V4L2_PIX_FMT_MJPEG:
+  case V4L2_PIX_FMT_H264:
+    if (camera_configure_decoder(camera) < 0) {
+      goto error;
+    }
+    break;
+
+  case V4L2_PIX_FMT_SRGGB10P:
+#if 1
+    if (camera_configure_isp(camera, 1, 0) < 0) {
+      goto error;
+    }
+#else
+    if (camera_configure_legacy_isp(&camera, 1.3) < 0) {
+      goto error;
+    }
+#endif
+    break;
+
+  default:
+    E_LOG_ERROR(camera, "Unsupported camera format=%s", fourcc_to_string(camera->format).buf);
+    break;
+  }
+
+  return 0;
+
+error:
+  return -1;
 }
 
 int camera_set_params(camera_t *camera)

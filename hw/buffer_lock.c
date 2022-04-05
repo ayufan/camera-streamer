@@ -46,7 +46,7 @@ void buffer_lock_capture(buffer_lock_t *buf_lock, buffer_t *buf)
   buf_lock->buf = buf;
   buf_lock->counter++;
   gettimeofday(&buf_lock->buf_time, NULL);
-  E_LOG_DEBUG(buf_lock, "Captured buffer: %d", buf_lock->counter);
+  E_LOG_DEBUG(buf_lock, "Captured buffer %s, frame=%d", dev_name(buf), buf_lock->counter);
   pthread_cond_broadcast(&buf_lock->cond_wait);
   pthread_mutex_unlock(&buf_lock->lock);
 }
