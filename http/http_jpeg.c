@@ -1,9 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "http.h"
-#include "buffer.h"
-#include "buffer_lock.h"
+#include "http/http.h"
+#include "hw/buffer.h"
+#include "hw/buffer_lock.h"
 
 DEFINE_BUFFER_LOCK(http_jpeg);
 

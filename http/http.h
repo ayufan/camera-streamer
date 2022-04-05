@@ -1,11 +1,13 @@
 #pragma once
 
+#include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <netinet/ip.h>
 
-#include "v4l2.h"
-#include "buffer.h"
-
-struct http_worker_s;
+typedef struct buffer_s buffer_t;
+typedef struct http_worker_s http_worker_t;
 
 typedef void (*http_method_fn)(struct http_worker_s *worker, FILE *stream);
 

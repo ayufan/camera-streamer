@@ -1,9 +1,9 @@
-#include "buffer.h"
-#include "buffer_list.h"
-#include "device.h"
-#include "links.h"
-#include "v4l2.h"
-#include "http.h"
+#include "hw/buffer.h"
+#include "hw/buffer_list.h"
+#include "hw/device.h"
+#include "hw/links.h"
+#include "hw/v4l2.h"
+#include "http/http.h"
 
 #include <signal.h>
 

@@ -1,6 +1,6 @@
-#include "buffer.h"
-#include "buffer_list.h"
-#include "device.h"
+#include "hw/buffer.h"
+#include "hw/buffer_list.h"
+#include "hw/device.h"
 
 #include <pthread.h>
 

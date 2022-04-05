@@ -1,10 +1,11 @@
-camera_stream: *.c *.h
-	gcc -g -lpthread -o camera_stream *.c
+SRC := $(wildcard **/*.c)
+HEADERS := $(wildcard **/*.h)
+HTML := $(wildcard html/*.js html/*.html)
+HTML_SRC := $(addsuffix .c,$(HTML))
 
-jmuxer.min.c: jmuxer.min.js
-	xxd -i $< > $@.tmp
-	mv $@.tmp $@
+camera_stream: $(SRC) $(HTML_SRC) $(HEADERS)
+	gcc -g -lpthread -I$(PWD) -o $@ $(filter %.c, $^)
 
-video.html.c: video.html
+html/%.c: html/%
 	xxd -i $< > $@.tmp
 	mv $@.tmp $@

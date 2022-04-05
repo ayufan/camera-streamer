@@ -8,7 +8,7 @@
 #include <netinet/tcp.h>
 #include <arpa/inet.h>
 
-#include "http.h"
+#include "http/http.h"
 
 #define BUFSIZE 256
 

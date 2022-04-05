@@ -1,6 +1,6 @@
-#include "buffer.h"
-#include "buffer_list.h"
-#include "device.h"
+#include "hw/buffer.h"
+#include "hw/buffer_list.h"
+#include "hw/device.h"
 
 buffer_t *buffer_open(const char *name, buffer_list_t *buf_list, int index) {
   buffer_t *buf = calloc(1, sizeof(buffer_t));

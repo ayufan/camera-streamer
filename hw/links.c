@@ -1,7 +1,7 @@
-#include "device.h"
-#include "buffer.h"
-#include "buffer_list.h"
-#include "links.h"
+#include "hw/device.h"
+#include "hw/buffer.h"
+#include "hw/buffer_list.h"
+#include "hw/links.h"
 
 #define N_FDS 50
 

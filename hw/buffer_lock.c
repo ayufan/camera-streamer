@@ -1,4 +1,4 @@
-#include "buffer_lock.h"
+#include "hw/buffer_lock.h"
 
 bool buffer_lock_is_used(buffer_lock_t *buf_lock)
 {
