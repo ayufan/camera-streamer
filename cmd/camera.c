@@ -37,6 +37,8 @@ int camera_open(camera_t *camera)
     camera->camera->allow_dma = false;
   }
 
+  device_set_pad_format(camera->camera, camera->options.width, camera->options.height, 0);
+
   if (device_open_buffer_list(camera->camera, true, camera->options.width, camera->options.height, camera->options.format, 0, camera->options.nbufs, true) < 0) {
     return -1;
   }

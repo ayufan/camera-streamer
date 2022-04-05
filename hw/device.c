@@ -7,6 +7,7 @@ device_t *device_open(const char *name, const char *path) {
   dev->name = strdup(name);
   dev->path = strdup(path);
   dev->fd = open(path, O_RDWR|O_NONBLOCK);
+  dev->subdev_fd = -1;
   dev->allow_dma = true;
   if(dev->fd < 0) {
 		E_LOG_ERROR(dev, "Can't open device");
@@ -20,6 +21,8 @@ device_t *device_open(const char *name, const char *path) {
 	}
 
 	E_LOG_INFO(dev, "Device path=%s fd=%d opened", dev->path, dev->fd);
+
+  dev->subdev_fd = device_open_v4l2_subdev(dev, 0);
   return dev;
 
 error:
@@ -40,6 +43,10 @@ void device_close(device_t *dev) {
   if (dev->output_list) {
     buffer_list_close(dev->output_list);
     dev->output_list = NULL;
+  }
+
+  if (dev->subdev_fd >= 0) {
+    close(dev->subdev_fd);
   }
 
   if(dev->fd >= 0) {
@@ -222,7 +229,7 @@ int device_set_option(device_t *dev, const char *name, uint32_t id, int32_t valu
   ctl.id = id;
   ctl.value = value;
   E_LOG_DEBUG(dev, "Configuring option %s (%08x) = %d", name, id, value);
-  E_XIOCTL(dev, dev->fd, VIDIOC_S_CTRL, &ctl, "Can't set option %s", name);
+  E_XIOCTL(dev, dev->subdev_fd >= 0 ? dev->subdev_fd : dev->fd, VIDIOC_S_CTRL, &ctl, "Can't set option %s", name);
   return 0;
 error:
   return -1;

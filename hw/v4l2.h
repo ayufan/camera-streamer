@@ -17,6 +17,7 @@
 #include <sys/mman.h>
 
 #include <linux/videodev2.h>
+#include <linux/v4l2-subdev.h>
 
 #include "opts/log.h"
 
