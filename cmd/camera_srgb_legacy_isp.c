@@ -12,7 +12,7 @@ extern bool check_streaming();
 
 void write_yuvu(buffer_t *buffer)
 {
-#if 1
+#if 0
   FILE *fp = fopen("/tmp/capture-yuyv.raw.tmp", "wb");
   if (fp) {
     fwrite(buffer->start, 1, buffer->used, fp);
@@ -22,7 +22,7 @@ void write_yuvu(buffer_t *buffer)
 #endif
 }
 
-int camera_configure_srgb_legacy_isp(camera_t *camera)
+int camera_configure_srgb_legacy_isp(camera_t *camera, float div)
 {
   if (device_open_buffer_list(camera->camera, true, camera->width, camera->height, V4L2_PIX_FMT_SRGGB10P, 0, camera->nbufs) < 0) {
     return -1;
@@ -35,7 +35,7 @@ int camera_configure_srgb_legacy_isp(camera_t *camera)
   camera->codec_h264 = device_open("H264", "/dev/video11");
 
   if (device_open_buffer_list(camera->legacy_isp.isp, false, src->fmt_width, src->fmt_height, src->fmt_format, src->fmt_bytesperline, camera->nbufs) < 0 ||
-    device_open_buffer_list(camera->legacy_isp.isp, true, src->fmt_width, src->fmt_height, V4L2_PIX_FMT_YUYV, 0, camera->nbufs) < 0) {
+    device_open_buffer_list(camera->legacy_isp.isp, true, src->fmt_width / div, src->fmt_height / div, V4L2_PIX_FMT_YUYV, 0, camera->nbufs) < 0) {
     return -1;
   }
 

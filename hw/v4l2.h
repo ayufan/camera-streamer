@@ -41,6 +41,7 @@ fourcc_string fourcc_to_string(unsigned format);
 unsigned fourcc_to_stride(unsigned width, unsigned format);
 int xioctl(const char *name, int fd, int request, void *arg);
 uint64_t get_monotonic_time_us(struct timespec *ts, struct timeval *tv);
+int shrink_to_block(int size, int block);
 
 #define E_XIOCTL(dev, _fd, _request, _value, _msg, ...) do { \
 		int ret; \

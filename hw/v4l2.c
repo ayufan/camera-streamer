@@ -75,6 +75,11 @@ unsigned fourcc_to_stride(unsigned width, unsigned format)
 	}
 }
 
+int shrink_to_block(int size, int block)
+{
+	return size / block * block;
+}
+
 uint64_t get_monotonic_time_us(struct timespec *ts, struct timeval *tv)
 {
 	struct timespec now;

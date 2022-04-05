@@ -12,7 +12,7 @@ extern bool check_streaming();
 
 void write_yuvu(buffer_t *buffer);
 
-int camera_configure_srgb_isp(camera_t *camera, bool use_half)
+int camera_configure_srgb_isp(camera_t *camera, float high_div, float low_div)
 {
   if (device_open_buffer_list(camera->camera, true, camera->width, camera->height, V4L2_PIX_FMT_SRGGB10P, 0, camera->nbufs) < 0) {
     return -1;
@@ -26,14 +26,14 @@ int camera_configure_srgb_isp(camera_t *camera, bool use_half)
   camera->codec_h264 = device_open("H264", "/dev/video11");
 
   if (device_open_buffer_list(camera->isp.isp_srgb, false, src->fmt_width, src->fmt_height, src->fmt_format, src->fmt_bytesperline, camera->nbufs) < 0 ||
-    device_open_buffer_list(camera->isp.isp_yuuv, true, src->fmt_width, src->fmt_height, V4L2_PIX_FMT_YUYV, 0, camera->nbufs) < 0) {
+    device_open_buffer_list(camera->isp.isp_yuuv, true, src->fmt_width / high_div, src->fmt_height / high_div, V4L2_PIX_FMT_YUYV, 0, camera->nbufs) < 0) {
     return -1;
   }
 
-  if (use_half) {
+  if (low_div >= 1) {
     camera->isp.isp_yuuv_low = device_open("ISP-YUUV-LOW", "/dev/video15");
 
-    if (device_open_buffer_list(camera->isp.isp_yuuv_low, true, src->fmt_width / 2, src->fmt_height / 2, V4L2_PIX_FMT_YUYV, 0, camera->nbufs) < 0) {
+    if (device_open_buffer_list(camera->isp.isp_yuuv_low, true, src->fmt_width / low_div, src->fmt_height / low_div, V4L2_PIX_FMT_YUYV, 0, camera->nbufs) < 0) {
       return -1;
     }
 
@@ -60,7 +60,7 @@ int camera_configure_srgb_isp(camera_t *camera, bool use_half)
 
   *links++ = (link_t){ camera->camera, { camera->isp.isp_srgb }, { NULL, check_streaming } };
 
-  if (use_half) {
+  if (camera->isp.isp_yuuv_low) {
     *links++ = (link_t){ camera->isp.isp_yuuv, { } };
     *links++ = (link_t){ camera->isp.isp_yuuv_low, { camera->codec_jpeg, camera->codec_h264 }, { write_yuvu } };
   } else {

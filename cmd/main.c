@@ -33,20 +33,22 @@ int main(int argc, char *argv[])
 
   camera_init(&camera);
 
-  // camera.width = 2328;
-  // camera.height = 1748;
-  // camera.nbufs = 4;
+  // camera.width = 1920; camera.height = 1080;
+  camera.width = 2328; camera.height = 1748; // 1164x874
+  //camera.width = 4656; camera.height = 3496;
+  //camera.width = 3840; camera.height = 2160;
+  camera.nbufs = 4;
 
   if (camera_open(&camera, "/dev/video0") < 0) {
     goto error;
   }
 
-#if 0
-  if (camera_configure_srgb_isp(&camera, true) < 0) {
+#if 1
+  if (camera_configure_srgb_isp(&camera, 1.6, 0) < 0) {
     goto error;
   }
 #else
-  if (camera_configure_srgb_legacy_isp(&camera) < 0) {
+  if (camera_configure_srgb_legacy_isp(&camera, 1.3) < 0) {
     goto error;
   }
 #endif

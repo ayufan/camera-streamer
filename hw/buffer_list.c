@@ -76,11 +76,12 @@ int buffer_list_set_format(buffer_list_t *buf_list, unsigned width, unsigned hei
 
 retry:
 
-  // JPEG is in 16x16 blocks (shrink image to fit)
-  if (strstr(buf_list->name, "JPEG")) {
-    width = width / 16 * 16;
-    height = height / 16 * 16;
-    printf("JPEG: %dx%d vs %dx%d\n", orig_width, orig_height, width, height);
+  // JPEG is in 16x16 blocks (shrink image to fit) (but adapt to 32x32)
+  // And ISP output
+  if (strstr(buf_list->name, "JPEG") || strstr(buf_list->name, "H264") || buf_list->do_capture && strstr(buf_list->name, "ISP")) {
+    width = shrink_to_block(width, 32);
+    height = shrink_to_block(height, 32);
+    E_LOG_INFO(buf_list, "Adapting size to 32x32 block: %dx%d vs %dx%d", orig_width, orig_height, width, height);
   }
 
   if (buf_list->do_mplanes) {

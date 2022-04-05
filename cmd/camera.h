@@ -43,7 +43,7 @@ typedef struct camera_s {
 void camera_init(camera_t *camera);
 void camera_close(camera_t *camera);
 int camera_open(camera_t *camera, const char *path);
-int camera_configure_srgb_isp(camera_t *camera, bool use_half);
-int camera_configure_srgb_legacy_isp(camera_t *camera);
+int camera_configure_srgb_isp(camera_t *camera, float high_div, float low_div);
+int camera_configure_srgb_legacy_isp(camera_t *camera, float div);
 int camera_set_params(camera_t *camera);
 int camera_run(camera_t *camera);
