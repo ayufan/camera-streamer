@@ -74,7 +74,7 @@ buffer_t *buffer_list_find_slot(buffer_list_t *buf_list)
   buffer_t *buf = NULL;
 
   for (int i = 0; i < buf_list->nbufs; i++) {
-    if (!buf_list->bufs[i]->enqueued) {
+    if (!buf_list->bufs[i]->enqueued && buf_list->bufs[i]->mmap_reflinks == 1) {
       buf = buf_list->bufs[i];
       break;
     }

@@ -13,10 +13,12 @@ buffer_list_t *buffer_list_open(const char *name, struct device_s *dev, unsigned
   switch(type) {
   case V4L2_BUF_TYPE_VIDEO_OUTPUT:
     buf_list->do_mmap = do_mmap;
+    buf_list->do_dma = do_mmap;
     break;
 
   case V4L2_BUF_TYPE_VIDEO_OUTPUT_MPLANE:
     buf_list->do_mmap = do_mmap;
+    buf_list->do_dma = do_mmap;
     buf_list->do_mplanes = true;
     break;
 
