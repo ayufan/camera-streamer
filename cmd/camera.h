@@ -15,13 +15,13 @@ typedef struct camera_s {
     device_t *devices[MAX_DEVICES];
     struct {
       device_t *camera;
-      device_t *codec_jpeg;
-      device_t *codec_h264;
-      device_t *legacy_isp;
+      device_t *decoder; // decode JPEG/H264 into YUVU
+      device_t *legacy_isp; // convert pRAA/YUVU into YUVU
       device_t *isp_srgb;
       device_t *isp_yuuv;
       device_t *isp_yuuv_low;
-      device_t *decoder;
+      device_t *codec_jpeg; // encode YUVU into JPEG
+      device_t *codec_h264; // encode YUVU into H264
     };
   };
   link_t links[MAX_DEVICES];
