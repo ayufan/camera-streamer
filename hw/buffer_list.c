@@ -70,17 +70,16 @@ int buffer_list_set_format(buffer_list_t *buf_list, unsigned width, unsigned hei
 
   fmt->type = buf_list->type;
 
-  bool retried = false;
   unsigned orig_width = width;
   unsigned orig_height = height;
-  unsigned stride = 0;
+  unsigned *pix_bytesperline;
 
 retry:
 
+  // JPEG is in 16x16 blocks (shrink image to fit)
   if (strstr(buf_list->name, "JPEG")) {
-    width = (width) / 16 * 16;
-    height = (height) / 16 * 16;
-    stride = orig_width * 2;
+    width = width / 16 * 16;
+    height = height / 16 * 16;
     printf("JPEG: %dx%d vs %dx%d\n", orig_width, orig_height, width, height);
   }
 
@@ -91,27 +90,34 @@ retry:
     fmt->fmt.pix_mp.pixelformat = format;
     fmt->fmt.pix_mp.field = V4L2_FIELD_ANY;
     fmt->fmt.pix_mp.num_planes = 1;
-    fmt->fmt.pix_mp.plane_fmt[0].bytesperline = stride;// fourcc_to_stride(orig_width, format);
+    pix_bytesperline = &fmt->fmt.pix_mp.plane_fmt[0].bytesperline;
+    *pix_bytesperline = bytesperline;
   } else {
     fmt->fmt.pix.colorspace = V4L2_COLORSPACE_RAW;
     fmt->fmt.pix.width = width;
     fmt->fmt.pix.height = height;
     fmt->fmt.pix.pixelformat = format;
     fmt->fmt.pix.field = V4L2_FIELD_ANY;
-    fmt->fmt.pix.bytesperline = fourcc_to_stride(width, format);
+    pix_bytesperline = &fmt->fmt.pix.bytesperline;
+    *pix_bytesperline = bytesperline; // stride;// fourcc_to_stride(width, format);
   }
 
   E_LOG_DEBUG(buf_list, "Configuring format ...");
   E_XIOCTL(buf_list, buf_list->device->fd, VIDIOC_S_FMT, fmt, "Can't set format");
 
+  if (bytesperline > 0 && *pix_bytesperline != bytesperline) {
+		E_LOG_ERROR(buf_list, "Requested bytesperline=%u. Got %ux%u.",
+      bytesperline, *pix_bytesperline);
+  }
+
   if (fmt->fmt.pix.width != width || fmt->fmt.pix.height != height) {
-		E_LOG_INFO(buf_list, "Requested resolution=%ux%u is unavailable. Got %ux%u.",
-      width, height, fmt->fmt.pix.width, fmt->fmt.pix.height);
-    if (retried) {
-      E_LOG_ERROR(buf_list, "Did retry.");
+    if (bytesperline) {
+      E_LOG_ERROR(buf_list, "Requested resolution=%ux%u is unavailable. Got %ux%u.",
+        width, height, fmt->fmt.pix.width, fmt->fmt.pix.height);
+    } else {
+      E_LOG_INFO(buf_list, "Requested resolution=%ux%u is unavailable. Got %ux%u. Accepted",
+        width, height, fmt->fmt.pix.width, fmt->fmt.pix.height);
     }
-    retried = true;
-    goto retry;
   }
 
 	if (fmt->fmt.pix.pixelformat != format) {
@@ -125,12 +131,13 @@ retry:
     "Using: %ux%u/%s, bytesperline=%d",
     fmt->fmt.pix.width, fmt->fmt.pix.height,
     fourcc_to_string(fmt->fmt.pix.pixelformat).buf,
-    fmt->fmt.pix.bytesperline
+    *pix_bytesperline
   );
 
   buf_list->fmt_width = fmt->fmt.pix.width;
   buf_list->fmt_height = fmt->fmt.pix.height;
   buf_list->fmt_format = fmt->fmt.pix.pixelformat;
+  buf_list->fmt_bytesperline = *pix_bytesperline;
 
   return 0;
 

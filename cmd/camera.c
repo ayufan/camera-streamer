@@ -36,9 +36,11 @@ int camera_open(camera_t *camera, const char *path)
 
 int camera_set_params(camera_t *camera)
 {
-  DEVICE_SET_OPTION(camera->camera, EXPOSURE, 1148);
+  DEVICE_SET_OPTION(camera->camera, EXPOSURE, 2684);
   DEVICE_SET_OPTION(camera->camera, ANALOGUE_GAIN, 938);
-  DEVICE_SET_OPTION(camera->camera, DIGITAL_GAIN, 256);
+  DEVICE_SET_OPTION(camera->camera, DIGITAL_GAIN, 512);
+  DEVICE_SET_OPTION(camera->camera, VBLANK, 1636);
+  DEVICE_SET_OPTION(camera->camera, HBLANK, 6906);
 
   DEVICE_SET_OPTION2(camera->codec_jpeg, JPEG, COMPRESSION_QUALITY, 80);
 
