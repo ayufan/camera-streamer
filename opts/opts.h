@@ -32,7 +32,7 @@ typedef struct options_s {
 #define OPTION_FORMAT_uint   "%d"
 #define OPTION_FORMAT_hex    "%08x"
 #define OPTION_FORMAT_bool   "%d"
-#define OPTION_FORMAT_float  "%.1f"
+#define OPTION_FORMAT_float  "%f"
 #define OPTION_FORMAT_string "%s"
 
 #define DEFINE_OPTION(_section, _name, _type) \

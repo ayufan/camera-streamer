@@ -57,11 +57,11 @@ int camera_open(camera_t *camera)
 
   case V4L2_PIX_FMT_SRGGB10P:
 #if 1
-    if (camera_configure_isp(camera, 1, 0) < 0) {
+    if (camera_configure_isp(camera, camera->options.high_res_factor, camera->options.low_res_factor) < 0) {
       goto error;
     }
 #else
-    if (camera_configure_legacy_isp(&camera, 1.3) < 0) {
+    if (camera_configure_legacy_isp(&camera, camera->options.high_res_factor) < 0) {
       goto error;
     }
 #endif
