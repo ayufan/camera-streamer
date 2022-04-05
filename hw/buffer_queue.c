@@ -188,4 +188,3 @@ buffer_t *buffer_list_dequeue(buffer_list_t *buf_list)
 error:
   return NULL;
 }
-

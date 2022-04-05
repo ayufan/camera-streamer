@@ -24,6 +24,10 @@ int _build_fds(link_t *all_links, struct pollfd *fds, link_t **links, buffer_lis
 
     bool can_consume = true;
 
+    if (link->callbacks.check_streaming) {
+      can_consume = link->callbacks.check_streaming();
+    }
+
     for (int j = 0; link->outputs[j]; j++) {
       device_t *output = link->outputs[j];
 
@@ -124,10 +128,6 @@ int links_stream(link_t *all_links, bool do_stream)
   for (int i = n; --i >= 0; ) {
     bool streaming = true;
     link_t *link = &all_links[i];
-    
-    if (link->callbacks.check_streaming) {
-      streaming = link->callbacks.check_streaming();
-    }
 
     if (buffer_list_stream(link->capture->capture_list, streaming) < 0) {
       E_LOG_ERROR(link->capture, "Failed to start streaming");
@@ -146,72 +146,13 @@ error:
   return -1;
 }
 
-// int links_open_buffer_list_from(device_t *dev, bool do_capture, buffer_list_t *parent_buffer, unsigned format)
-// {
-//   if (!parent_buffer) {
-//     return -1;
-//   }
-
-//   return device_open_buffer_list(
-//     dev,
-//     do_capture,
-//     parent_buffer->fmt_width,
-//     parent_buffer->fmt_height,
-//     format ? format : parent_buffer->fmt_format,
-//     parent_buffer->nbufs
-//   );
-// }
-
-// int links_init(link_t *all_links)
-// {
-//   // create all outputs (sinks)
-//   for (int i = 0; all_links[i].capture; i++) {
-//     link_t *link = &all_links[i];
-
-//     if (!link->capture) {
-//       E_LOG_ERROR(NULL, "Missing link capture.");
-//     }
-
-//     if (link->capture_format) {
-//       int ret = links_open_buffer_list_from(
-//         link->capture,
-//         true,
-//         link->capture->upstream_device ? link->capture->upstream_device->output_list : link->capture->output_list,
-//         link->capture_format
-//       );
-
-//       if (ret < 0) {
-//         E_LOG_ERROR(link->capture, "Failed to create capture_list.");
-//       }
-//     }
-
-//     if (!link->capture->capture_list) {
-//       E_LOG_ERROR(link->capture, "Missing capture device.");
-//     }
-
-//     for (int j = 0; link->outputs[j]; j++) {
-//       device_t *output = link->outputs[j];
-
-//       int ret = links_open_buffer_list_from(output, false, link->capture->capture_list, 0);
-//       if (ret < 0) {
-//         E_LOG_ERROR(output, "Failed to create output_list.");
-//       }
-//     }
-//   }
-
-//   return 0;
-
-// error:
-//   return -1;
-// }
-
 int links_loop(link_t *all_links, bool *running)
 {
   *running = true;
 
-    if (links_stream(all_links, true) < 0) {
-      return -1;
-    }
+  if (links_stream(all_links, true) < 0) {
+    return -1;
+  }
 
   while(*running) {
     if (links_step(all_links, 1000) < 0) {
