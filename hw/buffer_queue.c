@@ -30,11 +30,7 @@ bool buffer_consumed(buffer_t *buf)
   }
 
   pthread_mutex_lock(&buffer_lock);
-  if (buf->mmap_reflinks > 0) {
-    buf->mmap_reflinks--;
-  }
-
-  if (!buf->enqueued && buf->mmap_reflinks == 0) {
+  if (!buf->enqueued && buf->mmap_reflinks == 1) {
     // update used bytes
     if (buf->buf_list->do_mplanes) {
       buf->v4l2_plane.bytesused = buf->used;
@@ -48,6 +44,7 @@ bool buffer_consumed(buffer_t *buf)
     buf->enqueued_time_us = get_monotonic_time_us(NULL, &buf->v4l2_buffer.timestamp);
     E_XIOCTL(buf, buf->buf_list->device->fd, VIDIOC_QBUF, &buf->v4l2_buffer, "Can't queue buffer.");
     buf->enqueued = true;
+    buf->mmap_reflinks--;
   }
 
   pthread_mutex_unlock(&buffer_lock);
@@ -58,7 +55,6 @@ error:
   {
     buffer_t *mmap_source = buf->mmap_source;
     buf->mmap_source = NULL;
-
     pthread_mutex_unlock(&buffer_lock);
 
     if (mmap_source) {

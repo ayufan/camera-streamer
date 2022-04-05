@@ -29,6 +29,10 @@ typedef struct camera_s {
         struct {
           device_t *isp;
         } legacy_isp;
+
+        struct {
+          device_t *decoder;
+        } decoder;
       };
     };
   };
@@ -50,3 +54,4 @@ int camera_run(camera_t *camera);
 int camera_configure_isp(camera_t *camera, float high_div, float low_div);
 int camera_configure_legacy_isp(camera_t *camera, float div);
 int camera_configure_direct(camera_t *camera);
+int camera_configure_decoder(camera_t *camera);
