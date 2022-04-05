@@ -9,13 +9,6 @@ void camera_init(camera_t *camera)
 {
   memset(camera, 0, sizeof(*camera));
   camera->name = "CAMERA";
-  strcpy(camera->options.path, "/dev/video0");
-  camera->options.width = 1280;
-  camera->options.height = 720;
-  camera->options.nbufs = 4;
-  camera->options.format = V4L2_PIX_FMT_SRGGB10P;
-  camera->options.allow_dma = true;
-  camera->options.fps = 30;
 }
 
 void camera_close(camera_t *camera)
@@ -32,12 +25,17 @@ void camera_close(camera_t *camera)
 
 int camera_open(camera_t *camera)
 {
-  camera->camera = device_open("CAMERA", camera->options.path);
+  camera->camera = device_open(camera->name, camera->options.path);
   if (!camera->camera) {
     return -1;
   }
 
   camera->camera->allow_dma = camera->options.allow_dma;
+
+  if (strstr(camera->camera->v4l2_cap.bus_info, "usb")) {
+    E_LOG_INFO(camera, "Disabling DMA since device uses USB (which is likely not working properly).");
+    camera->camera->allow_dma = false;
+  }
 
   if (device_open_buffer_list(camera->camera, true, camera->options.width, camera->options.height, camera->options.format, 0, camera->options.nbufs, true) < 0) {
     return -1;

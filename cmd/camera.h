@@ -13,6 +13,8 @@ typedef struct camera_options_s {
   unsigned width, height, format;
   unsigned nbufs, fps;
   bool allow_dma;
+  float high_res_factor;
+  float low_res_factor;
 } camera_options_t;
 
 typedef struct camera_s {
@@ -33,7 +35,9 @@ typedef struct camera_s {
       device_t *codec_h264; // encode YUVU into H264
     };
   };
+
   link_t links[MAX_DEVICES];
+  int nlinks;
 } camera_t;
 
 #define CAMERA(DEVICE) camera->devices[DEVICE]

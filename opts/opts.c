@@ -7,13 +7,24 @@
 static void print_help(option_t *options)
 {
   for (int i = 0; options[i].name; i++) {
-    printf("%20s ", options[i].name);
+    option_t *option = &options[i];
+    printf("%40s\t", option->name);
 
-    if (options[i].ptr) {
-      printf(options[i].format, options[i].ptr);
+    if (option->value_string) {
+      printf(option->format, option->value_string);
+    } else if (option->value_mapping) {
+      for (int j = 0; option->value_mapping[j].name; j++) {
+        if (option->value_mapping[j].value == *option->value) {
+          printf("%s - ", option->value_mapping[j].name);
+          break;
+        }
+      }
+
+      printf(option->format, *option->value);
     } else {
-      printf(options[i].format, *options[i].value);
+      printf(option->format, *option->value);
     }
+
     printf("\n");
   }
 }
@@ -34,8 +45,17 @@ static int parse_opt(option_t *options, const char *key, const char *value)
   }
 
   int ret = 0;
-  if (option->ptr) {
-    ret = sscanf(value, option->format, option->ptr);
+  if (option->value_string) {
+    ret = sscanf(value, option->format, option->value_string);
+  } else if (option->value_mapping) {
+    for (int j = 0; option->value_mapping[j].name; j++) {
+      if (!strcmp(option->value_mapping[j].name, value)) {
+        *option->value_uint = option->value_mapping[j].value;
+        return 1;
+      }
+    }
+
+    ret = sscanf(value, option->format, option->value);
   } else {
     ret = sscanf(value, option->format, option->value);
   }

@@ -28,7 +28,9 @@ camera_options_t camera_options = {
   .format = 0,
   .nbufs = 4,
   .fps = 30,
-  .allow_dma = true
+  .allow_dma = true,
+  .high_res_factor = 1.0,
+  .low_res_factor = 0.0,
 };
 
 http_server_options_t http_options = {
@@ -41,14 +43,25 @@ log_options_t log_options = {
   .verbose = false
 };
 
+option_value_t camera_formats[] = {
+  { "DEFAULT", 0 },
+  { "YUYV", V4L2_PIX_FMT_YUYV },
+  { "MJPEG", V4L2_PIX_FMT_MJPEG },
+  { "H264", V4L2_PIX_FMT_H264 },
+  { "RG10", V4L2_PIX_FMT_SRGGB10P },
+  {}
+};
+
 option_t all_options[] = {
-  DEFINE_OPTION_PTR(camera, path, "%s"),
+  DEFINE_OPTION_PTR(camera, path, string),
   DEFINE_OPTION(camera, width, uint),
   DEFINE_OPTION(camera, height, uint),
-  DEFINE_OPTION(camera, format, uint),
+  DEFINE_OPTION_VALUES(camera, format, camera_formats),
   DEFINE_OPTION(camera, nbufs, uint),
   DEFINE_OPTION(camera, fps, uint),
   DEFINE_OPTION(camera, allow_dma, bool),
+  DEFINE_OPTION(camera, high_res_factor, float),
+  DEFINE_OPTION(camera, low_res_factor, float),
   DEFINE_OPTION(http, port, uint),
   DEFINE_OPTION(http, maxcons, uint),
   DEFINE_OPTION(log, debug, bool),

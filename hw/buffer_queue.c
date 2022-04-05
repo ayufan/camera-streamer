@@ -106,6 +106,9 @@ int buffer_list_enqueue(buffer_list_t *buf_list, buffer_t *dma_buf)
     return 0;
   }
 
+  buf->v4l2_buffer.flags &= ~V4L2_BUF_FLAG_KEYFRAME;
+  buf->v4l2_buffer.flags |= dma_buf->v4l2_buffer.flags & V4L2_BUF_FLAG_KEYFRAME;
+
   if (buf_list->do_mmap) {
     if (dma_buf->used > buf->length) {
       E_LOG_INFO(buf_list, "The dma_buf (%s) is too long: %zu vs space=%zu",
