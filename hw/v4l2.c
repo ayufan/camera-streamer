@@ -74,3 +74,17 @@ unsigned fourcc_to_stride(unsigned width, unsigned format)
 			E_LOG_PERROR(NULL, "Unknown format: %s", fourcc_to_string(format).buf);
 	}
 }
+
+uint64_t get_monotonic_time_us(struct timespec *ts, struct timeval *tv)
+{
+	struct timespec now;
+	clock_gettime(CLOCK_MONOTONIC, &now);
+	if (ts) {
+		*ts = now;
+	}
+	if (tv) {
+		tv->tv_sec = now.tv_sec;
+		tv->tv_usec = now.tv_nsec / 1000;
+	}
+	return now.tv_sec * 1000000LL + now.tv_nsec / 1000;
+}

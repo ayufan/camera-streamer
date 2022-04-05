@@ -79,8 +79,6 @@ int links_step(link_t *all_links, int timeout)
     return errno;
   }
 
-  printf("links_step n=%d, ret=%d\n", n, ret);
-
   for (int i = 0; i < n; i++) {
     buffer_list_t *buf_list = buf_lists[i];
     link_t *link = links[i];
@@ -220,7 +218,6 @@ int links_loop(link_t *all_links, bool *running)
       links_stream(all_links, false);
       return -1;
     }
-    //usleep(100*1000);
   }
 
   links_stream(all_links, false);

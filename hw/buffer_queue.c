@@ -44,18 +44,8 @@ bool buffer_consumed(buffer_t *buf)
       buf->v4l2_buffer.bytesused = buf->used;
     }
 
-#if 0
-    uint64_t now = get_now_monotonic_u64();
-    struct timeval ts = {
-      .tv_sec = now / 1000000,
-      .tv_usec = now % 1000000,
-    };
-
-    buf->v4l2_buffer.timestamp.tv_sec = ts.tv_sec;
-    buf->v4l2_buffer.timestamp.tv_usec = ts.tv_usec;
-#endif
-
     E_LOG_DEBUG(buf, "Queuing buffer... used=%zu length=%zu (linked=%s)", buf->used, buf->length, buf->mmap_source ? buf->mmap_source->name : NULL);
+    buf->enqueued_time_us = get_monotonic_time_us(NULL, &buf->v4l2_buffer.timestamp);
     E_XIOCTL(buf, buf->buf_list->device->fd, VIDIOC_QBUF, &buf->v4l2_buffer, "Can't queue buffer.");
     buf->enqueued = true;
   }
@@ -123,14 +113,12 @@ int buffer_list_enqueue(buffer_list_t *buf_list, buffer_t *dma_buf)
         dma_buf->name, dma_buf->used, buf->length);
     }
 
-    struct timespec before, after;
-    clock_gettime(CLOCK_MONOTONIC, &before);
+    uint64_t before = get_monotonic_time_us(NULL, NULL);
     memcpy(buf->start, dma_buf->start, dma_buf->used);
-    clock_gettime(CLOCK_MONOTONIC, &after);
-    uint64_t time_diff = after.tv_sec * 1000000LL + after.tv_nsec / 1000 - before.tv_sec * 1000000LL - before.tv_nsec / 1000;
+    uint64_t after = get_monotonic_time_us(NULL, NULL);
 
     E_LOG_DEBUG(buf, "mmap copy: dest=%p, src=%p (%s), size=%zu, space=%zu, time=%dllus",
-      buf->start, dma_buf->start, dma_buf->name, dma_buf->used, buf->length, time_diff);
+      buf->start, dma_buf->start, dma_buf->name, dma_buf->used, buf->length, after-before);
   } else {
     if (buf_list->do_mplanes) {
       buf->v4l2_plane.m.fd = dma_buf->dma_fd;
@@ -178,9 +166,15 @@ buffer_t *buffer_list_dequeue(buffer_list_t *buf_list)
 
   buf->enqueued = false;
   buf->mmap_reflinks = 1;
+  uint64_t enqueued_time_us = get_monotonic_time_us(NULL, NULL) - buf->enqueued_time_us;
 
-	E_LOG_DEBUG(buf_list, "Grabbed mmap buffer=%u, bytes=%d, used=%d, frame=%d, linked=%s",
-    buf->index, buf->length, buf->used, buf_list->frames, buf->mmap_source ? buf->mmap_source->name : NULL);
+	E_LOG_DEBUG(buf_list, "Grabbed mmap buffer=%u, bytes=%d, used=%d, frame=%d, linked=%s, enqueued_time_us=%lluus",
+    buf->index,
+    buf->length,
+    buf->used,
+    buf_list->frames,
+    buf->mmap_source ? buf->mmap_source->name : NULL,
+    enqueued_time_us);
 
   if (buf->mmap_source) {
     buf->mmap_source->used = 0;
