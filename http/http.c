@@ -122,18 +122,18 @@ error:
   return -1;
 }
 
-int http_server(int listen_port, int maxcons, http_method_t *methods)
+int http_server(http_server_options_t *options, http_method_t *methods)
 {
-  int listen_fd = http_listen(9092, maxcons);
+  int listen_fd = http_listen(options->listen_port, options->maxcons);
   if (listen_fd < 0) {
     return -1;
   }
 
   sigaction(SIGPIPE, &(struct sigaction){ SIG_IGN }, NULL);
 
-  while (maxcons-- > 0) {
+  for (int worker = 0; worker < options->maxcons; worker++) {
     char name[20];
-    sprintf(name, "HTTP%d/%d", listen_port, maxcons);
+    sprintf(name, "HTTP%d/%d", options->listen_port, worker);
 
     http_worker_t *worker = calloc(1, sizeof(http_worker_t));
     worker->name = strdup(name);

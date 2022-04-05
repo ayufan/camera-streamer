@@ -20,6 +20,21 @@ http_method_t http_methods[] = {
   { NULL, NULL }
 };
 
+camera_options_t camera_options = {
+  .path = "/dev/video0",
+  .width = 1920,
+  .height = 720,
+  .format = 0,
+  .nbufs = 4,
+  .fps = 30,
+  .allow_dma = true
+};
+
+http_server_options_t http_server_options = {
+  .listen_port = 9092,
+  .maxcons = 10
+};
+
 int main(int argc, char *argv[])
 {
   camera_t camera;
@@ -32,6 +47,7 @@ int main(int argc, char *argv[])
   }
 
   camera_init(&camera);
+  camera.options = camera_options;
 
   //camera.width = 1920; camera.height = 1080;
   strcpy(camera.options.path, "/dev/video2"); camera.options.width = 2328; camera.options.height = 1748; camera.options.format = V4L2_PIX_FMT_SRGGB10P; // 1164x874
@@ -49,7 +65,7 @@ int main(int argc, char *argv[])
     goto error;
   }
 
-  http_fd = http_server(9092, 5, http_methods);
+  http_fd = http_server(&http_server_options, http_methods);
   if (http_fd < 0) {
     goto error;
   }
