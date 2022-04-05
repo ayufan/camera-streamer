@@ -50,7 +50,7 @@ void http_video(http_worker_t *worker, FILE *stream)
         goto error;
       }
     } else if (!requested_key_frame) {
-      device_force_key(buf->buf_list->device);
+      device_video_force_key(buf->buf_list->device);
       requested_key_frame = true;
     }
     buffer_consumed(buf);

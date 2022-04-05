@@ -2,8 +2,6 @@
 #include <stdlib.h>
 
 #include "http/http.h"
-#include "hw/buffer.h"
-#include "hw/buffer_lock.h"
 
 void http_index(http_worker_t *worker, FILE *stream)
 {

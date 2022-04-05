@@ -152,7 +152,7 @@ error:
   return -1;
 }
 
-int device_force_key(device_t *dev)
+int device_video_force_key(device_t *dev)
 {
   struct v4l2_control ctl = {0};
   ctl.id = V4L2_CID_MPEG_VIDEO_FORCE_KEY_FRAME;
