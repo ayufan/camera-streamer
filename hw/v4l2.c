@@ -1,5 +1,7 @@
 #include "hw/v4l2.h"
 
+int log_debug = 0;
+
 int xioctl(const char *name, int fd, int request, void *arg)
 {
 	int retries = XIOCTL_RETRIES;

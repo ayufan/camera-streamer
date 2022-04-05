@@ -25,6 +25,11 @@ int main(int argc, char *argv[])
   camera_t camera;
   int http_fd = -1;
   int ret = -1;
+  const char *env;
+
+  if (env = getenv("DEBUG")) {
+    log_debug = strstr(env, "1") ? 1 : 0;
+  }
 
   camera_init(&camera);
 
