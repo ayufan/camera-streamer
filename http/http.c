@@ -67,7 +67,14 @@ static void http_process(http_worker_t *worker, FILE *stream)
   }
 
   for (int i = 0; worker->methods[i].name; i++) {
-    if (strstr(worker->client_method, worker->methods[i].name)) {
+    const char *name = worker->methods[i].name;
+    int nlen = strlen(worker->methods[i].name);
+
+    if (strncmp(worker->client_method, name, nlen-1))
+      continue;
+
+    // allow last character to match `?` or ` `
+    if (worker->client_method[nlen-1] == name[nlen-1] || name[nlen-1] == '?' && worker->client_method[nlen-1] == ' ') {
       worker->methods[i].func(worker, stream);
       return;
     }
