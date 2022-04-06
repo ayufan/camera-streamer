@@ -59,13 +59,13 @@ option_t all_options[] = {
   DEFINE_OPTION_VALUES(camera, format, camera_formats),
   DEFINE_OPTION(camera, nbufs, uint),
   DEFINE_OPTION(camera, fps, uint),
-  DEFINE_OPTION(camera, allow_dma, bool),
+  DEFINE_OPTION_DEFAULT(camera, allow_dma, bool, "1"),
   DEFINE_OPTION(camera, high_res_factor, float),
   DEFINE_OPTION(camera, low_res_factor, float),
   DEFINE_OPTION(http, port, uint),
   DEFINE_OPTION(http, maxcons, uint),
-  DEFINE_OPTION(log, debug, bool),
-  DEFINE_OPTION(log, verbose, bool),
+  DEFINE_OPTION_DEFAULT(log, debug, bool, "1"),
+  DEFINE_OPTION_DEFAULT(log, verbose, bool, "1"),
   {}
 };
 

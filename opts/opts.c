@@ -29,18 +29,28 @@ static void print_help(option_t *options)
   }
 }
 
-static int parse_opt(option_t *options, const char *key, const char *value)
+static int parse_opt(option_t *options, const char *key)
 {
   option_t *option = NULL;
+  const char *value = strchr(key, '=');
 
   for (int i = 0; options[i].name; i++) {
-    if (!strcmp(key, options[i].name)) {
-      option = &options[i];
-      break;
+    if (value) {
+      if (!strncmp(key, options[i].name, value - key)) {
+        option = &options[i];
+        value++; // ignore '='
+        break;
+      }
+    } else {
+      // require exact match
+      if (!strcmp(key, options[i].name)) {
+        option = &options[i];
+        value = option->default_value;
+        break;
+      }
     }
   }
-
-  if (!option) {
+  if (!option || !value) {
     return -EINVAL;
   }
 
@@ -68,22 +78,23 @@ int parse_opts(option_t *options, int argc, char *argv[])
 
   for (arg = 1; arg < argc; arg += 2) {
     const char *key = argv[arg];
-    if (!strcmp(key, "-help")) {
+
+    if (key[0] == '-') {
+      key++;
+      if (key[0] == '-')
+        key++;
+    } else {
+      E_LOG_ERROR(NULL, "The '%s' is not option (should start with - or --).", key);
+    }
+
+    if (!strcmp(key, "help")) {
       print_help(options);
       return -1;
     }
 
-    if (arg+1 == argc) {
-      E_LOG_ERROR(NULL, "The %s is missing argument.", key);
-    }
-
-    if (key[0] != '-') {
-      E_LOG_ERROR(NULL, "The '%s' is not option (should start with -).", key);
-    }
-
-    int ret = parse_opt(options, key+1, argv[arg+1]);
+    int ret = parse_opt(options, key);
     if (ret <= 0) {
-      E_LOG_ERROR(NULL, "Parsing '%s %s' returned '%d'.", key, argv[arg+1], ret);
+      E_LOG_ERROR(NULL, "Parsing '%s' returned '%d'.", argv[arg], ret);
     }
   }
 

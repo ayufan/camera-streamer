@@ -21,6 +21,7 @@ typedef struct options_s {
   const char *help;
   option_value_t *value_mapping;
   unsigned size;
+  const char *default_value;
 } option_t;
 
 #define lambda(return_type, function_body) \
@@ -41,6 +42,15 @@ typedef struct options_s {
     .value_##_type = &_section##_options._name, \
     .format = OPTION_FORMAT_##_type, \
     .size = sizeof(_section##_options._name), \
+  }
+
+#define DEFINE_OPTION_DEFAULT(_section, _name, _type, _default_value) \
+  { \
+    .name = #_section "-" #_name, \
+    .value_##_type = &_section##_options._name, \
+    .format = OPTION_FORMAT_##_type, \
+    .size = sizeof(_section##_options._name), \
+    .default_value = _default_value, \
   }
 
 #define DEFINE_OPTION_VALUES(_section, _name, _value_mapping) \
