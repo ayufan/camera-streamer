@@ -166,6 +166,20 @@ int device_set_stream(device_t *dev, bool do_on)
   return 0;
 }
 
+int device_set_decoder_start(device_t *dev, bool do_on)
+{
+  struct v4l2_decoder_cmd cmd = {0};
+
+  cmd.cmd = do_on ? V4L2_DEC_CMD_START : V4L2_DEC_CMD_STOP;
+
+  E_LOG_DEBUG(dev, "Setting decoder state %s...", do_on ? "Start" : "Stop");
+  E_XIOCTL(dev, dev->fd, VIDIOC_DECODER_CMD, &cmd, "Cannot set decoder state");
+  return 0;
+
+error:
+  return -1;
+}
+
 int device_consume_event(device_t *dev)
 {
 	struct v4l2_event event;

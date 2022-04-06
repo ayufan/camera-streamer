@@ -28,6 +28,7 @@ int device_open_buffer_list_capture(device_t *dev, struct buffer_list_s *output_
 int device_consume_event(device_t *device);
 
 int device_set_stream(device_t *dev, bool do_on);
+int device_set_decoder_start(device_t *dev, bool do_on);
 int device_video_force_key(device_t *dev);
 int device_set_pad_format(device_t *device, unsigned width, unsigned height, unsigned format);
 int device_set_option(device_t *dev, const char *name, uint32_t id, int32_t value);
