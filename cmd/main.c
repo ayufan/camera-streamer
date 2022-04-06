@@ -17,6 +17,7 @@ http_method_t http_methods[] = {
   { "GET /video?", http_video_html },
   { "GET /video.h264?", http_h264_video },
   { "GET /video.mkv?", http_mkv_video },
+  { "GET /video.mp4?", http_mp4_video },
   { "GET /jmuxer.min.js?", http_jmuxer_js },
   { "GET /?", http_index },
   { }

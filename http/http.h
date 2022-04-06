@@ -54,3 +54,5 @@ bool http_h264_needs_buffer();
 void http_h264_capture(buffer_t *buf);
 void http_h264_video(http_worker_t *worker, FILE *stream);
 void http_mkv_video(http_worker_t *worker, FILE *stream);
+void http_mp4_video(http_worker_t *worker, FILE *stream);
+void http_mov_video(http_worker_t *worker, FILE *stream);

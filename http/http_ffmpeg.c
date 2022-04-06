@@ -33,6 +33,7 @@ typedef struct {
   AVIOContext *output_avio;
   AVFormatContext *output_context;
   AVPacket *packet;
+  AVDictionary *output_opts;
 
   bool had_key_frame;
   bool requested_key_frame;
@@ -43,6 +44,7 @@ typedef struct {
   int pts;
   buffer_t *buf;
   unsigned buf_offset;
+  unsigned stream_offset;
 } http_ffmpeg_status_t;
 
 static int http_ffmpeg_read_from_buf(void *opaque, uint8_t *buf, int buf_size)
@@ -55,6 +57,7 @@ static int http_ffmpeg_read_from_buf(void *opaque, uint8_t *buf, int buf_size)
   if (!buf_size)
     return AVERROR_EOF;
 
+  E_LOG_DEBUG(status, "http_ffmpeg_read_from_buf: offset=%d, n=%d", status->buf_offset, buf_size);
   memcpy(buf, (char*)status->buf->start + status->buf_offset, buf_size);
   status->buf_offset += buf_size;
   return buf_size;
@@ -72,6 +75,11 @@ static int http_ffmpeg_write_to_stream(void *opaque, uint8_t *buf, int buf_size)
   }
 
   size_t n = fwrite(buf, 1, buf_size, status->stream);
+  fflush(status->stream);
+
+  E_LOG_DEBUG(status, "http_ffmpeg_write_to_stream: offset=%d, n=%d, buf_size=%d, error=%d",
+    status->stream_offset, buf_size, ferror(status->stream));
+  status->stream_offset += n;
   if (ferror(status->stream))
     return AVERROR_EOF;
 
@@ -155,6 +163,8 @@ static int http_ffmpeg_open_status(http_ffmpeg_status_t *status)
 
   if (status->packet)
     return 0;
+    
+
 
   status->packet = av_packet_alloc();
   if (!status->packet)
@@ -169,7 +179,7 @@ static int http_ffmpeg_open_status(http_ffmpeg_status_t *status)
     return ret;
   if ((ret = http_ffmpeg_copy_streams(status)) < 0)
     return ret;
-  if ((ret = avformat_write_header(status->output_context, NULL)) < 0)
+  if ((ret = avformat_write_header(status->output_context, &status->output_opts)) < 0)
     return ret;
 
   status->start_time = get_monotonic_time_us(NULL, NULL);
@@ -182,6 +192,7 @@ static int http_ffmpeg_close_status(http_ffmpeg_status_t *status)
   http_ffmpeg_close_avcontext(&status->input_context);
   http_ffmpeg_close_avcontext(&status->output_context);
   av_packet_free(&status->packet);
+  av_dict_free(&status->output_opts);
 }
 
 static int http_ffmpeg_copy_packets(http_ffmpeg_status_t *status)
@@ -276,6 +287,13 @@ static void http_ffmpeg_video(http_worker_t *worker, FILE *stream, const char *c
     .video_format = video_format
   };
 
+  av_dict_set_int(&status.output_opts, "probesize", 4096, 0);
+  av_dict_set_int(&status.output_opts, "direct", 1, 0);
+  av_dict_set_int(&status.output_opts, "frag_duration", 0, 0);
+  av_dict_set_int(&status.output_opts, "low_delay", 1, 0);
+  av_dict_set_int(&status.output_opts, "nobuffer", 1, 0);
+  av_dict_set_int(&status.output_opts, "flush_packets", 1, 0);
+
   int n = buffer_lock_write_loop(&http_h264, 0, (buffer_write_fn)http_ffmpeg_video_buf_part, &status);
   http_ffmpeg_close_status(&status);
 
@@ -295,4 +313,9 @@ static void http_ffmpeg_video(http_worker_t *worker, FILE *stream, const char *c
 void http_mkv_video(http_worker_t *worker, FILE *stream)
 {
   http_ffmpeg_video(worker, stream, "video/mp4", "matroska");
+}
+
+void http_mp4_video(http_worker_t *worker, FILE *stream)
+{
+  http_ffmpeg_video(worker, stream, "video/mp4", "mp4");
 }
