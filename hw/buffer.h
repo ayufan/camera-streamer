@@ -24,4 +24,4 @@ buffer_t *buffer_open(const char *name, struct buffer_list_s *buf_list, int buff
 void buffer_close(buffer_t *buf);
 
 bool buffer_use(buffer_t *buf);
-bool buffer_consumed(buffer_t *buf);
+bool buffer_consumed(buffer_t *buf, const char *who);

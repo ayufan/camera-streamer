@@ -53,7 +53,7 @@ void http_video(http_worker_t *worker, FILE *stream)
       device_video_force_key(buf->buf_list->device);
       requested_key_frame = true;
     }
-    buffer_consumed(buf);
+    buffer_consumed(buf, "h264-stream");
   }
 
 error:

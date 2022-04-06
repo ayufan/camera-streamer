@@ -113,7 +113,7 @@ retry:
     //fmt->fmt.pix.sizeimage = bytesperline * orig_height;
   }
 
-  E_LOG_DEBUG(buf_list, "Configuring format ...");
+  E_LOG_DEBUG(buf_list, "Configuring format (%s)...", fourcc_to_string(format).buf);
   E_XIOCTL(buf_list, buf_list->device->fd, VIDIOC_S_FMT, fmt, "Can't set format");
 
   if (buf_list->do_mplanes) {

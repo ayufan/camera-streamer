@@ -50,6 +50,9 @@ static int parse_opt(option_t *options, const char *key)
       }
     }
   }
+
+  E_LOG_DEBUG(NULL, "Parsing '%s'. Got value='%s', and option='%s'", key, value, option ? option->name : NULL);
+
   if (!option || !value) {
     return -EINVAL;
   }
@@ -76,7 +79,7 @@ int parse_opts(option_t *options, int argc, char *argv[])
 {
   int arg;
 
-  for (arg = 1; arg < argc; arg += 2) {
+  for (arg = 1; arg < argc; arg++) {
     const char *key = argv[arg];
 
     if (key[0] == '-') {

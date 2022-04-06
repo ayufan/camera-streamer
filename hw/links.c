@@ -96,7 +96,7 @@ int links_enqueue_from_source(buffer_list_t *buf_list, link_t *link)
     link->callbacks.on_buffer(buf);
   }
 
-  buffer_consumed(buf);
+  buffer_consumed(buf, "link-from-source");
   return 0;
 
 error:
@@ -133,11 +133,17 @@ int links_step(link_t *all_links, int timeout)
     buffer_list_t *buf_list = buf_lists[i];
     link_t *link = links[i];
 
-    E_LOG_DEBUG(buf_list, "pool i=%d revents=%08x streaming=%d enqueued=%d/%d", i, fds[i].revents, buf_list->streaming,
-      buffer_list_count_enqueued(buf_list), buf_list->nbufs);
+    E_LOG_DEBUG(buf_list, "pool event=%s%s%s%s/%08x streaming=%d enqueued=%d/%d",
+      !fds[i].revents ? "NONE" : "",
+      fds[i].revents & POLLIN ? "IN" : "",
+      fds[i].revents & POLLOUT ? "OUT" : "",
+      fds[i].revents & POLLERR ? "ERR" : "",
+      fds[i].revents,
+      buf_list->streaming,
+      buffer_list_count_enqueued(buf_list),
+      buf_list->nbufs);
 
     if (fds[i].revents & POLLIN) {
-      E_LOG_DEBUG(buf_list, "POLLIN");
       if (links_enqueue_from_source(buf_list, link) < 0) {
         return -1;
       }
@@ -145,7 +151,6 @@ int links_step(link_t *all_links, int timeout)
 
     // Dequeue buffers that were processed
     if (fds[i].revents & POLLOUT) {
-      E_LOG_DEBUG(buf_list, "POLLOUT");
       if (links_dequeue_from_sink(buf_list) < 0) {
         return -1;
       }
@@ -154,10 +159,6 @@ int links_step(link_t *all_links, int timeout)
     if (fds[i].revents & POLLERR) {
       E_LOG_INFO(buf_list, "Got an error");
       return -1;
-    }
-
-    if (fds[i].revents & ~(POLLIN|POLLOUT|POLLERR)) {
-      E_LOG_VERBOSE(buf_list, "POLL%08x", fds[i].revents);
     }
   }
   return 0;

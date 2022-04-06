@@ -26,7 +26,7 @@ bool buffer_lock_needs_buffer(buffer_lock_t *buf_lock)
 
   pthread_mutex_lock(&buf_lock->lock);
   if (now.tv_sec - buf_lock->buf_time.tv_sec > 1) {
-    buffer_consumed(buf_lock->buf);
+    buffer_consumed(buf_lock->buf, buf_lock->name);
     buf_lock->buf = NULL;
     needs_buffer = true;
   }
@@ -41,12 +41,12 @@ bool buffer_lock_needs_buffer(buffer_lock_t *buf_lock)
 void buffer_lock_capture(buffer_lock_t *buf_lock, buffer_t *buf)
 {
   pthread_mutex_lock(&buf_lock->lock);
-  buffer_consumed(buf_lock->buf);
+  buffer_consumed(buf_lock->buf, buf_lock->name);
   buffer_use(buf);
   buf_lock->buf = buf;
   buf_lock->counter++;
   gettimeofday(&buf_lock->buf_time, NULL);
-  E_LOG_DEBUG(buf_lock, "Captured buffer %s, frame=%d", dev_name(buf), buf_lock->counter);
+  E_LOG_DEBUG(buf_lock, "Captured buffer %s (refs=%d), frame=%d", dev_name(buf), buf ? buf->mmap_reflinks : 0, buf_lock->counter);
   pthread_cond_broadcast(&buf_lock->cond_wait);
   pthread_mutex_unlock(&buf_lock->lock);
 }

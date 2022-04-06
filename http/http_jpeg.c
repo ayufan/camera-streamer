@@ -56,7 +56,7 @@ void http_snapshot(http_worker_t *worker, FILE *stream)
   fprintf(stream, "Content-Length: %d\r\n", buf->used);
   fprintf(stream, "\r\n");
   fwrite(buf->start, buf->used, 1, stream);
-  buffer_consumed(buf);
+  buffer_consumed(buf, "jpeg-snapshot");
 error:
   buffer_lock_use(&http_jpeg, -1);
 }
@@ -85,7 +85,7 @@ void http_stream(http_worker_t *worker, FILE *stream)
       goto error;
     }
 
-    buffer_consumed(buf);
+    buffer_consumed(buf, "jpeg-stream");
   }
 
 error:

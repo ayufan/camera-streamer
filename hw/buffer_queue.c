@@ -13,7 +13,7 @@ bool buffer_use(buffer_t *buf)
   }
 
   pthread_mutex_lock(&buffer_lock);
-  if (!buf->enqueued) {
+  if (buf->enqueued) {
     pthread_mutex_unlock(&buffer_lock);
     return false;
   }
@@ -23,7 +23,7 @@ bool buffer_use(buffer_t *buf)
   return true;
 }
 
-bool buffer_consumed(buffer_t *buf)
+bool buffer_consumed(buffer_t *buf, const char *who)
 {
   if (!buf) {
     return false;
@@ -44,7 +44,11 @@ bool buffer_consumed(buffer_t *buf)
       buf->v4l2_buffer.bytesused = buf->used;
     }
 
-    E_LOG_DEBUG(buf, "Queuing buffer... used=%zu length=%zu (linked=%s)", buf->used, buf->length, buf->mmap_source ? buf->mmap_source->name : NULL);
+    E_LOG_DEBUG(buf, "Queuing buffer... used=%zu length=%zu (linked=%s) by %s",
+      buf->used,
+      buf->length,
+      buf->mmap_source ? buf->mmap_source->name : NULL,
+      who);
     buf->enqueued_time_us = get_monotonic_time_us(NULL, &buf->v4l2_buffer.timestamp);
     E_XIOCTL(buf, buf->buf_list->device->fd, VIDIOC_QBUF, &buf->v4l2_buffer, "Can't queue buffer.");
     buf->enqueued = true;
@@ -61,7 +65,7 @@ error:
     pthread_mutex_unlock(&buffer_lock);
 
     if (mmap_source) {
-      buffer_consumed(mmap_source);
+      buffer_consumed(mmap_source, who);
     }
   }
 
@@ -138,7 +142,7 @@ int buffer_list_enqueue(buffer_list_t *buf_list, buffer_t *dma_buf)
   }
 
   buf->used = dma_buf->used;
-  buffer_consumed(buf);
+  buffer_consumed(buf, "copy-data");
   return 1;
 error:
   return -1;
@@ -181,7 +185,7 @@ buffer_t *buffer_list_dequeue(buffer_list_t *buf_list)
 
   if (buf->mmap_source) {
     buf->mmap_source->used = 0;
-    buffer_consumed(buf->mmap_source);
+    buffer_consumed(buf->mmap_source, "mmap-dequeued");
     buf->mmap_source = NULL;
   }
 
