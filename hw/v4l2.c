@@ -86,9 +86,10 @@ uint64_t get_time_us(clockid_t clock, struct timespec *ts, struct timeval *tv, i
 	clock_gettime(clock, &now);
 
 	if (delays_us > 0) {
-		now.tv_nsec += delays_us * 1000LL;
-		now.tv_sec += now.tv_nsec / (1000LL * 1000LL * 1000LL);
-		now.tv_nsec %= 1000LL * 1000LL * 1000LL;
+		#define NS_IN_S (1000LL * 1000LL * 1000LL)
+		int64_t nsec = now.tv_nsec + delays_us * 1000LL;
+		now.tv_nsec = nsec % NS_IN_S;
+		now.tv_sec += nsec / NS_IN_S;
 	}
 
 	if (ts) {

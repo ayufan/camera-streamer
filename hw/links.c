@@ -151,7 +151,7 @@ int links_step(link_t *all_links, int timeout)
     buffer_list_t *buf_list = buf_lists[i];
     link_t *link = links[i];
 
-    E_LOG_DEBUG(buf_list, "pool event=%s%s%s%s%s%08x streaming=%d enqueued=%d/%d",
+    E_LOG_DEBUG(buf_list, "pool event=%s%s%s%s%s%08x streaming=%d enqueued=%d/%d paused=%d",
       !fds[i].revents ? "NONE/" : "",
       fds[i].revents & POLLIN ? "IN/" : "",
       fds[i].revents & POLLOUT ? "OUT/" : "",
@@ -160,7 +160,8 @@ int links_step(link_t *all_links, int timeout)
       fds[i].revents,
       buf_list->streaming,
       buffer_list_count_enqueued(buf_list),
-      buf_list->nbufs);
+      buf_list->nbufs,
+      buf_list->device->paused);
 
     if (fds[i].revents & POLLIN) {
       if (links_enqueue_from_source(buf_list, link) < 0) {

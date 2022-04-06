@@ -57,7 +57,7 @@ buffer_t *buffer_lock_get(buffer_lock_t *buf_lock, int timeout_ms, int *counter)
   if(!timeout_ms)
     timeout_ms = DEFAULT_BUFFER_LOCK_GET_TIMEOUT;
 
-  get_time_us(CLOCK_REALTIME, &timeout, NULL, timeout_ms * 1000LL * 1000LL);
+  get_time_us(CLOCK_REALTIME, &timeout, NULL, timeout_ms * 1000LL);
 
   pthread_mutex_lock(&buf_lock->lock);
   if (*counter == buf_lock->counter || !buf_lock->buf) {
