@@ -165,7 +165,7 @@ buffer_t *buffer_list_dequeue(buffer_list_t *buf_list)
 		v4l2_buf.m.planes = &v4l2_plane;
 	}
 
-	E_XIOCTL(buf_list, buf_list->device->fd, VIDIOC_DQBUF, &v4l2_buf, "Can't grab capture buffer");
+	E_XIOCTL(buf_list, buf_list->device->fd, VIDIOC_DQBUF, &v4l2_buf, "Can't grab capture buffer (flags=%08x)", v4l2_buf.flags);
 
   buffer_t *buf = buf_list->bufs[v4l2_buf.index];
 	if (buf_list->do_mplanes) {
