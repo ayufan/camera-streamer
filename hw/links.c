@@ -48,8 +48,9 @@ int _build_fds(link_t *all_links, struct pollfd *fds, link_t **links, buffer_lis
       fds[n].events = POLLHUP;
       if (count_enqueued > 0)
         fds[n].events |= POLLOUT;
-      buf_lists[n] = source;
-      links[n] = link;
+      fds[n].revents = 0;
+      buf_lists[n] = sink;
+      links[n] = NULL;
       n++;
 
       // Can this chain pauses
@@ -68,6 +69,7 @@ int _build_fds(link_t *all_links, struct pollfd *fds, link_t **links, buffer_lis
     fds[n].events = POLLHUP;
     if (!source->device->paused)
       fds[n].events |= POLLIN;
+    fds[n].revents = 0;
     buf_lists[n] = source;
     links[n] = link;
     n++;
@@ -117,6 +119,18 @@ error:
   return -1;
 }
 
+void print_pollfds(struct pollfd *fds, int n)
+{
+  if (!getenv("DEBUG_FDS")) {
+    return;
+  }
+
+  for (int i = 0; i < n; i++) {
+    printf("poll(i=%i, fd=%d, events=%08x, revents=%08x)\n", i, fds[i].fd, fds[i].events, fds[i].revents);
+  }
+  printf("pollfds = %d\n", n);
+}
+
 int links_step(link_t *all_links, int timeout)
 {
   struct pollfd fds[N_FDS] = {0};
@@ -125,7 +139,9 @@ int links_step(link_t *all_links, int timeout)
   buffer_t *buf;
 
   int n = _build_fds(all_links, fds, links, buf_lists, N_FDS);
+  print_pollfds(fds, n);
   int ret = poll(fds, n, timeout);
+  print_pollfds(fds, n);
 
   if (ret < 0 && errno != EINTR) {
     return errno;
@@ -135,11 +151,12 @@ int links_step(link_t *all_links, int timeout)
     buffer_list_t *buf_list = buf_lists[i];
     link_t *link = links[i];
 
-    E_LOG_DEBUG(buf_list, "pool event=%s%s%s%s/%08x streaming=%d enqueued=%d/%d",
-      !fds[i].revents ? "NONE" : "",
-      fds[i].revents & POLLIN ? "IN" : "",
-      fds[i].revents & POLLOUT ? "OUT" : "",
-      fds[i].revents & POLLERR ? "ERR" : "",
+    E_LOG_DEBUG(buf_list, "pool event=%s%s%s%s%s%08x streaming=%d enqueued=%d/%d",
+      !fds[i].revents ? "NONE/" : "",
+      fds[i].revents & POLLIN ? "IN/" : "",
+      fds[i].revents & POLLOUT ? "OUT/" : "",
+      fds[i].revents & POLLHUP ? "HUP/" : "",
+      fds[i].revents & POLLERR ? "ERR/" : "",
       fds[i].revents,
       buf_list->streaming,
       buffer_list_count_enqueued(buf_list),

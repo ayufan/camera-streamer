@@ -48,7 +48,7 @@ void http_snapshot(http_worker_t *worker, FILE *stream)
   if (!buf) {
     http_404_header(worker, stream);
     fprintf(stream, "No snapshot captured yet.\r\n");
-    return;
+    goto error;
   }
 
   fprintf(stream, "HTTP/1.1 200 OK\r\n");

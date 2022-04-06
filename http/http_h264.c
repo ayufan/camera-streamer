@@ -40,9 +40,14 @@ void http_video(http_worker_t *worker, FILE *stream)
       goto error;
     }
 
+    unsigned char *data = buf->start;
+
     if (buf->v4l2_buffer.flags & V4L2_BUF_FLAG_KEYFRAME) {
       had_key_frame = true;
-      E_LOG_DEBUG(buf, "Got key frame!");
+      E_LOG_DEBUG(buf, "Got key frame (from V4L2)!");
+    } else if (buf->used >= 5 && (data[4] & 0x1F) == 0x07) {
+      had_key_frame = true;
+      E_LOG_DEBUG(buf, "Got key frame (from buffer)!");
     }
 
     if (had_key_frame) {
