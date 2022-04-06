@@ -9,11 +9,12 @@
 
 DEFINE_BUFFER_LOCK(http_h264, 0);
 
-static const char *const VIDEO_HEADER = "HTTP/1.0 200 OK\r\n"
-                                         "Access-Control-Allow-Origin: *\r\n"
-                                         "Connection: close\r\n"
-                                         "Content-Type: video/webm;codecs=h264\r\n"
-                                         "\r\n";
+static const char *const VIDEO_HEADER =
+  "HTTP/1.0 200 OK\r\n"
+  "Access-Control-Allow-Origin: *\r\n"
+  "Connection: close\r\n"
+  "Content-Type: application/octet-stream\r\n"
+  "\r\n";
 
 void http_h264_capture(buffer_t *buf)
 {
@@ -62,7 +63,7 @@ int http_video_buf_part(buffer_lock_t *buf_lock, buffer_t *buf, int frame, http_
   return 1;
 }
 
-void http_video(http_worker_t *worker, FILE *stream)
+void http_h264_video(http_worker_t *worker, FILE *stream)
 {
   http_video_status_t status = { stream };
 
