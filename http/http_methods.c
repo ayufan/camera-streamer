@@ -12,16 +12,29 @@ void http_index(http_worker_t *worker, FILE *stream)
   fflush(stream);
 }
 
-void http_404_header(http_worker_t *worker, FILE *stream)
+void http_custom_header(FILE *stream, const char *status)
 {
+  fprintf(stream, "HTTP/1.1 %s\r\n", status);
+  fprintf(stream, "Content-Type: text/plain\r\n");
+  fprintf(stream, "\r\n");
+}
+
+void http_404_header(FILE *stream)
+{
+  http_custom_header(stream, "404 Not Found");
   fprintf(stream, "HTTP/1.1 404 Not Found\r\n");
   fprintf(stream, "Content-Type: text/plain\r\n");
   fprintf(stream, "\r\n");
 }
 
+void http_500_header(FILE *stream)
+{
+  http_custom_header(stream, "500 Server Error");
+}
+
 void http_404(http_worker_t *worker, FILE *stream)
 {
-  http_404_header(worker, stream);
+  http_404_header(stream);
   fprintf(stream, "Nothing here?\r\n");
 }
 

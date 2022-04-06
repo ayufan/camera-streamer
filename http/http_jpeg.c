@@ -39,58 +39,52 @@ void http_jpeg_capture(buffer_t *buf)
   buffer_lock_capture(&http_jpeg, buf);
 }
 
-void http_snapshot(http_worker_t *worker, FILE *stream)
+int http_snapshot_buf_part(buffer_lock_t *buf_lock, buffer_t *buf, int frame, FILE *stream)
 {
-  int counter = 0;
-  buffer_lock_use(&http_jpeg, 1);
-  buffer_t *buf = buffer_lock_get(&http_jpeg, 0, &counter);
-
-  if (!buf) {
-    http_404_header(worker, stream);
-    fprintf(stream, "No snapshot captured yet.\r\n");
-    goto error;
-  }
-
   fprintf(stream, "HTTP/1.1 200 OK\r\n");
   fprintf(stream, "Content-Type: image/jpeg\r\n");
   fprintf(stream, "Content-Length: %d\r\n", buf->used);
   fprintf(stream, "\r\n");
   fwrite(buf->start, buf->used, 1, stream);
-  buffer_consumed(buf, "jpeg-snapshot");
-error:
-  buffer_lock_use(&http_jpeg, -1);
+  return 1;
+}
+
+void http_snapshot(http_worker_t *worker, FILE *stream)
+{
+  int n = buffer_lock_write_loop(&http_jpeg, 1, (buffer_write_fn)http_snapshot_buf_part, stream);
+
+  if (n <= 0) {
+    http_500_header(stream);
+    fprintf(stream, "No snapshot captured yet.\r\n");
+  }
+}
+
+int http_stream_buf_part(buffer_lock_t *buf_lock, buffer_t *buf, int frame, FILE *stream)
+{
+  if (!frame && !fprintf(stream, STREAM_HEADER)) {
+    return -1;
+  }
+  if (!fprintf(stream, STREAM_PART, buf->used)) {
+    return -1;
+  }
+  if (!fwrite(buf->start, buf->used, 1, stream)) {
+    return -1;
+  }
+  if (!fprintf(stream, STREAM_BOUNDARY)) {
+    return -1;
+  }
+
+  return 1;
 }
 
 void http_stream(http_worker_t *worker, FILE *stream)
 {
-  int counter = 0;
-  buffer_t *buf = NULL;
-  fprintf(stream, STREAM_HEADER);
-  buffer_lock_use(&http_jpeg, 1);
+  int n = buffer_lock_write_loop(&http_jpeg, 0, (buffer_write_fn)http_stream_buf_part, stream);
 
-  while (!feof(stream)) {
-    buf = buffer_lock_get(&http_jpeg, 0, &counter);
-
-    if (!buf) {
-      fprintf(stream, STREAM_ERROR, -1, "No frames.");
-      goto error;
-    }
-
-    if (!fprintf(stream, STREAM_PART, buf->used)) {
-      goto error;
-    }
-    if (!fwrite(buf->start, buf->used, 1, stream)) {
-      goto error;
-    }
-    if (!fprintf(stream, STREAM_BOUNDARY)) {
-      goto error;
-    }
-
-    buffer_consumed(buf, "jpeg-stream");
-    buf = NULL;
+  if (n == 0) {
+    http_500_header(stream);
+    fprintf(stream, "No frames.\n");
+  } else if (n < 0) {
+    fprintf(stream, "Interrupted. Received %d frames", -n);
   }
-
-error:
-  buffer_consumed(buf, "error");
-  buffer_lock_use(&http_jpeg, -1);
 }

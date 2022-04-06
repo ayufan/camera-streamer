@@ -77,3 +77,35 @@ ret:
   pthread_mutex_unlock(&buf_lock->lock);
   return buf;
 }
+
+int buffer_lock_write_loop(buffer_lock_t *buf_lock, int nframes, buffer_write_fn fn, void *data)
+{
+  int counter = 0;
+  int frames = 0;
+
+  buffer_lock_use(buf_lock, 1);
+
+  while (nframes == 0 || frames < nframes) {
+    buffer_t *buf = buffer_lock_get(buf_lock, 0, &counter);
+    if (!buf) {
+      goto error;
+    }
+
+    int ret = fn(buf_lock, buf, frames, data);
+    buffer_consumed(buf, "write-loop");
+
+    if (ret > 0) {
+      frames++;
+    } else if (ret < 0) {
+      goto error;
+    }
+  }
+
+ok:
+  buffer_lock_use(buf_lock, -1);
+  return frames;
+
+error:
+  buffer_lock_use(buf_lock, -1);
+  return -frames;
+}

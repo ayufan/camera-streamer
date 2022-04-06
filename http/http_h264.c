@@ -25,45 +25,58 @@ bool http_h264_needs_buffer()
   return buffer_lock_needs_buffer(&http_h264);
 }
 
-void http_video(http_worker_t *worker, FILE *stream)
+typedef struct {
+  FILE *stream;
+  bool wrote_header;
+  bool had_key_frame;
+  bool requested_key_frame;
+} http_video_status_t;
+
+int http_video_buf_part(buffer_lock_t *buf_lock, buffer_t *buf, int frame, http_video_status_t *status)
 {
-  bool had_key_frame = false;
-  bool requested_key_frame = false;
-  int counter = 0;
-  buffer_t *buf = NULL;
-  fprintf(stream, VIDEO_HEADER);
+  unsigned char *data = buf->start;
 
-  buffer_lock_use(&http_h264, 1);
-
-  while (!feof(stream)) {
-    buf = buffer_lock_get(&http_h264, 0, &counter);
-    if (!buf) {
-      goto error;
-    }
-
-    unsigned char *data = buf->start;
-
-    if (buf->v4l2_buffer.flags & V4L2_BUF_FLAG_KEYFRAME) {
-      had_key_frame = true;
-      E_LOG_DEBUG(buf, "Got key frame (from V4L2)!");
-    } else if (buf->used >= 5 && (data[4] & 0x1F) == 0x07) {
-      had_key_frame = true;
-      E_LOG_DEBUG(buf, "Got key frame (from buffer)!");
-    }
-
-    if (had_key_frame) {
-      if (!fwrite(buf->start, buf->used, 1, stream)) {
-        goto error;
-      }
-    } else if (!requested_key_frame) {
-      device_video_force_key(buf->buf_list->device);
-      requested_key_frame = true;
-    }
-    buffer_consumed(buf, "h264-stream");
-    buf = NULL;
+  if (buf->v4l2_buffer.flags & V4L2_BUF_FLAG_KEYFRAME) {
+    status->had_key_frame = true;
+    E_LOG_DEBUG(buf, "Got key frame (from V4L2)!");
+  } else if (buf->used >= 5 && (data[4] & 0x1F) == 0x07) {
+    status->had_key_frame = true;
+    E_LOG_DEBUG(buf, "Got key frame (from buffer)!");
   }
 
-error:
-  buffer_consumed(buf, "error");
-  buffer_lock_use(&http_h264, -1);
+  if (!status->had_key_frame) {
+    if (!status->requested_key_frame) {
+      device_video_force_key(buf->buf_list->device);
+      status->requested_key_frame = true;
+    }
+    return 0;
+  }
+
+  if (!status->wrote_header) {
+    fprintf(status->stream, VIDEO_HEADER);
+  }
+  if (!fwrite(buf->start, buf->used, 1, status->stream)) {
+    return -1;
+  }
+  fflush(status->stream);
+  return 1;
+}
+
+void http_video(http_worker_t *worker, FILE *stream)
+{
+  http_video_status_t status = { stream };
+
+  int n = buffer_lock_write_loop(&http_h264, 0, (buffer_write_fn)http_video_buf_part, &status);
+
+  if (status.wrote_header) {
+    return;
+  }
+
+  http_500_header(stream);
+
+  if (n == 0) {
+    fprintf(stream, "No frames.\n");
+  } else if (n < 0) {
+    fprintf(stream, "Interrupted. Received %d frames", -n);
+  }
 }

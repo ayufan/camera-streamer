@@ -38,7 +38,9 @@ int http_server(http_server_options_t *options, http_method_t *methods);
 void http_index(http_worker_t *worker, FILE *stream);
 void http_video_html(http_worker_t *worker, FILE *stream);
 void http_jmuxer_js(http_worker_t *worker, FILE *stream);
-void http_404_header(http_worker_t *worker, FILE *stream);
+void http_custom_header(FILE *stream, const char *status);
+void http_404_header(FILE *stream);
+void http_500_header(FILE *stream);
 void http_404(http_worker_t *worker, FILE *stream);
 
 // M-JPEG

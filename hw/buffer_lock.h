@@ -25,8 +25,11 @@ typedef struct buffer_lock_s {
     .timeout_us = (_timeout_ms > DEFAULT_BUFFER_LOCK_TIMEOUT ? _timeout_ms : DEFAULT_BUFFER_LOCK_TIMEOUT) * 1000LL, \
   };
 
+typedef int (*buffer_write_fn)(buffer_lock_t *buf_lock, buffer_t *buf, int frame, void *data);
+
 void buffer_lock_capture(buffer_lock_t *buf_lock, buffer_t *buf);
 buffer_t *buffer_lock_get(buffer_lock_t *buf_lock, int timeout_ms, int *counter);
 bool buffer_lock_needs_buffer(buffer_lock_t *buf_lock);
 void buffer_lock_use(buffer_lock_t *buf_lock, int ref);
 bool buffer_lock_is_used(buffer_lock_t *buf_lock);
+int buffer_lock_write_loop(buffer_lock_t *buf_lock, int nframes, buffer_write_fn fn, void *data);
