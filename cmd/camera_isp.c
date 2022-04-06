@@ -54,13 +54,13 @@ int camera_configure_isp(camera_t *camera, float high_div, float low_div)
 
   link_t *links = camera->links;
 
-  *links++ = (link_t){ camera->camera, { camera->isp_srgb } };
+  *links++ = (link_t){ camera->camera, { camera->isp_srgb->output_list } };
 
   if (camera->isp_yuuv_low) {
     *links++ = (link_t){ camera->isp_yuuv, { } };
-    *links++ = (link_t){ camera->isp_yuuv_low, { camera->codec_jpeg, camera->codec_h264 }, { write_yuvu } };
+    *links++ = (link_t){ camera->isp_yuuv_low, { camera->codec_jpeg->output_list, camera->codec_h264->output_list }, { write_yuvu } };
   } else {
-    *links++ = (link_t){ camera->isp_yuuv, { camera->codec_jpeg, camera->codec_h264 }, { write_yuvu } };
+    *links++ = (link_t){ camera->isp_yuuv, { camera->codec_jpeg->output_list, camera->codec_h264->output_list }, { write_yuvu } };
   }
 
   *links++ = (link_t){ camera->codec_jpeg, { }, { http_jpeg_capture, http_jpeg_needs_buffer } };

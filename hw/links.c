@@ -14,7 +14,6 @@ void _update_paused(link_t *all_links)
   for (int i = n; i-- > 0; ) {
     link_t *link = &all_links[i];
 
-
     if (!link->capture->capture_list->streaming) {
       continue;
     }
@@ -25,18 +24,18 @@ void _update_paused(link_t *all_links)
       paused = false;
     }
 
-    for (int j = 0; link->outputs[j]; j++) {
-      device_t *output = link->outputs[j];
+    for (int j = 0; link->sinks[j]; j++) {
+      buffer_list_t *sink = link->sinks[j];
 
-      if (!output->output_list->streaming) {
+      if (!sink->streaming) {
         continue;
       }
-      if (output->output_list->device->paused) {
+      if (sink->device->paused) {
         continue;
       }
 
-      int count_enqueued = buffer_list_count_enqueued(output->output_list);
-      if (count_enqueued < output->output_list->nbufs) {
+      int count_enqueued = buffer_list_count_enqueued(sink);
+      if (count_enqueued < sink->nbufs) {
         paused = false;
       }
     }
@@ -66,26 +65,26 @@ int _build_fds(link_t *all_links, struct pollfd *fds, link_t **links, buffer_lis
       continue;
     }
 
-    for (int j = 0; link->outputs[j]; j++) {
-      device_t *output = link->outputs[j];
+    for (int j = 0; link->sinks[j]; j++) {
+      buffer_list_t *sink = link->sinks[j];
 
-      if (!output || !output->output_list || n >= max_n) {
+      if (n >= max_n) {
         return -EINVAL;
       }
-      if (!output->output_list->streaming) {
+      if (!sink->streaming) {
         continue;
       }
 
-      int count_enqueued = buffer_list_count_enqueued(output->output_list);
+      int count_enqueued = buffer_list_count_enqueued(sink);
 
       // Can something be dequeued?
       if (count_enqueued == 0) {
         continue;
       }
 
-      struct pollfd fd = {output->fd, POLLOUT};
+      struct pollfd fd = {sink->device->fd, POLLOUT};
       fds[n] = fd;
-      buf_lists[n] = output->output_list;
+      buf_lists[n] = sink;
       links[n] = link;
       n++;
     }
@@ -128,11 +127,11 @@ int links_step(link_t *all_links, int timeout)
     if (fds[i].revents & POLLIN) {
       E_LOG_DEBUG(buf_list, "POLLIN");
       if (buf = buffer_list_dequeue(buf_list)) {
-        for (int j = 0; link->outputs[j]; j++) {
-          if (link->outputs[j]->paused) {
+        for (int j = 0; link->sinks[j]; j++) {
+          if (link->sinks[j]->device->paused) {
             continue;
           }
-          buffer_list_enqueue(link->outputs[j]->output_list, buf);
+          buffer_list_enqueue(link->sinks[j], buf);
         }
 
         if (link->callbacks.on_buffer) {
@@ -142,14 +141,18 @@ int links_step(link_t *all_links, int timeout)
         buffer_consumed(buf);
       }
     }
+
+    // Dequeue buffers that were processed
     if (fds[i].revents & POLLOUT) {
       E_LOG_DEBUG(buf_list, "POLLOUT");
       buffer_list_dequeue(buf_list);
     }
+
     if (fds[i].revents & POLLERR) {
-      E_LOG_DEBUG(buf_list, "POLLERR");
-      device_consume_event(buf_list->device);
+      E_LOG_INFO(buf_list, "Got an error");
+      return -1;
     }
+
     if (fds[i].revents & ~(POLLIN|POLLOUT|POLLERR)) {
       E_LOG_DEBUG(buf_list, "POLL%08x", fds[i].revents);
     }
@@ -171,9 +174,13 @@ int links_stream(link_t *all_links, bool do_stream)
       E_LOG_ERROR(link->capture, "Failed to start streaming");
     }
 
-    for (int j = 0; link->outputs[j]; j++) {
-      if (buffer_list_stream(link->outputs[j]->output_list, streaming) < 0) {
-        E_LOG_ERROR(link->outputs[j], "Failed to start streaming");
+    if (device_set_stream(link->capture, streaming) < 0) {
+      E_LOG_ERROR(link->capture, "Failed to start streaming");
+    }
+
+    for (int j = 0; link->sinks[j]; j++) {
+      if (buffer_list_stream(link->sinks[j], streaming) < 0) {
+        E_LOG_ERROR(link->sinks[j], "Failed to start streaming");
       }
     }
   }

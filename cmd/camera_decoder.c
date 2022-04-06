@@ -44,16 +44,16 @@ int camera_configure_decoder(camera_t *camera)
   link_t *links = camera->links;
 
   if (camera->options.format == V4L2_PIX_FMT_MJPEG || camera->options.format == V4L2_PIX_FMT_JPEG) {
-    *links++ = (link_t){ camera->camera, { camera->decoder }, { http_jpeg_capture, http_jpeg_needs_buffer } };
-    *links++ = (link_t){ camera->decoder, { camera->codec_h264 } };
+    *links++ = (link_t){ camera->camera, { camera->decoder->output_list }, { http_jpeg_capture, http_jpeg_needs_buffer } };
+    *links++ = (link_t){ camera->decoder, { camera->codec_h264->output_list } };
     *links++ = (link_t){ camera->codec_h264, { }, { http_h264_capture, http_h264_needs_buffer } };
   } else if (camera->options.format != V4L2_PIX_FMT_H264) {
-    *links++ = (link_t){ camera->camera, { camera->decoder }, { http_h264_capture, http_h264_needs_buffer }};
-    *links++ = (link_t){ camera->decoder, { camera->codec_jpeg } };
+    *links++ = (link_t){ camera->camera, { camera->decoder->output_list }, { http_h264_capture, http_h264_needs_buffer }};
+    *links++ = (link_t){ camera->decoder, { camera->codec_jpeg->output_list } };
     *links++ = (link_t){ camera->codec_jpeg, { }, { http_jpeg_capture, http_jpeg_needs_buffer } };
   } else {
-    *links++ = (link_t){ camera->camera, { camera->decoder } };
-    *links++ = (link_t){ camera->decoder, { camera->codec_jpeg, camera->codec_h264 } };
+    *links++ = (link_t){ camera->camera, { camera->decoder->output_list } };
+    *links++ = (link_t){ camera->decoder, { camera->codec_jpeg->output_list, camera->codec_h264->output_list } };
     *links++ = (link_t){ camera->codec_jpeg, { }, { http_jpeg_capture, http_jpeg_needs_buffer } };
     *links++ = (link_t){ camera->codec_h264, { }, { http_h264_capture, http_h264_needs_buffer } };
   }

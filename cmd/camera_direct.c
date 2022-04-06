@@ -27,7 +27,7 @@ int camera_configure_direct(camera_t *camera)
 
   link_t *links = camera->links;
 
-  *links++ = (link_t){ camera->camera, { camera->codec_jpeg, camera->codec_h264 } };
+  *links++ = (link_t){ camera->camera, { camera->codec_jpeg->output_list, camera->codec_h264->output_list } };
   *links++ = (link_t){ camera->codec_jpeg, { }, { http_jpeg_capture, http_jpeg_needs_buffer } };
   *links++ = (link_t){ camera->codec_h264, { }, { http_h264_capture, http_h264_needs_buffer } };
   return 0;
