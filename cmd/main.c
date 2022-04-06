@@ -12,12 +12,19 @@
 http_method_t http_methods[] = {
   { "GET / ", http_index },
   { "GET /snapshot ", http_snapshot },
+  { "GET /snapshot?", http_snapshot },
   { "GET /stream ", http_stream },
+  { "GET /stream?", http_stream },
   { "GET /?action=snapshot ", http_snapshot },
+  { "GET /?action=snapshot?", http_snapshot },
   { "GET /?action=stream ", http_stream },
+  { "GET /?action=stream?", http_stream },
   { "GET /video ", http_video_html },
+  { "GET /video?", http_video_html },
   { "GET /video.h264 ", http_video },
+  { "GET /video.h264?", http_video },
   { "GET /jmuxer.min.js ", http_jmuxer_js },
+  { "GET /jmuxer.min.js?", http_jmuxer_js },
   { NULL, NULL }
 };
 
