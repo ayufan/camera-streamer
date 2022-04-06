@@ -18,12 +18,14 @@ typedef struct buffer_lock_s {
 #define DEFAULT_BUFFER_LOCK_TIMEOUT 16 // ~60fps
 #define DEFAULT_BUFFER_LOCK_GET_TIMEOUT 2000 // 2s
 
-#define DEFINE_BUFFER_LOCK(_name, _timeout_ms) static buffer_lock_t _name = { \
+#define DEFINE_BUFFER_LOCK(_name, _timeout_ms) buffer_lock_t _name = { \
     .name = #_name, \
     .lock = PTHREAD_MUTEX_INITIALIZER, \
     .cond_wait = PTHREAD_COND_INITIALIZER, \
     .timeout_us = (_timeout_ms > DEFAULT_BUFFER_LOCK_TIMEOUT ? _timeout_ms : DEFAULT_BUFFER_LOCK_TIMEOUT) * 1000LL, \
   };
+
+#define DECLARE_BUFFER_LOCK(_name) extern buffer_lock_t _name;
 
 typedef int (*buffer_write_fn)(buffer_lock_t *buf_lock, buffer_t *buf, int frame, void *data);
 
