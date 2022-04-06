@@ -11,6 +11,7 @@
 #include <signal.h>
 
 #include "http/http.h"
+#include "hw/v4l2.h"
 
 #define BUFSIZE 256
 
@@ -86,7 +87,7 @@ static void http_process(http_worker_t *worker, FILE *stream)
 static void http_client(http_worker_t *worker)
 {
   worker->client_host = inet_ntoa(worker->client_addr.sin_addr);
-  printf("Client connected %s.\n", worker->client_host);
+  E_LOG_INFO(worker, "Client connected %s.", worker->client_host);
 
   struct timeval tv;
   tv.tv_sec = 3;
@@ -107,7 +108,7 @@ static void http_client(http_worker_t *worker)
   close(worker->client_fd);
   worker->client_fd = -1;
 
-  printf("Client disconnected %s.\n", worker->client_host);
+  E_LOG_INFO(worker, "Client disconnected %s.", worker->client_host);
   worker->client_host = NULL;
 }
 

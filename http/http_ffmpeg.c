@@ -25,11 +25,13 @@ static AVRational time_base = {1, 1000LL * 1000LL};
 typedef struct {
   const char *name;
   FILE *stream;
+  const char *input_format;
   const char *content_type;
   const char *video_format;
 
   AVIOContext *input_avio;
   AVFormatContext *input_context;
+  AVDictionary *input_opts;
   AVIOContext *output_avio;
   AVFormatContext *output_context;
   AVPacket *packet;
@@ -55,7 +57,7 @@ static int http_ffmpeg_read_from_buf(void *opaque, uint8_t *buf, int buf_size)
 
   buf_size = FFMIN(buf_size, status->buf->used - status->buf_offset);
   if (!buf_size)
-    return AVERROR_EOF;
+    return 0;
 
   E_LOG_DEBUG(status, "http_ffmpeg_read_from_buf: offset=%d, n=%d", status->buf_offset, buf_size);
   memcpy(buf, (char*)status->buf->start + status->buf_offset, buf_size);
@@ -78,7 +80,7 @@ static int http_ffmpeg_write_to_stream(void *opaque, uint8_t *buf, int buf_size)
   fflush(status->stream);
 
   E_LOG_DEBUG(status, "http_ffmpeg_write_to_stream: offset=%d, n=%d, buf_size=%d, error=%d",
-    status->stream_offset, buf_size, ferror(status->stream));
+    status->stream_offset, n, buf_size, ferror(status->stream));
   status->stream_offset += n;
   if (ferror(status->stream))
     return AVERROR_EOF;
@@ -120,10 +122,14 @@ static void http_ffmpeg_close_avcontext(AVFormatContext **context)
   if (!*context)
     return;
 
-  if ((*context)->pb)
-    av_freep(&(*context)->pb->buffer);
+  AVIOContext *pb = (*context)->pb;
+  if (pb) av_freep(&pb->buffer);
   avio_context_free(&(*context)->pb);
-  avformat_close_input(context);
+  if ((*context)->iformat)
+    avformat_close_input(context);
+  else
+    avformat_free_context(*context);
+  *context = NULL;
 }
 
 static int http_ffmpeg_copy_streams(http_ffmpeg_status_t *status)
@@ -163,8 +169,10 @@ static int http_ffmpeg_open_status(http_ffmpeg_status_t *status)
 
   if (status->packet)
     return 0;
-    
 
+  AVInputFormat *input_format = av_find_input_format(status->input_format);
+  if (!input_format)
+    return AVERROR(EINVAL);
 
   status->packet = av_packet_alloc();
   if (!status->packet)
@@ -173,7 +181,7 @@ static int http_ffmpeg_open_status(http_ffmpeg_status_t *status)
     return ret;
   if ((ret = http_ffmpeg_init_avcontext(&status->output_context, status, 1, http_ffmpeg_write_to_stream)) < 0)
     return ret;
-  if ((ret = avformat_open_input(&status->input_context, NULL, NULL, NULL)) < 0)
+  if ((ret = avformat_open_input(&status->input_context, NULL, input_format, &status->input_opts)) < 0)
     return ret;
   if ((ret = avformat_find_stream_info(status->input_context, NULL)) < 0)
     return ret;
@@ -183,7 +191,6 @@ static int http_ffmpeg_open_status(http_ffmpeg_status_t *status)
     return ret;
 
   status->start_time = get_monotonic_time_us(NULL, NULL);
-
   return 0;
 }
 
@@ -192,6 +199,7 @@ static int http_ffmpeg_close_status(http_ffmpeg_status_t *status)
   http_ffmpeg_close_avcontext(&status->input_context);
   http_ffmpeg_close_avcontext(&status->output_context);
   av_packet_free(&status->packet);
+  av_dict_free(&status->input_opts);
   av_dict_free(&status->output_opts);
 }
 
@@ -230,6 +238,7 @@ static int http_ffmpeg_copy_packets(http_ffmpeg_status_t *status)
     );
  
     ret = av_interleaved_write_frame(status->output_context, status->packet);
+    av_packet_unref(status->packet);
 
     if (ret == AVERROR_EOF) {
       E_LOG_DEBUG(status, "av_interleaved_write_frame: EOF, pts: %d, since_start: %d", ret, pts, since_start);
@@ -283,11 +292,11 @@ static void http_ffmpeg_video(http_worker_t *worker, FILE *stream, const char *c
   http_ffmpeg_status_t status = {
     .name = worker->name,
     .stream = stream,
+    .input_format = "h264",
     .content_type = content_type,
     .video_format = video_format
   };
 
-  av_dict_set_int(&status.output_opts, "probesize", 4096, 0);
   av_dict_set_int(&status.output_opts, "direct", 1, 0);
   //av_dict_set_int(&status.output_opts, "frag_duration", 1, 0);
   av_dict_set_int(&status.output_opts, "frag_size", 4096, 0);
