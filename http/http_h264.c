@@ -7,7 +7,7 @@
 #include "hw/buffer_list.h"
 #include "hw/device.h"
 
-DEFINE_BUFFER_LOCK(http_h264);
+DEFINE_BUFFER_LOCK(http_h264, 0);
 
 static const char *const VIDEO_HEADER = "HTTP/1.0 200 OK\r\n"
                                          "Access-Control-Allow-Origin: *\r\n"

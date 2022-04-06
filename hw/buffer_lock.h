@@ -9,12 +9,20 @@ typedef struct buffer_lock_s {
   pthread_mutex_t lock;
   pthread_cond_t cond_wait;
   buffer_t *buf;
-  struct timeval buf_time;
+  uint64_t buf_time_us;
   int counter;
   int refs;
+  uint64_t timeout_us;
 } buffer_lock_t;
 
-#define DEFINE_BUFFER_LOCK(name) static buffer_lock_t name = { #name, PTHREAD_MUTEX_INITIALIZER, PTHREAD_COND_INITIALIZER, NULL, 0 };
+#define DEFAULT_BUFFER_LOCK_TIMEOUT 16 // ~60fps
+
+#define DEFINE_BUFFER_LOCK(_name, _timeout_ms) static buffer_lock_t _name = { \
+    .name = #_name, \
+    .lock = PTHREAD_MUTEX_INITIALIZER, \
+    .cond_wait = PTHREAD_COND_INITIALIZER, \
+    .timeout_us = (_timeout_ms > DEFAULT_BUFFER_LOCK_TIMEOUT ? _timeout_ms : DEFAULT_BUFFER_LOCK_TIMEOUT) * 1000LL, \
+  };
 
 void buffer_lock_capture(buffer_lock_t *buf_lock, buffer_t *buf);
 buffer_t *buffer_lock_get(buffer_lock_t *buf_lock, int timeout_s, int *counter);

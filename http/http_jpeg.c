@@ -5,7 +5,7 @@
 #include "hw/buffer.h"
 #include "hw/buffer_lock.h"
 
-DEFINE_BUFFER_LOCK(http_jpeg);
+DEFINE_BUFFER_LOCK(http_jpeg, 1000);
 
 #define PART_BOUNDARY "123456789000000000000987654321"
 #define CONTENT_TYPE "image/jpeg"

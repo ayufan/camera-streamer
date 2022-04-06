@@ -20,15 +20,13 @@ void buffer_lock_use(buffer_lock_t *buf_lock, int ref)
 
 bool buffer_lock_needs_buffer(buffer_lock_t *buf_lock)
 {
-  struct timeval now;
-  gettimeofday(&now, NULL);
+  uint64_t now = get_monotonic_time_us(NULL, NULL);
   bool needs_buffer = false;
 
   pthread_mutex_lock(&buf_lock->lock);
-  if (now.tv_sec - buf_lock->buf_time.tv_sec > 1) {
+  if (buf_lock->timeout_us > 0 && now - buf_lock->buf_time_us > buf_lock->timeout_us) {
     buffer_consumed(buf_lock->buf, buf_lock->name);
     buf_lock->buf = NULL;
-    needs_buffer = true;
   }
   if (buf_lock->refs > 0) {
     needs_buffer = true;
@@ -45,7 +43,7 @@ void buffer_lock_capture(buffer_lock_t *buf_lock, buffer_t *buf)
   buffer_use(buf);
   buf_lock->buf = buf;
   buf_lock->counter++;
-  gettimeofday(&buf_lock->buf_time, NULL);
+  buf_lock->buf_time_us = get_monotonic_time_us(NULL, NULL);
   E_LOG_DEBUG(buf_lock, "Captured buffer %s (refs=%d), frame=%d", dev_name(buf), buf ? buf->mmap_reflinks : 0, buf_lock->counter);
   pthread_cond_broadcast(&buf_lock->cond_wait);
   pthread_mutex_unlock(&buf_lock->lock);
