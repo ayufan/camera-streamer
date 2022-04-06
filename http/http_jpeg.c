@@ -64,11 +64,12 @@ error:
 void http_stream(http_worker_t *worker, FILE *stream)
 {
   int counter = 0;
+  buffer_t *buf = NULL;
   fprintf(stream, STREAM_HEADER);
   buffer_lock_use(&http_jpeg, 1);
 
   while (!feof(stream)) {
-    buffer_t *buf = buffer_lock_get(&http_jpeg, 0, &counter);
+    buf = buffer_lock_get(&http_jpeg, 0, &counter);
 
     if (!buf) {
       fprintf(stream, STREAM_ERROR, -1, "No frames.");
@@ -86,8 +87,10 @@ void http_stream(http_worker_t *worker, FILE *stream)
     }
 
     buffer_consumed(buf, "jpeg-stream");
+    buf = NULL;
   }
 
 error:
+  buffer_consumed(buf, "error");
   buffer_lock_use(&http_jpeg, -1);
 }

@@ -65,9 +65,11 @@ int _build_fds(link_t *all_links, struct pollfd *fds, link_t **links, buffer_lis
       source->device->output_device->paused = paused;
     }
 
+    int count_enqueued = buffer_list_count_enqueued(source);
+
     fds[n].fd = source->device->fd;
     fds[n].events = POLLHUP;
-    if (!source->device->paused)
+    if (!source->device->paused && count_enqueued > 0)
       fds[n].events |= POLLIN;
     fds[n].revents = 0;
     buf_lists[n] = source;

@@ -30,12 +30,13 @@ void http_video(http_worker_t *worker, FILE *stream)
   bool had_key_frame = false;
   bool requested_key_frame = false;
   int counter = 0;
+  buffer_t *buf = NULL;
   fprintf(stream, VIDEO_HEADER);
 
   buffer_lock_use(&http_h264, 1);
 
   while (!feof(stream)) {
-    buffer_t *buf = buffer_lock_get(&http_h264, 0, &counter);
+    buf = buffer_lock_get(&http_h264, 0, &counter);
     if (!buf) {
       goto error;
     }
@@ -59,8 +60,10 @@ void http_video(http_worker_t *worker, FILE *stream)
       requested_key_frame = true;
     }
     buffer_consumed(buf, "h264-stream");
+    buf = NULL;
   }
 
 error:
+  buffer_consumed(buf, "error");
   buffer_lock_use(&http_h264, -1);
 }
