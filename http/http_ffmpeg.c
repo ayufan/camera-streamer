@@ -289,7 +289,8 @@ static void http_ffmpeg_video(http_worker_t *worker, FILE *stream, const char *c
 
   av_dict_set_int(&status.output_opts, "probesize", 4096, 0);
   av_dict_set_int(&status.output_opts, "direct", 1, 0);
-  av_dict_set_int(&status.output_opts, "frag_duration", 0, 0);
+  //av_dict_set_int(&status.output_opts, "frag_duration", 1, 0);
+  av_dict_set_int(&status.output_opts, "frag_size", 4096, 0);
   av_dict_set_int(&status.output_opts, "low_delay", 1, 0);
   av_dict_set_int(&status.output_opts, "nobuffer", 1, 0);
   av_dict_set_int(&status.output_opts, "flush_packets", 1, 0);
