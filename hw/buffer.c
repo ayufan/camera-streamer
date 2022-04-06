@@ -54,11 +54,6 @@ buffer_t *buffer_open(const char *name, buffer_list_t *buf_list, int index) {
     buf->dma_fd = v4l2_exp.fd;
   }
 
-  if (buf_list->do_capture && buf_list->do_mmap) {
-    buf->used = 0;
-    buffer_consumed(buf, "capture-enqueue");
-  }
-
   return buf;
 
 error:

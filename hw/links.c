@@ -65,11 +65,18 @@ int _build_fds(link_t *all_links, struct pollfd *fds, link_t **links, buffer_lis
       source->device->output_device->paused = paused;
     }
 
+    if (!source->device->paused && source->do_mmap) {
+      buffer_t *buf;
+      while (buf = buffer_list_find_slot(source)) {
+        buffer_consumed(buf, "enqueued");
+      }
+    }
+  
     int count_enqueued = buffer_list_count_enqueued(source);
 
     fds[n].fd = source->device->fd;
     fds[n].events = POLLHUP;
-    if (!source->device->paused && count_enqueued > 0)
+    if (count_enqueued > 0)
       fds[n].events |= POLLIN;
     fds[n].revents = 0;
     buf_lists[n] = source;
@@ -102,7 +109,6 @@ int links_enqueue_from_source(buffer_list_t *buf_list, link_t *link)
     link->callbacks.on_buffer(buf);
   }
 
-  buffer_consumed(buf, "link-from-source");
   return 0;
 
 error:
