@@ -183,13 +183,14 @@ buffer_t *buffer_list_dequeue(buffer_list_t *buf_list)
   buf->mmap_reflinks = 1;
   uint64_t enqueued_time_us = get_monotonic_time_us(NULL, NULL) - buf->enqueued_time_us;
 
-	E_LOG_DEBUG(buf_list, "Grabbed mmap buffer=%u, bytes=%d, used=%d, frame=%d, linked=%s, enqueued_time_us=%lluus",
+	E_LOG_DEBUG(buf_list, "Grabbed mmap buffer=%u, bytes=%d, used=%d, frame=%d, linked=%s, enqueued_time_us=%lluus, flags=%08x",
     buf->index,
     buf->length,
     buf->used,
     buf_list->frames,
     buf->mmap_source ? buf->mmap_source->name : NULL,
-    enqueued_time_us);
+    enqueued_time_us,
+    buf->v4l2_buffer.flags);
 
   if (buf->mmap_source) {
     buf->mmap_source->used = 0;

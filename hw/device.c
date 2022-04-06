@@ -138,6 +138,13 @@ int device_open_buffer_list_output(device_t *dev, buffer_list_t *capture_list)
 
 int device_open_buffer_list_capture(device_t *dev, buffer_list_t *output_list, float div, unsigned format, bool do_mmap)
 {
+  if (!output_list) {
+    output_list = dev->output_list;
+  }
+  if (!output_list) {
+    return -1;
+  }
+
   return device_open_buffer_list(dev, true,
     output_list->fmt_width / div, output_list->fmt_height / div,
     format, 0, output_list->nbufs, do_mmap);

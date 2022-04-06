@@ -15,8 +15,11 @@ int camera_configure_decoder(camera_t *camera)
 
   camera->decoder = device_open("DECODER", "/dev/video10");
 
-  if (device_open_buffer_list_output(camera->decoder, src) < 0 ||
-    device_open_buffer_list_capture(camera->decoder, src, 1.0, V4L2_PIX_FMT_YUV420, true) < 0) {
+  if (device_open_buffer_list_output(camera->decoder, src) < 0) {
+    return -1;
+  }
+
+  if (device_open_buffer_list_capture(camera->decoder, NULL, 1.0, 0, true) < 0) {
     return -1;
   }
 

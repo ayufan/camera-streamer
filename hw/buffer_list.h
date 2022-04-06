@@ -34,3 +34,4 @@ buffer_t *buffer_list_dequeue(buffer_list_t *buf_list);
 int buffer_list_count_enqueued(buffer_list_t *buf_list);
 
 int buffer_list_enqueue(buffer_list_t *buf_list, buffer_t *dma_buf);
+int buffer_list_refresh_states(buffer_list_t *buf_list);
