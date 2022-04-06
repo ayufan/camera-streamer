@@ -9,12 +9,13 @@ void _update_paused(link_t *all_links)
 {
   int n = 0;
 
-  for (n = 0; all_links[n].capture; n++);
+  for (n = 0; all_links[n].source; n++);
 
   for (int i = n; i-- > 0; ) {
     link_t *link = &all_links[i];
+    buffer_list_t *source = link->source;
 
-    if (!link->capture->capture_list->streaming) {
+    if (!source->streaming) {
       continue;
     }
 
@@ -40,10 +41,10 @@ void _update_paused(link_t *all_links)
       }
     }
 
-    link->capture->paused = paused;
+    source->device->paused = paused;
 
-    if (link->capture->output_device) {
-      link->capture->output_device->paused = paused;
+    if (source->device->output_device) {
+      source->device->output_device->paused = paused;
     }
   }
 }
@@ -52,16 +53,17 @@ int _build_fds(link_t *all_links, struct pollfd *fds, link_t **links, buffer_lis
 {
   int n = 0;
 
-  for (int i = 0; all_links[i].capture; i++) {
+  for (int i = 0; all_links[i].source; i++) {
     link_t *link = &all_links[i];
+    buffer_list_t *source = link->source;
 
-    if (!link->capture || !link->capture->capture_list || n >= max_n) {
+    if (n >= max_n) {
       return -EINVAL;
     }
-    if (!link->capture->capture_list->do_mmap) {
+    if (!source->do_mmap) {
       continue;
     }
-    if (!link->capture->capture_list->streaming) {
+    if (!source->streaming) {
       continue;
     }
 
@@ -89,10 +91,10 @@ int _build_fds(link_t *all_links, struct pollfd *fds, link_t **links, buffer_lis
       n++;
     }
 
-    if (!link->capture->paused) {
-      struct pollfd fd = {link->capture->fd, POLLIN};
+    if (!source->device->paused) {
+      struct pollfd fd = {source->device->fd, POLLIN};
       fds[n] = fd;
-      buf_lists[n] = link->capture->capture_list;
+      buf_lists[n] = source;
       links[n] = link;
       n++;
     }
@@ -122,7 +124,7 @@ int links_step(link_t *all_links, int timeout)
     link_t *link = links[i];
 
     E_LOG_DEBUG(buf_list, "pool i=%d revents=%08x streaming=%d enqueued=%d/%d paused=%d", i, fds[i].revents, buf_list->streaming,
-      buffer_list_count_enqueued(buf_list), buf_list->nbufs, link->capture->paused);
+      buffer_list_count_enqueued(buf_list), buf_list->nbufs, link->source->device->paused);
 
     if (fds[i].revents & POLLIN) {
       E_LOG_DEBUG(buf_list, "POLLIN");
@@ -162,20 +164,12 @@ int links_step(link_t *all_links, int timeout)
 
 int links_stream(link_t *all_links, bool do_stream)
 {
-  int n;
-
-  for (n = 0; all_links[n].capture; n++);
-
-  for (int i = n; --i >= 0; ) {
+  for (int i = 0; all_links[i].source; i++) {
     bool streaming = true;
     link_t *link = &all_links[i];
 
-    if (buffer_list_stream(link->capture->capture_list, streaming) < 0) {
-      E_LOG_ERROR(link->capture, "Failed to start streaming");
-    }
-
-    if (device_set_stream(link->capture, streaming) < 0) {
-      E_LOG_ERROR(link->capture, "Failed to start streaming");
+    if (buffer_list_stream(link->source, streaming) < 0) {
+      E_LOG_ERROR(link->source, "Failed to start streaming");
     }
 
     for (int j = 0; link->sinks[j]; j++) {

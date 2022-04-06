@@ -9,7 +9,7 @@ typedef void (*link_on_buffer)(buffer_t *buf);
 typedef bool (*link_check_streaming)();
 
 typedef struct link_s {
-  struct device_s *capture; // capture_list
+  struct buffer_list_s *source; // capture_list
   struct buffer_list_s *sinks[10];
   struct {
     link_on_buffer on_buffer;

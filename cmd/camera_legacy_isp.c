@@ -47,9 +47,9 @@ int camera_configure_legacy_isp(camera_t *camera, float div)
 
   link_t *links = camera->links;
 
-  *links++ = (link_t){ camera->camera, { camera->legacy_isp->output_list } };
-  *links++ = (link_t){ camera->legacy_isp, { camera->codec_jpeg->output_list, camera->codec_h264->output_list }, { write_yuvu, NULL } };
-  *links++ = (link_t){ camera->codec_jpeg, { }, { http_jpeg_capture, http_jpeg_needs_buffer } };
-  *links++ = (link_t){ camera->codec_h264, { }, { http_h264_capture, http_h264_needs_buffer } };
+  *links++ = (link_t){ camera->camera->capture_list, { camera->legacy_isp->output_list } };
+  *links++ = (link_t){ camera->legacy_isp->capture_list, { camera->codec_jpeg->output_list, camera->codec_h264->output_list }, { write_yuvu, NULL } };
+  *links++ = (link_t){ camera->codec_jpeg->capture_list, { }, { http_jpeg_capture, http_jpeg_needs_buffer } };
+  *links++ = (link_t){ camera->codec_h264->capture_list, { }, { http_h264_capture, http_h264_needs_buffer } };
   return 0;
 }

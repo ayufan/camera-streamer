@@ -54,16 +54,16 @@ int camera_configure_isp(camera_t *camera, float high_div, float low_div)
 
   link_t *links = camera->links;
 
-  *links++ = (link_t){ camera->camera, { camera->isp_srgb->output_list } };
+  *links++ = (link_t){ camera->camera->capture_list, { camera->isp_srgb->output_list } };
 
   if (camera->isp_yuuv_low) {
-    *links++ = (link_t){ camera->isp_yuuv, { } };
-    *links++ = (link_t){ camera->isp_yuuv_low, { camera->codec_jpeg->output_list, camera->codec_h264->output_list }, { write_yuvu } };
+    *links++ = (link_t){ camera->isp_yuuv->capture_list, { } };
+    *links++ = (link_t){ camera->isp_yuuv_low->capture_list, { camera->codec_jpeg->output_list, camera->codec_h264->output_list }, { write_yuvu } };
   } else {
-    *links++ = (link_t){ camera->isp_yuuv, { camera->codec_jpeg->output_list, camera->codec_h264->output_list }, { write_yuvu } };
+    *links++ = (link_t){ camera->isp_yuuv->capture_list, { camera->codec_jpeg->output_list, camera->codec_h264->output_list }, { write_yuvu } };
   }
 
-  *links++ = (link_t){ camera->codec_jpeg, { }, { http_jpeg_capture, http_jpeg_needs_buffer } };
-  *links++ = (link_t){ camera->codec_h264, { }, { http_h264_capture, http_h264_needs_buffer } };
+  *links++ = (link_t){ camera->codec_jpeg->capture_list, { }, { http_jpeg_capture, http_jpeg_needs_buffer } };
+  *links++ = (link_t){ camera->codec_h264->capture_list, { }, { http_h264_capture, http_h264_needs_buffer } };
   return 0;
 }
