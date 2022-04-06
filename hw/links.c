@@ -5,16 +5,22 @@
 
 #define N_FDS 50
 
-void _update_paused(link_t *all_links)
+int _build_fds(link_t *all_links, struct pollfd *fds, link_t **links, buffer_list_t **buf_lists, int max_n)
 {
-  int n = 0;
+  int n = 0, nlinks = 0;
 
-  for (n = 0; all_links[n].source; n++);
+  for (nlinks = 0; all_links[nlinks].source; nlinks++);
 
-  for (int i = n; i-- > 0; ) {
+  // This traverses in reverse order as it requires to first fix outputs
+  // and go back into captures
+
+  for (int i = nlinks; i-- > 0; ) {
     link_t *link = &all_links[i];
     buffer_list_t *source = link->source;
 
+    if (n >= max_n) {
+      return -EINVAL;
+    }
     if (!source->streaming) {
       continue;
     }
@@ -23,48 +29,6 @@ void _update_paused(link_t *all_links)
 
     if (link->callbacks.check_streaming && link->callbacks.check_streaming()) {
       paused = false;
-    }
-
-    for (int j = 0; link->sinks[j]; j++) {
-      buffer_list_t *sink = link->sinks[j];
-
-      if (!sink->streaming) {
-        continue;
-      }
-      if (sink->device->paused) {
-        continue;
-      }
-
-      int count_enqueued = buffer_list_count_enqueued(sink);
-      if (count_enqueued < sink->nbufs) {
-        paused = false;
-      }
-    }
-
-    source->device->paused = paused;
-
-    if (source->device->output_device) {
-      source->device->output_device->paused = paused;
-    }
-  }
-}
-
-int _build_fds(link_t *all_links, struct pollfd *fds, link_t **links, buffer_list_t **buf_lists, int max_n)
-{
-  int n = 0;
-
-  for (int i = 0; all_links[i].source; i++) {
-    link_t *link = &all_links[i];
-    buffer_list_t *source = link->source;
-
-    if (n >= max_n) {
-      return -EINVAL;
-    }
-    if (!source->do_mmap) {
-      continue;
-    }
-    if (!source->streaming) {
-      continue;
     }
 
     for (int j = 0; link->sinks[j]; j++) {
@@ -80,20 +44,27 @@ int _build_fds(link_t *all_links, struct pollfd *fds, link_t **links, buffer_lis
       int count_enqueued = buffer_list_count_enqueued(sink);
 
       // Can something be dequeued?
-      if (count_enqueued == 0) {
-        continue;
+      if (count_enqueued > 0) {
+        fds[n] = (struct pollfd){ sink->device->fd, POLLOUT };
+        buf_lists[n] = sink;
+        links[n] = link;
+        n++;
       }
 
-      struct pollfd fd = {sink->device->fd, POLLOUT};
-      fds[n] = fd;
-      buf_lists[n] = sink;
-      links[n] = link;
-      n++;
+      // Can this chain pauses
+      if (!sink->device->paused && count_enqueued < sink->nbufs) {
+        paused = false;
+      }
+    }
+
+    source->device->paused = paused;
+
+    if (source->device->output_device) {
+      source->device->output_device->paused = paused;
     }
 
     if (!source->device->paused) {
-      struct pollfd fd = {source->device->fd, POLLIN};
-      fds[n] = fd;
+      fds[n] = (struct pollfd){ source->device->fd, POLLIN };
       buf_lists[n] = source;
       links[n] = link;
       n++;
@@ -109,8 +80,6 @@ int links_step(link_t *all_links, int timeout)
   link_t *links[N_FDS];
   buffer_list_t *buf_lists[N_FDS];
   buffer_t *buf;
-
-  _update_paused(all_links);
 
   int n = _build_fds(all_links, fds, links, buf_lists, N_FDS);
   int ret = poll(fds, n, timeout);
