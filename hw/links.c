@@ -44,12 +44,13 @@ int _build_fds(link_t *all_links, struct pollfd *fds, link_t **links, buffer_lis
       int count_enqueued = buffer_list_count_enqueued(sink);
 
       // Can something be dequeued?
-      if (count_enqueued > 0) {
-        fds[n] = (struct pollfd){ sink->device->fd, POLLOUT };
-        buf_lists[n] = sink;
-        links[n] = NULL;
-        n++;
-      }
+      fds[n].fd = sink->device->fd;
+      fds[n].events = POLLHUP;
+      if (count_enqueued > 0)
+        fds[n].events |= POLLOUT;
+      buf_lists[n] = source;
+      links[n] = link;
+      n++;
 
       // Can this chain pauses
       if (!sink->device->paused && count_enqueued < sink->nbufs) {
@@ -63,12 +64,13 @@ int _build_fds(link_t *all_links, struct pollfd *fds, link_t **links, buffer_lis
       source->device->output_device->paused = paused;
     }
 
-    if (!source->device->paused) {
-      fds[n] = (struct pollfd){ source->device->fd, POLLIN };
-      buf_lists[n] = source;
-      links[n] = link;
-      n++;
-    }
+    fds[n].fd = source->device->fd;
+    fds[n].events = POLLHUP;
+    if (!source->device->paused)
+      fds[n].events |= POLLIN;
+    buf_lists[n] = source;
+    links[n] = link;
+    n++;
   }
 
   return n;
@@ -154,6 +156,11 @@ int links_step(link_t *all_links, int timeout)
       if (links_dequeue_from_sink(buf_list) < 0) {
         return -1;
       }
+    }
+
+    if (fds[i].revents & POLLHUP) {
+      E_LOG_INFO(buf_list, "Device disconnected.");
+      return -1;
     }
 
     if (fds[i].revents & POLLERR) {
