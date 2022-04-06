@@ -10,7 +10,7 @@ device_t *device_open(const char *name, const char *path) {
   dev->subdev_fd = -1;
   dev->allow_dma = true;
   if(dev->fd < 0) {
-		E_LOG_ERROR(dev, "Can't open device");
+		E_LOG_ERROR(dev, "Can't open device: %s", path);
 	}
 
 	E_LOG_DEBUG(dev, "Querying device capabilities ...");
@@ -53,6 +53,8 @@ void device_close(device_t *dev) {
     close(dev->fd);
   }
 
+  free(dev->name);
+  free(dev->path);
   free(dev);
 }
 
@@ -141,8 +143,14 @@ int device_open_buffer_list_capture(device_t *dev, buffer_list_t *output_list, f
     format, 0, output_list->nbufs, do_mmap);
 }
 
-int device_stream(device_t *dev, bool do_on)
+int device_set_stream(device_t *dev, bool do_on)
 {
+  struct v4l2_event_subscription sub = {0};
+  sub.type = V4L2_EVENT_SOURCE_CHANGE;
+
+  E_LOG_DEBUG(dev, "Subscribing to DV-timings events ...");
+  xioctl(dev_name(dev), dev->fd, do_on ? VIDIOC_SUBSCRIBE_EVENT : VIDIOC_UNSUBSCRIBE_EVENT, &sub);
+
   if (dev->capture_list) {
     if (buffer_list_stream(dev->capture_list, do_on) < 0) {
       return -1;

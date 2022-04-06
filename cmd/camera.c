@@ -23,6 +23,12 @@ void camera_close(camera_t *camera)
     }
   }
 
+  for (int i = MAX_DEVICES; i-- > 0; ) {
+    if (camera->links[i].callbacks.on_buffer) {
+      camera->links[i].callbacks.on_buffer = NULL;
+    }
+  }
+
   memset(camera->links, 0, sizeof(camera->links));
   free(camera);
 }
