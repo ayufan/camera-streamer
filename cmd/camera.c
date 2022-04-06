@@ -13,6 +13,9 @@ void camera_init(camera_t *camera)
 
 void camera_close(camera_t *camera)
 {
+  if (!camera)
+    return;
+
   for (int i = MAX_DEVICES; i-- > 0; ) {
     if (camera->devices[i]) {
       device_close(camera->devices[i]);
@@ -21,13 +24,18 @@ void camera_close(camera_t *camera)
   }
 
   memset(camera->links, 0, sizeof(camera->links));
+  free(camera);
 }
 
-int camera_open(camera_t *camera)
+camera_t *camera_open(camera_options_t *options)
 {
+  camera_t *camera = calloc(1, sizeof(camera_t));
+  camera->name = "CAMERA";
+  camera->options = *options;
+
   camera->camera = device_open(camera->name, camera->options.path);
   if (!camera->camera) {
-    return -1;
+    goto error;
   }
 
   camera->camera->allow_dma = camera->options.allow_dma;
@@ -40,7 +48,7 @@ int camera_open(camera_t *camera)
   device_set_pad_format(camera->camera, camera->options.width, camera->options.height, 0);
 
   if (device_open_buffer_list(camera->camera, true, camera->options.width, camera->options.height, camera->options.format, 0, camera->options.nbufs, true) < 0) {
-    return -1;
+    goto error;
   }
 
   switch (camera->camera->capture_list->fmt_format) {
@@ -74,10 +82,15 @@ int camera_open(camera_t *camera)
     break;
   }
 
-  return 0;
+  if (camera_set_params(camera) < 0) {
+    goto error;
+  }
+
+  return camera;
 
 error:
-  return -1;
+  camera_close(camera);
+  return NULL;
 }
 
 int camera_set_params(camera_t *camera)

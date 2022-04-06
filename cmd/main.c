@@ -71,23 +71,17 @@ option_t all_options[] = {
 
 int main(int argc, char *argv[])
 {
-  camera_t camera;
   int http_fd = -1;
   int ret = -1;
   const char *env;
+  camera_t *camera;
 
   if (parse_opts(all_options, argc, argv) < 0) {
     return -1;
   }
 
-  camera_init(&camera);
-  camera.options = camera_options;
-
-  if (camera_open(&camera) < 0) {
-    goto error;
-  }
-
-  if (camera_set_params(&camera) < 0) {
+  camera = camera_open(&camera_options);
+  if (!camera) {
     goto error;
   }
 
@@ -96,10 +90,10 @@ int main(int argc, char *argv[])
     goto error;
   }
 
-  ret = camera_run(&camera);
+  ret = camera_run(camera);
 
 error:
   close(http_fd);
-  camera_close(&camera);
+  camera_close(camera);
   return ret;
 }

@@ -42,10 +42,9 @@ typedef struct camera_s {
 
 #define CAMERA(DEVICE) camera->devices[DEVICE]
 
-void camera_init(camera_t *camera);
-void camera_close(camera_t *camera);
-int camera_open(camera_t *camera);
+camera_t *camera_open(camera_options_t *camera);
 int camera_set_params(camera_t *camera);
+void camera_close(camera_t *camera);
 int camera_run(camera_t *camera);
 
 int camera_configure_isp(camera_t *camera, float high_div, float low_div);
