@@ -2,6 +2,8 @@
 
 #include "v4l2.h"
 
+#define LINKS_LOOP_INTERVAL 100
+
 typedef struct buffer_s buffer_t;
 typedef struct buffer_list_s buffer_list_t;
 

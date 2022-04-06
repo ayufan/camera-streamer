@@ -220,7 +220,7 @@ int links_loop(link_t *all_links, bool *running)
   }
 
   while(*running) {
-    if (links_step(all_links, 1000) < 0) {
+    if (links_step(all_links, LINKS_LOOP_INTERVAL) < 0) {
       links_stream(all_links, false);
       return -1;
     }

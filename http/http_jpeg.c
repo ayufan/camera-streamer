@@ -43,7 +43,7 @@ void http_snapshot(http_worker_t *worker, FILE *stream)
 {
   int counter = 0;
   buffer_lock_use(&http_jpeg, 1);
-  buffer_t *buf = buffer_lock_get(&http_jpeg, 1, &counter);
+  buffer_t *buf = buffer_lock_get(&http_jpeg, 0, &counter);
 
   if (!buf) {
     http_404_header(worker, stream);
@@ -68,7 +68,7 @@ void http_stream(http_worker_t *worker, FILE *stream)
   buffer_lock_use(&http_jpeg, 1);
 
   while (!feof(stream)) {
-    buffer_t *buf = buffer_lock_get(&http_jpeg, 3, &counter);
+    buffer_t *buf = buffer_lock_get(&http_jpeg, 0, &counter);
 
     if (!buf) {
       fprintf(stream, STREAM_ERROR, -1, "No frames.");

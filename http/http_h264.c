@@ -35,7 +35,7 @@ void http_video(http_worker_t *worker, FILE *stream)
   buffer_lock_use(&http_h264, 1);
 
   while (!feof(stream)) {
-    buffer_t *buf = buffer_lock_get(&http_h264, 3, &counter);
+    buffer_t *buf = buffer_lock_get(&http_h264, 0, &counter);
     if (!buf) {
       goto error;
     }

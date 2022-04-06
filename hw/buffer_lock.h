@@ -16,6 +16,7 @@ typedef struct buffer_lock_s {
 } buffer_lock_t;
 
 #define DEFAULT_BUFFER_LOCK_TIMEOUT 16 // ~60fps
+#define DEFAULT_BUFFER_LOCK_GET_TIMEOUT 2000 // 2s
 
 #define DEFINE_BUFFER_LOCK(_name, _timeout_ms) static buffer_lock_t _name = { \
     .name = #_name, \
@@ -25,7 +26,7 @@ typedef struct buffer_lock_s {
   };
 
 void buffer_lock_capture(buffer_lock_t *buf_lock, buffer_t *buf);
-buffer_t *buffer_lock_get(buffer_lock_t *buf_lock, int timeout_s, int *counter);
+buffer_t *buffer_lock_get(buffer_lock_t *buf_lock, int timeout_ms, int *counter);
 bool buffer_lock_needs_buffer(buffer_lock_t *buf_lock);
 void buffer_lock_use(buffer_lock_t *buf_lock, int ref);
 bool buffer_lock_is_used(buffer_lock_t *buf_lock);

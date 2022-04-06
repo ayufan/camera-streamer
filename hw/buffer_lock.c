@@ -49,14 +49,15 @@ void buffer_lock_capture(buffer_lock_t *buf_lock, buffer_t *buf)
   pthread_mutex_unlock(&buf_lock->lock);
 }
 
-buffer_t *buffer_lock_get(buffer_lock_t *buf_lock, int timeout_s, int *counter)
+buffer_t *buffer_lock_get(buffer_lock_t *buf_lock, int timeout_ms, int *counter)
 {
   buffer_t *buf = NULL;
-  struct timeval now;
   struct timespec timeout;
-  gettimeofday(&now, NULL);
-  timeout.tv_nsec = now.tv_usec;
-  timeout.tv_sec = now.tv_sec + timeout_s;
+
+  if(!timeout_ms)
+    timeout_ms = DEFAULT_BUFFER_LOCK_GET_TIMEOUT;
+
+  get_time_us(CLOCK_REALTIME, &timeout, NULL, timeout_ms * 1000LL * 1000LL);
 
   pthread_mutex_lock(&buf_lock->lock);
   if (*counter == buf_lock->counter || !buf_lock->buf) {

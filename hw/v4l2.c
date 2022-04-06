@@ -80,10 +80,17 @@ int shrink_to_block(int size, int block)
 	return size / block * block;
 }
 
-uint64_t get_monotonic_time_us(struct timespec *ts, struct timeval *tv)
+uint64_t get_time_us(clockid_t clock, struct timespec *ts, struct timeval *tv, int64_t delays_us)
 {
 	struct timespec now;
-	clock_gettime(CLOCK_MONOTONIC, &now);
+	clock_gettime(clock, &now);
+
+	if (delays_us > 0) {
+		now.tv_nsec += delays_us * 1000LL;
+		now.tv_sec += now.tv_nsec / (1000LL * 1000LL * 1000LL);
+		now.tv_nsec %= 1000LL * 1000LL * 1000LL;
+	}
+
 	if (ts) {
 		*ts = now;
 	}
@@ -92,4 +99,9 @@ uint64_t get_monotonic_time_us(struct timespec *ts, struct timeval *tv)
 		tv->tv_usec = now.tv_nsec / 1000;
 	}
 	return now.tv_sec * 1000000LL + now.tv_nsec / 1000;
+}
+
+uint64_t get_monotonic_time_us(struct timespec *ts, struct timeval *tv)
+{
+	return get_time_us(CLOCK_MONOTONIC, ts, tv, 0);
 }
