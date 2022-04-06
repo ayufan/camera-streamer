@@ -30,9 +30,11 @@ bool buffer_consumed(buffer_t *buf, const char *who)
   }
 
   pthread_mutex_lock(&buffer_lock);
-  if (buf->mmap_reflinks > 0) {
-    buf->mmap_reflinks--;
+  if (buf->mmap_reflinks == 0) {
+    E_LOG_PERROR(buf, "Non symmetric reference counts");
   }
+
+  buf->mmap_reflinks--;
 
   if (!buf->enqueued && buf->mmap_reflinks == 0) {
     // update used bytes
@@ -170,6 +172,10 @@ buffer_t *buffer_list_dequeue(buffer_list_t *buf_list)
     buf->used = v4l2_buf.bytesused;
   }
   buf->v4l2_buffer.flags = v4l2_buf.flags;
+
+  if (buf->mmap_reflinks > 0) {
+    E_LOG_PERROR(buf, "Buffer appears to be enqueued? (links=%d)", buf->mmap_reflinks);
+  }
 
   buf->enqueued = false;
   buf->mmap_reflinks = 1;
