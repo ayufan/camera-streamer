@@ -58,6 +58,11 @@ camera_t *camera_open(camera_options_t *options)
   }
   camera->camera->capture_list->do_timestamps = true;
 
+  if (camera->options.fps > 0) {
+    camera->camera->capture_list->fmt_interval_us = 1000 * 1000 / camera->options.fps;
+    printf("buffer_lock.c: frame interval: %d\n", camera->camera->capture_list->fmt_interval_us);
+  }
+
   switch (camera->camera->capture_list->fmt_format) {
   case V4L2_PIX_FMT_YUYV:
     if (camera_configure_direct(camera) < 0) {

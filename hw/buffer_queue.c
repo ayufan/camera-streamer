@@ -180,6 +180,7 @@ buffer_t *buffer_list_dequeue(buffer_list_t *buf_list)
   }
   buf->v4l2_buffer.flags = v4l2_buf.flags;
   buf->v4l2_buffer.timestamp = v4l2_buf.timestamp;
+  buf_list->last_dequeued_us = get_monotonic_time_us(NULL, NULL);
 
   if (buf->mmap_reflinks > 0) {
     E_LOG_PERROR(buf, "Buffer appears to be enqueued? (links=%d)", buf->mmap_reflinks);

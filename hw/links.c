@@ -5,9 +5,10 @@
 
 #define N_FDS 50
 
-int _build_fds(link_t *all_links, struct pollfd *fds, link_t **links, buffer_list_t **buf_lists, int max_n)
+int _build_fds(link_t *all_links, struct pollfd *fds, link_t **links, buffer_list_t **buf_lists, int max_n, int *max_timeout_ms)
 {
   int n = 0, nlinks = 0;
+  uint64_t now_us = get_monotonic_time_us(NULL, NULL);
 
   for (nlinks = 0; all_links[nlinks].source; nlinks++);
 
@@ -67,9 +68,20 @@ int _build_fds(link_t *all_links, struct pollfd *fds, link_t **links, buffer_lis
   
     int count_enqueued = buffer_list_count_enqueued(source);
 
+    bool can_dequeue = count_enqueued > 0;
+    int64_t since_last_us = now_us - source->last_dequeued_us;
+    if (since_last_us < source->fmt_interval_us) {
+      can_dequeue = false;
+
+      int64_t since_last_ms = since_last_us / 1000;
+      if (since_last_ms < *max_timeout_ms) {
+        *max_timeout_ms = since_last_ms;
+      }
+    }
+
     fds[n].fd = source->device->fd;
     fds[n].events = POLLHUP;
-    if (count_enqueued > 0)
+    if (can_dequeue)
       fds[n].events |= POLLIN;
     fds[n].revents = 0;
     buf_lists[n] = source;
@@ -132,16 +144,16 @@ void print_pollfds(struct pollfd *fds, int n)
   printf("pollfds = %d\n", n);
 }
 
-int links_step(link_t *all_links, int timeout)
+int links_step(link_t *all_links, int timeout_ms)
 {
   struct pollfd fds[N_FDS] = {0};
   link_t *links[N_FDS];
   buffer_list_t *buf_lists[N_FDS];
   buffer_t *buf;
 
-  int n = _build_fds(all_links, fds, links, buf_lists, N_FDS);
+  int n = _build_fds(all_links, fds, links, buf_lists, N_FDS, &timeout_ms);
   print_pollfds(fds, n);
-  int ret = poll(fds, n, timeout);
+  int ret = poll(fds, n, timeout_ms);
   print_pollfds(fds, n);
 
   if (ret < 0 && errno != EINTR) {
