@@ -30,6 +30,8 @@ typedef struct {
 	char buf[10];
 } fourcc_string;
 
+#define CLOCK_FROM_PARAMS -1
+
 fourcc_string fourcc_to_string(unsigned format);
 unsigned fourcc_to_stride(unsigned width, unsigned format);
 int xioctl(const char *name, int fd, int request, void *arg);

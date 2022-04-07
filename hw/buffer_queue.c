@@ -51,7 +51,11 @@ bool buffer_consumed(buffer_t *buf, const char *who)
       buf->length,
       buf->mmap_source ? buf->mmap_source->name : NULL,
       who);
-    buf->enqueued_time_us = get_monotonic_time_us(NULL, &buf->v4l2_buffer.timestamp);
+
+    if (buf->buf_list->do_timestamps && !buf->buf_list->do_capture) {
+      get_monotonic_time_us(NULL, &buf->v4l2_buffer.timestamp);
+    }
+
     E_XIOCTL(buf, buf->buf_list->device->fd, VIDIOC_QBUF, &buf->v4l2_buffer, "Can't queue buffer.");
     buf->enqueued = true;
   }
@@ -116,6 +120,7 @@ int buffer_list_enqueue(buffer_list_t *buf_list, buffer_t *dma_buf)
   buf->v4l2_buffer.flags = 0;
   buf->v4l2_buffer.flags &= ~V4L2_BUF_FLAG_KEYFRAME;
   buf->v4l2_buffer.flags |= dma_buf->v4l2_buffer.flags & V4L2_BUF_FLAG_KEYFRAME;
+  buf->v4l2_buffer.timestamp = dma_buf->v4l2_buffer.timestamp;
 
   if (buf_list->do_mmap) {
     if (dma_buf->used > buf->length) {
@@ -175,21 +180,25 @@ buffer_t *buffer_list_dequeue(buffer_list_t *buf_list)
   }
   buf->v4l2_buffer.flags = v4l2_buf.flags;
 
+  if (buf_list->do_timestamps && buf_list->do_capture) {
+    get_monotonic_time_us(NULL, &buf->v4l2_buffer.timestamp);
+  } else {
+    buf->v4l2_buffer.timestamp = v4l2_buf.timestamp;
+  }
+
   if (buf->mmap_reflinks > 0) {
     E_LOG_PERROR(buf, "Buffer appears to be enqueued? (links=%d)", buf->mmap_reflinks);
   }
 
   buf->enqueued = false;
   buf->mmap_reflinks = 1;
-  uint64_t enqueued_time_us = get_monotonic_time_us(NULL, NULL) - buf->enqueued_time_us;
 
-	E_LOG_DEBUG(buf_list, "Grabbed mmap buffer=%u, bytes=%d, used=%d, frame=%d, linked=%s, enqueued_time_us=%lluus, flags=%08x",
+	E_LOG_DEBUG(buf_list, "Grabbed mmap buffer=%u, bytes=%d, used=%d, frame=%d, linked=%s, flags=%08x",
     buf->index,
     buf->length,
     buf->used,
     buf_list->frames,
     buf->mmap_source ? buf->mmap_source->name : NULL,
-    enqueued_time_us,
     buf->v4l2_buffer.flags);
 
   if (buf->mmap_source) {

@@ -16,6 +16,7 @@ typedef struct buffer_list_s {
   bool do_capture;
 
   unsigned fmt_width, fmt_height, fmt_format, fmt_bytesperline;
+  bool do_timestamps;
 
   bool streaming;
   int frames;

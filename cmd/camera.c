@@ -56,6 +56,7 @@ camera_t *camera_open(camera_options_t *options)
   if (device_open_buffer_list(camera->camera, true, camera->options.width, camera->options.height, camera->options.format, 0, camera->options.nbufs, true) < 0) {
     goto error;
   }
+  camera->camera->capture_list->do_timestamps = true;
 
   switch (camera->camera->capture_list->fmt_format) {
   case V4L2_PIX_FMT_YUYV:

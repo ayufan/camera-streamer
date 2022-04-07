@@ -83,7 +83,17 @@ int shrink_to_block(int size, int block)
 uint64_t get_time_us(clockid_t clock, struct timespec *ts, struct timeval *tv, int64_t delays_us)
 {
 	struct timespec now;
-	clock_gettime(clock, &now);
+
+	if (clock != CLOCK_FROM_PARAMS) {
+		clock_gettime(clock, &now);
+	} else if (ts) {
+		now = *ts;
+	} else if (tv) {
+		now.tv_sec = tv->tv_sec;
+		now.tv_nsec = tv->tv_usec * 1000;
+	} else {
+		return -1;
+	}
 
 	if (delays_us > 0) {
 		#define NS_IN_S (1000LL * 1000LL * 1000LL)
