@@ -54,6 +54,11 @@ int camera_configure_isp(camera_t *camera, float high_div, float low_div)
 
   link_t *links = camera->links;
 
+  if (camera->options.fps > 0) {
+    camera->codec_jpeg->capture_list->fmt_interval_us = 1000 * 1000 / camera->options.fps;
+    printf("buffer_lock.c: frame interval: %d\n", camera->codec_jpeg->capture_list->fmt_interval_us);
+  }
+
   *links++ = (link_t){ camera->camera->capture_list, { camera->isp_srgb->output_list } };
 
   if (camera->isp_yuuv_low) {

@@ -12,6 +12,7 @@ typedef struct buffer_lock_s {
   uint64_t buf_time_us;
   int counter;
   int refs;
+  int dropped;
   uint64_t timeout_us;
 } buffer_lock_t;
 
