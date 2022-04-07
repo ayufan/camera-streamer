@@ -4,6 +4,7 @@
 #include "hw/links.h"
 
 #define N_FDS 50
+#define QUEUE_ON_CAPTURE // seems to provide better latency
 
 int _build_fds(link_t *all_links, struct pollfd *fds, link_t **links, buffer_list_t **buf_lists, int max_n, int *max_timeout_ms)
 {
@@ -69,10 +70,12 @@ int _build_fds(link_t *all_links, struct pollfd *fds, link_t **links, buffer_lis
     int count_enqueued = buffer_list_count_enqueued(source);
     bool can_dequeue = count_enqueued > 0;
 
+#ifndef QUEUE_ON_CAPTURE
     if (now_us - source->last_dequeued_us < source->fmt_interval_us) {
       can_dequeue = false;
       *max_timeout_ms = MIN(*max_timeout_ms, (source->last_dequeued_us + source->fmt_interval_us - now_us) / 1000);
     }
+#endif
 
     fds[n].fd = source->device->fd;
     fds[n].events = POLLHUP;
@@ -139,16 +142,16 @@ void print_pollfds(struct pollfd *fds, int n)
   printf("pollfds = %d\n", n);
 }
 
-int links_step(link_t *all_links, int *timeout_ms)
+int links_step(link_t *all_links, int timeout_now_ms, int *timeout_next_ms)
 {
   struct pollfd fds[N_FDS] = {0};
   link_t *links[N_FDS];
   buffer_list_t *buf_lists[N_FDS];
   buffer_t *buf;
 
-  int n = _build_fds(all_links, fds, links, buf_lists, N_FDS, timeout_ms);
+  int n = _build_fds(all_links, fds, links, buf_lists, N_FDS, &timeout_now_ms);
   print_pollfds(fds, n);
-  int ret = poll(fds, n, *timeout_ms);
+  int ret = poll(fds, n, timeout_now_ms);
   print_pollfds(fds, n);
 
   uint64_t now_us = get_monotonic_time_us(NULL, NULL);
@@ -196,12 +199,30 @@ int links_step(link_t *all_links, int *timeout_ms)
       return -1;
     }
 
-    // feed capture queue (two buffers)
     if (!buf_list->device->paused && buf_list->do_capture && buf_list->do_mmap) {
       buffer_t *buf;
+
+#ifdef QUEUE_ON_CAPTURE
+      if (buf_list->fmt_interval_us > 0 && now_us - buf_list->last_enqueued_us < buf_list->fmt_interval_us) {
+        *timeout_next_ms = MIN(*timeout_next_ms, (buf_list->last_enqueued_us + buf_list->fmt_interval_us - now_us) / 1000);
+
+        E_LOG_DEBUG(buf_list, "skipping dequeue: %.1f / %.1f. enqueued=%d\n",
+          (now_us - buf_list->last_enqueued_us) / 1000.0f,
+          buf_list->fmt_interval_us / 1000.0f,
+          buffer_list_count_enqueued(buf_list));
+        continue;
+      } else if (buf_list->fmt_interval_us > 0) {
+        E_LOG_DEBUG(buf_list, "since last: %.1f / %.1f. enqueued=%d\n",
+          (now_us - buf_list->last_enqueued_us) / 1000.0f,
+          buf_list->fmt_interval_us / 1000.0f,
+          buffer_list_count_enqueued(buf_list));
+      }
+#else
+    // feed capture queue (two buffers)
       int count_enqueued = buffer_list_count_enqueued(buf_list);
       if (count_enqueued > 1)
           continue;
+#endif
 
       if (buf = buffer_list_find_slot(buf_list)) {
         buffer_consumed(buf, "enqueued");
@@ -245,12 +266,13 @@ int links_loop(link_t *all_links, bool *running)
   int timeout_ms = LINKS_LOOP_INTERVAL;
 
   while(*running) {
-    if (links_step(all_links, &timeout_ms) < 0) {
+    int timeout_now_ms = timeout_ms;
+    timeout_ms = LINKS_LOOP_INTERVAL;
+
+    if (links_step(all_links, timeout_now_ms, &timeout_ms) < 0) {
       links_stream(all_links, false);
       return -1;
     }
-
-    timeout_ms = LINKS_LOOP_INTERVAL;
   }
 
   links_stream(all_links, false);
