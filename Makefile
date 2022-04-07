@@ -1,10 +1,26 @@
+TARGET := camera_stream
 SRC := $(wildcard **/*.c)
 HEADERS := $(wildcard **/*.h)
 HTML := $(wildcard html/*.js html/*.html)
-HTML_SRC := $(addsuffix .c,$(HTML))
 
-camera_stream: $(SRC) $(HTML_SRC) $(HEADERS)
-	gcc -Werror -g -I$(PWD) -o $@ $(filter %.c, $^) -lpthread -lavcodec -lavformat -lavutil
+CFLAGS := -Werror -g -I$(PWD)
+LDLIBS := -lpthread -lavcodec -lavformat -lavutil
+
+HTML_SRC = $(addsuffix .c,$(HTML))
+OBJS = $(subst .c,.o,$(SRC) $(HTML_SRC))
+
+.SUFFIXES:
+
+$(TARGET): $(OBJS)
+	gcc $(CFLAGS) -o $@ $^ $(LDLIBS)
+
+clean:
+	rm -f .depend $(OBJS) $(HTML_SRC) $(TARGET)
+
+-include $(OBJS:.o=.d)
+
+%.o: %.c
+	gcc -MMD $(CFLAGS) -c -o $@ $<
 
 html/%.c: html/%
 	xxd -i $< > $@.tmp

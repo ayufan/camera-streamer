@@ -1,2 +1,5 @@
 camera_stream
 tmp/
+*.o
+*.d
+html/*.c
