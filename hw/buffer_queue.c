@@ -68,7 +68,7 @@ error:
   {
     buffer_t *mmap_source = buf->mmap_source;
     buf->mmap_source = NULL;
-    buf->mmap_reflinks--;
+    buf->mmap_reflinks++;
     pthread_mutex_unlock(&buffer_lock);
 
     if (mmap_source) {

@@ -196,7 +196,7 @@ int links_step(link_t *all_links, int *timeout_ms)
       return -1;
     }
 
-    // feed capture queue (two buffers max)
+    // feed capture queue (two buffers)
     if (!buf_list->device->paused && buf_list->do_capture && buf_list->do_mmap) {
       buffer_t *buf;
       int count_enqueued = buffer_list_count_enqueued(buf_list);
