@@ -3,6 +3,7 @@
 
 #include <stddef.h>
 #include <stdio.h>
+#include <limits.h>
 
 static void print_help(option_t *options)
 {
@@ -12,17 +13,18 @@ static void print_help(option_t *options)
 
     if (option->value_string) {
       printf(option->format, option->value_string);
-    } else if (option->value_mapping) {
-      for (int j = 0; option->value_mapping[j].name; j++) {
-        if (option->value_mapping[j].value == *option->value) {
-          printf("%s - ", option->value_mapping[j].name);
-          break;
+    } else {
+      if (option->value_mapping) {
+        for (int j = 0; option->value_mapping[j].name; j++) {
+          if (option->value_mapping[j].value == *option->value) {
+            printf("%s - ", option->value_mapping[j].name);
+            break;
+          }
         }
       }
 
-      printf(option->format, *option->value);
-    } else {
-      printf(option->format, *option->value);
+      unsigned mask = UINT_MAX >> ((sizeof(*option->value) - option->size) * 8);
+      printf(option->format, *option->value & mask);
     }
 
     printf("\n");

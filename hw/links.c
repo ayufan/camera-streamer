@@ -177,6 +177,10 @@ int links_step(link_t *all_links, int *timeout_ms)
     if (!buf_list->device->paused && buf_list->do_capture && buf_list->do_mmap) {
       buffer_t *buf;
       while (buf = buffer_list_find_slot(buf_list)) {
+        int count_enqueued = buffer_list_count_enqueued(buf_list);
+        if (count_enqueued > 1)
+          break;
+
         buffer_consumed(buf, "enqueued");
       }
     }

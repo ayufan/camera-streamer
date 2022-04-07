@@ -69,6 +69,7 @@ option_t all_options[] = {
   DEFINE_OPTION(http, maxcons, uint),
   DEFINE_OPTION_DEFAULT(log, debug, bool, "1"),
   DEFINE_OPTION_DEFAULT(log, verbose, bool, "1"),
+  DEFINE_OPTION_PTR(log, filter, string),
   {}
 };
 
