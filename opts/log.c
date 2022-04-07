@@ -24,7 +24,7 @@ strstrn(const char *s, const char *find, size_t len)
 bool filter_log(const char *filename)
 {
   if (!log_options.filter[0])
-    return true;
+    return false;
 
   const char *ptr = log_options.filter;
   do {

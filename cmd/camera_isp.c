@@ -48,9 +48,9 @@ int camera_configure_isp(camera_t *camera, float high_div, float low_div)
     return -1;
   }
 
-  DEVICE_SET_OPTION(camera->isp_srgb, RED_BALANCE, 2120);
-  DEVICE_SET_OPTION(camera->isp_srgb, BLUE_BALANCE, 1472);
-  DEVICE_SET_OPTION(camera->isp_srgb, DIGITAL_GAIN, 1007);
+  // DEVICE_SET_OPTION(camera->isp_srgb, RED_BALANCE, 2120);
+  // DEVICE_SET_OPTION(camera->isp_srgb, BLUE_BALANCE, 1472);
+  // DEVICE_SET_OPTION(camera->isp_srgb, DIGITAL_GAIN, 1007);
 
   link_t *links = camera->links;
 
