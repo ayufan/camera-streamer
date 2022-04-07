@@ -58,6 +58,7 @@ bool buffer_consumed(buffer_t *buf, const char *who)
 
     E_XIOCTL(buf, buf->buf_list->device->fd, VIDIOC_QBUF, &buf->v4l2_buffer, "Can't queue buffer.");
     buf->enqueued = true;
+    buf->enqueue_time_us = get_monotonic_time_us(NULL, NULL);
   }
 
   pthread_mutex_unlock(&buffer_lock);

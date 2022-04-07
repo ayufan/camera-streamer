@@ -43,11 +43,13 @@ void buffer_lock_capture(buffer_lock_t *buf_lock, buffer_t *buf)
   buffer_use(buf);
   buf_lock->buf = buf;
   buf_lock->counter++;
-  buf_lock->buf_time_us = get_monotonic_time_us(NULL, NULL);
+  uint64_t last_lock_us = buf_lock->buf_time_us;
   uint64_t captured_time_us = get_time_us(CLOCK_FROM_PARAMS, NULL, &buf->v4l2_buffer.timestamp, 0);
-  E_LOG_DEBUG(buf_lock, "Captured buffer %s (refs=%d), frame=%d, delay=%.1f",
+  buf_lock->buf_time_us = get_monotonic_time_us(NULL, NULL);
+  E_LOG_DEBUG(buf_lock, "Captured buffer %s (refs=%d), frame=%d, processing_us=%.1f, frame_us=%.1f",
     dev_name(buf), buf ? buf->mmap_reflinks : 0, buf_lock->counter,
-    (buf_lock->buf_time_us - captured_time_us) / 1000.0f);
+    (buf_lock->buf_time_us - captured_time_us) / 1000.0f,
+    (buf_lock->buf_time_us - last_lock_us) / 1000.0f);
   pthread_cond_broadcast(&buf_lock->cond_wait);
   pthread_mutex_unlock(&buf_lock->lock);
 }
