@@ -1,3 +1,5 @@
+#ifdef USE_FFMPEG
+
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -330,3 +332,5 @@ void http_mp4_video(http_worker_t *worker, FILE *stream)
 {
   http_ffmpeg_video(worker, stream, "video/mp4", "mp4");
 }
+
+#endif // USE_FFMPEG

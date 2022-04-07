@@ -4,7 +4,14 @@ HEADERS := $(wildcard **/*.h)
 HTML := $(wildcard html/*.js html/*.html)
 
 CFLAGS := -Werror -g -I$(PWD)
-LDLIBS := -lpthread -lavcodec -lavformat -lavutil
+LDLIBS := -lpthread
+
+USE_FFMPEG ?= $(shell pkg-config libavutil libavformat libavcodec && echo 1)
+
+ifeq (1,$(USE_FFMPEG))
+CFLAGS += -DUSE_FFMPEG
+LDLIBS += -lavcodec -lavformat -lavutil
+endif
 
 HTML_SRC = $(addsuffix .c,$(HTML))
 OBJS = $(subst .c,.o,$(SRC) $(HTML_SRC))
