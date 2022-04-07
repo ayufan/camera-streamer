@@ -43,7 +43,6 @@ typedef struct {
 
   uint64_t start_time;
   int video_stream;
-  int pts;
   buffer_t *buf;
   unsigned buf_offset;
   unsigned stream_offset;
@@ -213,7 +212,7 @@ static int http_ffmpeg_copy_packets(http_ffmpeg_status_t *status)
     ret = av_read_frame(status->input_context, status->packet);
     if (ret == AVERROR_EOF) {
       ret = 0;
-      E_LOG_DEBUG(status, "av_read_frame: EOF", ret, status->pts);
+      E_LOG_DEBUG(status, "av_read_frame: EOF", ret);
       break;
     } else if (ret < 0) {
       E_LOG_DEBUG(status, "av_read_frame: %08x, pts: %d", ret, status->packet->pts);
