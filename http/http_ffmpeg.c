@@ -57,7 +57,7 @@ static int http_ffmpeg_read_from_buf(void *opaque, uint8_t *buf, int buf_size)
 
   buf_size = FFMIN(buf_size, status->buf->used - status->buf_offset);
   if (!buf_size)
-    return 0;
+    return AVERROR_EOF;
 
   E_LOG_DEBUG(status, "http_ffmpeg_read_from_buf: offset=%d, n=%d", status->buf_offset, buf_size);
   memcpy(buf, (char*)status->buf->start + status->buf_offset, buf_size);
@@ -117,19 +117,21 @@ error:
   return -1;
 }
 
-static void http_ffmpeg_close_avcontext(AVFormatContext **context)
+static void http_ffmpeg_close_avcontext(AVFormatContext **contextp)
 {
-  if (!*context)
+  if (!*contextp)
     return;
 
-  AVIOContext *pb = (*context)->pb;
-  if (pb) av_freep(&pb->buffer);
-  avio_context_free(&(*context)->pb);
-  if ((*context)->iformat)
-    avformat_close_input(context);
+  AVFormatContext *context = *contextp;
+
+  if (context->pb)
+    av_freep(&context->pb->buffer);
+  avio_context_free(&context->pb);
+  if (context->iformat)
+    avformat_close_input(contextp);
   else
-    avformat_free_context(*context);
-  *context = NULL;
+    avformat_free_context(context);
+  *contextp = NULL;
 }
 
 static int http_ffmpeg_copy_streams(http_ffmpeg_status_t *status)
