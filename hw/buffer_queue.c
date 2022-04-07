@@ -52,7 +52,7 @@ bool buffer_consumed(buffer_t *buf, const char *who)
       buf->mmap_source ? buf->mmap_source->name : NULL,
       who);
 
-    if (buf->buf_list->do_timestamps && !buf->buf_list->do_capture) {
+    if (buf->buf_list->do_timestamps) {
       get_monotonic_time_us(NULL, &buf->v4l2_buffer.timestamp);
     }
 
@@ -179,12 +179,7 @@ buffer_t *buffer_list_dequeue(buffer_list_t *buf_list)
     buf->used = v4l2_buf.bytesused;
   }
   buf->v4l2_buffer.flags = v4l2_buf.flags;
-
-  if (buf_list->do_timestamps && buf_list->do_capture) {
-    get_monotonic_time_us(NULL, &buf->v4l2_buffer.timestamp);
-  } else {
-    buf->v4l2_buffer.timestamp = v4l2_buf.timestamp;
-  }
+  buf->v4l2_buffer.timestamp = v4l2_buf.timestamp;
 
   if (buf->mmap_reflinks > 0) {
     E_LOG_PERROR(buf, "Buffer appears to be enqueued? (links=%d)", buf->mmap_reflinks);
