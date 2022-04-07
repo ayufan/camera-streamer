@@ -15,6 +15,8 @@ typedef struct camera_options_s {
   bool allow_dma;
   float high_res_factor;
   float low_res_factor;
+
+  char options[4096];
 } camera_options_t;
 
 typedef struct camera_s {

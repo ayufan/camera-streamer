@@ -5,13 +5,32 @@
 #include <stdio.h>
 #include <limits.h>
 
+static int option_handler_print(option_t *option, char *data);
+static int option_handler_set(option_t *option, char *data);
+
+#define OPTION_VALUE_LIST_SEP ","
+
 static void print_help(option_t *options)
 {
   for (int i = 0; options[i].name; i++) {
     option_t *option = &options[i];
+
     printf("%40s\t", option->name);
 
-    if (option->value_string) {
+    if (option->value_list) {
+      char *string = option->value_list;
+      char *token;
+      int tokens = 0;
+
+      while (token = strsep(&string, OPTION_VALUE_LIST_SEP)) {
+        if (tokens++ > 0)
+          printf("\n%40s\t", "");
+        printf("%s", token);
+      }
+
+      if (!tokens)
+        printf("(none)");
+    } else if (option->value_string) {
       printf(option->format, option->value_string);
     } else {
       if (option->value_mapping) {
@@ -60,7 +79,16 @@ static int parse_opt(option_t *options, const char *key)
   }
 
   int ret = 0;
-  if (option->value_string) {
+  if (option->value_list) {
+    char *ptr = option->value_list;
+
+    if (*ptr) {
+      strcat(ptr, OPTION_VALUE_LIST_SEP);
+      ptr += strlen(ptr);
+    }
+
+    ret = sscanf(value, option->format, ptr);
+  } else if (option->value_string) {
     ret = sscanf(value, option->format, option->value_string);
   } else if (option->value_mapping) {
     for (int j = 0; option->value_mapping[j].name; j++) {

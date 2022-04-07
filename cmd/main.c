@@ -65,11 +65,15 @@ option_t all_options[] = {
   DEFINE_OPTION_DEFAULT(camera, allow_dma, bool, "1"),
   DEFINE_OPTION(camera, high_res_factor, float),
   DEFINE_OPTION(camera, low_res_factor, float),
+  DEFINE_OPTION_PTR(camera, options, list),
+
   DEFINE_OPTION(http, port, uint),
   DEFINE_OPTION(http, maxcons, uint),
+
   DEFINE_OPTION_DEFAULT(log, debug, bool, "1"),
   DEFINE_OPTION_DEFAULT(log, verbose, bool, "1"),
-  DEFINE_OPTION_PTR(log, filter, string),
+  DEFINE_OPTION_PTR(log, filter, list),
+
   {}
 };
 

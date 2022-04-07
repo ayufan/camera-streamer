@@ -10,6 +10,7 @@ typedef struct option_value_s {
 typedef struct options_s {
   const char *name;
   char *value_string;
+  char *value_list;
   union {
     unsigned *value;
     unsigned *value_uint;
@@ -35,6 +36,7 @@ typedef struct options_s {
 #define OPTION_FORMAT_bool   "%d"
 #define OPTION_FORMAT_float  "%f"
 #define OPTION_FORMAT_string "%s"
+#define OPTION_FORMAT_list "%s"
 
 #define DEFINE_OPTION(_section, _name, _type) \
   { \
