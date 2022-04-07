@@ -8,8 +8,6 @@
 static int option_handler_print(option_t *option, char *data);
 static int option_handler_set(option_t *option, char *data);
 
-#define OPTION_VALUE_LIST_SEP ","
-
 static void print_help(option_t *options)
 {
   for (int i = 0; options[i].name; i++) {

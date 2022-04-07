@@ -60,7 +60,6 @@ camera_t *camera_open(camera_options_t *options)
 
   if (camera->options.fps > 0) {
     camera->camera->capture_list->fmt_interval_us = 1000 * 1000 / camera->options.fps;
-    printf("buffer_lock.c: frame interval: %d\n", camera->camera->capture_list->fmt_interval_us);
   }
 
   switch (camera->camera->capture_list->fmt_format) {
@@ -108,6 +107,7 @@ error:
 int camera_set_params(camera_t *camera)
 {
   device_set_fps(camera->camera, camera->options.fps);
+  device_set_option_list(camera->camera, camera->options.options);
 
   // DEVICE_SET_OPTION(camera->camera, EXPOSURE, 2684);
   // DEVICE_SET_OPTION(camera->camera, ANALOGUE_GAIN, 938);

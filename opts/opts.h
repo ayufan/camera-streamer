@@ -31,6 +31,8 @@ typedef struct options_s {
           __fn__; \
 })
 
+#define OPTION_VALUE_LIST_SEP ","
+
 #define OPTION_FORMAT_uint   "%d"
 #define OPTION_FORMAT_hex    "%08x"
 #define OPTION_FORMAT_bool   "%d"
