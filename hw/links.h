@@ -20,5 +20,5 @@ typedef struct link_s {
 } link_t;
 
 int links_init(link_t *all_links);
-int links_step(link_t *all_links, int timeout);
+int links_step(link_t *all_links, int *timeout_ms);
 int links_loop(link_t *all_links, bool *running);

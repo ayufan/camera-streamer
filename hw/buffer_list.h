@@ -18,6 +18,7 @@ typedef struct buffer_list_s {
   unsigned fmt_width, fmt_height, fmt_format, fmt_bytesperline, fmt_interval_us;
   bool do_timestamps;
 
+  uint64_t last_enqueued_us;
   uint64_t last_dequeued_us;
 
   bool streaming;
