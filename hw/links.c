@@ -67,10 +67,16 @@ int _build_fds(link_t *all_links, struct pollfd *fds, link_t **links, buffer_lis
     }
   
     int count_enqueued = buffer_list_count_enqueued(source);
+    bool can_dequeue = count_enqueued > 0;
+
+    if (now_us - source->last_dequeued_us < source->fmt_interval_us) {
+      can_dequeue = false;
+      *max_timeout_ms = MIN(*max_timeout_ms, (source->last_dequeued_us + source->fmt_interval_us - now_us) / 1000);
+    }
 
     fds[n].fd = source->device->fd;
     fds[n].events = POLLHUP;
-    if (count_enqueued > 0)
+    if (can_dequeue)
       fds[n].events |= POLLIN;
     fds[n].revents = 0;
     buf_lists[n] = source;

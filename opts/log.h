@@ -11,6 +11,9 @@ typedef struct log_options_s {
 
 extern log_options_t log_options;
 
+#define MIN(a, b) ((a) < (b) ? (a) : (b))
+#define MAX(a, b) ((a) > (b) ? (a) : (b))
+
 // assumes that name is first item
 #define dev_name(dev) (dev ? *(const char**)dev : "?")
 #define E_LOG_ERROR(dev, _msg, ...)		do { fprintf(stderr, "%s: %s: " _msg "\n", __FILENAME__, dev_name(dev), ##__VA_ARGS__); goto error; } while(0)

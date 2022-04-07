@@ -14,6 +14,8 @@ typedef struct buffer_lock_s {
   int refs;
   int dropped;
   uint64_t timeout_us;
+
+  int frame_interval_ms;
 } buffer_lock_t;
 
 #define DEFAULT_BUFFER_LOCK_TIMEOUT 16 // ~60fps

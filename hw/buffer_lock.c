@@ -47,10 +47,10 @@ void buffer_lock_capture(buffer_lock_t *buf_lock, buffer_t *buf)
     buffer_consumed(buf_lock->buf, buf_lock->name);
     buf_lock->buf = NULL;
     buf_lock->buf_time_us = now;
-  } else if (now - buf_lock->buf_time_us < buf->buf_list->fmt_interval_us) {
+  } else if (now - buf_lock->buf_time_us < buf_lock->frame_interval_ms * 1000) {
     buf_lock->dropped++;
 
-    E_LOG_DEBUG(buf_lock, "Dropped buffer %s (refs=%d), frame=%d/%d, frame_us=%.1f",
+    E_LOG_DEBUG(buf_lock, "Dropped buffer %s (refs=%d), frame=%d/%d, frame_ms=%.1f",
       dev_name(buf), buf ? buf->mmap_reflinks : 0,
       buf_lock->counter, buf_lock->dropped,
       (now - captured_time_us) / 1000.0f);
@@ -59,7 +59,7 @@ void buffer_lock_capture(buffer_lock_t *buf_lock, buffer_t *buf)
     buffer_use(buf);
     buf_lock->buf = buf;
     buf_lock->counter++;
-    E_LOG_DEBUG(buf_lock, "Captured buffer %s (refs=%d), frame=%d/%d, processing_us=%.1f, frame_us=%.1f",
+    E_LOG_DEBUG(buf_lock, "Captured buffer %s (refs=%d), frame=%d/%d, processing_ms=%.1f, frame_ms=%.1f",
       dev_name(buf), buf ? buf->mmap_reflinks : 0,
       buf_lock->counter, buf_lock->dropped,
       (now - captured_time_us) / 1000.0f,
