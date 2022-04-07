@@ -173,18 +173,6 @@ int links_step(link_t *all_links, int *timeout_ms)
       buf_list->nbufs,
       buf_list->device->paused);
 
-    // feed capture queue
-    if (!buf_list->device->paused && buf_list->do_capture && buf_list->do_mmap) {
-      buffer_t *buf;
-      while (buf = buffer_list_find_slot(buf_list)) {
-        int count_enqueued = buffer_list_count_enqueued(buf_list);
-        if (count_enqueued > 1)
-          break;
-
-        buffer_consumed(buf, "enqueued");
-      }
-    }
-
     if (fds[i].revents & POLLIN) {
       if (links_enqueue_from_source(buf_list, link) < 0) {
         return -1;
@@ -206,6 +194,18 @@ int links_step(link_t *all_links, int *timeout_ms)
     if (fds[i].revents & POLLERR) {
       E_LOG_INFO(buf_list, "Got an error");
       return -1;
+    }
+
+    // feed capture queue (two buffers max)
+    if (!buf_list->device->paused && buf_list->do_capture && buf_list->do_mmap) {
+      buffer_t *buf;
+      int count_enqueued = buffer_list_count_enqueued(buf_list);
+      if (count_enqueued > 1)
+          continue;
+
+      if (buf = buffer_list_find_slot(buf_list)) {
+        buffer_consumed(buf, "enqueued");
+      }
     }
   }
   return 0;
