@@ -1,6 +1,7 @@
 #pragma once
 
-#include "v4l2.h"
+#include <stdint.h>
+#include <stdbool.h>
 
 #define LINKS_LOOP_INTERVAL 100
 

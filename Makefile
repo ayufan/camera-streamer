@@ -29,6 +29,9 @@ install: $(TARGET)
 clean:
 	rm -f .depend $(OBJS) $(OBJS:.o=.d) $(HTML_SRC) $(TARGET)
 
+headers:
+	find -name '*.h' | xargs -n1 gcc $(CFLAGS) -Wno-error -c -o /dev/null
+
 -include $(OBJS:.o=.d)
 
 %.o: %.c

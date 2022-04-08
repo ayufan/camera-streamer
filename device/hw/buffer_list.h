@@ -1,10 +1,15 @@
 #pragma once
 
-#include "v4l2.h"
+#include <stdbool.h>
+#include <stdint.h>
+#include <linux/videodev2.h>
+
+typedef struct buffer_s buffer_t;
+typedef struct device_s device_t;
 
 typedef struct buffer_list_s {
   char *name;
-  struct device_s *device;
+  device_t *device;
   buffer_t **bufs;
   int nbufs;
   int type;
