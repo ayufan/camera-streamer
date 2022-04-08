@@ -21,6 +21,9 @@ OBJS = $(subst .c,.o,$(SRC) $(HTML_SRC))
 $(TARGET): $(OBJS)
 	gcc $(CFLAGS) -o $@ $^ $(LDLIBS)
 
+install: $(TARGET)
+	install $(TARGET) /usr/local/bin/
+
 clean:
 	rm -f .depend $(OBJS) $(HTML_SRC) $(TARGET)
 
