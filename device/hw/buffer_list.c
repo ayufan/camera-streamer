@@ -94,8 +94,10 @@ retry:
 
   if (buf_list->do_mplanes) {
     fmt->fmt.pix_mp.colorspace = V4L2_COLORSPACE_JPEG;
-    fmt->fmt.pix_mp.width = width;
-    fmt->fmt.pix_mp.height = height;
+    if (width)
+      fmt->fmt.pix_mp.width = width;
+    if (height)
+      fmt->fmt.pix_mp.height = height;
     if (format)
       fmt->fmt.pix_mp.pixelformat = format;
     fmt->fmt.pix_mp.field = V4L2_FIELD_ANY;
@@ -104,8 +106,10 @@ retry:
     //fmt->fmt.pix_mp.plane_fmt[0].sizeimage = bytesperline * orig_height;
   } else {
     fmt->fmt.pix.colorspace = V4L2_COLORSPACE_RAW;
-    fmt->fmt.pix.width = width;
-    fmt->fmt.pix.height = height;
+    if (width)
+      fmt->fmt.pix.width = width;
+    if (height)
+      fmt->fmt.pix.height = height;
     if (format)
       fmt->fmt.pix.pixelformat = format;
     fmt->fmt.pix.field = V4L2_FIELD_ANY;
