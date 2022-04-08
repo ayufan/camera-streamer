@@ -26,6 +26,10 @@ static void http_write_response(
 void http_content(http_worker_t *worker, FILE *stream)
 {
   if (worker->current_method) {
+    if (worker->current_method->content_lengthp) {
+      worker->current_method->content_length = *worker->current_method->content_lengthp;
+    }
+
     http_write_response(stream,
       NULL,
       worker->current_method->content_type,
