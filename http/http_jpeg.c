@@ -68,7 +68,7 @@ void http_snapshot(http_worker_t *worker, FILE *stream)
   int n = buffer_lock_write_loop(http_jpeg_buffer_for_res(worker), 1, (buffer_write_fn)http_snapshot_buf_part, stream);
 
   if (n <= 0) {
-    http_500_header(stream);
+    http_500(stream, NULL);
     fprintf(stream, "No snapshot captured yet.\r\n");
   }
 }
@@ -96,7 +96,7 @@ void http_stream(http_worker_t *worker, FILE *stream)
   int n = buffer_lock_write_loop(http_jpeg_buffer_for_res(worker), 0, (buffer_write_fn)http_stream_buf_part, stream);
 
   if (n == 0) {
-    http_500_header(stream);
+    http_500(stream, NULL);
     fprintf(stream, "No frames.\n");
   } else if (n < 0) {
     fprintf(stream, "Interrupted. Received %d frames", -n);

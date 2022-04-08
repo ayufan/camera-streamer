@@ -99,7 +99,7 @@ void http_h264_video(http_worker_t *worker, FILE *stream)
     return;
   }
 
-  http_500_header(stream);
+  http_500(stream, NULL);
 
   if (n == 0) {
     fprintf(stream, "No frames.\n");

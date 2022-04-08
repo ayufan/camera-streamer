@@ -14,6 +14,10 @@ typedef void (*http_method_fn)(struct http_worker_s *worker, FILE *stream);
 typedef struct http_method_s {
   const char *name;
   http_method_fn func;
+  const char *content_type;
+  const char *content_body;
+  unsigned content_length;
+  unsigned *content_lengthp;
 } http_method_t;
 
 typedef struct http_worker_s {
@@ -26,6 +30,8 @@ typedef struct http_worker_s {
   struct sockaddr_in client_addr;
   char *client_host;
   char client_method[256];
+
+  http_method_t *current_method;
 } http_worker_t;
 
 typedef struct http_server_options_s {
@@ -34,14 +40,9 @@ typedef struct http_server_options_s {
 } http_server_options_t;
 
 int http_server(http_server_options_t *options, http_method_t *methods);
-
-void http_index(http_worker_t *worker, FILE *stream);
-void http_video_html(http_worker_t *worker, FILE *stream);
-void http_jmuxer_js(http_worker_t *worker, FILE *stream);
-void http_custom_header(FILE *stream, const char *status);
-void http_404_header(FILE *stream);
-void http_500_header(FILE *stream);
-void http_404(http_worker_t *worker, FILE *stream);
+void http_content(http_worker_t *worker, FILE *stream);
+void http_404(FILE *stream, const char *data);
+void http_500(FILE *stream, const char *data);
 
 // M-JPEG
 void http_snapshot(http_worker_t *worker, FILE *stream);

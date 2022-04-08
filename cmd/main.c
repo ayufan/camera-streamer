@@ -9,19 +9,26 @@
 
 #include <signal.h>
 
+extern unsigned char html_index_html[];
+extern unsigned int html_index_html_len;
+extern unsigned char html_video_html[];
+extern unsigned int html_video_html_len;
+extern unsigned char html_jmuxer_min_js[];
+extern unsigned int html_jmuxer_min_js_len;
+
 http_method_t http_methods[] = {
   { "GET /snapshot?", http_snapshot },
   { "GET /stream?", http_stream },
   { "GET /?action=snapshot", http_snapshot },
   { "GET /?action=stream", http_stream },
-  { "GET /video?", http_video_html },
+  { "GET /video?", http_content, "text/html", html_video_html, 0, &html_video_html_len },
   { "GET /video.h264?", http_h264_video },
 #ifdef USE_FFMPEG
   { "GET /video.mkv?", http_mkv_video },
   { "GET /video.mp4?", http_mp4_video },
-  { "GET /jmuxer.min.js?", http_jmuxer_js },
+  { "GET /jmuxer.min.js?", http_content, "text/javascript", html_jmuxer_min_js, 0, &html_jmuxer_min_js_len },
 #endif // USE_FFMPEG
-  { "GET /?", http_index },
+  { "GET /?", http_content, "text/html", html_index_html, 0, &html_index_html_len },
   { }
 };
 

@@ -67,6 +67,8 @@ static void http_process(http_worker_t *worker, FILE *stream)
       break;
   }
 
+  worker->current_method = NULL;
+
   for (int i = 0; worker->methods[i].name; i++) {
     const char *name = worker->methods[i].name;
     int nlen = strlen(worker->methods[i].name);
@@ -76,12 +78,18 @@ static void http_process(http_worker_t *worker, FILE *stream)
 
     // allow last character to match `?` or ` `
     if (worker->client_method[nlen-1] == name[nlen-1] || name[nlen-1] == '?' && worker->client_method[nlen-1] == ' ') {
-      worker->methods[i].func(worker, stream);
-      return;
+      worker->current_method = &worker->methods[i];
+      break;
     }
   }
 
-  http_404(worker, stream);
+  if (worker->current_method) {
+    worker->current_method->func(worker, stream);
+    worker->current_method = NULL;
+    return;
+  }
+
+  http_404(stream, "Not found.");
 }
 
 static void http_client(http_worker_t *worker)
