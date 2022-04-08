@@ -1,6 +1,12 @@
 #pragma once
 
-#include "v4l2.h"
+#include <stdbool.h>
+#include <stdint.h>
+#include <stddef.h>
+#include <linux/videodev2.h>
+
+typedef struct buffer_s buffer_t;
+typedef struct buffer_list_s buffer_list_t;
 
 typedef struct buffer_s {
   char *name;
@@ -15,12 +21,12 @@ typedef struct buffer_s {
   int dma_fd;
 
   int mmap_reflinks;
-  struct buffer_s *mmap_source;
+  buffer_list_t *mmap_source;
   bool enqueued;
   uint64_t enqueue_time_us;
 } buffer_t;
 
-buffer_t *buffer_open(const char *name, struct buffer_list_s *buf_list, int buffer);
+buffer_t *buffer_open(const char *name, buffer_list_t *buf_list, int buffer);
 void buffer_close(buffer_t *buf);
 
 bool buffer_use(buffer_t *buf);

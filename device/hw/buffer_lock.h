@@ -1,8 +1,10 @@
 #pragma once
 
-#include "buffer.h"
-
+#include <stdbool.h>
+#include <stdint.h>
 #include <pthread.h>
+
+typedef struct buffer_s buffer_t;
 
 typedef struct buffer_lock_s {
   const char *name;
