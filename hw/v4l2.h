@@ -30,14 +30,10 @@ typedef struct {
 	char buf[10];
 } fourcc_string;
 
-#define CLOCK_FROM_PARAMS -1
 
 fourcc_string fourcc_to_string(unsigned format);
 unsigned fourcc_to_stride(unsigned width, unsigned format);
 int xioctl(const char *name, int fd, int request, void *arg);
-uint64_t get_monotonic_time_us(struct timespec *ts, struct timeval *tv);
-uint64_t get_time_us(clockid_t clock, struct timespec *ts, struct timeval *tv, int64_t delays_us);
-int shrink_to_block(int size, int block);
 
 #define E_XIOCTL(dev, _fd, _request, _value, _msg, ...) do { \
 		int ret; \
