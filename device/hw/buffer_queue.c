@@ -1,7 +1,7 @@
 #include "device/hw/buffer.h"
 #include "device/hw/buffer_list.h"
 #include "device/hw/device.h"
-
+#include "device/hw/v4l2.h"
 #include <pthread.h>
 
 pthread_mutex_t buffer_lock = PTHREAD_MUTEX_INITIALIZER;

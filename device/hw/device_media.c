@@ -1,4 +1,5 @@
 #include "device/hw/device.h"
+#include "device/hw/v4l2.h"
 
 #include <unistd.h>
 #include <dirent.h>

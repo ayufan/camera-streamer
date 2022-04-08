@@ -21,7 +21,7 @@ typedef struct buffer_s {
   int dma_fd;
 
   int mmap_reflinks;
-  buffer_list_t *mmap_source;
+  buffer_t *mmap_source;
   bool enqueued;
   uint64_t enqueue_time_us;
 } buffer_t;
