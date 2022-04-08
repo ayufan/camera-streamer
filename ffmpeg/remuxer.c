@@ -3,10 +3,10 @@
 
 #ifdef USE_FFMPEG
 static AVRational time_base = {1, 1000LL * 1000LL};
+static int avio_ctx_buffer_size = 4096;
 
 static int ffmpeg_remuxer_init_avcontext(AVFormatContext **context, ffmpeg_remuxer_t *remuxer, int output, int (*packet)(void *opaque, uint8_t *buf, int buf_size))
 {
-  static int avio_ctx_buffer_size = 4096;
   uint8_t *buffer = NULL;
   AVIOContext *avio = NULL;
   int ret = -1;

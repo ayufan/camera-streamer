@@ -39,7 +39,7 @@ static int http_ffmpeg_read_from_buf(void *opaque, uint8_t *buf, int buf_size)
   if (!status->buf)
     return FFMPEG_DATA_PACKET_EOF;
 
-  buf_size = FFMIN(buf_size, status->buf->used - status->buf_offset);
+  buf_size = MIN(buf_size, status->buf->used - status->buf_offset);
   if (!buf_size)
     return FFMPEG_DATA_PACKET_EOF;
 

@@ -1,3 +1,5 @@
+#include <stdint.h>
+
 #ifdef USE_FFMPEG
 #include <libavcodec/avcodec.h>
 #include <libavformat/avio.h>

@@ -23,11 +23,9 @@ http_method_t http_methods[] = {
   { "GET /?action=stream", http_stream },
   { "GET /video?", http_content, "text/html", html_video_html, 0, &html_video_html_len },
   { "GET /video.h264?", http_h264_video },
-#ifdef USE_FFMPEG
   { "GET /video.mkv?", http_mkv_video },
   { "GET /video.mp4?", http_mp4_video },
   { "GET /jmuxer.min.js?", http_content, "text/javascript", html_jmuxer_min_js, 0, &html_jmuxer_min_js_len },
-#endif // USE_FFMPEG
   { "GET /?", http_content, "text/html", html_index_html, 0, &html_index_html_len },
   { }
 };
