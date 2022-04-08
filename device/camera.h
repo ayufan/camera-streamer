@@ -7,6 +7,7 @@
 #define MAX_HTTP_METHODS 20
 
 #define CAMERA_DEVICE_CAMERA 0
+#define CAMERA_OPTIONS_LENGTH 4096
 
 typedef struct camera_options_s {
   char path[256];
@@ -16,7 +17,11 @@ typedef struct camera_options_s {
   float high_res_factor;
   float low_res_factor;
 
-  char options[4096];
+  char options[CAMERA_OPTIONS_LENGTH];
+
+  struct {
+    char options[CAMERA_OPTIONS_LENGTH];
+  } isp;
 } camera_options_t;
 
 typedef struct camera_s {

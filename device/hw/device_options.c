@@ -1,4 +1,5 @@
 #include "device/hw/device.h"
+#include "opts/opts.h"
 
 #include <ctype.h>
 
@@ -83,7 +84,8 @@ error:
 
 int device_set_option_string(device_t *dev, const char *option)
 {
-  char name[256];
+  int ret = -1;
+  char *name = strdup(option);
   strcpy(name, option);
 
   char *value = strchr(name, '=');
@@ -94,21 +96,19 @@ int device_set_option_string(device_t *dev, const char *option)
 
   device_option_normalize_name(name);
 
-  int ret = device_set_option_string_fd(dev, dev->subdev_fd, name, value);
-  if (ret > 0)
-    return 0;
-
-  ret = device_set_option_string_fd(dev, dev->fd, name, value);
-
+  ret = device_set_option_string_fd(dev, dev->subdev_fd, name, value);
+  if (ret <= 0)
+    ret = device_set_option_string_fd(dev, dev->fd, name, value);
   if (ret == 0)
     E_LOG_ERROR(dev, "The '%s' was failed to find.", option);
   else if (ret < 0)
     E_LOG_ERROR(dev, "The '%s' did fail to be set.", option);
 
-  return 0;
+  ret = 0;
 
 error:
-  return -1;
+  free(name);
+  return ret;
 }
 
 void device_set_option_list(device_t *dev, const char *option_list)
@@ -121,7 +121,7 @@ void device_set_option_list(device_t *dev, const char *option_list)
   char *string = start;
   char *option;
 
-  while (option = strsep(&string, ",")) {
+  while (option = strsep(&string, OPTION_VALUE_LIST_SEP)) {
     device_set_option_string(dev, option);
   }
 

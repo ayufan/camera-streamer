@@ -74,6 +74,8 @@ option_t all_options[] = {
   DEFINE_OPTION(camera, low_res_factor, float),
   DEFINE_OPTION_PTR(camera, options, list),
 
+  DEFINE_OPTION_PTR(camera, isp.options, list),
+
   DEFINE_OPTION(http, port, uint),
   DEFINE_OPTION(http, maxcons, uint),
 

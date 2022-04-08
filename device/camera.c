@@ -108,6 +108,7 @@ int camera_set_params(camera_t *camera)
 {
   device_set_fps(camera->camera, camera->options.fps);
   device_set_option_list(camera->camera, camera->options.options);
+  device_set_option_list(camera->isp_srgb, camera->options.isp.options);
 
   // DEVICE_SET_OPTION(camera->camera, EXPOSURE, 2684);
   // DEVICE_SET_OPTION(camera->camera, ANALOGUE_GAIN, 938);

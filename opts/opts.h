@@ -25,13 +25,7 @@ typedef struct options_s {
   const char *default_value;
 } option_t;
 
-#define lambda(return_type, function_body) \
-({ \
-      return_type __fn__ function_body \
-          __fn__; \
-})
-
-#define OPTION_VALUE_LIST_SEP ","
+#define OPTION_VALUE_LIST_SEP ";"
 
 #define OPTION_FORMAT_uint   "%d"
 #define OPTION_FORMAT_hex    "%08x"
