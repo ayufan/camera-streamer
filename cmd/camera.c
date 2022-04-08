@@ -82,7 +82,7 @@ camera_t *camera_open(camera_options_t *options)
       goto error;
     }
 #else
-    if (camera_configure_legacy_isp(&camera, camera->options.high_res_factor) < 0) {
+    if (camera_configure_legacy_isp(camera, camera->options.high_res_factor) < 0) {
       goto error;
     }
 #endif
