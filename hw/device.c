@@ -181,6 +181,7 @@ int device_set_decoder_start(device_t *dev, bool do_on)
 
   E_LOG_DEBUG(dev, "Setting decoder state %s...", do_on ? "Start" : "Stop");
   E_XIOCTL(dev, dev->fd, VIDIOC_DECODER_CMD, &cmd, "Cannot set decoder state");
+  dev->decoder_started = do_on;
   return 0;
 
 error:

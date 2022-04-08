@@ -101,6 +101,11 @@ int links_enqueue_from_source(buffer_list_t *buf_list, link_t *link)
     E_LOG_ERROR(buf_list, "No buffer dequeued from source?");
   }
 
+  if (link->callbacks.validate_buffer && !link->callbacks.validate_buffer(link, buf)) {
+    E_LOG_DEBUG(buf_list, "Buffer rejected by validation");
+    return 0;
+  }
+
   for (int j = 0; link->sinks[j]; j++) {
     if (link->sinks[j]->device->paused) {
       continue;
