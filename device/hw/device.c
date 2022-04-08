@@ -1,6 +1,6 @@
-#include "hw/device.h"
-#include "hw/buffer.h"
-#include "hw/buffer_list.h"
+#include "device/hw/device.h"
+#include "device/hw/buffer.h"
+#include "device/hw/buffer_list.h"
 
 device_t *device_open(const char *name, const char *path) {
   device_t *dev = calloc(1, sizeof(device_t));

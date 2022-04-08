@@ -1,6 +1,6 @@
-#include "hw/buffer.h"
-#include "hw/buffer_list.h"
-#include "hw/device.h"
+#include "device/hw/buffer.h"
+#include "device/hw/buffer_list.h"
+#include "device/hw/device.h"
 
 buffer_list_t *buffer_list_open(const char *name, struct device_s *dev, unsigned type, bool do_mmap)
 {

@@ -1,5 +1,5 @@
-#include "hw/buffer_lock.h"
-#include "hw/buffer_list.h"
+#include "device/hw/buffer_lock.h"
+#include "device/hw/buffer_list.h"
 
 bool buffer_lock_is_used(buffer_lock_t *buf_lock)
 {

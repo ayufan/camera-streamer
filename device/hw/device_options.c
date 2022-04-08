@@ -1,4 +1,4 @@
-#include "hw/device.h"
+#include "device/hw/device.h"
 
 #include <ctype.h>
 

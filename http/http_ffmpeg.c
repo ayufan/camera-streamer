@@ -2,10 +2,10 @@
 #include <stdlib.h>
 
 #include "http/http.h"
-#include "hw/buffer.h"
-#include "hw/buffer_lock.h"
-#include "hw/buffer_list.h"
-#include "hw/device.h"
+#include "device/hw/buffer.h"
+#include "device/hw/buffer_lock.h"
+#include "device/hw/buffer_list.h"
+#include "device/hw/device.h"
 #include "ffmpeg/remuxer.h"
 
 buffer_lock_t *http_h264_buffer_for_res(http_worker_t *worker);

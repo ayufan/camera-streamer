@@ -2,10 +2,10 @@
 #include <stdlib.h>
 
 #include "http/http.h"
-#include "hw/buffer.h"
-#include "hw/buffer_lock.h"
-#include "hw/buffer_list.h"
-#include "hw/device.h"
+#include "device/hw/buffer.h"
+#include "device/hw/buffer_lock.h"
+#include "device/hw/buffer_list.h"
+#include "device/hw/device.h"
 
 DEFINE_BUFFER_LOCK(http_h264, 0);
 DEFINE_BUFFER_LOCK(http_h264_lowres, 0);

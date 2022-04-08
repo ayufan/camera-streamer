@@ -1,7 +1,7 @@
-#include "hw/device.h"
-#include "hw/buffer.h"
-#include "hw/buffer_list.h"
-#include "hw/links.h"
+#include "device/hw/device.h"
+#include "device/hw/buffer.h"
+#include "device/hw/buffer_list.h"
+#include "device/hw/links.h"
 
 #define N_FDS 50
 #define QUEUE_ON_CAPTURE // seems to provide better latency

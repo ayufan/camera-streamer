@@ -1,6 +1,6 @@
 TARGET := camera_stream
-SRC := $(wildcard **/*.c)
-HEADERS := $(wildcard **/*.h)
+SRC := $(wildcard **/*.c) $(wildcard **/*/*.c)
+HEADERS := $(wildcard **/*.h) $(wildcard **/*/*.h)
 HTML := $(wildcard html/*.js html/*.html)
 
 CFLAGS := -Werror -g -I$(PWD)
@@ -18,14 +18,16 @@ OBJS = $(subst .c,.o,$(SRC) $(HTML_SRC))
 
 .SUFFIXES:
 
-$(TARGET): $(OBJS)
+all: $(TARGET)
+
+%: cmd/%.c $(filter-out cmd/%, $(OBJS))
 	gcc $(CFLAGS) -o $@ $^ $(LDLIBS)
 
 install: $(TARGET)
 	install $(TARGET) /usr/local/bin/
 
 clean:
-	rm -f .depend $(OBJS) $(HTML_SRC) $(TARGET)
+	rm -f .depend $(OBJS) $(OBJS:.o=.d) $(HTML_SRC) $(TARGET)
 
 -include $(OBJS:.o=.d)
 

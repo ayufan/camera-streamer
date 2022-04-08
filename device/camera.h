@@ -1,7 +1,7 @@
 #pragma once
 
-#include "hw/links.h"
-#include "hw/device.h"
+#include "device/hw/links.h"
+#include "device/hw/device.h"
 
 #define MAX_DEVICES 20
 #define MAX_HTTP_METHODS 20

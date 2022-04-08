@@ -1,5 +1,5 @@
 #include "opts.h"
-#include "hw/v4l2.h"
+#include "device/hw/v4l2.h"
 
 #include <stddef.h>
 #include <stdio.h>

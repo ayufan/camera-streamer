@@ -1,4 +1,4 @@
-#include "hw/v4l2.h"
+#include "device/hw/v4l2.h"
 
 int xioctl(const char *name, int fd, int request, void *arg)
 {
