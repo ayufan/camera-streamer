@@ -115,6 +115,10 @@ int camera_set_params(camera_t *camera)
   // DEVICE_SET_OPTION(camera->camera, VBLANK, 1636);
   // DEVICE_SET_OPTION(camera->camera, HBLANK, 6906);
 
+  // DEVICE_SET_OPTION(camera->isp_srgb, RED_BALANCE, 2120);
+  // DEVICE_SET_OPTION(camera->isp_srgb, BLUE_BALANCE, 1472);
+  // DEVICE_SET_OPTION(camera->isp_srgb, DIGITAL_GAIN, 1007);
+
   DEVICE_SET_OPTION2(camera->codec_jpeg, JPEG, COMPRESSION_QUALITY, 80);
 
   DEVICE_SET_OPTION2(camera->codec_h264, MPEG_VIDEO, BITRATE, 5000 * 1000);

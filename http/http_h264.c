@@ -8,6 +8,7 @@
 #include "hw/device.h"
 
 DEFINE_BUFFER_LOCK(http_h264, 0);
+DEFINE_BUFFER_LOCK(http_h264_lowres, 0);
 
 static const char *const VIDEO_HEADER =
   "HTTP/1.0 200 OK\r\n"
@@ -21,9 +22,22 @@ void http_h264_capture(buffer_t *buf)
   buffer_lock_capture(&http_h264, buf);
 }
 
+void http_h264_lowres_capture(buffer_t *buf)
+{
+  buffer_lock_capture(&http_h264_lowres, buf);
+}
+
 bool http_h264_needs_buffer()
 {
-  return buffer_lock_needs_buffer(&http_h264);
+  return buffer_lock_needs_buffer(&http_h264) | buffer_lock_needs_buffer(&http_h264_lowres);
+}
+
+buffer_lock_t *http_h264_buffer_for_res(http_worker_t *worker)
+{
+  if (strstr(worker->client_method, HTTP_LOW_RES_PARAM))
+    return &http_h264_lowres;
+  else
+    return &http_h264;
 }
 
 typedef struct {
@@ -67,7 +81,7 @@ void http_h264_video(http_worker_t *worker, FILE *stream)
 {
   http_video_status_t status = { stream };
 
-  int n = buffer_lock_write_loop(&http_h264, 0, (buffer_write_fn)http_video_buf_part, &status);
+  int n = buffer_lock_write_loop(http_h264_buffer_for_res(worker), 0, (buffer_write_fn)http_video_buf_part, &status);
 
   if (status.wrote_header) {
     return;

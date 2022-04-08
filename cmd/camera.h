@@ -32,9 +32,11 @@ typedef struct camera_s {
       device_t *legacy_isp; // convert pRAA/YUVU into YUVU
       device_t *isp_srgb;
       device_t *isp_yuuv;
-      device_t *isp_yuuv_low;
+      device_t *isp_yuuv_lowres;
       device_t *codec_jpeg; // encode YUVU into JPEG
       device_t *codec_h264; // encode YUVU into H264
+      device_t *codec_jpeg_lowres; // encode YUVU into JPEG
+      device_t *codec_h264_lowres; // encode YUVU into H264
     };
   };
 

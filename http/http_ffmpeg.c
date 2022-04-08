@@ -13,7 +13,7 @@
 #include <libavformat/avio.h>
 #include <libavformat/avformat.h>
 
-DECLARE_BUFFER_LOCK(http_h264);
+buffer_lock_t *http_h264_buffer_for_res(http_worker_t *worker);
 
 static const char *const VIDEO_HEADER =
   "HTTP/1.0 200 OK\r\n"
@@ -307,7 +307,7 @@ static void http_ffmpeg_video(http_worker_t *worker, FILE *stream, const char *c
   av_dict_set_int(&status.output_opts, "nobuffer", 1, 0);
   av_dict_set_int(&status.output_opts, "flush_packets", 1, 0);
 
-  int n = buffer_lock_write_loop(&http_h264, 0, (buffer_write_fn)http_ffmpeg_video_buf_part, &status);
+  int n = buffer_lock_write_loop(http_h264_buffer_for_res(worker), 0, (buffer_write_fn)http_ffmpeg_video_buf_part, &status);
   http_ffmpeg_close_status(&status);
 
   if (status.wrote_header) {

@@ -47,12 +47,16 @@ void http_404(http_worker_t *worker, FILE *stream);
 void http_snapshot(http_worker_t *worker, FILE *stream);
 void http_stream(http_worker_t *worker, FILE *stream);
 void http_jpeg_capture(struct buffer_s *buf);
+void http_jpeg_lowres_capture(struct buffer_s *buf);
 bool http_jpeg_needs_buffer();
 
 // H264
 bool http_h264_needs_buffer();
 void http_h264_capture(buffer_t *buf);
+void http_h264_lowres_capture(buffer_t *buf);
 void http_h264_video(http_worker_t *worker, FILE *stream);
 void http_mkv_video(http_worker_t *worker, FILE *stream);
 void http_mp4_video(http_worker_t *worker, FILE *stream);
 void http_mov_video(http_worker_t *worker, FILE *stream);
+
+#define HTTP_LOW_RES_PARAM "res=low"

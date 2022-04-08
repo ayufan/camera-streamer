@@ -6,6 +6,7 @@
 #include "hw/buffer_lock.h"
 
 DEFINE_BUFFER_LOCK(http_jpeg, 1000);
+DEFINE_BUFFER_LOCK(http_jpeg_lowres, 1000);
 
 #define PART_BOUNDARY "123456789000000000000987654321"
 #define CONTENT_TYPE "image/jpeg"
@@ -31,12 +32,25 @@ static const char *const STREAM_BOUNDARY = "\r\n"
 
 bool http_jpeg_needs_buffer()
 {
-  return buffer_lock_needs_buffer(&http_jpeg);
+  return buffer_lock_needs_buffer(&http_jpeg) | buffer_lock_needs_buffer(&http_jpeg_lowres);
 }
 
 void http_jpeg_capture(buffer_t *buf)
 {
   buffer_lock_capture(&http_jpeg, buf);
+}
+
+void http_jpeg_lowres_capture(buffer_t *buf)
+{
+  buffer_lock_capture(&http_jpeg_lowres, buf);
+}
+
+buffer_lock_t *http_jpeg_buffer_for_res(http_worker_t *worker)
+{
+  if (strstr(worker->client_method, HTTP_LOW_RES_PARAM))
+    return &http_jpeg_lowres;
+  else
+    return &http_jpeg;
 }
 
 int http_snapshot_buf_part(buffer_lock_t *buf_lock, buffer_t *buf, int frame, FILE *stream)
@@ -51,7 +65,7 @@ int http_snapshot_buf_part(buffer_lock_t *buf_lock, buffer_t *buf, int frame, FI
 
 void http_snapshot(http_worker_t *worker, FILE *stream)
 {
-  int n = buffer_lock_write_loop(&http_jpeg, 1, (buffer_write_fn)http_snapshot_buf_part, stream);
+  int n = buffer_lock_write_loop(http_jpeg_buffer_for_res(worker), 1, (buffer_write_fn)http_snapshot_buf_part, stream);
 
   if (n <= 0) {
     http_500_header(stream);
@@ -79,7 +93,7 @@ int http_stream_buf_part(buffer_lock_t *buf_lock, buffer_t *buf, int frame, FILE
 
 void http_stream(http_worker_t *worker, FILE *stream)
 {
-  int n = buffer_lock_write_loop(&http_jpeg, 0, (buffer_write_fn)http_stream_buf_part, stream);
+  int n = buffer_lock_write_loop(http_jpeg_buffer_for_res(worker), 0, (buffer_write_fn)http_stream_buf_part, stream);
 
   if (n == 0) {
     http_500_header(stream);
