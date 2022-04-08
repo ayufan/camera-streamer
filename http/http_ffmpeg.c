@@ -255,14 +255,8 @@ static int http_ffmpeg_copy_packets(http_ffmpeg_status_t *status)
 
 static int http_ffmpeg_video_buf_part(buffer_lock_t *buf_lock, buffer_t *buf, int frame, http_ffmpeg_status_t *status)
 {
-  unsigned char *data = buf->start;
-
-  if (buf->v4l2_buffer.flags & V4L2_BUF_FLAG_KEYFRAME) {
-    status->had_key_frame = true;
-    E_LOG_DEBUG(buf, "Got key frame (from V4L2)!");
-  } else if (buf->used >= 5 && (data[4] & 0x1F) == 0x07) {
-    status->had_key_frame = true;
-    E_LOG_DEBUG(buf, "Got key frame (from buffer)!");
+  if (!status->had_key_frame) {
+    status->had_key_frame = h264_is_key_frame(buf);
   }
 
   if (!status->had_key_frame) {
