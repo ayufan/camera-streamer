@@ -206,13 +206,13 @@ int links_step(link_t *all_links, int timeout_now_ms, int *timeout_next_ms)
       if (buf_list->fmt_interval_us > 0 && now_us - buf_list->last_enqueued_us < buf_list->fmt_interval_us) {
         *timeout_next_ms = MIN(*timeout_next_ms, (buf_list->last_enqueued_us + buf_list->fmt_interval_us - now_us) / 1000);
 
-        E_LOG_DEBUG(buf_list, "skipping dequeue: %.1f / %.1f. enqueued=%d\n",
+        E_LOG_DEBUG(buf_list, "skipping dequeue: %.1f / %.1f. enqueued=%d",
           (now_us - buf_list->last_enqueued_us) / 1000.0f,
           buf_list->fmt_interval_us / 1000.0f,
           buffer_list_count_enqueued(buf_list));
         continue;
       } else if (buf_list->fmt_interval_us > 0) {
-        E_LOG_DEBUG(buf_list, "since last: %.1f / %.1f. enqueued=%d\n",
+        E_LOG_DEBUG(buf_list, "since last: %.1f / %.1f. enqueued=%d",
           (now_us - buf_list->last_enqueued_us) / 1000.0f,
           buf_list->fmt_interval_us / 1000.0f,
           buffer_list_count_enqueued(buf_list));
