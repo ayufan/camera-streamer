@@ -37,57 +37,10 @@ bool buffer_consumed(buffer_t *buf, const char *who)
   buf->mmap_reflinks--;
 
   if (!buf->enqueued && buf->mmap_reflinks == 0) {
-    struct v4l2_buffer v4l2_buf = {0};
-    struct v4l2_plane v4l2_plane = {0};
-
-    v4l2_buf.type = buf->buf_list->v4l2.type;
-    v4l2_buf.index = buf->index;
-    v4l2_buf.flags = buf->v4l2.flags;
-
-    if (buf->buf_list->do_mmap) {
-      assert(buf->dma_source == NULL);
-      v4l2_buf.memory = V4L2_MEMORY_MMAP;
-    } else {
-      assert(buf->dma_source != NULL);
-      v4l2_buf.memory = V4L2_MEMORY_DMABUF;
+    if (buf->buf_list->device->hw->buffer_enqueue(buf, who) < 0) {
+      goto error;
     }
 
-    // update used bytes
-    if (buf->buf_list->v4l2.do_mplanes) {
-      v4l2_buf.length = 1;
-      v4l2_buf.m.planes = &v4l2_plane;
-      v4l2_plane.bytesused = buf->used;
-      v4l2_plane.length = buf->length;
-      v4l2_plane.data_offset = 0;
-
-      if (buf->dma_source) {
-        assert(!buf->buf_list->do_mmap);
-        v4l2_plane.m.fd = buf->dma_source->dma_fd;
-      }
-    } else {
-      v4l2_buf.bytesused = buf->used;
-
-      if (buf->dma_source) {
-        assert(!buf->buf_list->do_mmap);
-        v4l2_buf.m.fd = buf->dma_source->dma_fd;
-      }
-    }
-
-    E_LOG_DEBUG(buf, "Queuing buffer... used=%zu length=%zu (linked=%s) by %s",
-      buf->used,
-      buf->length,
-      buf->dma_source ? buf->dma_source->name : NULL,
-      who);
-
-    // Assign or clone timestamp
-    if (buf->buf_list->do_timestamps) {
-      get_monotonic_time_us(NULL, &v4l2_buf.timestamp);
-    } else {
-      v4l2_buf.timestamp.tv_sec = buf->captured_time_us / (1000LL * 1000LL);
-      v4l2_buf.timestamp.tv_usec = buf->captured_time_us % (1000LL * 1000LL);
-    }
-
-    E_XIOCTL(buf, buf->buf_list->device->fd, VIDIOC_QBUF, &v4l2_buf, "Can't queue buffer.");
     buf->enqueued = true;
     buf->enqueue_time_us = buf->buf_list->last_enqueued_us = get_monotonic_time_us(NULL, NULL);
   }
@@ -184,28 +137,12 @@ error:
 
 buffer_t *buffer_list_dequeue(buffer_list_t *buf_list)
 {
-	struct v4l2_buffer v4l2_buf = {0};
-	struct v4l2_plane v4l2_plane = {0};
+  buffer_t *buf = NULL;
 
-	v4l2_buf.type = buf_list->v4l2.type;
-  v4l2_buf.memory = V4L2_MEMORY_MMAP;
-
-	if (buf_list->v4l2.do_mplanes) {
-		v4l2_buf.length = 1;
-		v4l2_buf.m.planes = &v4l2_plane;
-	}
-
-	E_XIOCTL(buf_list, buf_list->device->fd, VIDIOC_DQBUF, &v4l2_buf, "Can't grab capture buffer (flags=%08x)", v4l2_buf.flags);
-
-  buffer_t *buf = buf_list->bufs[v4l2_buf.index];
-	if (buf_list->v4l2.do_mplanes) {
-    buf->used = v4l2_plane.bytesused;
-  } else {
-    buf->used = v4l2_buf.bytesused;
+  if (buf_list->device->hw->buffer_list_dequeue(buf_list, &buf) < 0) {
+    goto error;
   }
-  // TODO: Copy flags
-  buf->v4l2.flags = v4l2_buf.flags;
-  buf->captured_time_us = get_time_us(CLOCK_FROM_PARAMS, NULL, &v4l2_buf.timestamp, 0);
+
   buf_list->last_dequeued_us = get_monotonic_time_us(NULL, NULL);
 
   if (buf->mmap_reflinks > 0) {
@@ -238,17 +175,5 @@ error:
 
 int buffer_list_pollfd(buffer_list_t *buf_list, struct pollfd *pollfd, bool can_dequeue)
 {
-  int count_enqueued = buffer_list_count_enqueued(buf_list);
-
-  // Can something be dequeued?
-  pollfd->fd = buf_list->device->fd;
-  pollfd->events = POLLHUP;
-  if (count_enqueued > 0 && can_dequeue) {
-    if (buf_list->do_capture)
-      pollfd->events |= POLLIN;
-    else
-      pollfd->events |= POLLOUT;
-  }
-  pollfd->revents = 0;
-  return 0;
+  return buf_list->device->hw->buffer_list_pollfd(buf_list, pollfd, can_dequeue);
 }

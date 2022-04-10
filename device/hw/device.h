@@ -4,10 +4,17 @@
 #include <stdint.h>
 #include <linux/videodev2.h>
 
+typedef struct buffer_s buffer_t;
 typedef struct buffer_list_s buffer_list_t;
 typedef struct device_s device_t;
+struct pollfd;
 
 typedef struct device_hw_s {
+  int (*buffer_open)(buffer_t *buf);
+  void (*buffer_close)(buffer_t *buf);
+  int (*buffer_enqueue)(buffer_t *buf, const char *who);
+  int (*buffer_list_dequeue)(buffer_list_t *buf_list, buffer_t **bufp);
+  int (*buffer_list_pollfd)(buffer_list_t *buf_list, struct pollfd *pollfd, bool can_dequeue);
 } device_hw_t;
 
 typedef struct device_s {
