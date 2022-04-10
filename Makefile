@@ -1,24 +1,30 @@
 TARGET := camera_stream
-SRC := $(wildcard **/*.c) $(wildcard **/*/*.c)
-HEADERS := $(wildcard **/*.h) $(wildcard **/*/*.h)
+SRC := $(wildcard **/*.c **/*/*.c **/*.cc **/*/*.cc)
+HEADERS := $(wildcard **/*.h **/*/*.h **/*.hh **/*/*.hh)
 HTML := $(wildcard html/*.js html/*.html)
 
 CFLAGS := -Werror -g -I$(PWD)
-LDLIBS := -lpthread
+LDLIBS := -lpthread -lstdc++
 
 ifneq (x,x$(shell which ccache))
 CCACHE ?= ccache
 endif
 
 USE_FFMPEG ?= $(shell pkg-config libavutil libavformat libavcodec && echo 1)
+USE_LIBCAMERA ?= $(shell pkg-config libcamera && echo 1)
 
 ifeq (1,$(USE_FFMPEG))
 CFLAGS += -DUSE_FFMPEG
 LDLIBS += -lavcodec -lavformat -lavutil
 endif
 
+ifeq (1,$(USE_LIBCAMERA))
+CFLAGS += -DUSE_LIBCAMERA $(shell pkg-config --cflags libcamera)
+LDLIBS +=  $(shell pkg-config --cflags libs)
+endif
+
 HTML_SRC = $(addsuffix .c,$(HTML))
-OBJS = $(subst .c,.o,$(SRC) $(HTML_SRC))
+OBJS = $(patsubst %.cc,%.o,$(patsubst %.c,%.o,$(SRC) $(HTML_SRC)))
 
 .SUFFIXES:
 
@@ -40,6 +46,9 @@ headers:
 
 %.o: %.c
 	$(CCACHE) $(CC) -MMD $(CFLAGS) -c -o $@ $<
+
+%.o: %.cc
+	$(CCACHE) $(CXX) -std=c++17 -MMD $(CFLAGS) -c -o $@ $<
 
 html/%.c: html/%
 	xxd -i $< > $@.tmp

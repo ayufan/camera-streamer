@@ -25,6 +25,7 @@ typedef struct buffer_s {
   union {
     struct buffer_v4l2_s *v4l2;
     struct buffer_dummy_s *dummy;
+    struct buffer_libcamera_s *libcamera;
   };
 
   // State

@@ -41,6 +41,7 @@ typedef struct device_s {
   union {
     struct device_v4l2_s *v4l2;
     struct device_dummy_s *dummy;
+    struct device_libcamera_s *libcamera;
   };
 
   device_t *output_device;
@@ -65,3 +66,4 @@ int device_set_option_string(device_t *dev, const char *option, const char *valu
 void device_set_option_list(device_t *dev, const char *option_list);
 
 device_t *device_v4l2_open(const char *name, const char *path);
+device_t *device_libcamera_open(const char *name, const char *path);
