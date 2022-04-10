@@ -79,7 +79,6 @@ int _build_fds(link_t *all_links, struct pollfd *fds, link_t **links, buffer_lis
       links[n] = link;
       n++;
     }
-    n++;
   }
 
   return n;
