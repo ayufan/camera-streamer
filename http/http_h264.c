@@ -51,7 +51,6 @@ typedef struct {
 bool h264_is_key_frame(buffer_t *buf)
 {
   unsigned char *data = buf->start;
-  device_t *camera = buf->buf_list->device;
 
   if (buf->v4l2.flags & V4L2_BUF_FLAG_KEYFRAME) {
     E_LOG_DEBUG(buf, "Got key frame (from V4L2)!");
@@ -82,6 +81,7 @@ int http_video_buf_part(buffer_lock_t *buf_lock, buffer_t *buf, int frame, http_
 
   if (!status->wrote_header) {
     fprintf(status->stream, VIDEO_HEADER);
+    status->wrote_header = true;
   }
   if (!fwrite(buf->start, buf->used, 1, status->stream)) {
     return -1;
