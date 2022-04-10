@@ -116,7 +116,7 @@ int device_open_buffer_list(device_t *dev, bool do_capture, unsigned width, unsi
     goto error;
   }
 
-  if (buffer_list_request(*buf_list, nbufs) < 0) {
+  if (buffer_list_set_buffers(*buf_list, nbufs) < 0) {
     goto error;
   }
 
@@ -160,13 +160,13 @@ int device_set_stream(device_t *dev, bool do_on)
   xioctl(dev_name(dev), dev->fd, do_on ? VIDIOC_SUBSCRIBE_EVENT : VIDIOC_UNSUBSCRIBE_EVENT, &sub);
 
   if (dev->capture_list) {
-    if (buffer_list_stream(dev->capture_list, do_on) < 0) {
+    if (buffer_list_set_stream(dev->capture_list, do_on) < 0) {
       return -1;
     }
   }
 
   if (dev->output_list) {
-    if (buffer_list_stream(dev->output_list, do_on) < 0) {
+    if (buffer_list_set_stream(dev->output_list, do_on) < 0) {
       return -1;
     }
   }

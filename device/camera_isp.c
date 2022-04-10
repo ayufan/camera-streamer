@@ -3,7 +3,7 @@
 #include "device/hw/buffer.h"
 #include "device/hw/buffer_list.h"
 #include "device/hw/device.h"
-#include "device/hw/links.h"
+#include "device/links.h"
 #include "device/hw/v4l2.h"
 #include "device/hw/buffer_list.h"
 #include "http/http.h"

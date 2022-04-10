@@ -1,6 +1,6 @@
 #pragma once
 
-#include "device/hw/links.h"
+#include "device/links.h"
 #include "device/hw/device.h"
 
 #define MAX_DEVICES 20

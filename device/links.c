@@ -1,4 +1,4 @@
-#include "device/hw/links.h"
+#include "device/links.h"
 #include "device/hw/device.h"
 #include "device/hw/buffer.h"
 #include "device/hw/buffer_list.h"
@@ -44,19 +44,15 @@ int _build_fds(link_t *all_links, struct pollfd *fds, link_t **links, buffer_lis
         continue;
       }
 
-      int count_enqueued = buffer_list_count_enqueued(sink);
-
       // Can something be dequeued?
-      fds[n].fd = sink->device->fd;
-      fds[n].events = POLLHUP;
-      if (count_enqueued > 0)
-        fds[n].events |= POLLOUT;
-      fds[n].revents = 0;
-      buf_lists[n] = sink;
-      links[n] = NULL;
-      n++;
+      if (buffer_list_pollfd(sink, &fds[n], true) == 0) {
+        buf_lists[n] = sink;
+        links[n] = NULL;
+        n++;
+      }
 
       // Can this chain pauses
+      int count_enqueued = buffer_list_count_enqueued(sink);
       if (!sink->device->paused && count_enqueued < sink->nbufs) {
         paused = false;
       }
@@ -67,7 +63,7 @@ int _build_fds(link_t *all_links, struct pollfd *fds, link_t **links, buffer_lis
     if (source->device->output_device) {
       source->device->output_device->paused = paused;
     }
-  
+
     int count_enqueued = buffer_list_count_enqueued(source);
     bool can_dequeue = count_enqueued > 0;
 
@@ -78,13 +74,11 @@ int _build_fds(link_t *all_links, struct pollfd *fds, link_t **links, buffer_lis
     }
 #endif
 
-    fds[n].fd = source->device->fd;
-    fds[n].events = POLLHUP;
-    if (can_dequeue)
-      fds[n].events |= POLLIN;
-    fds[n].revents = 0;
-    buf_lists[n] = source;
-    links[n] = link;
+    if (buffer_list_pollfd(source, &fds[n], can_dequeue) == 0) {
+      buf_lists[n] = source;
+      links[n] = link;
+      n++;
+    }
     n++;
   }
 
@@ -244,12 +238,12 @@ int links_stream(link_t *all_links, bool do_stream)
     bool streaming = true;
     link_t *link = &all_links[i];
 
-    if (buffer_list_stream(link->source, streaming) < 0) {
+    if (buffer_list_set_stream(link->source, streaming) < 0) {
       E_LOG_ERROR(link->source, "Failed to start streaming");
     }
 
     for (int j = 0; link->sinks[j]; j++) {
-      if (buffer_list_stream(link->sinks[j], streaming) < 0) {
+      if (buffer_list_set_stream(link->sinks[j], streaming) < 0) {
         E_LOG_ERROR(link->sinks[j], "Failed to start streaming");
       }
     }

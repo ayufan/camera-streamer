@@ -169,7 +169,7 @@ error:
   return -1;
 }
 
-int buffer_list_request(buffer_list_t *buf_list, int nbufs)
+int buffer_list_set_buffers(buffer_list_t *buf_list, int nbufs)
 {
 	struct v4l2_requestbuffers v4l2_req = {0};
 	v4l2_req.count = nbufs;
@@ -206,7 +206,7 @@ error:
   return -1;
 }
 
-int buffer_list_stream(buffer_list_t *buf_list, bool do_on)
+int buffer_list_set_stream(buffer_list_t *buf_list, bool do_on)
 {
   if (!buf_list) {
     return -1;

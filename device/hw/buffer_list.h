@@ -6,6 +6,7 @@
 
 typedef struct buffer_s buffer_t;
 typedef struct device_s device_t;
+struct pollfd;
 
 typedef struct buffer_list_s {
   char *name;
@@ -33,14 +34,13 @@ typedef struct buffer_list_s {
 buffer_list_t *buffer_list_open(const char *name, struct device_s *dev, unsigned type, bool do_mmap);
 void buffer_list_close(buffer_list_t *buf_list);
 
+int buffer_list_set_stream(buffer_list_t *buf_list, bool do_on);
 int buffer_list_set_format(buffer_list_t *buffer_list, unsigned width, unsigned height, unsigned format, unsigned bytesperline);
-int buffer_list_request(buffer_list_t *buf_list, int nbufs);
+int buffer_list_set_buffers(buffer_list_t *buf_list, int nbufs);
 
-int buffer_list_stream(buffer_list_t *buf_list, bool do_on);
-
+int buffer_list_pollfd(buffer_list_t *buf_list, struct pollfd *pollfd, bool can_dequeue);
 buffer_t *buffer_list_find_slot(buffer_list_t *buf_list);
 buffer_t *buffer_list_dequeue(buffer_list_t *buf_list);
 int buffer_list_count_enqueued(buffer_list_t *buf_list);
-
 int buffer_list_enqueue(buffer_list_t *buf_list, buffer_t *dma_buf);
 int buffer_list_refresh_states(buffer_list_t *buf_list);

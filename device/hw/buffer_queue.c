@@ -210,3 +210,19 @@ buffer_t *buffer_list_dequeue(buffer_list_t *buf_list)
 error:
   return NULL;
 }
+
+int buffer_list_pollfd(buffer_list_t *buf_list, struct pollfd *pollfd, bool can_dequeue)
+{
+  int count_enqueued = buffer_list_count_enqueued(buf_list);
+
+  // Can something be dequeued?
+  pollfd->fd = buf_list->device->fd;
+  pollfd->events = POLLHUP;
+  if (count_enqueued > 0 && can_dequeue)
+    if (buf_list->do_capture)
+      pollfd->events |= POLLIN;
+    else
+      pollfd->events |= POLLOUT;
+  pollfd->revents = 0;
+  return 0;
+}
