@@ -9,7 +9,7 @@ buffer_list_t *buffer_list_open(const char *name, struct device_s *dev, unsigned
 
   buf_list->device = dev;
   buf_list->name = strdup(name);
-  buf_list->type = type;
+  buf_list->v4l2.type = type;
 
   switch(type) {
   case V4L2_BUF_TYPE_VIDEO_OUTPUT:
@@ -20,7 +20,7 @@ buffer_list_t *buffer_list_open(const char *name, struct device_s *dev, unsigned
   case V4L2_BUF_TYPE_VIDEO_OUTPUT_MPLANE:
     buf_list->do_mmap = do_mmap;
     buf_list->do_dma = do_mmap;
-    buf_list->do_mplanes = true;
+    buf_list->v4l2.do_mplanes = true;
     break;
 
   case V4L2_BUF_TYPE_VIDEO_CAPTURE:
@@ -32,7 +32,7 @@ buffer_list_t *buffer_list_open(const char *name, struct device_s *dev, unsigned
   case V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE:
     buf_list->do_dma = do_mmap;
     buf_list->do_mmap = do_mmap;
-    buf_list->do_mplanes = true;
+    buf_list->v4l2.do_mplanes = true;
     buf_list->do_capture = true;
     break;
 
@@ -69,9 +69,9 @@ void buffer_list_close(buffer_list_t *buf_list)
 
 int buffer_list_set_format(buffer_list_t *buf_list, unsigned width, unsigned height, unsigned format, unsigned bytesperline)
 {
-	struct v4l2_format *fmt = &buf_list->v4l2_format;
+	struct v4l2_format fmt = { 0 };
 
-  fmt->type = buf_list->type;
+  fmt.type = buf_list->v4l2.type;
 
   unsigned orig_width = width;
   unsigned orig_height = height;
@@ -91,46 +91,46 @@ retry:
   }
 
   E_LOG_DEBUG(buf_list, "Get current format ...");
-  E_XIOCTL(buf_list, buf_list->device->fd, VIDIOC_G_FMT, fmt, "Can't set format");
+  E_XIOCTL(buf_list, buf_list->device->fd, VIDIOC_G_FMT, &fmt, "Can't set format");
 
-  if (buf_list->do_mplanes) {
-    fmt->fmt.pix_mp.colorspace = V4L2_COLORSPACE_JPEG;
+  if (buf_list->v4l2.do_mplanes) {
+    fmt.fmt.pix_mp.colorspace = V4L2_COLORSPACE_JPEG;
     if (width)
-      fmt->fmt.pix_mp.width = width;
+      fmt.fmt.pix_mp.width = width;
     if (height)
-      fmt->fmt.pix_mp.height = height;
+      fmt.fmt.pix_mp.height = height;
     if (format)
-      fmt->fmt.pix_mp.pixelformat = format;
-    fmt->fmt.pix_mp.field = V4L2_FIELD_ANY;
-    fmt->fmt.pix_mp.num_planes = 1;
-    fmt->fmt.pix_mp.plane_fmt[0].bytesperline = bytesperline;
-    //fmt->fmt.pix_mp.plane_fmt[0].sizeimage = bytesperline * orig_height;
+      fmt.fmt.pix_mp.pixelformat = format;
+    fmt.fmt.pix_mp.field = V4L2_FIELD_ANY;
+    fmt.fmt.pix_mp.num_planes = 1;
+    fmt.fmt.pix_mp.plane_fmt[0].bytesperline = bytesperline;
+    //fmt.fmt.pix_mp.plane_fmt[0].sizeimage = bytesperline * orig_height;
   } else {
-    fmt->fmt.pix.colorspace = V4L2_COLORSPACE_RAW;
+    fmt.fmt.pix.colorspace = V4L2_COLORSPACE_RAW;
     if (width)
-      fmt->fmt.pix.width = width;
+      fmt.fmt.pix.width = width;
     if (height)
-      fmt->fmt.pix.height = height;
+      fmt.fmt.pix.height = height;
     if (format)
-      fmt->fmt.pix.pixelformat = format;
-    fmt->fmt.pix.field = V4L2_FIELD_ANY;
-    fmt->fmt.pix.bytesperline = bytesperline;
-    //fmt->fmt.pix.sizeimage = bytesperline * orig_height;
+      fmt.fmt.pix.pixelformat = format;
+    fmt.fmt.pix.field = V4L2_FIELD_ANY;
+    fmt.fmt.pix.bytesperline = bytesperline;
+    //fmt.fmt.pix.sizeimage = bytesperline * orig_height;
   }
 
   E_LOG_DEBUG(buf_list, "Configuring format (%s)...", fourcc_to_string(format).buf);
-  E_XIOCTL(buf_list, buf_list->device->fd, VIDIOC_S_FMT, fmt, "Can't set format");
+  E_XIOCTL(buf_list, buf_list->device->fd, VIDIOC_S_FMT, &fmt, "Can't set format");
 
-  if (buf_list->do_mplanes) {
-    buf_list->fmt_width = fmt->fmt.pix_mp.width;
-    buf_list->fmt_height = fmt->fmt.pix_mp.height;
-    buf_list->fmt_format = fmt->fmt.pix_mp.pixelformat;
-    buf_list->fmt_bytesperline = fmt->fmt.pix_mp.plane_fmt[0].bytesperline;
+  if (buf_list->v4l2.do_mplanes) {
+    buf_list->fmt_width = fmt.fmt.pix_mp.width;
+    buf_list->fmt_height = fmt.fmt.pix_mp.height;
+    buf_list->fmt_format = fmt.fmt.pix_mp.pixelformat;
+    buf_list->fmt_bytesperline = fmt.fmt.pix_mp.plane_fmt[0].bytesperline;
   } else {
-    buf_list->fmt_width = fmt->fmt.pix.width;
-    buf_list->fmt_height = fmt->fmt.pix.height;
-    buf_list->fmt_format = fmt->fmt.pix.pixelformat;
-    buf_list->fmt_bytesperline = fmt->fmt.pix.bytesperline;
+    buf_list->fmt_width = fmt.fmt.pix.width;
+    buf_list->fmt_height = fmt.fmt.pix.height;
+    buf_list->fmt_format = fmt.fmt.pix.pixelformat;
+    buf_list->fmt_bytesperline = fmt.fmt.pix.bytesperline;
   }
 
   if (bytesperline > 0 && buf_list->fmt_bytesperline != bytesperline) {
@@ -173,7 +173,7 @@ int buffer_list_set_buffers(buffer_list_t *buf_list, int nbufs)
 {
 	struct v4l2_requestbuffers v4l2_req = {0};
 	v4l2_req.count = nbufs;
-	v4l2_req.type = buf_list->type;
+	v4l2_req.type = buf_list->v4l2.type;
 	v4l2_req.memory = buf_list->do_mmap ? V4L2_MEMORY_MMAP : V4L2_MEMORY_DMABUF;
 
 	E_LOG_DEBUG(buf_list, "Requesting %u buffers", v4l2_req.count);
@@ -216,7 +216,7 @@ int buffer_list_set_stream(buffer_list_t *buf_list, bool do_on)
     return 0;
   }
 
-	enum v4l2_buf_type type = buf_list->type;
+	enum v4l2_buf_type type = buf_list->v4l2.type;
   
   E_XIOCTL(buf_list, buf_list->device->fd, do_on ? VIDIOC_STREAMON : VIDIOC_STREAMOFF, &type, "Cannot set streaming state");
   buf_list->streaming = do_on;
@@ -239,9 +239,9 @@ int buffer_list_refresh_states(buffer_list_t *buf_list)
   struct v4l2_buffer v4l2_buf = {0};
   struct v4l2_plane v4l2_plane = {0};
 
-	v4l2_buf.type = buf_list->type;
+	v4l2_buf.type = buf_list->v4l2.type;
 
-  if (buf_list->do_mplanes) {
+  if (buf_list->v4l2.do_mplanes) {
     v4l2_buf.length = 1;
     v4l2_buf.m.planes = &v4l2_plane;
   }
@@ -257,7 +257,7 @@ int buffer_list_refresh_states(buffer_list_t *buf_list)
 
   	E_XIOCTL(buf_list, buf_list->device->fd, VIDIOC_QUERYBUF, &v4l2_buf, "Can't query buffer (flags=%08x)", i);
     E_LOG_INFO(buf_list, "Buffer: %d, Flags: %08x. Offset: %d", i, v4l2_buf.flags,
-      buf_list->do_mplanes ? v4l2_plane.m.mem_offset : v4l2_buf.m.offset);
+      buf_list->v4l2.do_mplanes ? v4l2_plane.m.mem_offset : v4l2_buf.m.offset);
   }
 
 error:

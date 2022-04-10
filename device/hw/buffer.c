@@ -14,10 +14,10 @@ buffer_t *buffer_open(const char *name, buffer_list_t *buf_list, int index) {
   buf->mmap_reflinks = 1;
   buf->used = 0;
 
-  buf->v4l2_buffer.type = buf_list->type;
+  buf->v4l2_buffer.type = buf_list->v4l2.type;
   buf->v4l2_buffer.index = index;
 
-  if (buf_list->do_mplanes) {
+  if (buf_list->v4l2.do_mplanes) {
     buf->v4l2_buffer.length = 1;
     buf->v4l2_buffer.m.planes = &buf->v4l2_plane;
     buf->v4l2_plane.data_offset = 0;
@@ -31,7 +31,7 @@ buffer_t *buffer_open(const char *name, buffer_list_t *buf_list, int index) {
 
   E_XIOCTL(buf_list, dev->fd, VIDIOC_QUERYBUF, &buf->v4l2_buffer, "Cannot query buffer %d", index);
 
-  if (buf_list->do_mplanes) {
+  if (buf_list->v4l2.do_mplanes) {
     buf->offset = buf->v4l2_plane.m.mem_offset;
     buf->length = buf->v4l2_plane.length;
   } else {
@@ -48,7 +48,7 @@ buffer_t *buffer_open(const char *name, buffer_list_t *buf_list, int index) {
 
   if (buf_list->do_dma) {
     struct v4l2_exportbuffer v4l2_exp = {0};
-    v4l2_exp.type = buf_list->type;
+    v4l2_exp.type = buf_list->v4l2.type;
     v4l2_exp.index = index;
     v4l2_exp.plane = 0;
     E_XIOCTL(buf_list, dev->fd, VIDIOC_EXPBUF, &v4l2_exp, "Can't export queue buffer=%u to DMA", index);

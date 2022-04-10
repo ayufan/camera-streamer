@@ -8,8 +8,6 @@ typedef struct buffer_list_s buffer_list_t;
 typedef struct device_s device_t;
 
 typedef struct device_hw_s {
-  int (*device_hw_open)(device_t *device);
-  int (*device_hw_close)(device_t *device);
 } device_hw_t;
 
 typedef struct device_s {

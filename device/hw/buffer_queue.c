@@ -38,7 +38,7 @@ bool buffer_consumed(buffer_t *buf, const char *who)
 
   if (!buf->enqueued && buf->mmap_reflinks == 0) {
     // update used bytes
-    if (buf->buf_list->do_mplanes) {
+    if (buf->buf_list->v4l2.do_mplanes) {
       buf->v4l2_plane.bytesused = buf->used;
       buf->v4l2_plane.length = buf->length;
       buf->v4l2_plane.data_offset = 0;
@@ -137,7 +137,7 @@ int buffer_list_enqueue(buffer_list_t *buf_list, buffer_t *dma_buf)
     E_LOG_DEBUG(buf, "mmap copy: dest=%p, src=%p (%s), size=%zu, space=%zu, time=%dllus",
       buf->start, dma_buf->start, dma_buf->name, dma_buf->used, buf->length, after-before);
   } else {
-    if (buf_list->do_mplanes) {
+    if (buf_list->v4l2.do_mplanes) {
       buf->v4l2_plane.m.fd = dma_buf->dma_fd;
     } else {
       buf->v4l2_buffer.m.fd = dma_buf->dma_fd;
@@ -163,10 +163,10 @@ buffer_t *buffer_list_dequeue(buffer_list_t *buf_list)
 	struct v4l2_buffer v4l2_buf = {0};
 	struct v4l2_plane v4l2_plane = {0};
 
-	v4l2_buf.type = buf_list->type;
+	v4l2_buf.type = buf_list->v4l2.type;
   v4l2_buf.memory = V4L2_MEMORY_MMAP;
 
-	if (buf_list->do_mplanes) {
+	if (buf_list->v4l2.do_mplanes) {
 		v4l2_buf.length = 1;
 		v4l2_buf.m.planes = &v4l2_plane;
 	}
@@ -174,7 +174,7 @@ buffer_t *buffer_list_dequeue(buffer_list_t *buf_list)
 	E_XIOCTL(buf_list, buf_list->device->fd, VIDIOC_DQBUF, &v4l2_buf, "Can't grab capture buffer (flags=%08x)", v4l2_buf.flags);
 
   buffer_t *buf = buf_list->bufs[v4l2_buf.index];
-	if (buf_list->do_mplanes) {
+	if (buf_list->v4l2.do_mplanes) {
     buf->used = v4l2_plane.bytesused;
   } else {
     buf->used = v4l2_buf.bytesused;

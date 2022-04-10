@@ -13,19 +13,18 @@ typedef struct buffer_list_s {
   device_t *device;
   buffer_t **bufs;
   int nbufs;
-  int type;
 
-  struct v4l2_format v4l2_format;
-  bool do_mplanes;
-  bool do_mmap;
-  bool do_dma;
-  bool do_capture;
+  bool do_mmap, do_dma, do_capture;
+
+  struct {
+    bool do_mplanes;
+    int type;
+  } v4l2;
 
   unsigned fmt_width, fmt_height, fmt_format, fmt_bytesperline, fmt_interval_us;
   bool do_timestamps;
 
-  uint64_t last_enqueued_us;
-  uint64_t last_dequeued_us;
+  uint64_t last_enqueued_us, last_dequeued_us;
 
   bool streaming;
   int frames;
