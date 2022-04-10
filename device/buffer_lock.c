@@ -105,6 +105,7 @@ int buffer_lock_write_loop(buffer_lock_t *buf_lock, int nframes, buffer_write_fn
 {
   int counter = 0;
   int frames = 0;
+  uint64_t deadline_ms = get_monotonic_time_us(NULL, NULL) + DEFAULT_BUFFER_LOCK_GET_TIMEOUT * 1000LL;
 
   buffer_lock_use(buf_lock, 1);
 
@@ -120,6 +121,9 @@ int buffer_lock_write_loop(buffer_lock_t *buf_lock, int nframes, buffer_write_fn
     if (ret > 0) {
       frames++;
     } else if (ret < 0) {
+      goto error;
+    } else if(!frames && deadline_ms < get_monotonic_time_us(NULL, NULL)) {
+      E_LOG_DEBUG(buf_lock, "Deadline getting frame elapsed.");
       goto error;
     }
   }
