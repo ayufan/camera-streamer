@@ -1,6 +1,6 @@
 #include "device/buffer.h"
 #include "device/buffer_list.h"
-#include "device/hw/device.h"
+#include "device/device.h"
 #include "device/hw/v4l2.h"
 
 buffer_list_t *buffer_list_open(const char *name, struct device_s *dev, bool do_capture, bool do_mmap)

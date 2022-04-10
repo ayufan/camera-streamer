@@ -1,7 +1,7 @@
 #include "device/v4l2/v4l2.h"
 #include "device/buffer.h"
 #include "device/buffer_list.h"
-#include "device/hw/device.h"
+#include "device/device.h"
 
 int v4l2_buffer_open(buffer_t *buf)
 {

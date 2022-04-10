@@ -6,7 +6,7 @@
 #include "device/buffer.h"
 #include "device/buffer_lock.h"
 #include "device/buffer_list.h"
-#include "device/hw/device.h"
+#include "device/device.h"
 
 DEFINE_BUFFER_LOCK(http_h264, 0);
 DEFINE_BUFFER_LOCK(http_h264_lowres, 0);

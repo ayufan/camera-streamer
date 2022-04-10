@@ -1,4 +1,4 @@
-#include "device/hw/device.h"
+#include "device/device.h"
 #include "device/buffer.h"
 #include "device/buffer_list.h"
 #include "device/hw/v4l2.h"

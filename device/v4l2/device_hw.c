@@ -1,6 +1,6 @@
 #include "device/v4l2/v4l2.h"
 #include "device/hw/v4l2.h"
-#include "device/hw/device.h"
+#include "device/device.h"
 
 device_hw_t v4l2_device_hw = {
   .device_open = v4l2_device_open,
