@@ -1,42 +1,30 @@
+#include "device/v4l2/v4l2.h"
 #include "device/buffer.h"
-#include "device/hw/buffer_list.h"
+#include "device/buffer_list.h"
 #include "device/hw/device.h"
-#include "device/hw/v4l2.h"
 
-buffer_list_t *buffer_list_open(const char *name, struct device_s *dev, bool do_capture, bool do_mmap)
+int v4l2_buffer_list_set_format(buffer_list_t *buf_list, unsigned width, unsigned height, unsigned format, unsigned bytesperline)
 {
-  buffer_list_t *buf_list = calloc(1, sizeof(buffer_list_t));
-
-  buf_list->device = dev;
-  buf_list->name = strdup(name);
-  buf_list->do_capture = do_capture;
+  device_t *dev = buf_list->device;
 
   struct v4l2_capability v4l2_cap;
   E_XIOCTL(dev, dev->fd, VIDIOC_QUERYCAP, &v4l2_cap, "Can't query device capabilities");
 
-  if (do_capture) {
+  if (buf_list->do_capture) {
      if (v4l2_cap.capabilities & V4L2_CAP_VIDEO_CAPTURE) {
       buf_list->v4l2.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-      buf_list->do_dma = do_mmap;
-      buf_list->do_mmap = do_mmap;
     } else if (v4l2_cap.capabilities & (V4L2_CAP_VIDEO_CAPTURE_MPLANE | V4L2_CAP_VIDEO_M2M_MPLANE)) {
       buf_list->v4l2.type = V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE;
       buf_list->v4l2.do_mplanes = true;
-      buf_list->do_dma = do_mmap;
-      buf_list->do_mmap = do_mmap;
     } else {
       E_LOG_ERROR(dev, "Video capture is not supported by device: %08x", v4l2_cap.capabilities);
     }
   } else {
     if (v4l2_cap.capabilities & V4L2_CAP_VIDEO_OUTPUT) {
       buf_list->v4l2.type = V4L2_BUF_TYPE_VIDEO_OUTPUT;
-      buf_list->do_mmap = do_mmap;
-      buf_list->do_dma = do_mmap;
     } else if (v4l2_cap.capabilities & (V4L2_CAP_VIDEO_OUTPUT_MPLANE | V4L2_CAP_VIDEO_M2M_MPLANE)) {
       buf_list->v4l2.type = V4L2_BUF_TYPE_VIDEO_OUTPUT_MPLANE;
       buf_list->v4l2.do_mplanes = true;
-      buf_list->do_mmap = do_mmap;
-      buf_list->do_dma = do_mmap;
     } else {
       E_LOG_ERROR(dev, "Video output is not supported by device: %08x", v4l2_cap.capabilities);
     }
@@ -49,42 +37,11 @@ buffer_list_t *buffer_list_open(const char *name, struct device_s *dev, bool do_
     strcat(buf_list->name, MPLANE_SUFFIX);
   }
 
-  return buf_list;
-
-error:
-  buffer_list_close(buf_list);
-  return NULL;
-}
-
-void buffer_list_close(buffer_list_t *buf_list)
-{
-  if (!buf_list) {
-    return;
-  }
-
-  if (buf_list->bufs) {
-    for (int i = 0; i < buf_list->nbufs; i++) {
-      buffer_close(buf_list->bufs[i]);
-    }
-    free(buf_list->bufs);
-    buf_list->bufs = NULL;
-    buf_list->nbufs = 0;
-  }
-
-  free(buf_list->name);
-  free(buf_list);
-}
-
-int buffer_list_set_format(buffer_list_t *buf_list, unsigned width, unsigned height, unsigned format, unsigned bytesperline)
-{
 	struct v4l2_format fmt = { 0 };
-
   fmt.type = buf_list->v4l2.type;
 
   unsigned orig_width = width;
   unsigned orig_height = height;
-
-retry:
 
   // JPEG is in 16x16 blocks (shrink image to fit) (but adapt to 32x32)
   // And ISP output
@@ -177,7 +134,7 @@ error:
   return -1;
 }
 
-int buffer_list_set_buffers(buffer_list_t *buf_list, int nbufs)
+int v4l2_buffer_list_set_buffers(buffer_list_t *buf_list, int nbufs)
 {
 	struct v4l2_requestbuffers v4l2_req = {0};
 	v4l2_req.count = nbufs;
@@ -192,48 +149,18 @@ int buffer_list_set_buffers(buffer_list_t *buf_list, int nbufs)
 	}
 
 	E_LOG_DEBUG(buf_list, "Got %u buffers", v4l2_req.count);
-
-  buf_list->bufs = calloc(v4l2_req.count, sizeof(buffer_t*));
-  buf_list->nbufs = v4l2_req.count;
-
-  for (unsigned i = 0; i < buf_list->nbufs; i++) {
-    char name[64];
-    sprintf(name, "%s:buf%d", buf_list->name, i);
-    buffer_t *buf = buffer_open(name, buf_list, i);
-    if (!buf) {
-		  E_LOG_ERROR(buf_list, "Cannot open buffer: %u", i);
-      goto error;
-    }
-    buf_list->bufs[i] = buf;
-  }
-
-	E_LOG_DEBUG(buf_list, "Opened %u buffers", buf_list->nbufs);
-  return 0;
+  return v4l2_req.count;
 
 error:
   return -1;
 }
 
-int buffer_list_set_stream(buffer_list_t *buf_list, bool do_on)
+int v4l2_buffer_list_set_stream(buffer_list_t *buf_list, bool do_on)
 {
-  if (!buf_list) {
-    return -1;
-  }
-
-  if (buf_list->streaming == do_on) {
-    return 0;
-  }
-
 	enum v4l2_buf_type type = buf_list->v4l2.type;
-  
   E_XIOCTL(buf_list, buf_list->device->fd, do_on ? VIDIOC_STREAMON : VIDIOC_STREAMOFF, &type, "Cannot set streaming state");
-  buf_list->streaming = do_on;
 
-  int enqueued = buffer_list_count_enqueued(buf_list);
-
-  E_LOG_DEBUG(buf_list, "Streaming %s... Was %d of %d enqueud", do_on ? "started" : "stopped", enqueued, buf_list->nbufs);
   return 0;
-
 error:
   return -1;
 }

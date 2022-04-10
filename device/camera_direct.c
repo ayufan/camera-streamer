@@ -1,11 +1,11 @@
 #include "camera.h"
 
 #include "device/buffer.h"
-#include "device/hw/buffer_list.h"
+#include "device/buffer_list.h"
 #include "device/hw/device.h"
 #include "device/links.h"
 #include "device/hw/v4l2.h"
-#include "device/hw/buffer_list.h"
+#include "device/buffer_list.h"
 #include "http/http.h"
 
 int camera_configure_direct(camera_t *camera)

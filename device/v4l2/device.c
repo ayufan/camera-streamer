@@ -8,6 +8,9 @@ device_hw_t v4l2_device_hw = {
   .buffer_enqueue = v4l2_buffer_enqueue,
   .buffer_list_dequeue = v4l2_buffer_list_dequeue,
   .buffer_list_pollfd = v4l2_buffer_list_pollfd,
+  .buffer_list_set_format = v4l2_buffer_list_set_format,
+  .buffer_list_set_buffers = v4l2_buffer_list_set_buffers,
+  .buffer_list_set_stream = v4l2_buffer_list_set_stream
 };
 
 device_t *device_v4l2_open(const char *name, const char *path)

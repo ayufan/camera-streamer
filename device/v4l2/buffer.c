@@ -1,6 +1,6 @@
 #include "device/v4l2/v4l2.h"
 #include "device/buffer.h"
-#include "device/hw/buffer_list.h"
+#include "device/buffer_list.h"
 #include "device/hw/device.h"
 
 int v4l2_buffer_open(buffer_t *buf)
@@ -43,9 +43,7 @@ int v4l2_buffer_open(buffer_t *buf)
     if (buf->start == MAP_FAILED) {
       goto error;
     }
-  }
 
-  if (buf_list->do_dma) {
     struct v4l2_exportbuffer v4l2_exp = {0};
     v4l2_exp.type = v4l2_buf.type;
     v4l2_exp.index = buf->index;

@@ -1,5 +1,5 @@
 #include "device/v4l2/v4l2.h"
-#include "device/hw/buffer_list.h"
+#include "device/buffer_list.h"
 #include "device/hw/device.h"
 
 int v4l2_buffer_list_refresh_states(buffer_list_t *buf_list)

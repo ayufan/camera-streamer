@@ -14,7 +14,7 @@ typedef struct buffer_list_s {
   buffer_t **bufs;
   int nbufs;
 
-  bool do_mmap, do_dma, do_capture;
+  bool do_mmap, do_capture;
 
   struct {
     bool do_mplanes;
@@ -34,7 +34,7 @@ buffer_list_t *buffer_list_open(const char *name, struct device_s *dev, bool do_
 void buffer_list_close(buffer_list_t *buf_list);
 
 int buffer_list_set_stream(buffer_list_t *buf_list, bool do_on);
-int buffer_list_set_format(buffer_list_t *buffer_list, unsigned width, unsigned height, unsigned format, unsigned bytesperline);
+int buffer_list_set_format(buffer_list_t *buf_list, unsigned width, unsigned height, unsigned format, unsigned bytesperline);
 int buffer_list_set_buffers(buffer_list_t *buf_list, int nbufs);
 
 int buffer_list_pollfd(buffer_list_t *buf_list, struct pollfd *pollfd, bool can_dequeue);
