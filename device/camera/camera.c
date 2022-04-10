@@ -125,6 +125,7 @@ int camera_set_params(camera_t *camera)
 
   device_set_option_string(camera->codec_h264, "video_bitrate_mode", "0");
   device_set_option_string(camera->codec_h264, "video_bitrate", "5000000");
+  device_set_option_string(camera->codec_h264, "repeat_sequence_header", "1");
   device_set_option_string(camera->codec_h264, "h264_i_frame_period", "30");
   device_set_option_string(camera->codec_h264, "h264_level", "11");
   device_set_option_string(camera->codec_h264, "h264_profile", "4");

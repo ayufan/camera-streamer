@@ -13,6 +13,8 @@ int v4l2_device_open(device_t *dev)
     goto error;
   }
 
+	E_LOG_INFO(dev, "Device path=%s fd=%d opened", dev->path, dev->v4l2.dev_fd);
+
 	E_LOG_DEBUG(dev, "Querying device capabilities ...");
   struct v4l2_capability v4l2_cap;
   E_XIOCTL(dev, dev->v4l2.dev_fd, VIDIOC_QUERYCAP, &v4l2_cap, "Can't query device capabilities");
@@ -23,8 +25,6 @@ int v4l2_device_open(device_t *dev)
 
   strcpy(dev->bus_info, v4l2_cap.bus_info);
   dev->v4l2.subdev_fd = v4l2_device_open_v4l2_subdev(dev, 0);
-	E_LOG_INFO(dev, "Device path=%s fd=%d opened", dev->path, dev->v4l2.dev_fd);
-
   return 0;
 
 error:

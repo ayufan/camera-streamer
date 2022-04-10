@@ -67,8 +67,9 @@ int v4l2_device_open_v4l2_subdev(device_t *dev, int subdev)
     };
 
     int rc = ioctl(media_fd, MEDIA_IOC_ENUM_ENTITIES, &entity);
-    if (rc < 0 && errno == EINVAL)
+    if (rc < 0 && errno == EINVAL) {
       break;
+    }
 
     if (rc < 0) {
       goto error;
@@ -79,26 +80,27 @@ int v4l2_device_open_v4l2_subdev(device_t *dev, int subdev)
     sprintf(path, "/sys/dev/char/%d:%d", entity.dev.major, entity.dev.minor);
 
     char link[256];
-    if (readlink(path, link, sizeof(link)) < 0) {
+    if ((rc = readlink(path, link, sizeof(link)-1)) < 0) {
       E_LOG_ERROR(dev, "Cannot readlink '%s'", path);
-      goto error;
     }
+    link[rc] = 0;
 
-    char * last = strrchr(link, '/');
+    char *last = strrchr(link, '/');
     if (!last) {
       E_LOG_ERROR(dev, "Link '%s' for '%s' does not end with '/'", link, path);
-      goto error;
     }
 
     if (strstr(last, "/v4l-subdev") != last) {
-      goto error;
+      E_LOG_ERROR(dev, "Link '%s' does not contain '/v4l-subdev'", link, path);
     }
 
     sprintf(path, "/dev%s", last);
     ret = open(path, O_RDWR);
-    if (ret >= 0) {
-      E_LOG_INFO(dev, "Opened '%s' (fd=%d)", path, ret);
+    if (ret < 0) {
+      E_LOG_ERROR(dev, "Cannot open '%s' (ret=%d)", path, ret);
     }
+
+    E_LOG_INFO(dev, "Opened '%s' (fd=%d)", path, ret);
     break;
   }
 
