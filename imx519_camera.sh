@@ -3,6 +3,16 @@
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 cd "$SCRIPT_DIR"
 
+CAMERA_PATH=$(echo /dev/v4l/by-path/*.csi-video-index0)
+
+if [[ "$1" == "dump" ]]; then
+  shift
+  libcamera-still "$@"
+  v4l2-ctl -d /dev/v4l-subdev0 -C exposure -C vertical_blanking -C analogue_gain -C digital_gain 
+  v4l2-ctl -d /dev/video13 -C red_balance -C colour_correction_matrix -C black_level -C green_equalisation -C gamma -C denoise -C sharpen -C defective_pixel_correction -C colour_denoise
+  exit 0
+fi
+
 set -xeo pipefail
 make -j$(nproc)
 $GDB ./camera_stream -camera-path=$(echo /dev/v4l/by-path/*.csi-video-index0) \
