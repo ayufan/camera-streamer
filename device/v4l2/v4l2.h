@@ -10,6 +10,11 @@ typedef struct buffer_list_s buffer_list_t;
 typedef struct device_s device_t;
 struct pollfd;
 
+typedef struct device_v4l2_s {
+  int dev_fd;
+  int subdev_fd;
+} device_v4l2_t;
+
 int v4l2_device_open(device_t *dev);
 void v4l2_device_close(device_t *dev);
 int v4l2_device_set_decoder_start(device_t *dev, bool do_on);

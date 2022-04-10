@@ -13,7 +13,7 @@
 int v4l2_device_open_media_device(device_t *dev)
 {
   struct stat st;
-  if (fstat(dev->v4l2.dev_fd, &st) < 0) {
+  if (fstat(dev->v4l2->dev_fd, &st) < 0) {
     E_LOG_ERROR(dev, "Cannot get fstat");
     return -1;
   }
@@ -114,7 +114,7 @@ int v4l2_device_set_pad_format(device_t *dev, unsigned width, unsigned height, u
 {
   struct v4l2_subdev_format fmt = {0};
 
-  if (dev->v4l2.subdev_fd < 0) {
+  if (dev->v4l2->subdev_fd < 0) {
     return -1;
   }
 
@@ -126,8 +126,8 @@ int v4l2_device_set_pad_format(device_t *dev, unsigned width, unsigned height, u
   fmt.format.colorspace = V4L2_COLORSPACE_RAW;
   fmt.format.field = V4L2_FIELD_ANY;
 
-  E_LOG_DEBUG(dev, "Configuring mpad %d (subdev_fd=%d)...", fmt.pad, dev->v4l2.subdev_fd);
-  E_XIOCTL(dev, dev->v4l2.subdev_fd, VIDIOC_SUBDEV_S_FMT, &fmt, "Can't configure mpad %d (subdev_fd=%d)", fmt.pad, dev->v4l2.subdev_fd);
+  E_LOG_DEBUG(dev, "Configuring mpad %d (subdev_fd=%d)...", fmt.pad, dev->v4l2->subdev_fd);
+  E_XIOCTL(dev, dev->v4l2->subdev_fd, VIDIOC_SUBDEV_S_FMT, &fmt, "Can't configure mpad %d (subdev_fd=%d)", fmt.pad, dev->v4l2->subdev_fd);
   return 0;
 
 error:

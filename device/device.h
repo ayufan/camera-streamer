@@ -37,10 +37,9 @@ typedef struct device_s {
   buffer_list_t *capture_list;
   buffer_list_t *output_list;
 
-  struct {
-    int dev_fd;
-    int subdev_fd;
-  } v4l2;
+  union {
+    struct device_v4l2_s *v4l2;
+  };
 
   device_t *output_device;
   bool paused;
