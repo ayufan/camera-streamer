@@ -32,7 +32,6 @@ typedef struct device_s {
   char *name;
   char *path;
   char bus_info[64];
-  int fd;
   bool allow_dma;
 
   device_hw_t *hw;
@@ -40,6 +39,7 @@ typedef struct device_s {
   buffer_list_t *output_list;
 
   struct {
+    int dev_fd;
     int subdev_fd;
   } v4l2;
 

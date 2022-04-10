@@ -26,7 +26,7 @@ int v4l2_buffer_open(buffer_t *buf)
     v4l2_buf.memory = V4L2_MEMORY_DMABUF;
   }
 
-  E_XIOCTL(buf_list, dev->fd, VIDIOC_QUERYBUF, &v4l2_buf, "Cannot query buffer %d", index);
+  E_XIOCTL(buf_list, dev->v4l2.dev_fd, VIDIOC_QUERYBUF, &v4l2_buf, "Cannot query buffer %d", index);
 
   uint64_t mem_offset = 0;
 
@@ -39,7 +39,7 @@ int v4l2_buffer_open(buffer_t *buf)
   }
 
   if (buf_list->do_mmap) {
-    buf->start = mmap(NULL, buf->length, PROT_READ | PROT_WRITE, MAP_SHARED, dev->fd, mem_offset);
+    buf->start = mmap(NULL, buf->length, PROT_READ | PROT_WRITE, MAP_SHARED, dev->v4l2.dev_fd, mem_offset);
     if (buf->start == MAP_FAILED) {
       goto error;
     }
@@ -48,7 +48,7 @@ int v4l2_buffer_open(buffer_t *buf)
     v4l2_exp.type = v4l2_buf.type;
     v4l2_exp.index = buf->index;
     v4l2_exp.plane = 0;
-    E_XIOCTL(buf_list, dev->fd, VIDIOC_EXPBUF, &v4l2_exp, "Can't export queue buffer=%u to DMA", index);
+    E_XIOCTL(buf_list, dev->v4l2.dev_fd, VIDIOC_EXPBUF, &v4l2_exp, "Can't export queue buffer=%u to DMA", index);
     buf->dma_fd = v4l2_exp.fd;
   }
 
@@ -123,7 +123,7 @@ int v4l2_buffer_enqueue(buffer_t *buf, const char *who)
     v4l2_buf.timestamp.tv_usec = buf->captured_time_us % (1000LL * 1000LL);
   }
 
-  E_XIOCTL(buf, buf->buf_list->device->fd, VIDIOC_QBUF, &v4l2_buf, "Can't queue buffer.");
+  E_XIOCTL(buf, buf->buf_list->device->v4l2.dev_fd, VIDIOC_QBUF, &v4l2_buf, "Can't queue buffer.");
 
   return 0;
 
@@ -144,7 +144,7 @@ int v4l2_buffer_list_dequeue(buffer_list_t *buf_list, buffer_t **bufp)
 		v4l2_buf.m.planes = &v4l2_plane;
 	}
 
-	E_XIOCTL(buf_list, buf_list->device->fd, VIDIOC_DQBUF, &v4l2_buf, "Can't grab capture buffer (flags=%08x)", v4l2_buf.flags);
+	E_XIOCTL(buf_list, buf_list->device->v4l2.dev_fd, VIDIOC_DQBUF, &v4l2_buf, "Can't grab capture buffer (flags=%08x)", v4l2_buf.flags);
 
   buffer_t *buf = *bufp = buf_list->bufs[v4l2_buf.index];
 	if (buf_list->v4l2.do_mplanes) {
@@ -166,7 +166,7 @@ int v4l2_buffer_list_pollfd(buffer_list_t *buf_list, struct pollfd *pollfd, bool
   int count_enqueued = buffer_list_count_enqueued(buf_list);
 
   // Can something be dequeued?
-  pollfd->fd = buf_list->device->fd;
+  pollfd->fd = buf_list->device->v4l2.dev_fd;
   pollfd->events = POLLHUP;
   if (count_enqueued > 0 && can_dequeue) {
     if (buf_list->do_capture)

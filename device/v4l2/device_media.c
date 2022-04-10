@@ -12,7 +12,7 @@
 int v4l2_device_open_media_device(device_t *dev)
 {
   struct stat st;
-  if (fstat(dev->fd, &st) < 0) {
+  if (fstat(dev->v4l2.dev_fd, &st) < 0) {
     E_LOG_ERROR(dev, "Cannot get fstat");
     return -1;
   }
