@@ -37,26 +37,57 @@ bool buffer_consumed(buffer_t *buf, const char *who)
   buf->mmap_reflinks--;
 
   if (!buf->enqueued && buf->mmap_reflinks == 0) {
+    struct v4l2_buffer v4l2_buf = {0};
+    struct v4l2_plane v4l2_plane = {0};
+
+    v4l2_buf.type = buf->buf_list->v4l2.type;
+    v4l2_buf.index = buf->index;
+    v4l2_buf.flags = buf->v4l2.flags;
+
+    if (buf->buf_list->do_mmap) {
+      assert(buf->dma_source == NULL);
+      v4l2_buf.memory = V4L2_MEMORY_MMAP;
+    } else {
+      assert(buf->dma_source != NULL);
+      v4l2_buf.memory = V4L2_MEMORY_DMABUF;
+    }
+
     // update used bytes
     if (buf->buf_list->v4l2.do_mplanes) {
-      buf->v4l2_plane.bytesused = buf->used;
-      buf->v4l2_plane.length = buf->length;
-      buf->v4l2_plane.data_offset = 0;
+      v4l2_buf.length = 1;
+      v4l2_buf.m.planes = &v4l2_plane;
+      v4l2_plane.bytesused = buf->used;
+      v4l2_plane.length = buf->length;
+      v4l2_plane.data_offset = 0;
+
+      if (buf->dma_source) {
+        assert(!buf->buf_list->do_mmap);
+        v4l2_plane.m.fd = buf->dma_source->dma_fd;
+      }
     } else {
-      buf->v4l2_buffer.bytesused = buf->used;
+      v4l2_buf.bytesused = buf->used;
+
+      if (buf->dma_source) {
+        assert(!buf->buf_list->do_mmap);
+        v4l2_buf.m.fd = buf->dma_source->dma_fd;
+      }
     }
 
     E_LOG_DEBUG(buf, "Queuing buffer... used=%zu length=%zu (linked=%s) by %s",
       buf->used,
       buf->length,
-      buf->mmap_source ? buf->mmap_source->name : NULL,
+      buf->dma_source ? buf->dma_source->name : NULL,
       who);
 
+    // Assign or clone timestamp
     if (buf->buf_list->do_timestamps) {
-      get_monotonic_time_us(NULL, &buf->v4l2_buffer.timestamp);
+      get_monotonic_time_us(NULL, &v4l2_buf.timestamp);
+    } else {
+      v4l2_buf.timestamp.tv_sec = buf->captured_time_us / (1000LL * 1000LL);
+      v4l2_buf.timestamp.tv_usec = buf->captured_time_us % (1000LL * 1000LL);
     }
 
-    E_XIOCTL(buf, buf->buf_list->device->fd, VIDIOC_QBUF, &buf->v4l2_buffer, "Can't queue buffer.");
+    E_XIOCTL(buf, buf->buf_list->device->fd, VIDIOC_QBUF, &v4l2_buf, "Can't queue buffer.");
     buf->enqueued = true;
     buf->enqueue_time_us = buf->buf_list->last_enqueued_us = get_monotonic_time_us(NULL, NULL);
   }
@@ -66,13 +97,13 @@ bool buffer_consumed(buffer_t *buf, const char *who)
 
 error:
   {
-    buffer_t *mmap_source = buf->mmap_source;
-    buf->mmap_source = NULL;
+    buffer_t *dma_source = buf->dma_source;
+    buf->dma_source = NULL;
     buf->mmap_reflinks++;
     pthread_mutex_unlock(&buffer_lock);
 
-    if (mmap_source) {
-      buffer_consumed(mmap_source, who);
+    if (dma_source) {
+      buffer_consumed(dma_source, who);
     }
   }
 
@@ -117,11 +148,10 @@ int buffer_list_enqueue(buffer_list_t *buf_list, buffer_t *dma_buf)
     return 0;
   }
 
-  // V4L2_BUF_FLAG_LAST
-  buf->v4l2_buffer.flags = 0;
-  buf->v4l2_buffer.flags &= ~V4L2_BUF_FLAG_KEYFRAME;
-  buf->v4l2_buffer.flags |= dma_buf->v4l2_buffer.flags & V4L2_BUF_FLAG_KEYFRAME;
-  buf->v4l2_buffer.timestamp = dma_buf->v4l2_buffer.timestamp;
+  buf->v4l2.flags = 0;
+  buf->v4l2.flags &= ~V4L2_BUF_FLAG_KEYFRAME;
+  buf->v4l2.flags |= dma_buf->v4l2.flags & V4L2_BUF_FLAG_KEYFRAME;
+  buf->captured_time_us = dma_buf->captured_time_us;
 
   if (buf_list->do_mmap) {
     if (dma_buf->used > buf->length) {
@@ -137,16 +167,10 @@ int buffer_list_enqueue(buffer_list_t *buf_list, buffer_t *dma_buf)
     E_LOG_DEBUG(buf, "mmap copy: dest=%p, src=%p (%s), size=%zu, space=%zu, time=%dllus",
       buf->start, dma_buf->start, dma_buf->name, dma_buf->used, buf->length, after-before);
   } else {
-    if (buf_list->v4l2.do_mplanes) {
-      buf->v4l2_plane.m.fd = dma_buf->dma_fd;
-    } else {
-      buf->v4l2_buffer.m.fd = dma_buf->dma_fd;
-    }
-
     E_LOG_DEBUG(buf, "dmabuf copy: dest=%p, src=%p (%s, dma_fd=%d), size=%zu",
       buf->start, dma_buf->start, dma_buf->name, dma_buf->dma_fd, dma_buf->used);
 
-    buf->mmap_source = dma_buf;
+    buf->dma_source = dma_buf;
     buf->length = dma_buf->length;
     dma_buf->mmap_reflinks++;
   }
@@ -179,8 +203,9 @@ buffer_t *buffer_list_dequeue(buffer_list_t *buf_list)
   } else {
     buf->used = v4l2_buf.bytesused;
   }
-  buf->v4l2_buffer.flags = v4l2_buf.flags;
-  buf->v4l2_buffer.timestamp = v4l2_buf.timestamp;
+  // TODO: Copy flags
+  buf->v4l2.flags = v4l2_buf.flags;
+  buf->captured_time_us = get_time_us(CLOCK_FROM_PARAMS, NULL, &v4l2_buf.timestamp, 0);
   buf_list->last_dequeued_us = get_monotonic_time_us(NULL, NULL);
 
   if (buf->mmap_reflinks > 0) {
@@ -195,13 +220,13 @@ buffer_t *buffer_list_dequeue(buffer_list_t *buf_list)
     buf->length,
     buf->used,
     buf_list->frames,
-    buf->mmap_source ? buf->mmap_source->name : NULL,
-    buf->v4l2_buffer.flags);
+    buf->dma_source ? buf->dma_source->name : NULL,
+    buf->v4l2.flags);
 
-  if (buf->mmap_source) {
-    buf->mmap_source->used = 0;
-    buffer_consumed(buf->mmap_source, "mmap-dequeued");
-    buf->mmap_source = NULL;
+  if (buf->dma_source) {
+    buf->dma_source->used = 0;
+    buffer_consumed(buf->dma_source, "mmap-dequeued");
+    buf->dma_source = NULL;
   }
 
   buf_list->frames++;
@@ -218,11 +243,12 @@ int buffer_list_pollfd(buffer_list_t *buf_list, struct pollfd *pollfd, bool can_
   // Can something be dequeued?
   pollfd->fd = buf_list->device->fd;
   pollfd->events = POLLHUP;
-  if (count_enqueued > 0 && can_dequeue)
+  if (count_enqueued > 0 && can_dequeue) {
     if (buf_list->do_capture)
       pollfd->events |= POLLIN;
     else
       pollfd->events |= POLLOUT;
+  }
   pollfd->revents = 0;
   return 0;
 }

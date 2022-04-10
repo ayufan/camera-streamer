@@ -12,18 +12,22 @@ typedef struct buffer_s {
   char *name;
   struct buffer_list_s *buf_list;
   int index;
+
+  // Mapped memory (with DMA)
   void *start;
-  size_t offset;
   size_t used;
   size_t length;
-  struct v4l2_buffer v4l2_buffer;
-  struct v4l2_plane v4l2_plane;
   int dma_fd;
 
+  struct {
+    unsigned flags;
+  } v4l2;
+
+  // State
   int mmap_reflinks;
-  buffer_t *mmap_source;
+  buffer_t *dma_source;
   bool enqueued;
-  uint64_t enqueue_time_us;
+  uint64_t enqueue_time_us, captured_time_us;
 } buffer_t;
 
 buffer_t *buffer_open(const char *name, buffer_list_t *buf_list, int buffer);

@@ -42,7 +42,6 @@ bool buffer_lock_needs_buffer(buffer_lock_t *buf_lock)
 void buffer_lock_capture(buffer_lock_t *buf_lock, buffer_t *buf)
 {
   uint64_t now = get_monotonic_time_us(NULL, NULL);
-  uint64_t captured_time_us = buf ? get_time_us(CLOCK_FROM_PARAMS, NULL, &buf->v4l2_buffer.timestamp, 0) : 0;
 
   pthread_mutex_lock(&buf_lock->lock);
   if (!buf) {
@@ -55,7 +54,7 @@ void buffer_lock_capture(buffer_lock_t *buf_lock, buffer_t *buf)
     E_LOG_DEBUG(buf_lock, "Dropped buffer %s (refs=%d), frame=%d/%d, frame_ms=%.1f",
       dev_name(buf), buf ? buf->mmap_reflinks : 0,
       buf_lock->counter, buf_lock->dropped,
-      (now - captured_time_us) / 1000.0f);
+      (now - buf->captured_time_us) / 1000.0f);
   } else {
     buffer_consumed(buf_lock->buf, buf_lock->name);
     buffer_use(buf);
@@ -64,7 +63,7 @@ void buffer_lock_capture(buffer_lock_t *buf_lock, buffer_t *buf)
     E_LOG_DEBUG(buf_lock, "Captured buffer %s (refs=%d), frame=%d/%d, processing_ms=%.1f, frame_ms=%.1f",
       dev_name(buf), buf ? buf->mmap_reflinks : 0,
       buf_lock->counter, buf_lock->dropped,
-      (now - captured_time_us) / 1000.0f,
+      (now - buf->captured_time_us) / 1000.0f,
       (now - buf_lock->buf_time_us) / 1000.0f);
     buf_lock->buf_time_us = now;
     pthread_cond_broadcast(&buf_lock->cond_wait);
