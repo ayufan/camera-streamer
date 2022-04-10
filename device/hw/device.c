@@ -2,32 +2,22 @@
 #include "device/buffer.h"
 #include "device/buffer_list.h"
 #include "device/hw/v4l2.h"
+#include "opts/opts.h"
 
 device_t *device_open(const char *name, const char *path, device_hw_t *hw) {
   device_t *dev = calloc(1, sizeof(device_t));
   dev->name = strdup(name);
   dev->path = strdup(path);
   dev->hw = hw;
-  dev->fd = open(path, O_RDWR|O_NONBLOCK);
+  dev->fd = -1;
   dev->subdev_fd = -1;
   dev->allow_dma = true;
-  if(dev->fd < 0) {
+
+  if (dev->hw->device_open(dev) < 0) {
 		E_LOG_ERROR(dev, "Can't open device: %s", path);
-	}
-
-	E_LOG_DEBUG(dev, "Querying device capabilities ...");
-  struct v4l2_capability v4l2_cap;
-  E_XIOCTL(dev, dev->fd, VIDIOC_QUERYCAP, &v4l2_cap, "Can't query device capabilities");
-
-	if (!(v4l2_cap.capabilities & V4L2_CAP_STREAMING)) {
-		E_LOG_ERROR(dev, "Device doesn't support streaming IO");
-	}
-
-  strcpy(dev->bus_info, v4l2_cap.bus_info);
+  }
 
 	E_LOG_INFO(dev, "Device path=%s fd=%d opened", dev->path, dev->fd);
-
-  dev->subdev_fd = device_open_v4l2_subdev(dev, 0);
   return dev;
 
 error:
@@ -50,14 +40,7 @@ void device_close(device_t *dev) {
     dev->output_list = NULL;
   }
 
-  if (dev->subdev_fd >= 0) {
-    close(dev->subdev_fd);
-  }
-
-  if(dev->fd >= 0) {
-    close(dev->fd);
-  }
-
+  dev->hw->device_close(dev);
   free(dev->name);
   free(dev->path);
   free(dev);
@@ -141,11 +124,14 @@ int device_open_buffer_list_capture(device_t *dev, buffer_list_t *output_list, f
 
 int device_set_stream(device_t *dev, bool do_on)
 {
+  // TODO: support events
+#if 0
   struct v4l2_event_subscription sub = {0};
   sub.type = V4L2_EVENT_SOURCE_CHANGE;
 
   E_LOG_DEBUG(dev, "Subscribing to DV-timings events ...");
   xioctl(dev_name(dev), dev->fd, do_on ? VIDIOC_SUBSCRIBE_EVENT : VIDIOC_UNSUBSCRIBE_EVENT, &sub);
+#endif
 
   if (dev->capture_list) {
     if (buffer_list_set_stream(dev->capture_list, do_on) < 0) {
@@ -162,23 +148,11 @@ int device_set_stream(device_t *dev, bool do_on)
   return 0;
 }
 
-int device_set_decoder_start(device_t *dev, bool do_on)
-{
-  struct v4l2_decoder_cmd cmd = {0};
-
-  cmd.cmd = do_on ? V4L2_DEC_CMD_START : V4L2_DEC_CMD_STOP;
-
-  E_LOG_DEBUG(dev, "Setting decoder state %s...", do_on ? "Start" : "Stop");
-  E_XIOCTL(dev, dev->fd, VIDIOC_DECODER_CMD, &cmd, "Cannot set decoder state");
-  dev->decoder_started = do_on;
-  return 0;
-
-error:
-  return -1;
-}
-
 int device_consume_event(device_t *dev)
 {
+  // TODO: support events
+
+#if 0
 	struct v4l2_event event;
 
   if (!dev) {
@@ -200,39 +174,69 @@ int device_consume_event(device_t *dev)
   return 0;
 
 error:
+#endif
+
   return -1;
+}
+
+int device_set_decoder_start(device_t *dev, bool do_on)
+{
+  if (!dev || dev->hw->device_set_decoder_start(dev, do_on) < 0)
+    return -1;
+
+  dev->decoder_started = do_on;
+  return 0;
 }
 
 int device_video_force_key(device_t *dev)
 {
-  if (!dev) {
+  if (!dev || dev->hw->device_video_force_key(dev) < 0)
     return -1;
-  }
 
-  struct v4l2_control ctl = {0};
-  ctl.id = V4L2_CID_MPEG_VIDEO_FORCE_KEY_FRAME;
-  ctl.value = 1;
-  E_LOG_DEBUG(dev, "Forcing keyframe ...");
-  E_XIOCTL(dev, dev->fd, VIDIOC_S_CTRL, &ctl, "Can't force keyframe");
   return 0;
-error:
-  return -1;
 }
 
 int device_set_fps(device_t *dev, int desired_fps)
 {
-  struct v4l2_streamparm setfps = {0};
+  if (!dev || dev->hw->device_set_fps(dev, desired_fps) < 0)
+    return -1;
 
+  return 0;
+}
+
+int device_set_option_string(device_t *dev, const char *key, const char *value)
+{
   if (!dev) {
     return -1;
   }
 
-  setfps.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-  setfps.parm.output.timeperframe.numerator = 1;
-  setfps.parm.output.timeperframe.denominator = desired_fps;
-  E_LOG_DEBUG(dev, "Configuring FPS ...");
-  E_XIOCTL(dev, dev->fd, VIDIOC_S_PARM, &setfps, "Can't set FPS");
-  return 0;
-error:
-  return -1;
+  return dev->hw->device_set_option(dev, key, value);
+}
+
+void device_set_option_list(device_t *dev, const char *option_list)
+{
+  if (!dev || !option_list || !option_list[0]) {
+    return;
+  }
+
+  char *start = strdup(option_list);
+  char *string = start;
+  char *option;
+
+  while (option = strsep(&string, OPTION_VALUE_LIST_SEP)) {
+    char *value = option;
+    char *key = strsep(&value, "=");
+
+    if (value) {
+      device_set_option_string(dev, key, value);
+    } else {
+      E_LOG_INFO(dev, "Missing 'key=value' for '%s'", option);
+      continue;
+    }
+
+    // consume all separators
+    while (strsep(&value, "="));
+  }
+
+  free(start);
 }

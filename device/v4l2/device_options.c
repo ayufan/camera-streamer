@@ -1,10 +1,10 @@
-#include "device/hw/device.h"
+#include "device/v4l2/v4l2.h"
 #include "device/hw/v4l2.h"
-#include "opts/opts.h"
+#include "device/hw/device.h"
 
 #include <ctype.h>
 
-int device_set_option(device_t *dev, const char *name, uint32_t id, int32_t value)
+int v4l2_device_set_option_by_id(device_t *dev, const char *name, uint32_t id, int32_t value)
 {
   struct v4l2_control ctl = {0};
 
@@ -21,7 +21,7 @@ error:
   return -1;
 }
 
-void device_option_normalize_name(char *in)
+void v4l2_device_option_normalize_name(char *in)
 {
   char *out = in;
 
@@ -39,7 +39,7 @@ void device_option_normalize_name(char *in)
   *out++ = 0;
 }
 
-static int device_set_option_string_fd_by_id(device_t *dev, int fd, uint32_t *id, char *name, char *value)
+static int v4l2_device_set_option_string_fd_iter_id(device_t *dev, int fd, uint32_t *id, char *name, char *value)
 {
   struct v4l2_query_ext_ctrl qctrl = { .id = *id };
   void *data = NULL;
@@ -50,7 +50,7 @@ static int device_set_option_string_fd_by_id(device_t *dev, int fd, uint32_t *id
   }
   *id = qctrl.id;
 
-  device_option_normalize_name(qctrl.name);
+  v4l2_device_option_normalize_name(qctrl.name);
 
   if (strcmp(qctrl.name, name) != 0)
     return 0;
@@ -131,61 +131,42 @@ error:
   return -1;
 }
 
-static int device_set_option_string_fd(device_t *dev, int fd, char *name, char *value)
+static int v4l2_device_set_option_string_fd(device_t *dev, int fd, char *name, char *value)
 {
   int ret = 0;
 
   uint32_t id = V4L2_CTRL_FLAG_NEXT_CTRL | V4L2_CTRL_FLAG_NEXT_COMPOUND;
-  while ((ret = device_set_option_string_fd_by_id(dev, fd, &id, name, value)) == 0 && id) {
+  while ((ret = v4l2_device_set_option_string_fd_iter_id(dev, fd, &id, name, value)) == 0 && id) {
     id |= V4L2_CTRL_FLAG_NEXT_CTRL | V4L2_CTRL_FLAG_NEXT_COMPOUND;
   }
 
   return ret;
 }
 
-int device_set_option_string(device_t *dev, const char *option)
+int v4l2_device_set_option(device_t *dev, const char *key, const char *value)
 {
-  int ret = -1;
-  char *name = strdup(option);
-  strcpy(name, option);
+  char *keyp = strdup(key);
+  char *valuep = strdup(value);
 
-  char *value = strchr(name, '=');
-  if (!value) {
-    E_LOG_ERROR(dev, "Missing 'key=value': '%s'", option);
-  }
-  *value++ = 0;
+  int ret = 0;
 
-  device_option_normalize_name(name);
+  v4l2_device_option_normalize_name(keyp);
 
   if (dev->subdev_fd >= 0)
-    ret = device_set_option_string_fd(dev, dev->subdev_fd, name, value);
+    ret = v4l2_device_set_option_string_fd(dev, dev->subdev_fd, keyp, valuep);
   if (ret <= 0)
-    ret = device_set_option_string_fd(dev, dev->fd, name, value);
-  if (ret == 0)
-    E_LOG_ERROR(dev, "The '%s' was failed to find.", option);
-  else if (ret < 0)
-    E_LOG_ERROR(dev, "The '%s' did fail to be set.", option);
+    ret = v4l2_device_set_option_string_fd(dev, dev->fd, keyp, valuep);
 
-  ret = 0;
+  free(keyp);
+  free(valuep);
+
+  if (ret == 0)
+    E_LOG_ERROR(dev, "The '%s=%s' was failed to find.", key, value);
+  else if (ret < 0)
+    E_LOG_ERROR(dev, "The '%s=%s' did fail to be set.", key, value);
+
+  return 0;
 
 error:
-  free(name);
-  return ret;
-}
-
-void device_set_option_list(device_t *dev, const char *option_list)
-{
-  if (!dev || !option_list || !option_list[0]) {
-    return;
-  }
-
-  char *start = strdup(option_list);
-  char *string = start;
-  char *option;
-
-  while (option = strsep(&string, OPTION_VALUE_LIST_SEP)) {
-    device_set_option_string(dev, option);
-  }
-
-  free(start);
+  return -1;
 }

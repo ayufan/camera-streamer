@@ -1,3 +1,4 @@
+#include "device/v4l2/v4l2.h"
 #include "device/hw/device.h"
 #include "device/hw/v4l2.h"
 
@@ -8,7 +9,7 @@
 #include <sys/sysmacros.h>
 #include <linux/media.h>
 
-int device_open_media_device(device_t *dev)
+int v4l2_device_open_media_device(device_t *dev)
 {
   struct stat st;
   if (fstat(dev->fd, &st) < 0) {
@@ -49,13 +50,13 @@ error:
   return ret;
 }
 
-int device_open_v4l2_subdev(device_t *dev, int subdev)
+int v4l2_device_open_v4l2_subdev(device_t *dev, int subdev)
 {
   int media_fd = -1;
 	unsigned int last_id = 0;
   int ret = -1;
 
-  media_fd = device_open_media_device(dev);
+  media_fd = v4l2_device_open_media_device(dev);
   if (media_fd < 0) {
     E_LOG_ERROR(dev, "Cannot find media controller");
   }
@@ -106,7 +107,7 @@ error:
   return ret;
 }
 
-int device_set_pad_format(device_t *dev, unsigned width, unsigned height, unsigned format)
+int v4l2_device_set_pad_format(device_t *dev, unsigned width, unsigned height, unsigned format)
 {
   struct v4l2_subdev_format fmt = {0};
 

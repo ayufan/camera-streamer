@@ -51,7 +51,8 @@ camera_t *camera_open(camera_options_t *options)
     camera->camera->allow_dma = false;
   }
 
-  device_set_pad_format(camera->camera, camera->options.width, camera->options.height, 0);
+  // TODO: mpad format
+  // device_set_pad_format(camera->camera, camera->options.width, camera->options.height, 0);
 
   if (device_open_buffer_list(camera->camera, true, camera->options.width, camera->options.height, camera->options.format, 0, camera->options.nbufs, true) < 0) {
     goto error;
@@ -120,14 +121,15 @@ int camera_set_params(camera_t *camera)
   // DEVICE_SET_OPTION(camera->isp_srgb, BLUE_BALANCE, 1472);
   // DEVICE_SET_OPTION(camera->isp_srgb, DIGITAL_GAIN, 1007);
 
-  DEVICE_SET_OPTION2(camera->codec_jpeg, JPEG, COMPRESSION_QUALITY, 80);
+  device_set_option_string(camera->codec_jpeg, "compression_quality", "80");
 
-  DEVICE_SET_OPTION2(camera->codec_h264, MPEG_VIDEO, BITRATE, 5000 * 1000);
-  DEVICE_SET_OPTION2(camera->codec_h264, MPEG_VIDEO, H264_I_PERIOD, 30);
-  DEVICE_SET_OPTION2(camera->codec_h264, MPEG_VIDEO, H264_LEVEL, V4L2_MPEG_VIDEO_H264_LEVEL_4_0);
-  DEVICE_SET_OPTION2(camera->codec_h264, MPEG_VIDEO, REPEAT_SEQ_HEADER, 1);
-  DEVICE_SET_OPTION2(camera->codec_h264, MPEG_VIDEO, H264_MIN_QP, 16);
-  DEVICE_SET_OPTION2(camera->codec_h264, MPEG_VIDEO, H264_MIN_QP, 32);
+  device_set_option_string(camera->codec_h264, "video_bitrate_mode", "0");
+  device_set_option_string(camera->codec_h264, "video_bitrate", "5000000");
+  device_set_option_string(camera->codec_h264, "h264_i_frame_period", "30");
+  device_set_option_string(camera->codec_h264, "h264_level", "11");
+  device_set_option_string(camera->codec_h264, "h264_profile", "4");
+  device_set_option_string(camera->codec_h264, "h264_minimum_qp_value", "16");
+  device_set_option_string(camera->codec_h264, "h264_maximum_qp_value", "32");
   return 0;
 }
 
