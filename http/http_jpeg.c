@@ -3,7 +3,7 @@
 
 #include "http/http.h"
 #include "device/hw/buffer.h"
-#include "device/hw/buffer_lock.h"
+#include "device/buffer_lock.h"
 
 DEFINE_BUFFER_LOCK(http_jpeg, 1000);
 DEFINE_BUFFER_LOCK(http_jpeg_lowres, 1000);
