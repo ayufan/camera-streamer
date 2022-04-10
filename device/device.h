@@ -40,6 +40,7 @@ typedef struct device_s {
 
   union {
     struct device_v4l2_s *v4l2;
+    struct device_dummy_s *dummy;
   };
 
   device_t *output_device;
