@@ -2,7 +2,7 @@
 #include <stdlib.h>
 
 #include "http/http.h"
-#include "device/hw/buffer.h"
+#include "device/buffer.h"
 #include "device/buffer_lock.h"
 
 DEFINE_BUFFER_LOCK(http_jpeg, 1000);

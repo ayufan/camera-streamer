@@ -1,5 +1,5 @@
 #include "device/v4l2/v4l2.h"
-#include "device/hw/buffer.h"
+#include "device/buffer.h"
 #include "device/hw/buffer_list.h"
 #include "device/hw/device.h"
 

@@ -3,7 +3,7 @@
 
 #include "opts/log.h"
 #include "http/http.h"
-#include "device/hw/buffer.h"
+#include "device/buffer.h"
 #include "device/buffer_lock.h"
 #include "device/hw/buffer_list.h"
 #include "device/hw/device.h"
