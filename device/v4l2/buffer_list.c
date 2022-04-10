@@ -5,28 +5,30 @@
 #include "opts/log.h"
 #include "opts/fourcc.h"
 
-int v4l2_buffer_list_set_format(buffer_list_t *buf_list, unsigned width, unsigned height, unsigned format, unsigned bytesperline)
+int v4l2_buffer_list_open(buffer_list_t *buf_list, unsigned width, unsigned height, unsigned format, unsigned bytesperline)
 {
   device_t *dev = buf_list->device;
+
+  buf_list->v4l2 = calloc(1, sizeof(buffer_list_v4l2_t));
 
   struct v4l2_capability v4l2_cap;
   E_XIOCTL(dev, dev->v4l2->dev_fd, VIDIOC_QUERYCAP, &v4l2_cap, "Can't query device capabilities");
 
   if (buf_list->do_capture) {
      if (v4l2_cap.capabilities & V4L2_CAP_VIDEO_CAPTURE) {
-      buf_list->v4l2.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+      buf_list->v4l2->type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
     } else if (v4l2_cap.capabilities & (V4L2_CAP_VIDEO_CAPTURE_MPLANE | V4L2_CAP_VIDEO_M2M_MPLANE)) {
-      buf_list->v4l2.type = V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE;
-      buf_list->v4l2.do_mplanes = true;
+      buf_list->v4l2->type = V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE;
+      buf_list->v4l2->do_mplanes = true;
     } else {
       E_LOG_ERROR(dev, "Video capture is not supported by device: %08x", v4l2_cap.capabilities);
     }
   } else {
     if (v4l2_cap.capabilities & V4L2_CAP_VIDEO_OUTPUT) {
-      buf_list->v4l2.type = V4L2_BUF_TYPE_VIDEO_OUTPUT;
+      buf_list->v4l2->type = V4L2_BUF_TYPE_VIDEO_OUTPUT;
     } else if (v4l2_cap.capabilities & (V4L2_CAP_VIDEO_OUTPUT_MPLANE | V4L2_CAP_VIDEO_M2M_MPLANE)) {
-      buf_list->v4l2.type = V4L2_BUF_TYPE_VIDEO_OUTPUT_MPLANE;
-      buf_list->v4l2.do_mplanes = true;
+      buf_list->v4l2->type = V4L2_BUF_TYPE_VIDEO_OUTPUT_MPLANE;
+      buf_list->v4l2->do_mplanes = true;
     } else {
       E_LOG_ERROR(dev, "Video output is not supported by device: %08x", v4l2_cap.capabilities);
     }
@@ -40,7 +42,7 @@ int v4l2_buffer_list_set_format(buffer_list_t *buf_list, unsigned width, unsigne
   }
 
 	struct v4l2_format fmt = { 0 };
-  fmt.type = buf_list->v4l2.type;
+  fmt.type = buf_list->v4l2->type;
 
   unsigned orig_width = width;
   unsigned orig_height = height;
@@ -60,7 +62,7 @@ int v4l2_buffer_list_set_format(buffer_list_t *buf_list, unsigned width, unsigne
   E_LOG_DEBUG(buf_list, "Get current format ...");
   E_XIOCTL(buf_list, buf_list->device->v4l2->dev_fd, VIDIOC_G_FMT, &fmt, "Can't set format");
 
-  if (buf_list->v4l2.do_mplanes) {
+  if (buf_list->v4l2->do_mplanes) {
     fmt.fmt.pix_mp.colorspace = V4L2_COLORSPACE_JPEG;
     if (width)
       fmt.fmt.pix_mp.width = width;
@@ -88,7 +90,7 @@ int v4l2_buffer_list_set_format(buffer_list_t *buf_list, unsigned width, unsigne
   E_LOG_DEBUG(buf_list, "Configuring format (%s)...", fourcc_to_string(format).buf);
   E_XIOCTL(buf_list, buf_list->device->v4l2->dev_fd, VIDIOC_S_FMT, &fmt, "Can't set format");
 
-  if (buf_list->v4l2.do_mplanes) {
+  if (buf_list->v4l2->do_mplanes) {
     buf_list->fmt_width = fmt.fmt.pix_mp.width;
     buf_list->fmt_height = fmt.fmt.pix_mp.height;
     buf_list->fmt_format = fmt.fmt.pix_mp.pixelformat;
@@ -140,7 +142,7 @@ int v4l2_buffer_list_set_buffers(buffer_list_t *buf_list, int nbufs)
 {
 	struct v4l2_requestbuffers v4l2_req = {0};
 	v4l2_req.count = nbufs;
-	v4l2_req.type = buf_list->v4l2.type;
+	v4l2_req.type = buf_list->v4l2->type;
 	v4l2_req.memory = buf_list->do_mmap ? V4L2_MEMORY_MMAP : V4L2_MEMORY_DMABUF;
 
 	E_LOG_DEBUG(buf_list, "Requesting %u buffers", v4l2_req.count);
@@ -159,10 +161,15 @@ error:
 
 int v4l2_buffer_list_set_stream(buffer_list_t *buf_list, bool do_on)
 {
-	enum v4l2_buf_type type = buf_list->v4l2.type;
+	enum v4l2_buf_type type = buf_list->v4l2->type;
   E_XIOCTL(buf_list, buf_list->device->v4l2->dev_fd, do_on ? VIDIOC_STREAMON : VIDIOC_STREAMOFF, &type, "Cannot set streaming state");
 
   return 0;
 error:
   return -1;
+}
+
+void v4l2_buffer_list_close(buffer_list_t *buf_list) {
+  free(buf_list->v4l2);
+  buf_list->v4l2 = NULL;
 }

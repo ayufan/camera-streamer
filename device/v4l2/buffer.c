@@ -12,10 +12,10 @@ int v4l2_buffer_open(buffer_t *buf)
   buffer_list_t *buf_list = buf->buf_list;
   device_t *dev = buf_list->device;
 
-	v4l2_buf.type = buf_list->v4l2.type;
+	v4l2_buf.type = buf_list->v4l2->type;
   v4l2_buf.index = buf->index;
 
-  if (buf_list->v4l2.do_mplanes) {
+  if (buf_list->v4l2->do_mplanes) {
     v4l2_buf.length = 1;
     v4l2_buf.m.planes = &v4l2_plane;
     v4l2_plane.data_offset = 0;
@@ -31,7 +31,7 @@ int v4l2_buffer_open(buffer_t *buf)
 
   uint64_t mem_offset = 0;
 
-  if (buf_list->v4l2.do_mplanes) {
+  if (buf_list->v4l2->do_mplanes) {
     mem_offset = v4l2_plane.m.mem_offset;
     buf->length = v4l2_plane.length;
   } else {
@@ -77,7 +77,7 @@ int v4l2_buffer_enqueue(buffer_t *buf, const char *who)
   struct v4l2_buffer v4l2_buf = {0};
   struct v4l2_plane v4l2_plane = {0};
 
-  v4l2_buf.type = buf->buf_list->v4l2.type;
+  v4l2_buf.type = buf->buf_list->v4l2->type;
   v4l2_buf.index = buf->index;
   v4l2_buf.flags = 0;
   if (buf->flags.is_keyframe)
@@ -92,7 +92,7 @@ int v4l2_buffer_enqueue(buffer_t *buf, const char *who)
   }
 
   // update used bytes
-  if (buf->buf_list->v4l2.do_mplanes) {
+  if (buf->buf_list->v4l2->do_mplanes) {
     v4l2_buf.length = 1;
     v4l2_buf.m.planes = &v4l2_plane;
     v4l2_plane.bytesused = buf->used;
@@ -139,10 +139,10 @@ int v4l2_buffer_list_dequeue(buffer_list_t *buf_list, buffer_t **bufp)
 	struct v4l2_buffer v4l2_buf = {0};
 	struct v4l2_plane v4l2_plane = {0};
 
-	v4l2_buf.type = buf_list->v4l2.type;
+	v4l2_buf.type = buf_list->v4l2->type;
   v4l2_buf.memory = V4L2_MEMORY_MMAP;
 
-	if (buf_list->v4l2.do_mplanes) {
+	if (buf_list->v4l2->do_mplanes) {
 		v4l2_buf.length = 1;
 		v4l2_buf.m.planes = &v4l2_plane;
 	}
@@ -150,7 +150,7 @@ int v4l2_buffer_list_dequeue(buffer_list_t *buf_list, buffer_t **bufp)
 	E_XIOCTL(buf_list, buf_list->device->v4l2->dev_fd, VIDIOC_DQBUF, &v4l2_buf, "Can't grab capture buffer (flags=%08x)", v4l2_buf.flags);
 
   buffer_t *buf = *bufp = buf_list->bufs[v4l2_buf.index];
-	if (buf_list->v4l2.do_mplanes) {
+	if (buf_list->v4l2->do_mplanes) {
     buf->used = v4l2_plane.bytesused;
   } else {
     buf->used = v4l2_buf.bytesused;

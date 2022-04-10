@@ -15,10 +15,9 @@ typedef struct buffer_list_s {
 
   bool do_mmap, do_capture;
 
-  struct {
-    bool do_mplanes;
-    int type;
-  } v4l2;
+  union {
+    struct buffer_list_v4l2_s *v4l2;
+  };
 
   unsigned fmt_width, fmt_height, fmt_format, fmt_bytesperline, fmt_interval_us;
   bool do_timestamps;
@@ -29,11 +28,10 @@ typedef struct buffer_list_s {
   int frames;
 } buffer_list_t;
 
-buffer_list_t *buffer_list_open(const char *name, struct device_s *dev, bool do_capture, bool do_mmap);
+buffer_list_t *buffer_list_open(const char *name, struct device_s *dev, unsigned width, unsigned height, unsigned format, unsigned bytesperline, bool do_capture, bool do_mmap);
 void buffer_list_close(buffer_list_t *buf_list);
 
 int buffer_list_set_stream(buffer_list_t *buf_list, bool do_on);
-int buffer_list_set_format(buffer_list_t *buf_list, unsigned width, unsigned height, unsigned format, unsigned bytesperline);
 int buffer_list_set_buffers(buffer_list_t *buf_list, int nbufs);
 
 int buffer_list_pollfd(buffer_list_t *buf_list, struct pollfd *pollfd, bool can_dequeue);

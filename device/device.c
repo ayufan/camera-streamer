@@ -75,12 +75,8 @@ int device_open_buffer_list(device_t *dev, bool do_capture, unsigned width, unsi
     sprintf(name, "%s:output", dev->name);
   }
 
-  *buf_list = buffer_list_open(name, dev, do_capture, do_mmap);
+  *buf_list = buffer_list_open(name, dev, width, height, format, bytesperline, do_capture, do_mmap);
   if (!*buf_list) {
-    goto error;
-  }
-
-  if (buffer_list_set_format(*buf_list, width, height, format, bytesperline) < 0) {
     goto error;
   }
 

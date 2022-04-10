@@ -3,7 +3,7 @@
 #include "device/device.h"
 #include "opts/log.h"
 
-buffer_list_t *buffer_list_open(const char *name, struct device_s *dev, bool do_capture, bool do_mmap)
+buffer_list_t *buffer_list_open(const char *name, struct device_s *dev, unsigned width, unsigned height, unsigned format, unsigned bytesperline, bool do_capture, bool do_mmap)
 {
   buffer_list_t *buf_list = calloc(1, sizeof(buffer_list_t));
 
@@ -11,6 +11,11 @@ buffer_list_t *buffer_list_open(const char *name, struct device_s *dev, bool do_
   buf_list->name = strdup(name);
   buf_list->do_capture = do_capture;
   buf_list->do_mmap = do_mmap;
+
+  if (dev->hw->buffer_list_open(buf_list, width, height, format, bytesperline) < 0) {
+    goto error;
+  }
+
   return buf_list;
 
 error:
@@ -33,13 +38,9 @@ void buffer_list_close(buffer_list_t *buf_list)
     buf_list->nbufs = 0;
   }
 
+  buf_list->device->hw->buffer_list_close(buf_list);
   free(buf_list->name);
   free(buf_list);
-}
-
-int buffer_list_set_format(buffer_list_t *buf_list, unsigned width, unsigned height, unsigned format, unsigned bytesperline)
-{
-  return buf_list->device->hw->buffer_list_set_format(buf_list, width, height, format, bytesperline);
 }
 
 int buffer_list_set_buffers(buffer_list_t *buf_list, int nbufs)

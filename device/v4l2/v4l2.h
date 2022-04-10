@@ -15,6 +15,11 @@ typedef struct device_v4l2_s {
   int subdev_fd;
 } device_v4l2_t;
 
+typedef struct buffer_list_v4l2_s {
+  bool do_mplanes;
+  int type;
+} buffer_list_v4l2_t;
+
 int v4l2_device_open(device_t *dev);
 void v4l2_device_close(device_t *dev);
 int v4l2_device_set_decoder_start(device_t *dev, bool do_on);
@@ -29,7 +34,8 @@ int v4l2_buffer_list_dequeue(buffer_list_t *buf_list, buffer_t **bufp);
 int v4l2_buffer_list_refresh_states(buffer_list_t *buf_list);
 int v4l2_buffer_list_pollfd(buffer_list_t *buf_list, struct pollfd *pollfd, bool can_dequeue);
 
-int v4l2_buffer_list_set_format(buffer_list_t *buf_list, unsigned width, unsigned height, unsigned format, unsigned bytesperline);
+int v4l2_buffer_list_open(buffer_list_t *buf_list, unsigned width, unsigned height, unsigned format, unsigned bytesperline);
+void v4l2_buffer_list_close(buffer_list_t *buf_list);
 int v4l2_buffer_list_set_buffers(buffer_list_t *buf_list, int nbufs);
 int v4l2_buffer_list_set_stream(buffer_list_t *buf_list, bool do_on);
 
