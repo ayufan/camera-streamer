@@ -13,6 +13,10 @@ endif
 USE_FFMPEG ?= $(shell pkg-config libavutil libavformat libavcodec && echo 1)
 USE_LIBCAMERA ?= $(shell pkg-config libcamera && echo 1)
 
+ifeq (1,$(DEBUG))
+CFLAGS += -g
+endif
+
 ifeq (1,$(USE_FFMPEG))
 CFLAGS += -DUSE_FFMPEG
 LDLIBS += -lavcodec -lavformat -lavutil
