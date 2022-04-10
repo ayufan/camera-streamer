@@ -39,7 +39,7 @@ camera_t *camera_open(camera_options_t *options)
   camera->name = "CAMERA";
   camera->options = *options;
 
-  camera->camera = device_open(camera->name, camera->options.path);
+  camera->camera = device_v4l2_open(camera->name, camera->options.path);
   if (!camera->camera) {
     goto error;
   }

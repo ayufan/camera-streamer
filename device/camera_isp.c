@@ -12,10 +12,10 @@ void write_yuvu(buffer_t *buffer);
 
 int camera_configure_isp(camera_t *camera, float high_div, float low_div)
 {
-  camera->isp_srgb = device_open("ISP", "/dev/video13");
-  camera->isp_yuuv = device_open("ISP-YUUV", "/dev/video14");
-  camera->codec_jpeg = device_open("JPEG", "/dev/video31");
-  camera->codec_h264 = device_open("H264", "/dev/video11");
+  camera->isp_srgb = device_v4l2_open("ISP", "/dev/video13");
+  camera->isp_yuuv = device_v4l2_open("ISP-YUUV", "/dev/video14");
+  camera->codec_jpeg = device_v4l2_open("JPEG", "/dev/video31");
+  camera->codec_h264 = device_v4l2_open("H264", "/dev/video11");
 
   if (device_open_buffer_list_output(camera->isp_srgb, camera->camera->capture_list) < 0 ||
     device_open_buffer_list_capture(camera->isp_yuuv, camera->camera->capture_list, high_div, V4L2_PIX_FMT_YUYV, true) < 0) {
@@ -48,9 +48,9 @@ int camera_configure_isp(camera_t *camera, float high_div, float low_div)
     return 0;
   }
 
-  camera->isp_yuuv_lowres = device_open("ISP-YUUV-LOW", "/dev/video15");
-  camera->codec_jpeg_lowres = device_open("JPEG-LOW", "/dev/video31");
-  camera->codec_h264_lowres = device_open("H264-LOW", "/dev/video11");
+  camera->isp_yuuv_lowres = device_v4l2_open("ISP-YUUV-LOW", "/dev/video15");
+  camera->codec_jpeg_lowres = device_v4l2_open("JPEG-LOW", "/dev/video31");
+  camera->codec_h264_lowres = device_v4l2_open("H264-LOW", "/dev/video11");
 
   if (device_open_buffer_list_capture(camera->isp_yuuv_lowres, camera->camera->capture_list, low_div, V4L2_PIX_FMT_YUYV, true) < 0) {
     return -1;

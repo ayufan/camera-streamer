@@ -12,8 +12,8 @@ int camera_configure_direct(camera_t *camera)
 {
   buffer_list_t *src = camera->camera->capture_list;
 
-  camera->codec_jpeg = device_open("JPEG", "/dev/video31");
-  camera->codec_h264 = device_open("H264", "/dev/video11");
+  camera->codec_jpeg = device_v4l2_open("JPEG", "/dev/video31");
+  camera->codec_h264 = device_v4l2_open("H264", "/dev/video11");
 
   if (device_open_buffer_list_output(camera->codec_jpeg, src) < 0 ||
     device_open_buffer_list_capture(camera->codec_jpeg, src, 1.0, V4L2_PIX_FMT_JPEG, true) < 0) {

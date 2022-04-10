@@ -3,10 +3,11 @@
 #include "device/hw/buffer_list.h"
 #include "device/hw/v4l2.h"
 
-device_t *device_open(const char *name, const char *path) {
+device_t *device_open(const char *name, const char *path, device_hw_t *hw) {
   device_t *dev = calloc(1, sizeof(device_t));
   dev->name = strdup(name);
   dev->path = strdup(path);
+  dev->hw = hw;
   dev->fd = open(path, O_RDWR|O_NONBLOCK);
   dev->subdev_fd = -1;
   dev->allow_dma = true;

@@ -14,7 +14,7 @@ int camera_configure_decoder(camera_t *camera)
   buffer_list_t *src = camera_src;
   device_video_force_key(camera->camera);
 
-  camera->decoder = device_open("DECODER", "/dev/video10");
+  camera->decoder = device_v4l2_open("DECODER", "/dev/video10");
 
   if (device_open_buffer_list_output(camera->decoder, src) < 0) {
     return -1;
@@ -31,7 +31,7 @@ int camera_configure_decoder(camera_t *camera)
   src = camera->decoder->capture_list;
 
   if (camera_src->fmt_format != V4L2_PIX_FMT_MJPEG && camera_src->fmt_format != V4L2_PIX_FMT_JPEG) {
-    camera->codec_jpeg = device_open("JPEG", "/dev/video31");
+    camera->codec_jpeg = device_v4l2_open("JPEG", "/dev/video31");
 
     if (device_open_buffer_list_output(camera->codec_jpeg, src) < 0 ||
       device_open_buffer_list_capture(camera->codec_jpeg, src, 1.0, V4L2_PIX_FMT_JPEG, true) < 0) {
@@ -40,7 +40,7 @@ int camera_configure_decoder(camera_t *camera)
   }
 
   if (camera_src->fmt_format != V4L2_PIX_FMT_H264) {
-    camera->codec_h264 = device_open("H264", "/dev/video11");
+    camera->codec_h264 = device_v4l2_open("H264", "/dev/video11");
 
     if (device_open_buffer_list_output(camera->codec_h264, src) < 0 ||
       device_open_buffer_list_capture(camera->codec_h264, src, 1.0, V4L2_PIX_FMT_H264, true) < 0) {

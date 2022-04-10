@@ -7,6 +7,11 @@
 typedef struct buffer_list_s buffer_list_t;
 typedef struct device_s device_t;
 
+typedef struct device_hw_s {
+  int (*device_hw_open)(device_t *device);
+  int (*device_hw_close)(device_t *device);
+} device_hw_t;
+
 typedef struct device_s {
   char *name;
   char *path;
@@ -15,6 +20,7 @@ typedef struct device_s {
   struct v4l2_capability v4l2_cap;
   bool allow_dma;
 
+  device_hw_t *hw;
   buffer_list_t *capture_list;
   buffer_list_t *output_list;
 
@@ -23,7 +29,8 @@ typedef struct device_s {
   bool decoder_started;
 } device_t;
 
-device_t *device_open(const char *name, const char *path);
+device_t *device_open(const char *name, const char *path, device_hw_t *hw);
+device_t *device_v4l2_open(const char *name, const char *path);
 int device_open_media_device(device_t *dev);
 int device_open_v4l2_subdev(device_t *dev, int subdev);
 void device_close(device_t *device);
