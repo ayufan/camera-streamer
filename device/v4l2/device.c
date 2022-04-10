@@ -5,7 +5,7 @@
 int v4l2_device_open(device_t *dev)
 {
   dev->fd = -1;
-  dev->subdev_fd = -1;
+  dev->v4l2.subdev_fd = -1;
 
   dev->fd = open(dev->path, O_RDWR|O_NONBLOCK);
   if (dev->fd < 0) {
@@ -22,7 +22,8 @@ int v4l2_device_open(device_t *dev)
 	}
 
   strcpy(dev->bus_info, v4l2_cap.bus_info);
-  dev->subdev_fd = v4l2_device_open_v4l2_subdev(dev, 0);
+  dev->v4l2.subdev_fd = v4l2_device_open_v4l2_subdev(dev, 0);
+	E_LOG_INFO(dev, "Device path=%s fd=%d opened", dev->path, dev->fd);
 
   return 0;
 
@@ -32,8 +33,8 @@ error:
 
 void v4l2_device_close(device_t *dev)
 {
-  if (dev->subdev_fd >= 0) {
-    close(dev->subdev_fd);
+  if (dev->v4l2.subdev_fd >= 0) {
+    close(dev->v4l2.subdev_fd);
   }
 
   if(dev->fd >= 0) {

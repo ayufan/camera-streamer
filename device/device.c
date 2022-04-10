@@ -10,14 +10,12 @@ device_t *device_open(const char *name, const char *path, device_hw_t *hw) {
   dev->path = strdup(path);
   dev->hw = hw;
   dev->fd = -1;
-  dev->subdev_fd = -1;
   dev->allow_dma = true;
 
   if (dev->hw->device_open(dev) < 0) {
 		E_LOG_ERROR(dev, "Can't open device: %s", path);
   }
 
-	E_LOG_INFO(dev, "Device path=%s fd=%d opened", dev->path, dev->fd);
   return dev;
 
 error:

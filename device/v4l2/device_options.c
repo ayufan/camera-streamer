@@ -15,7 +15,7 @@ int v4l2_device_set_option_by_id(device_t *dev, const char *name, uint32_t id, i
   ctl.id = id;
   ctl.value = value;
   E_LOG_DEBUG(dev, "Configuring option %s (%08x) = %d", name, id, value);
-  E_XIOCTL(dev, dev->subdev_fd >= 0 ? dev->subdev_fd : dev->fd, VIDIOC_S_CTRL, &ctl, "Can't set option %s", name);
+  E_XIOCTL(dev, dev->v4l2.subdev_fd >= 0 ? dev->v4l2.subdev_fd : dev->fd, VIDIOC_S_CTRL, &ctl, "Can't set option %s", name);
   return 0;
 error:
   return -1;
@@ -152,8 +152,8 @@ int v4l2_device_set_option(device_t *dev, const char *key, const char *value)
 
   v4l2_device_option_normalize_name(keyp);
 
-  if (dev->subdev_fd >= 0)
-    ret = v4l2_device_set_option_string_fd(dev, dev->subdev_fd, keyp, valuep);
+  if (dev->v4l2.subdev_fd >= 0)
+    ret = v4l2_device_set_option_string_fd(dev, dev->v4l2.subdev_fd, keyp, valuep);
   if (ret <= 0)
     ret = v4l2_device_set_option_string_fd(dev, dev->fd, keyp, valuep);
 
