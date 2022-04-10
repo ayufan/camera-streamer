@@ -30,7 +30,7 @@ typedef struct buffer_list_s {
   int frames;
 } buffer_list_t;
 
-buffer_list_t *buffer_list_open(const char *name, struct device_s *dev, unsigned type, bool do_mmap);
+buffer_list_t *buffer_list_open(const char *name, struct device_s *dev, bool do_capture, bool do_mmap);
 void buffer_list_close(buffer_list_t *buf_list);
 
 int buffer_list_set_stream(buffer_list_t *buf_list, bool do_on);

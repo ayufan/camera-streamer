@@ -46,7 +46,7 @@ camera_t *camera_open(camera_options_t *options)
 
   camera->camera->allow_dma = camera->options.allow_dma;
 
-  if (strstr(camera->camera->v4l2_cap.bus_info, "usb")) {
+  if (strstr(camera->camera->bus_info, "usb")) {
     E_LOG_INFO(camera, "Disabling DMA since device uses USB (which is likely not working properly).");
     camera->camera->allow_dma = false;
   }

@@ -13,9 +13,9 @@ typedef struct device_hw_s {
 typedef struct device_s {
   char *name;
   char *path;
+  char bus_info[64];
   int fd;
   int subdev_fd;
-  struct v4l2_capability v4l2_cap;
   bool allow_dma;
 
   device_hw_t *hw;

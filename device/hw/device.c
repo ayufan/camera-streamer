@@ -16,11 +16,14 @@ device_t *device_open(const char *name, const char *path, device_hw_t *hw) {
 	}
 
 	E_LOG_DEBUG(dev, "Querying device capabilities ...");
-  E_XIOCTL(dev, dev->fd, VIDIOC_QUERYCAP, &dev->v4l2_cap, "Can't query device capabilities");\
+  struct v4l2_capability v4l2_cap;
+  E_XIOCTL(dev, dev->fd, VIDIOC_QUERYCAP, &v4l2_cap, "Can't query device capabilities");
 
-	if (!(dev->v4l2_cap.capabilities & V4L2_CAP_STREAMING)) {
+	if (!(v4l2_cap.capabilities & V4L2_CAP_STREAMING)) {
 		E_LOG_ERROR(dev, "Device doesn't support streaming IO");
 	}
+
+  strcpy(dev->bus_info, v4l2_cap.bus_info);
 
 	E_LOG_INFO(dev, "Device path=%s fd=%d opened", dev->path, dev->fd);
 
@@ -81,15 +84,7 @@ int device_open_buffer_list(device_t *dev, bool do_capture, unsigned width, unsi
       E_LOG_ERROR(dev, "The capture_list is already created.");
     }
 
-    if (dev->v4l2_cap.capabilities & V4L2_CAP_VIDEO_CAPTURE) {
-      type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-      sprintf(name, "%s:capture", dev->name);
-    } else if (dev->v4l2_cap.capabilities & (V4L2_CAP_VIDEO_CAPTURE_MPLANE | V4L2_CAP_VIDEO_M2M_MPLANE)) {
-      type = V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE;
-      sprintf(name, "%s:capture:mplane", dev->name);
-    } else {
-      E_LOG_ERROR(dev, "Video capture is not supported by device: %08x", dev->v4l2_cap.capabilities);
-    }
+    sprintf(name, "%s:capture", dev->name);
   } else {
     buf_list = &dev->output_list;
 
@@ -97,18 +92,10 @@ int device_open_buffer_list(device_t *dev, bool do_capture, unsigned width, unsi
       E_LOG_ERROR(dev, "The output_list is already created.");
     }
 
-    if (dev->v4l2_cap.capabilities & V4L2_CAP_VIDEO_OUTPUT) {
-      type = V4L2_BUF_TYPE_VIDEO_OUTPUT;
-      sprintf(name, "%s:output", dev->name);
-    } else if (dev->v4l2_cap.capabilities & (V4L2_CAP_VIDEO_OUTPUT_MPLANE | V4L2_CAP_VIDEO_M2M_MPLANE)) {
-      type = V4L2_BUF_TYPE_VIDEO_OUTPUT_MPLANE;
-      sprintf(name, "%s:output:mplane", dev->name);
-    } else {
-      E_LOG_ERROR(dev, "Video output is not supported by device: %08x", dev->v4l2_cap.capabilities);
-    }
+    sprintf(name, "%s:output", dev->name);
   }
 
-  *buf_list = buffer_list_open(name, dev, type, do_mmap);
+  *buf_list = buffer_list_open(name, dev, do_capture, do_mmap);
   if (!*buf_list) {
     goto error;
   }

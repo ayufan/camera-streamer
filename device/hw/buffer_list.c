@@ -3,42 +3,50 @@
 #include "device/hw/device.h"
 #include "device/hw/v4l2.h"
 
-buffer_list_t *buffer_list_open(const char *name, struct device_s *dev, unsigned type, bool do_mmap)
+buffer_list_t *buffer_list_open(const char *name, struct device_s *dev, bool do_capture, bool do_mmap)
 {
   buffer_list_t *buf_list = calloc(1, sizeof(buffer_list_t));
 
   buf_list->device = dev;
   buf_list->name = strdup(name);
-  buf_list->v4l2.type = type;
+  buf_list->do_capture = do_capture;
 
-  switch(type) {
-  case V4L2_BUF_TYPE_VIDEO_OUTPUT:
-    buf_list->do_mmap = do_mmap;
-    buf_list->do_dma = do_mmap;
-    break;
+  struct v4l2_capability v4l2_cap;
+  E_XIOCTL(dev, dev->fd, VIDIOC_QUERYCAP, &v4l2_cap, "Can't query device capabilities");
 
-  case V4L2_BUF_TYPE_VIDEO_OUTPUT_MPLANE:
-    buf_list->do_mmap = do_mmap;
-    buf_list->do_dma = do_mmap;
-    buf_list->v4l2.do_mplanes = true;
-    break;
+  if (do_capture) {
+     if (v4l2_cap.capabilities & V4L2_CAP_VIDEO_CAPTURE) {
+      buf_list->v4l2.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+      buf_list->do_dma = do_mmap;
+      buf_list->do_mmap = do_mmap;
+    } else if (v4l2_cap.capabilities & (V4L2_CAP_VIDEO_CAPTURE_MPLANE | V4L2_CAP_VIDEO_M2M_MPLANE)) {
+      buf_list->v4l2.type = V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE;
+      buf_list->v4l2.do_mplanes = true;
+      buf_list->do_dma = do_mmap;
+      buf_list->do_mmap = do_mmap;
+    } else {
+      E_LOG_ERROR(dev, "Video capture is not supported by device: %08x", v4l2_cap.capabilities);
+    }
+  } else {
+    if (v4l2_cap.capabilities & V4L2_CAP_VIDEO_OUTPUT) {
+      buf_list->v4l2.type = V4L2_BUF_TYPE_VIDEO_OUTPUT;
+      buf_list->do_mmap = do_mmap;
+      buf_list->do_dma = do_mmap;
+    } else if (v4l2_cap.capabilities & (V4L2_CAP_VIDEO_OUTPUT_MPLANE | V4L2_CAP_VIDEO_M2M_MPLANE)) {
+      buf_list->v4l2.type = V4L2_BUF_TYPE_VIDEO_OUTPUT_MPLANE;
+      buf_list->v4l2.do_mplanes = true;
+      buf_list->do_mmap = do_mmap;
+      buf_list->do_dma = do_mmap;
+    } else {
+      E_LOG_ERROR(dev, "Video output is not supported by device: %08x", v4l2_cap.capabilities);
+    }
+  }
 
-  case V4L2_BUF_TYPE_VIDEO_CAPTURE:
-    buf_list->do_dma = do_mmap;
-    buf_list->do_mmap = do_mmap;
-    buf_list->do_capture = true;
-    break;
-
-  case V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE:
-    buf_list->do_dma = do_mmap;
-    buf_list->do_mmap = do_mmap;
-    buf_list->v4l2.do_mplanes = true;
-    buf_list->do_capture = true;
-    break;
-
-  default:
-    E_LOG_PERROR(buf_list, "Unknown type=%d", type);
-    goto error;
+  // Add suffix for debug purposes
+  if (v4l2_cap.capabilities & (V4L2_CAP_VIDEO_CAPTURE_MPLANE | V4L2_CAP_VIDEO_M2M_MPLANE | V4L2_CAP_VIDEO_OUTPUT_MPLANE | V4L2_CAP_VIDEO_M2M_MPLANE)) {
+#define MPLANE_SUFFIX ":mplane"
+    buf_list->name = realloc(buf_list->name, strlen(buf_list->name) + strlen(MPLANE_SUFFIX) + 1);
+    strcat(buf_list->name, MPLANE_SUFFIX);
   }
 
   return buf_list;
