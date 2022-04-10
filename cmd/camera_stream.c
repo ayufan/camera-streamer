@@ -1,13 +1,10 @@
-#include "device/buffer.h"
-#include "device/buffer_list.h"
-#include "device/device.h"
-#include "device/links.h"
-#include "device/hw/v4l2.h"
 #include "http/http.h"
 #include "opts/opts.h"
+#include "opts/log.h"
 #include "device/camera/camera.h"
 
 #include <signal.h>
+#include <unistd.h>
 
 extern unsigned char html_index_html[];
 extern unsigned int html_index_html_len;
