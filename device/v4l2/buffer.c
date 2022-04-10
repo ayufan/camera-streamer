@@ -12,6 +12,8 @@ int v4l2_buffer_open(buffer_t *buf)
   buffer_list_t *buf_list = buf->buf_list;
   device_t *dev = buf_list->device;
 
+  buf->v4l2 = calloc(1, sizeof(buffer_v4l2_t));
+
 	v4l2_buf.type = buf_list->v4l2->type;
   v4l2_buf.index = buf->index;
 
@@ -70,6 +72,9 @@ void v4l2_buffer_close(buffer_t *buf)
     close(buf->dma_fd);
     buf->dma_fd = -1;
   }
+
+  free(buf->v4l2);
+  buf->v4l2 = NULL;
 }
 
 int v4l2_buffer_enqueue(buffer_t *buf, const char *who)
@@ -156,7 +161,7 @@ int v4l2_buffer_list_dequeue(buffer_list_t *buf_list, buffer_t **bufp)
     buf->used = v4l2_buf.bytesused;
   }
 
-  buf->v4l2.flags = v4l2_buf.flags;
+  buf->v4l2->flags = v4l2_buf.flags;
   buf->flags.is_keyframe = (v4l2_buf.flags & V4L2_BUF_FLAG_KEYFRAME) != 0;
   buf->captured_time_us = get_time_us(CLOCK_FROM_PARAMS, NULL, &v4l2_buf.timestamp, 0);
   return 0;

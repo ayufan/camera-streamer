@@ -22,9 +22,9 @@ typedef struct buffer_s {
     bool is_keyframe : 1;
   } flags;
 
-  struct {
-    unsigned flags;
-  } v4l2;
+  union {
+    struct buffer_v4l2_s *v4l2;
+  };
 
   // State
   int mmap_reflinks;

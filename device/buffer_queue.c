@@ -151,13 +151,12 @@ buffer_t *buffer_list_dequeue(buffer_list_t *buf_list)
   buf->enqueued = false;
   buf->mmap_reflinks = 1;
 
-	E_LOG_DEBUG(buf_list, "Grabbed mmap buffer=%u, bytes=%d, used=%d, frame=%d, linked=%s, flags=%08x",
+	E_LOG_DEBUG(buf_list, "Grabbed mmap buffer=%u, bytes=%d, used=%d, frame=%d, linked=%s",
     buf->index,
     buf->length,
     buf->used,
     buf_list->frames,
-    buf->dma_source ? buf->dma_source->name : NULL,
-    buf->v4l2.flags);
+    buf->dma_source ? buf->dma_source->name : NULL);
 
   if (buf->dma_source) {
     buf->dma_source->used = 0;
