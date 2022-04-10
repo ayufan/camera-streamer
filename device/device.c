@@ -1,7 +1,7 @@
 #include "device/device.h"
 #include "device/buffer.h"
 #include "device/buffer_list.h"
-#include "device/hw/v4l2.h"
+#include "opts/log.h"
 #include "opts/opts.h"
 
 device_t *device_open(const char *name, const char *path, device_hw_t *hw) {

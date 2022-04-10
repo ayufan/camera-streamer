@@ -1,7 +1,9 @@
-#include "device/v4l2/v4l2.h"
+#include "v4l2.h"
 #include "device/buffer.h"
 #include "device/buffer_list.h"
 #include "device/device.h"
+#include "opts/log.h"
+#include "opts/fourcc.h"
 
 int v4l2_buffer_list_set_format(buffer_list_t *buf_list, unsigned width, unsigned height, unsigned format, unsigned bytesperline)
 {

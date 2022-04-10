@@ -3,7 +3,6 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <stddef.h>
-#include <linux/videodev2.h>
 
 typedef struct buffer_s buffer_t;
 typedef struct buffer_list_s buffer_list_t;
@@ -18,6 +17,10 @@ typedef struct buffer_s {
   size_t used;
   size_t length;
   int dma_fd;
+
+  struct {
+    bool is_keyframe : 1;
+  } flags;
 
   struct {
     unsigned flags;

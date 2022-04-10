@@ -1,6 +1,7 @@
 #include "http/http.h"
 #include "opts/opts.h"
 #include "opts/log.h"
+#include "opts/fourcc.h"
 #include "device/camera/camera.h"
 
 #include <signal.h>

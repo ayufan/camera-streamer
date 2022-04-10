@@ -1,6 +1,7 @@
-#include "device/v4l2/v4l2.h"
+#include "v4l2.h"
+
 #include "device/device.h"
-#include "device/hw/v4l2.h"
+#include "opts/log.h"
 
 #include <unistd.h>
 #include <dirent.h>

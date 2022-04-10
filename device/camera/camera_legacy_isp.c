@@ -4,7 +4,8 @@
 #include "device/buffer_list.h"
 #include "device/device.h"
 #include "device/links.h"
-#include "device/hw/v4l2.h"
+#include "opts/log.h"
+#include "opts/fourcc.h"
 #include "device/buffer_list.h"
 #include "http/http.h"
 

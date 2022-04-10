@@ -1,4 +1,4 @@
-#include "v4l2.h"
+#include "fourcc.h"
 
 fourcc_string fourcc_to_string(unsigned format)
 {

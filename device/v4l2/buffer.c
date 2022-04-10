@@ -1,7 +1,8 @@
-#include "device/v4l2/v4l2.h"
+#include "v4l2.h"
 #include "device/buffer.h"
 #include "device/buffer_list.h"
 #include "device/device.h"
+#include "opts/log.h"
 
 int v4l2_buffer_open(buffer_t *buf)
 {
@@ -78,7 +79,9 @@ int v4l2_buffer_enqueue(buffer_t *buf, const char *who)
 
   v4l2_buf.type = buf->buf_list->v4l2.type;
   v4l2_buf.index = buf->index;
-  v4l2_buf.flags = buf->v4l2.flags;
+  v4l2_buf.flags = 0;
+  if (buf->flags.is_keyframe)
+    v4l2_buf.flags |= V4L2_BUF_FLAG_KEYFRAME;
 
   if (buf->buf_list->do_mmap) {
     assert(buf->dma_source == NULL);
@@ -154,6 +157,7 @@ int v4l2_buffer_list_dequeue(buffer_list_t *buf_list, buffer_t **bufp)
   }
 
   buf->v4l2.flags = v4l2_buf.flags;
+  buf->flags.is_keyframe = (v4l2_buf.flags & V4L2_BUF_FLAG_KEYFRAME) != 0;
   buf->captured_time_us = get_time_us(CLOCK_FROM_PARAMS, NULL, &v4l2_buf.timestamp, 0);
   return 0;
 

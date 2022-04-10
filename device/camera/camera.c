@@ -3,7 +3,8 @@
 #include "device/device.h"
 #include "device/buffer_list.h"
 #include "device/links.h"
-#include "device/hw/v4l2.h"
+#include "opts/log.h"
+#include "opts/fourcc.h"
 
 void camera_init(camera_t *camera)
 {

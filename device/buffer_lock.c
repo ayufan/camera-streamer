@@ -1,7 +1,7 @@
 #include "device/buffer_lock.h"
 #include "device/buffer_list.h"
 #include "device/buffer.h"
-#include "device/hw/v4l2.h"
+#include "opts/log.h"
 
 bool buffer_lock_is_used(buffer_lock_t *buf_lock)
 {

@@ -11,7 +11,7 @@
 #include <signal.h>
 
 #include "http/http.h"
-#include "device/hw/v4l2.h"
+#include "opts/log.h"
 
 #define BUFSIZE 256
 

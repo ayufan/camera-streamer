@@ -1,7 +1,7 @@
 #include "device/buffer.h"
 #include "device/buffer_list.h"
 #include "device/device.h"
-#include "device/hw/v4l2.h"
+#include "opts/log.h"
 
 #include <pthread.h>
 
@@ -102,9 +102,7 @@ int buffer_list_enqueue(buffer_list_t *buf_list, buffer_t *dma_buf)
     return 0;
   }
 
-  buf->v4l2.flags = 0;
-  buf->v4l2.flags &= ~V4L2_BUF_FLAG_KEYFRAME;
-  buf->v4l2.flags |= dma_buf->v4l2.flags & V4L2_BUF_FLAG_KEYFRAME;
+  buf->flags = dma_buf->flags;
   buf->captured_time_us = dma_buf->captured_time_us;
 
   if (buf_list->do_mmap) {
