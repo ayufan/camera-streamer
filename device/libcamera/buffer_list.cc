@@ -1,10 +1,5 @@
 #include "libcamera.hh"
 
-extern "C" {
-#include "device/buffer_list.h"
-#include <stdlib.h>
-};
-
 int libcamera_buffer_list_open(buffer_list_t *buf_list, unsigned width, unsigned height, unsigned format, unsigned bytesperline)
 {
   buf_list->libcamera = new buffer_list_libcamera_t{};

@@ -1,9 +1,5 @@
 #include "libcamera.hh"
 
-extern "C" {
-#include "device/device.h"
-};
-
 device_hw_t libcamera_device_hw = {
   .device_open = libcamera_device_open,
   .device_close = libcamera_device_close,

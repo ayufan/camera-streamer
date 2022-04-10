@@ -5,7 +5,15 @@ extern "C" {
 #include <linux/v4l2-subdev.h>
 #include <stdbool.h>
 #include <stdint.h>
+#include <stdlib.h>
+
+#include "device/device.h"
+#include "device/buffer_list.h"
+#include "device/buffer.h"
 };
+
+#include <optional>
+#include <memory>
 
 #include <libcamera/controls.h>
 #include <libcamera/control_ids.h>

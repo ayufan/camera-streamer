@@ -3,3 +3,4 @@ tmp/
 *.o
 *.d
 html/*.c
+/test_*

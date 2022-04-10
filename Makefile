@@ -20,7 +20,7 @@ endif
 
 ifeq (1,$(USE_LIBCAMERA))
 CFLAGS += -DUSE_LIBCAMERA $(shell pkg-config --cflags libcamera)
-LDLIBS +=  $(shell pkg-config --cflags libs)
+LDLIBS +=  $(shell pkg-config --libs libcamera)
 endif
 
 HTML_SRC = $(addsuffix .c,$(HTML))

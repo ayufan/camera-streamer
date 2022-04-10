@@ -1,13 +1,15 @@
 #include "libcamera.hh"
 
-extern "C" {
-#include "device/device.h"
-#include <stdlib.h>
-};
-
 int libcamera_device_open(device_t *dev)
 {
   dev->libcamera = new device_libcamera_t{};
+
+  auto camera_manager = std::make_unique<libcamera::CameraManager>();
+  int ret = camera_manager->start();
+  if (ret < 0) {
+    return -1;
+  }
+
   return 0;
 }
 
