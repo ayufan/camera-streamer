@@ -1,6 +1,6 @@
-camera_stream
 tmp/
 *.o
 *.d
 html/*.c
+/camera-streamer
 /test_*
