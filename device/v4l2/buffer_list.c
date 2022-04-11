@@ -5,7 +5,7 @@
 #include "opts/log.h"
 #include "opts/fourcc.h"
 
-int v4l2_buffer_list_open(buffer_list_t *buf_list, unsigned width, unsigned height, unsigned format, unsigned bytesperline)
+int v4l2_buffer_list_open(buffer_list_t *buf_list, unsigned width, unsigned height, unsigned format, unsigned bytesperline, int nbufs)
 {
   device_t *dev = buf_list->dev;
 
@@ -128,23 +128,6 @@ int v4l2_buffer_list_open(buffer_list_t *buf_list, unsigned width, unsigned heig
     v4l2_device_set_pad_format(dev, width, height, format);
   }
 
-	E_LOG_INFO(
-    buf_list,
-    "Using: %ux%u/%s, bytesperline=%d",
-    buf_list->fmt_width,
-    buf_list->fmt_height,
-    fourcc_to_string(buf_list->fmt_format).buf,
-    buf_list->fmt_bytesperline
-  );
-
-  return 0;
-
-error:
-  return -1;
-}
-
-int v4l2_buffer_list_set_buffers(buffer_list_t *buf_list, int nbufs)
-{
 	struct v4l2_requestbuffers v4l2_req = {0};
 	v4l2_req.count = nbufs;
 	v4l2_req.type = buf_list->v4l2->type;

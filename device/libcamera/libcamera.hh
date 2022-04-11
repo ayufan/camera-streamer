@@ -10,6 +10,7 @@ extern "C" {
 #include "device/device.h"
 #include "device/buffer_list.h"
 #include "device/buffer.h"
+#include "opts/log.h"
 };
 
 #include <optional>
@@ -54,7 +55,6 @@ int libcamera_buffer_enqueue(buffer_t *buf, const char *who);
 int libcamera_buffer_list_dequeue(buffer_list_t *buf_list, buffer_t **bufp);
 int libcamera_buffer_list_pollfd(buffer_list_t *buf_list, struct pollfd *pollfd, bool can_dequeue);
 
-int libcamera_buffer_list_open(buffer_list_t *buf_list, unsigned width, unsigned height, unsigned format, unsigned bytesperline);
+int libcamera_buffer_list_open(buffer_list_t *buf_list, unsigned width, unsigned height, unsigned format, unsigned bytesperline, int nbufs);
 void libcamera_buffer_list_close(buffer_list_t *buf_list);
-int libcamera_buffer_list_set_buffers(buffer_list_t *buf_list, int nbufs);
 int libcamera_buffer_list_set_stream(buffer_list_t *buf_list, bool do_on);

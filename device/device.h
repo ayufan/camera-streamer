@@ -22,9 +22,8 @@ typedef struct device_hw_s {
   int (*buffer_list_dequeue)(buffer_list_t *buf_list, buffer_t **bufp);
   int (*buffer_list_pollfd)(buffer_list_t *buf_list, struct pollfd *pollfd, bool can_dequeue);
 
-  int (*buffer_list_open)(buffer_list_t *buf_list, unsigned width, unsigned height, unsigned format, unsigned bytesperline);
+  int (*buffer_list_open)(buffer_list_t *buf_list, unsigned width, unsigned height, unsigned format, unsigned bytesperline, int nbufs);
   void (*buffer_list_close)(buffer_list_t *buf_list);
-  int (*buffer_list_set_buffers)(buffer_list_t *buf_list, int nbufs);
   int (*buffer_list_set_stream)(buffer_list_t *buf_list, bool do_on);
 } device_hw_t;
 

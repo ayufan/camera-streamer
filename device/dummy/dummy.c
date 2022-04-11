@@ -18,7 +18,6 @@ device_hw_t dummy_device_hw = {
   .buffer_list_pollfd = dummy_buffer_list_pollfd,
   .buffer_list_open = dummy_buffer_list_open,
   .buffer_list_close = dummy_buffer_list_close,
-  .buffer_list_set_buffers = dummy_buffer_list_set_buffers,
   .buffer_list_set_stream = dummy_buffer_list_set_stream
 };
 

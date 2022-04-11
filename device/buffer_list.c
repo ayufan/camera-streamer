@@ -2,8 +2,9 @@
 #include "device/buffer_list.h"
 #include "device/device.h"
 #include "opts/log.h"
+#include "opts/fourcc.h"
 
-buffer_list_t *buffer_list_open(const char *name, struct device_s *dev, unsigned width, unsigned height, unsigned format, unsigned bytesperline, bool do_capture, bool do_mmap)
+buffer_list_t *buffer_list_open(const char *name, struct device_s *dev, unsigned width, unsigned height, unsigned format, unsigned bytesperline, int nbufs, bool do_capture, bool do_mmap)
 {
   buffer_list_t *buf_list = calloc(1, sizeof(buffer_list_t));
 
@@ -12,9 +13,35 @@ buffer_list_t *buffer_list_open(const char *name, struct device_s *dev, unsigned
   buf_list->do_capture = do_capture;
   buf_list->do_mmap = do_mmap;
 
-  if (dev->hw->buffer_list_open(buf_list, width, height, format, bytesperline) < 0) {
+  int got_bufs = dev->hw->buffer_list_open(buf_list, width, height, format, bytesperline, nbufs);
+  if (got_bufs <= 0) {
     goto error;
   }
+
+	E_LOG_INFO(
+    buf_list,
+    "Using: %ux%u/%s, bytesperline=%d",
+    buf_list->fmt_width,
+    buf_list->fmt_height,
+    fourcc_to_string(buf_list->fmt_format).buf,
+    buf_list->fmt_bytesperline
+  );
+
+  buf_list->bufs = calloc(got_bufs, sizeof(buffer_t*));
+  buf_list->nbufs = got_bufs;
+
+  for (unsigned i = 0; i < buf_list->nbufs; i++) {
+    char name[64];
+    sprintf(name, "%s:buf%d", buf_list->name, i);
+    buffer_t *buf = buffer_open(name, buf_list, i);
+    if (!buf) {
+		  E_LOG_ERROR(buf_list, "Cannot open buffer: %u", i);
+      goto error;
+    }
+    buf_list->bufs[i] = buf;
+  }
+
+	E_LOG_DEBUG(buf_list, "Opened %u buffers", buf_list->nbufs);
 
   return buf_list;
 
@@ -41,34 +68,6 @@ void buffer_list_close(buffer_list_t *buf_list)
   buf_list->dev->hw->buffer_list_close(buf_list);
   free(buf_list->name);
   free(buf_list);
-}
-
-int buffer_list_set_buffers(buffer_list_t *buf_list, int nbufs)
-{
-  int got_bufs = buf_list->dev->hw->buffer_list_set_buffers(buf_list, nbufs);
-  if (got_bufs <= 0) {
-    goto error;
-  }
-
-  buf_list->bufs = calloc(got_bufs, sizeof(buffer_t*));
-  buf_list->nbufs = got_bufs;
-
-  for (unsigned i = 0; i < buf_list->nbufs; i++) {
-    char name[64];
-    sprintf(name, "%s:buf%d", buf_list->name, i);
-    buffer_t *buf = buffer_open(name, buf_list, i);
-    if (!buf) {
-		  E_LOG_ERROR(buf_list, "Cannot open buffer: %u", i);
-      goto error;
-    }
-    buf_list->bufs[i] = buf;
-  }
-
-	E_LOG_DEBUG(buf_list, "Opened %u buffers", buf_list->nbufs);
-  return 0;
-
-error:
-  return -1;
 }
 
 int buffer_list_set_stream(buffer_list_t *buf_list, bool do_on)
