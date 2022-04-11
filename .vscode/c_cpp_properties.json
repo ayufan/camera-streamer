@@ -6,7 +6,10 @@
                 "${workspaceFolder}/**",
                 "/usr/include/libcamera"
             ],
-            "defines": [],
+            "defines": [
+                "USE_LIBCAMERA=1",
+                "USE_FFMPEG=1"
+            ],
             "compilerPath": "/usr/bin/gcc",
             "cStandard": "gnu17",
             "cppStandard": "gnu++14",
