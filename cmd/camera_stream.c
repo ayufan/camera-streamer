@@ -53,10 +53,16 @@ log_options_t log_options = {
 option_value_t camera_formats[] = {
   { "DEFAULT", 0 },
   { "YUYV", V4L2_PIX_FMT_YUYV },
+  { "YUV420", V4L2_PIX_FMT_YUV420 },
+  { "YUYV", V4L2_PIX_FMT_YUYV },
   { "MJPG", V4L2_PIX_FMT_MJPEG },
   { "MJPEG", V4L2_PIX_FMT_MJPEG },
   { "H264", V4L2_PIX_FMT_H264 },
   { "RG10", V4L2_PIX_FMT_SRGGB10P },
+  { "RGB565", V4L2_PIX_FMT_RGB565 },
+  { "RGBP", V4L2_PIX_FMT_RGB565 },
+  { "RGB24", V4L2_PIX_FMT_RGB24 },
+  { "RGB", V4L2_PIX_FMT_RGB24 },
   {}
 };
 

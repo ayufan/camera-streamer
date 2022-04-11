@@ -102,11 +102,6 @@ int v4l2_buffer_list_open(buffer_list_t *buf_list, unsigned width, unsigned heig
     buf_list->fmt_bytesperline = fmt.fmt.pix.bytesperline;
   }
 
-  if (bytesperline > 0 && buf_list->fmt_bytesperline != bytesperline) {
-		LOG_ERROR(buf_list, "Requested bytesperline=%u. Got %u.",
-      bytesperline, buf_list->fmt_bytesperline);
-  }
-
   if (buf_list->fmt_width != width || buf_list->fmt_height != height) {
     if (bytesperline) {
       LOG_ERROR(buf_list, "Requested resolution=%ux%u is unavailable. Got %ux%u.",
@@ -122,6 +117,11 @@ int v4l2_buffer_list_open(buffer_list_t *buf_list, unsigned width, unsigned heig
 			fourcc_to_string(format).buf,
 			fourcc_to_string(buf_list->fmt_format).buf);
 	}
+
+  if (bytesperline > 0 && buf_list->fmt_bytesperline != bytesperline) {
+		LOG_ERROR(buf_list, "Requested bytesperline=%u. Got %u.",
+      bytesperline, buf_list->fmt_bytesperline);
+  }
 
   // Some devices require setting pad size via media-controller
   if (buf_list->do_capture) {

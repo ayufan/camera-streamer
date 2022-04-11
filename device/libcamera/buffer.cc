@@ -18,24 +18,41 @@ int libcamera_buffer_open(buffer_t *buf)
     if (buf->libcamera->request->addBuffer(stream, buffer.get()) < 0) {
       LOG_ERROR(buf, "Can't set buffer for request");
     }
-
-    for (auto const &plane : buffer->planes()) {
-      if (buf->start) {
-        LOG_ERROR(buf, "Too many planes open.");
-      }
-
-      buf->start = mmap(NULL, plane.length, PROT_READ | PROT_WRITE, MAP_SHARED, plane.fd.get(), 0);
-      buf->length = plane.length;
-      buf->used = 0;
-      buf->dma_fd = plane.fd.get();
-
-      if (!buf->start) {
-        LOG_ERROR(buf, "Failed to mmap DMA buffer");
-      }
-
-      LOG_DEBUG(buf, "Mapped buffer: start=%p, length=%d, fd=%d",
-        buf->start, buf->length, buf->dma_fd);
+    if (buf->start) {
+      LOG_ERROR(buf, "Too many streams.");
     }
+
+    if (buffer->planes().empty()) {
+      LOG_ERROR(buf, "No planes allocated");
+    }
+
+    uint64_t offset = buffer->planes()[0].offset;
+    uint64_t length = 0;
+    libcamera::SharedFD dma_fd = buffer->planes()[0].fd;
+
+    // Require that planes are continuous
+    for (auto const &plane : buffer->planes()) {
+      if (plane.fd != dma_fd) {
+        LOG_ERROR(buf, "Plane does not share FD: fd=%d, expected=%d", plane.fd.get(), dma_fd.get());
+      }
+
+      if (offset + length != plane.offset) {
+        LOG_ERROR(buf, "Plane is not continuous: offset=%lld, expected=%lld", plane.offset, offset + length);
+      }
+
+      length += plane.length;
+    }
+
+    buf->start = mmap(NULL, length, PROT_READ | PROT_WRITE, MAP_SHARED, dma_fd.get(), offset);
+    if (!buf->start || buf->start == MAP_FAILED) {
+      LOG_ERROR(buf, "Failed to mmap DMA buffer");
+    }
+
+    buf->dma_fd = dma_fd.get();
+    buf->length = length;
+
+    LOG_DEBUG(buf, "Mapped buffer: start=%p, length=%d, fd=%d, planes=%d",
+      buf->start, buf->length, buf->dma_fd, buffer->planes().size());
   }
 
   return 0;

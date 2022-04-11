@@ -78,6 +78,12 @@ camera_t *camera_open(camera_options_t *options)
 
   switch (camera->camera->capture_list->fmt_format) {
   case V4L2_PIX_FMT_YUYV:
+  case V4L2_PIX_FMT_YVYU:
+  case V4L2_PIX_FMT_VYUY:
+  case V4L2_PIX_FMT_UYVY:
+  case V4L2_PIX_FMT_YUV420:
+  case V4L2_PIX_FMT_RGB565:
+  case V4L2_PIX_FMT_RGB24:
     if (camera_configure_direct(camera) < 0) {
       goto error;
     }
@@ -103,7 +109,8 @@ camera_t *camera_open(camera_options_t *options)
     break;
 
   default:
-    LOG_ERROR(camera, "Unsupported camera format=%s", fourcc_to_string(camera->options.format).buf);
+    LOG_ERROR(camera, "Unsupported camera format=%s",
+      fourcc_to_string(camera->camera->capture_list->fmt_format).buf);
     break;
   }
 
