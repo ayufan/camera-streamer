@@ -38,6 +38,17 @@ bool buffer_consumed(buffer_t *buf, const char *who)
   buf->mmap_reflinks--;
 
   if (!buf->enqueued && buf->mmap_reflinks == 0) {
+    E_LOG_DEBUG(buf, "Queuing buffer... used=%zu length=%zu (linked=%s) by %s",
+      buf->used,
+      buf->length,
+      buf->dma_source ? buf->dma_source->name : NULL,
+      who);
+
+    // Assign or clone timestamp
+    if (buf->buf_list->do_timestamps) {
+      buf->captured_time_us = get_monotonic_time_us(NULL, NULL);
+    }
+
     if (buf->buf_list->dev->hw->buffer_enqueue(buf, who) < 0) {
       goto error;
     }

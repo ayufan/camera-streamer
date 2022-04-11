@@ -117,19 +117,8 @@ int v4l2_buffer_enqueue(buffer_t *buf, const char *who)
     }
   }
 
-  E_LOG_DEBUG(buf, "Queuing buffer... used=%zu length=%zu (linked=%s) by %s",
-    buf->used,
-    buf->length,
-    buf->dma_source ? buf->dma_source->name : NULL,
-    who);
-
-  // Assign or clone timestamp
-  if (buf->buf_list->do_timestamps) {
-    get_monotonic_time_us(NULL, &v4l2_buf.timestamp);
-  } else {
-    v4l2_buf.timestamp.tv_sec = buf->captured_time_us / (1000LL * 1000LL);
-    v4l2_buf.timestamp.tv_usec = buf->captured_time_us % (1000LL * 1000LL);
-  }
+  v4l2_buf.timestamp.tv_sec = buf->captured_time_us / (1000LL * 1000LL);
+  v4l2_buf.timestamp.tv_usec = buf->captured_time_us % (1000LL * 1000LL);
 
   E_XIOCTL(buf, buf->buf_list->dev->v4l2->dev_fd, VIDIOC_QBUF, &v4l2_buf, "Can't queue buffer.");
 
