@@ -4,7 +4,7 @@
 #include "opts/log.h"
 #include "opts/fourcc.h"
 
-buffer_list_t *buffer_list_open(const char *name, struct device_s *dev, const char *path, buffer_format_t fmt, bool do_capture, bool do_mmap)
+buffer_list_t *buffer_list_open(const char *name, int index, struct device_s *dev, const char *path, buffer_format_t fmt, bool do_capture, bool do_mmap)
 {
   buffer_list_t *buf_list = calloc(1, sizeof(buffer_list_t));
 
@@ -16,6 +16,7 @@ buffer_list_t *buffer_list_open(const char *name, struct device_s *dev, const ch
   buf_list->do_capture = do_capture;
   buf_list->do_mmap = do_mmap;
   buf_list->fmt = fmt;
+  buf_list->index = index;
 
   int got_bufs = dev->hw->buffer_list_open(buf_list);
   if (got_bufs <= 0) {

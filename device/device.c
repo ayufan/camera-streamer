@@ -27,9 +27,13 @@ void device_close(device_t *dev) {
     return;
   }
 
-  if (dev->capture_list) {
-    buffer_list_close(dev->capture_list);
-    dev->capture_list = NULL;
+  if (dev->capture_lists) {
+    for (int i = 0; i < dev->n_capture_list; i++) {
+      buffer_list_close(dev->capture_lists[i]);
+      dev->capture_lists[i] = NULL;
+    }
+    free(dev->capture_lists);
+    dev->capture_lists = NULL;
   }
 
   if (dev->output_list) {
@@ -47,7 +51,8 @@ buffer_list_t *device_open_buffer_list(device_t *dev, bool do_capture, unsigned 
 {
   unsigned type;
   char name[64];
-  struct buffer_list_s **buf_list = NULL;
+  int index = 0;
+  buffer_list_t *buf_list;
 
   if (!dev) {
     return NULL;
@@ -58,16 +63,13 @@ buffer_list_t *device_open_buffer_list(device_t *dev, bool do_capture, unsigned 
   }
 
   if (do_capture) {
-    buf_list = &dev->capture_list;
+    index = dev->n_capture_list;
 
-    if (dev->capture_list) {
-      LOG_ERROR(dev, "The capture_list is already created.");
-    }
-
-    sprintf(name, "%s:capture", dev->name);
+    if (index > 0)
+      sprintf(name, "%s:capture:%d", dev->name, index);
+    else
+      sprintf(name, "%s:capture", dev->name);
   } else {
-    buf_list = &dev->output_list;
-
     if (dev->output_list) {
       LOG_ERROR(dev, "The output_list is already created.");
     }
@@ -83,21 +85,31 @@ buffer_list_t *device_open_buffer_list(device_t *dev, bool do_capture, unsigned 
     .nbufs = nbufs
   };
 
-  *buf_list = buffer_list_open(name, dev, NULL, fmt, do_capture, do_mmap);
-  if (!*buf_list) {
+  buf_list = buffer_list_open(name, index, dev, NULL, fmt, do_capture, do_mmap);
+  if (!buf_list) {
     goto error;
   }
 
-  return *buf_list;
+  if (do_capture) {
+    dev->capture_lists = reallocarray(dev->capture_lists, dev->n_capture_list+1, sizeof(buffer_list_t*));
+    dev->capture_lists[dev->n_capture_list++] = buf_list;
+  } else {
+    dev->output_list = buf_list;
+  }
+
+  return buf_list;
 
 error:
-  buffer_list_close(*buf_list);
-  *buf_list = NULL;
+  buffer_list_close(buf_list);
   return NULL;
 }
 
 buffer_list_t *device_open_buffer_list_output(device_t *dev, buffer_list_t *capture_list)
 {
+  if (!dev || !capture_list) {
+    return NULL;
+  }
+
   return device_open_buffer_list(dev, false,
     capture_list->fmt.width, capture_list->fmt.height,
     capture_list->fmt.format, capture_list->fmt.bytesperline,
@@ -107,10 +119,7 @@ buffer_list_t *device_open_buffer_list_output(device_t *dev, buffer_list_t *capt
 
 buffer_list_t *device_open_buffer_list_capture(device_t *dev, buffer_list_t *output_list, float div, unsigned format, bool do_mmap)
 {
-  if (!output_list) {
-    output_list = dev->output_list;
-  }
-  if (!output_list) {
+  if (!dev || !output_list) {
     return NULL;
   }
 
@@ -130,8 +139,8 @@ int device_set_stream(device_t *dev, bool do_on)
   ioctl_retried(dev_name(dev), dev->v4l2->dev_fd, do_on ? VIDIOC_SUBSCRIBE_EVENT : VIDIOC_UNSUBSCRIBE_EVENT, &sub);
 #endif
 
-  if (dev->capture_list) {
-    if (buffer_list_set_stream(dev->capture_list, do_on) < 0) {
+  for (int i = 0; i < dev->n_capture_list; i++) {
+    if (buffer_list_set_stream(dev->capture_lists[i], do_on) < 0) {
       return -1;
     }
   }

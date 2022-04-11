@@ -21,34 +21,29 @@ void write_yuvu(buffer_t *buffer)
 #endif
 }
 
-int camera_configure_legacy_isp(camera_t *camera, buffer_list_t *src, float div)
+int camera_configure_legacy_isp(camera_t *camera, buffer_list_t *camera_capture, float div)
 {
   camera->legacy_isp = device_v4l2_open("ISP", "/dev/video12");
   camera->codec_jpeg = device_v4l2_open("JPEG", "/dev/video31");
   camera->codec_h264 = device_v4l2_open("H264", "/dev/video11");
 
-  if (!device_open_buffer_list_output(camera->legacy_isp, src) ||
-    !device_open_buffer_list_capture(camera->legacy_isp, src, div, V4L2_PIX_FMT_YUYV, true)) {
-    return -1;
-  }
+  buffer_list_t *isp_output = device_open_buffer_list_output(camera->legacy_isp, camera_capture);
+  buffer_list_t *isp_capture = device_open_buffer_list_capture(camera->legacy_isp, isp_output, div, V4L2_PIX_FMT_YUYV, true);
 
-  src = camera->legacy_isp->capture_list;
+  buffer_list_t *jpeg_output = device_open_buffer_list_output(camera->codec_jpeg, isp_capture);
+  buffer_list_t *jpeg_capture = device_open_buffer_list_capture(camera->codec_jpeg, jpeg_output, 1.0, V4L2_PIX_FMT_JPEG, true);
 
-  if (!device_open_buffer_list_output(camera->codec_jpeg, src) ||
-    !device_open_buffer_list_capture(camera->codec_jpeg, src, 1.0, V4L2_PIX_FMT_JPEG, true)) {
-    return -1;
-  }
+  buffer_list_t *h264_output = device_open_buffer_list_output(camera->codec_h264, isp_capture);
+  buffer_list_t *h264_capture = device_open_buffer_list_capture(camera->codec_h264, h264_output, 1.0, V4L2_PIX_FMT_H264, true);
 
-  if (!device_open_buffer_list_output(camera->codec_h264, src) ||
-    !device_open_buffer_list_capture(camera->codec_h264, src, 1.0, V4L2_PIX_FMT_H264, true)) {
+  if (!jpeg_capture || !h264_capture) {
     return -1;
   }
 
   link_t *links = camera->links;
-
-  *links++ = (link_t){ camera->camera->capture_list, { camera->legacy_isp->output_list } };
-  *links++ = (link_t){ camera->legacy_isp->capture_list, { camera->codec_jpeg->output_list, camera->codec_h264->output_list }, { write_yuvu, NULL } };
-  *links++ = (link_t){ camera->codec_jpeg->capture_list, { }, { http_jpeg_capture, http_jpeg_needs_buffer } };
-  *links++ = (link_t){ camera->codec_h264->capture_list, { }, { http_h264_capture, http_h264_needs_buffer } };
+  *links++ = (link_t){ camera_capture, { isp_output } };
+  *links++ = (link_t){ isp_capture, { jpeg_output, h264_output }, { write_yuvu, NULL } };
+  *links++ = (link_t){ jpeg_capture, { }, { http_jpeg_capture, http_jpeg_needs_buffer } };
+  *links++ = (link_t){ h264_capture, { }, { http_h264_capture, http_h264_needs_buffer } };
   return 0;
 }

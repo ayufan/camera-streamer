@@ -33,7 +33,8 @@ typedef struct device_s {
   char bus_info[64];
 
   device_hw_t *hw;
-  buffer_list_t *capture_list;
+  int n_capture_list;
+  buffer_list_t **capture_lists;
   buffer_list_t *output_list;
 
   struct {

@@ -38,6 +38,13 @@ typedef struct camera_options_s {
   } h264;
 } camera_options_t;
 
+typedef struct camera_pipeline_s {
+  int index;
+  buffer_list_t *capture;
+  unsigned width, height, format;
+  float res_factor;
+} camera_pipeline_t;
+
 typedef struct camera_s {
   const char *name;
 
