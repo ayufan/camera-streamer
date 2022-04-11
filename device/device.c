@@ -96,17 +96,13 @@ error:
   return NULL;
 }
 
-int device_open_buffer_list_output(device_t *dev, buffer_list_t *capture_list)
+buffer_list_t *device_open_buffer_list_output(device_t *dev, buffer_list_t *capture_list)
 {
-  if (device_open_buffer_list(dev, false,
+  return device_open_buffer_list(dev, false,
     capture_list->fmt.width, capture_list->fmt.height,
     capture_list->fmt.format, capture_list->fmt.bytesperline,
     capture_list->nbufs,
-    capture_list->dev->opts.allow_dma ? !capture_list->do_mmap : true)) {
-      return 0;
-    }
-
-  return -1;
+    capture_list->dev->opts.allow_dma ? !capture_list->do_mmap : true);
 }
 
 int device_open_buffer_list_capture(device_t *dev, buffer_list_t *output_list, float div, unsigned format, bool do_mmap)
