@@ -7,6 +7,12 @@ typedef struct buffer_s buffer_t;
 typedef struct device_s device_t;
 struct pollfd;
 
+typedef struct buffer_format_s {
+  unsigned width, height, format, bytesperline;
+  unsigned nbufs;
+  unsigned interval_us;
+} buffer_format_t;
+
 typedef struct buffer_list_s {
   char *name;
   char *path;
@@ -14,7 +20,8 @@ typedef struct buffer_list_s {
   buffer_t **bufs;
   int nbufs;
 
-  bool do_mmap, do_capture;
+  buffer_format_t fmt;
+  bool do_mmap, do_capture, do_timestamps;
 
   union {
     struct buffer_list_v4l2_s *v4l2;
@@ -22,16 +29,12 @@ typedef struct buffer_list_s {
     struct buffer_list_libcamera_s *libcamera;
   };
 
-  unsigned fmt_width, fmt_height, fmt_format, fmt_bytesperline, fmt_interval_us;
-  bool do_timestamps;
-
   uint64_t last_enqueued_us, last_dequeued_us;
-
   bool streaming;
   int frames;
 } buffer_list_t;
 
-buffer_list_t *buffer_list_open(const char *name, const char *path, struct device_s *dev, unsigned width, unsigned height, unsigned format, unsigned bytesperline, int nbufs, bool do_capture, bool do_mmap);
+buffer_list_t *buffer_list_open(const char *name, struct device_s *dev, const char *path, buffer_format_t fmt, bool do_capture, bool do_mmap);
 void buffer_list_close(buffer_list_t *buf_list);
 
 int buffer_list_set_stream(buffer_list_t *buf_list, bool do_on);

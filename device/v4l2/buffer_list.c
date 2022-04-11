@@ -5,7 +5,7 @@
 #include "opts/log.h"
 #include "opts/fourcc.h"
 
-int v4l2_buffer_list_open(buffer_list_t *buf_list, const char *path, unsigned width, unsigned height, unsigned format, unsigned bytesperline, int nbufs)
+int v4l2_buffer_list_open(buffer_list_t *buf_list)
 {
   device_t *dev = buf_list->dev;
 
@@ -45,95 +45,95 @@ int v4l2_buffer_list_open(buffer_list_t *buf_list, const char *path, unsigned wi
     strcat(buf_list->name, MPLANE_SUFFIX);
   }
 
-	struct v4l2_format fmt = { 0 };
-  fmt.type = buf_list->v4l2->type;
+	struct v4l2_format v4l2_fmt = { 0 };
+  v4l2_fmt.type = buf_list->v4l2->type;
 
-  unsigned orig_width = width;
-  unsigned orig_height = height;
+  buffer_format_t fmt = buf_list->fmt;
 
   // JPEG is in 16x16 blocks (shrink image to fit) (but adapt to 32x32)
   // And ISP output
   if (strstr(buf_list->name, "JPEG") || strstr(buf_list->name, "H264") || buf_list->do_capture && strstr(buf_list->name, "ISP")) {
-    width = shrink_to_block(width, 32);
-    height = shrink_to_block(height, 32);
-    LOG_VERBOSE(buf_list, "Adapting size to 32x32 block: %dx%d vs %dx%d", orig_width, orig_height, width, height);
+    buffer_format_t org_fmt = buf_list->fmt;
+    fmt.width = shrink_to_block(fmt.width, 32);
+    fmt.height = shrink_to_block(fmt.height, 32);
+    LOG_VERBOSE(buf_list, "Adapting size to 32x32 block: %dx%d vs %dx%d", org_fmt.width, org_fmt.height, fmt.width, fmt.height);
   }
 
-  if (format == V4L2_PIX_FMT_H264) {
-    bytesperline = 0;
+  if (fmt.format == V4L2_PIX_FMT_H264) {
+    fmt.bytesperline = 0;
   }
 
   LOG_DEBUG(buf_list, "Get current format ...");
-  ERR_IOCTL(buf_list, buf_list->v4l2->dev_fd, VIDIOC_G_FMT, &fmt, "Can't set format");
+  ERR_IOCTL(buf_list, buf_list->v4l2->dev_fd, VIDIOC_G_FMT, &v4l2_fmt, "Can't set format");
 
   if (buf_list->v4l2->do_mplanes) {
-    fmt.fmt.pix_mp.colorspace = V4L2_COLORSPACE_JPEG;
-    if (width)
-      fmt.fmt.pix_mp.width = width;
-    if (height)
-      fmt.fmt.pix_mp.height = height;
-    if (format)
-      fmt.fmt.pix_mp.pixelformat = format;
-    fmt.fmt.pix_mp.field = V4L2_FIELD_ANY;
-    fmt.fmt.pix_mp.num_planes = 1;
-    fmt.fmt.pix_mp.plane_fmt[0].bytesperline = bytesperline;
-    //fmt.fmt.pix_mp.plane_fmt[0].sizeimage = bytesperline * orig_height;
+    v4l2_fmt.fmt.pix_mp.colorspace = V4L2_COLORSPACE_JPEG;
+    if (fmt.width)
+      v4l2_fmt.fmt.pix_mp.width = fmt.width;
+    if (fmt.height)
+      v4l2_fmt.fmt.pix_mp.height = fmt.height;
+    if (fmt.format)
+      v4l2_fmt.fmt.pix_mp.pixelformat = fmt.format;
+    v4l2_fmt.fmt.pix_mp.field = V4L2_FIELD_ANY;
+    v4l2_fmt.fmt.pix_mp.num_planes = 1;
+    v4l2_fmt.fmt.pix_mp.plane_fmt[0].bytesperline = fmt.bytesperline;
+    //v4l2_fmt.fmt.pix_mp.plane_fmt[0].sizeimage = bytesperline * orig_height;
   } else {
-    fmt.fmt.pix.colorspace = V4L2_COLORSPACE_RAW;
-    if (width)
-      fmt.fmt.pix.width = width;
-    if (height)
-      fmt.fmt.pix.height = height;
-    if (format)
-      fmt.fmt.pix.pixelformat = format;
-    fmt.fmt.pix.field = V4L2_FIELD_ANY;
-    fmt.fmt.pix.bytesperline = bytesperline;
-    //fmt.fmt.pix.sizeimage = bytesperline * orig_height;
+    v4l2_fmt.fmt.pix.colorspace = V4L2_COLORSPACE_RAW;
+    if (fmt.width)
+      v4l2_fmt.fmt.pix.width = fmt.width;
+    if (fmt.height)
+      v4l2_fmt.fmt.pix.height = fmt.height;
+    if (fmt.format)
+      v4l2_fmt.fmt.pix.pixelformat = fmt.format;
+    v4l2_fmt.fmt.pix.field = V4L2_FIELD_ANY;
+    v4l2_fmt.fmt.pix.bytesperline = fmt.bytesperline;
+    //v4l2_fmt.fmt.pix.sizeimage = bytesperline * orig_height;
   }
 
-  LOG_DEBUG(buf_list, "Configuring format (%s)...", fourcc_to_string(format).buf);
-  ERR_IOCTL(buf_list, buf_list->v4l2->dev_fd, VIDIOC_S_FMT, &fmt, "Can't set format");
+  LOG_DEBUG(buf_list, "Configuring format (%s)...", fourcc_to_string(fmt.format).buf);
+  ERR_IOCTL(buf_list, buf_list->v4l2->dev_fd, VIDIOC_S_FMT, &v4l2_fmt, "Can't set format");
 
   if (buf_list->v4l2->do_mplanes) {
-    buf_list->fmt_width = fmt.fmt.pix_mp.width;
-    buf_list->fmt_height = fmt.fmt.pix_mp.height;
-    buf_list->fmt_format = fmt.fmt.pix_mp.pixelformat;
-    buf_list->fmt_bytesperline = fmt.fmt.pix_mp.plane_fmt[0].bytesperline;
+    buf_list->fmt.width = v4l2_fmt.fmt.pix_mp.width;
+    buf_list->fmt.height = v4l2_fmt.fmt.pix_mp.height;
+    buf_list->fmt.format = v4l2_fmt.fmt.pix_mp.pixelformat;
+    buf_list->fmt.bytesperline = v4l2_fmt.fmt.pix_mp.plane_fmt[0].bytesperline;
   } else {
-    buf_list->fmt_width = fmt.fmt.pix.width;
-    buf_list->fmt_height = fmt.fmt.pix.height;
-    buf_list->fmt_format = fmt.fmt.pix.pixelformat;
-    buf_list->fmt_bytesperline = fmt.fmt.pix.bytesperline;
+    buf_list->fmt.width = v4l2_fmt.fmt.pix.width;
+    buf_list->fmt.height = v4l2_fmt.fmt.pix.height;
+    buf_list->fmt.format = v4l2_fmt.fmt.pix.pixelformat;
+    buf_list->fmt.bytesperline = v4l2_fmt.fmt.pix.bytesperline;
   }
 
-  if (buf_list->fmt_width != width || buf_list->fmt_height != height) {
-    if (bytesperline) {
+  if (buf_list->fmt.width != fmt.width || buf_list->fmt.height != fmt.height) {
+    if (fmt.bytesperline) {
       LOG_ERROR(buf_list, "Requested resolution=%ux%u is unavailable. Got %ux%u.",
-        width, height, buf_list->fmt_width, buf_list->fmt_height);
+        fmt.width, fmt.height, buf_list->fmt.width, buf_list->fmt.height);
     } else {
       LOG_INFO(buf_list, "Requested resolution=%ux%u is unavailable. Got %ux%u. Accepted",
-        width, height, buf_list->fmt_width, buf_list->fmt_height);
+        fmt.width, fmt.height, buf_list->fmt.width, buf_list->fmt.height);
     }
   }
 
-	if (format && buf_list->fmt_format != format) {
+	if (fmt.format && buf_list->fmt.format != fmt.format) {
 		LOG_ERROR(buf_list, "Could not obtain the requested format=%s; driver gave us %s",
-			fourcc_to_string(format).buf,
-			fourcc_to_string(buf_list->fmt_format).buf);
+			fourcc_to_string(fmt.format).buf,
+			fourcc_to_string(buf_list->fmt.format).buf);
 	}
 
-  if (bytesperline > 0 && buf_list->fmt_bytesperline != bytesperline) {
+  if (fmt.bytesperline > 0 && buf_list->fmt.bytesperline != fmt.bytesperline) {
 		LOG_ERROR(buf_list, "Requested bytesperline=%u. Got %u.",
-      bytesperline, buf_list->fmt_bytesperline);
+      fmt.bytesperline, buf_list->fmt.bytesperline);
   }
 
   // Some devices require setting pad size via media-controller
   if (buf_list->do_capture) {
-    v4l2_device_set_pad_format(dev, width, height, format);
+    v4l2_device_set_pad_format(dev, fmt.width, fmt.height, fmt.format);
   }
 
 	struct v4l2_requestbuffers v4l2_req = {0};
-	v4l2_req.count = nbufs;
+	v4l2_req.count = fmt.nbufs;
 	v4l2_req.type = buf_list->v4l2->type;
 	v4l2_req.memory = buf_list->do_mmap ? V4L2_MEMORY_MMAP : V4L2_MEMORY_DMABUF;
 
@@ -145,6 +145,7 @@ int v4l2_buffer_list_open(buffer_list_t *buf_list, const char *path, unsigned wi
 	}
 
 	LOG_DEBUG(buf_list, "Got %u buffers", v4l2_req.count);
+  buf_list->fmt.nbufs = v4l2_req.count;
   return v4l2_req.count;
 
 error:

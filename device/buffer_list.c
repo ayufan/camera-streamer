@@ -4,18 +4,20 @@
 #include "opts/log.h"
 #include "opts/fourcc.h"
 
-buffer_list_t *buffer_list_open(const char *name, const char *path, struct device_s *dev, unsigned width, unsigned height, unsigned format, unsigned bytesperline, int nbufs, bool do_capture, bool do_mmap)
+buffer_list_t *buffer_list_open(const char *name, struct device_s *dev, const char *path, buffer_format_t fmt, bool do_capture, bool do_mmap)
 {
   buffer_list_t *buf_list = calloc(1, sizeof(buffer_list_t));
 
   buf_list->dev = dev;
   buf_list->name = strdup(name);
-  if (path)
+  if (path) {
     buf_list->path = strdup(path);
+  }
   buf_list->do_capture = do_capture;
   buf_list->do_mmap = do_mmap;
+  buf_list->fmt = fmt;
 
-  int got_bufs = dev->hw->buffer_list_open(buf_list, path, width, height, format, bytesperline, nbufs);
+  int got_bufs = dev->hw->buffer_list_open(buf_list);
   if (got_bufs <= 0) {
     goto error;
   }
@@ -23,13 +25,14 @@ buffer_list_t *buffer_list_open(const char *name, const char *path, struct devic
 	LOG_INFO(
     buf_list,
     "Using: %ux%u/%s, bytesperline=%d",
-    buf_list->fmt_width,
-    buf_list->fmt_height,
-    fourcc_to_string(buf_list->fmt_format).buf,
-    buf_list->fmt_bytesperline
+    buf_list->fmt.width,
+    buf_list->fmt.height,
+    fourcc_to_string(buf_list->fmt.format).buf,
+    buf_list->fmt.bytesperline
   );
 
   buf_list->bufs = calloc(got_bufs, sizeof(buffer_t*));
+  buf_list->fmt.nbufs = got_bufs;
   buf_list->nbufs = got_bufs;
 
   for (unsigned i = 0; i < buf_list->nbufs; i++) {

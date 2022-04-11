@@ -27,10 +27,10 @@ int camera_configure_v4l2(camera_t *camera)
   camera->camera->capture_list->do_timestamps = true;
 
   if (camera->options.fps > 0) {
-    camera->camera->capture_list->fmt_interval_us = 1000 * 1000 / camera->options.fps;
+    camera->camera->capture_list->fmt.interval_us = 1000 * 1000 / camera->options.fps;
   }
 
-  switch (camera->camera->capture_list->fmt_format) {
+  switch (camera->camera->capture_list->fmt.format) {
   case V4L2_PIX_FMT_YUYV:
   case V4L2_PIX_FMT_YVYU:
   case V4L2_PIX_FMT_VYUY:
@@ -64,7 +64,7 @@ int camera_configure_v4l2(camera_t *camera)
 
   default:
     LOG_ERROR(camera, "Unsupported camera format=%s",
-      fourcc_to_string(camera->camera->capture_list->fmt_format).buf);
+      fourcc_to_string(camera->camera->capture_list->fmt.format).buf);
     break;
   }
 

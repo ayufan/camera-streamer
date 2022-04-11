@@ -31,7 +31,7 @@ int camera_configure_decoder(camera_t *camera)
 
   src = camera->decoder->capture_list;
 
-  if (camera_src->fmt_format != V4L2_PIX_FMT_MJPEG && camera_src->fmt_format != V4L2_PIX_FMT_JPEG) {
+  if (camera_src->fmt.format != V4L2_PIX_FMT_MJPEG && camera_src->fmt.format != V4L2_PIX_FMT_JPEG) {
     camera->codec_jpeg = device_v4l2_open("JPEG", "/dev/video31");
 
     if (device_open_buffer_list_output(camera->codec_jpeg, src) < 0 ||
@@ -40,7 +40,7 @@ int camera_configure_decoder(camera_t *camera)
     }
   }
 
-  if (camera_src->fmt_format != V4L2_PIX_FMT_H264) {
+  if (camera_src->fmt.format != V4L2_PIX_FMT_H264) {
     camera->codec_h264 = device_v4l2_open("H264", "/dev/video11");
 
     if (device_open_buffer_list_output(camera->codec_h264, src) < 0 ||
@@ -51,11 +51,11 @@ int camera_configure_decoder(camera_t *camera)
 
   link_t *links = camera->links;
 
-  if (camera_src->fmt_format == V4L2_PIX_FMT_MJPEG || camera_src->fmt_format == V4L2_PIX_FMT_JPEG) {
+  if (camera_src->fmt.format == V4L2_PIX_FMT_MJPEG || camera_src->fmt.format == V4L2_PIX_FMT_JPEG) {
     *links++ = (link_t){ camera->camera->capture_list, { camera->decoder->output_list }, { http_jpeg_capture, http_jpeg_needs_buffer } };
     *links++ = (link_t){ camera->decoder->capture_list, { camera->codec_h264->output_list } };
     *links++ = (link_t){ camera->codec_h264->capture_list, { }, { http_h264_capture, http_h264_needs_buffer } };
-  } else if (camera_src->fmt_format == V4L2_PIX_FMT_H264) {
+  } else if (camera_src->fmt.format == V4L2_PIX_FMT_H264) {
     *links++ = (link_t){ camera->camera->capture_list, { camera->decoder->output_list }, { http_h264_capture, http_h264_needs_buffer }};
     *links++ = (link_t){ camera->decoder->capture_list, { camera->codec_jpeg->output_list } };
     *links++ = (link_t){ camera->codec_jpeg->capture_list, { }, { http_jpeg_capture, http_jpeg_needs_buffer } };

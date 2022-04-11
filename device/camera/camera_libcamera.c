@@ -22,7 +22,7 @@ int camera_configure_libcamera(camera_t *camera)
   camera->camera->capture_list->do_timestamps = true;
 
   if (camera->options.fps > 0) {
-    camera->camera->capture_list->fmt_interval_us = 1000 * 1000 / camera->options.fps;
+    camera->camera->capture_list->fmt.interval_us = 1000 * 1000 / camera->options.fps;
   }
 
   if (camera_configure_direct(camera) < 0) {

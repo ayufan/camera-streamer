@@ -1,10 +1,8 @@
 #ifdef USE_LIBCAMERA
 #include "libcamera.hh"
 
-int libcamera_buffer_list_open(buffer_list_t *buf_list, const char *path, unsigned width, unsigned height, unsigned format, unsigned bytesperline, int nbufs)
+int libcamera_buffer_list_open(buffer_list_t *buf_list)
 {
-  int got_bufs = 0;
-
   if (!buf_list->do_capture) {
     LOG_INFO(buf_list, "Only capture mode is supported.");
     return -1;
@@ -29,13 +27,13 @@ int libcamera_buffer_list_open(buffer_list_t *buf_list, const char *path, unsign
     { libcamera::StreamRole::Viewfinder });
 
   auto &configuration = buf_list->libcamera->configuration->at(0);
-  configuration.size = libcamera::Size(width, height);
-  configuration.pixelFormat = libcamera::PixelFormat(format);
-  if (bytesperline > 0) {
-    configuration.stride = bytesperline;
+  configuration.size = libcamera::Size(buf_list->fmt.width, buf_list->fmt.height);
+  configuration.pixelFormat = libcamera::PixelFormat(buf_list->fmt.format);
+  if (buf_list->fmt.bytesperline > 0) {
+    configuration.stride = buf_list->fmt.bytesperline;
   }
-  if (nbufs > 0) {
-    configuration.bufferCount = nbufs;
+  if (buf_list->fmt.nbufs > 0) {
+    configuration.bufferCount = buf_list->fmt.nbufs;
   }
   if (buf_list->libcamera->configuration->validate() == libcamera::CameraConfiguration::Invalid) {
     LOG_ERROR(buf_list, "Camera configuration invalid");
@@ -45,15 +43,15 @@ int libcamera_buffer_list_open(buffer_list_t *buf_list, const char *path, unsign
     LOG_ERROR(buf_list, "Failed to configure camera");
   }
 
-  buf_list->fmt_width = configuration.size.width;
-  buf_list->fmt_height = configuration.size.height;
-  buf_list->fmt_format = configuration.pixelFormat.fourcc();
-  buf_list->fmt_bytesperline = configuration.stride;
+  buf_list->fmt.width = configuration.size.width;
+  buf_list->fmt.height = configuration.size.height;
+  buf_list->fmt.format = configuration.pixelFormat.fourcc();
+  buf_list->fmt.bytesperline = configuration.stride;
+  buf_list->fmt.nbufs = configuration.bufferCount;
 
   buf_list->libcamera->allocator = std::make_shared<libcamera::FrameBufferAllocator>(
     buf_list->dev->libcamera->camera);
 
-  got_bufs = configuration.bufferCount;
 
   for (libcamera::StreamConfiguration &stream_config : *buf_list->libcamera->configuration) {
     if (buf_list->libcamera->allocator->allocate(stream_config.stream()) < 0) {
@@ -62,10 +60,10 @@ int libcamera_buffer_list_open(buffer_list_t *buf_list, const char *path, unsign
 
     int allocated = buf_list->libcamera->allocator->buffers(
       stream_config.stream()).size();
-    got_bufs = std::min(got_bufs, allocated);
+    buf_list->fmt.nbufs = std::min<unsigned>(buf_list->fmt.nbufs, allocated);
   }
 
-  return got_bufs;
+  return buf_list->fmt.nbufs;
 
 error:
   return -1;

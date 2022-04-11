@@ -75,7 +75,15 @@ int device_open_buffer_list(device_t *dev, bool do_capture, unsigned width, unsi
     sprintf(name, "%s:output", dev->name);
   }
 
-  *buf_list = buffer_list_open(name, NULL, dev, width, height, format, bytesperline, nbufs, do_capture, do_mmap);
+  buffer_format_t fmt = {
+    .width = width,
+    .height = height,
+    .format = format,
+    .bytesperline = bytesperline,
+    .nbufs = nbufs
+  };
+
+  *buf_list = buffer_list_open(name, dev, NULL, fmt, do_capture, do_mmap);
   if (!*buf_list) {
     goto error;
   }
@@ -91,8 +99,8 @@ error:
 int device_open_buffer_list_output(device_t *dev, buffer_list_t *capture_list)
 {
   return device_open_buffer_list(dev, false,
-    capture_list->fmt_width, capture_list->fmt_height,
-    capture_list->fmt_format, capture_list->fmt_bytesperline,
+    capture_list->fmt.width, capture_list->fmt.height,
+    capture_list->fmt.format, capture_list->fmt.bytesperline,
     capture_list->nbufs,
     capture_list->dev->opts.allow_dma ? !capture_list->do_mmap : true);
 }
@@ -107,7 +115,7 @@ int device_open_buffer_list_capture(device_t *dev, buffer_list_t *output_list, f
   }
 
   return device_open_buffer_list(dev, true,
-    output_list->fmt_width / div, output_list->fmt_height / div,
+    output_list->fmt.width / div, output_list->fmt.height / div,
     format, 0, output_list->nbufs, do_mmap);
 }
 
