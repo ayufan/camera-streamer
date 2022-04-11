@@ -1,4 +1,5 @@
 #include "opts/log.h"
+#include "opts/opts.h"
 
 #define _GNU_SOURCE
 #include <string.h>
@@ -28,7 +29,7 @@ bool filter_log(const char *filename)
 
   const char *ptr = log_options.filter;
   do {
-    const char *next = strchr(ptr, ',');
+    const char *next = strchr(ptr, OPTION_VALUE_LIST_SEP[0]);
     if (!next)
       next = ptr + strlen(ptr);
 
