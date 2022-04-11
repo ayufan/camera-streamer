@@ -50,7 +50,7 @@ camera_t *camera_open(camera_options_t *options)
     break;
 
   default:
-    E_LOG_ERROR(camera, "Unsupported camera type");
+    LOG_ERROR(camera, "Unsupported camera type");
   }
 
   if (!camera->camera) {
@@ -60,7 +60,7 @@ camera_t *camera_open(camera_options_t *options)
   camera->camera->allow_dma = camera->options.allow_dma;
 
   if (strstr(camera->camera->bus_info, "usb")) {
-    E_LOG_INFO(camera, "Disabling DMA since device uses USB (which is likely not working properly).");
+    LOG_INFO(camera, "Disabling DMA since device uses USB (which is likely not working properly).");
     camera->camera->allow_dma = false;
   }
 
@@ -103,7 +103,7 @@ camera_t *camera_open(camera_options_t *options)
     break;
 
   default:
-    E_LOG_ERROR(camera, "Unsupported camera format=%s", fourcc_to_string(camera->options.format).buf);
+    LOG_ERROR(camera, "Unsupported camera format=%s", fourcc_to_string(camera->options.format).buf);
     break;
   }
 

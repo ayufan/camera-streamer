@@ -87,16 +87,16 @@ int _build_fds(link_t *all_links, struct pollfd *fds, link_t **links, buffer_lis
 int links_enqueue_from_source(buffer_list_t *buf_list, link_t *link)
 {
   if (!link) {
-    E_LOG_ERROR(buf_list, "Missing link for source");
+    LOG_ERROR(buf_list, "Missing link for source");
   }
 
   buffer_t *buf = buffer_list_dequeue(buf_list);
   if (!buf) {
-    E_LOG_ERROR(buf_list, "No buffer dequeued from source?");
+    LOG_ERROR(buf_list, "No buffer dequeued from source?");
   }
 
   if (link->callbacks.validate_buffer && !link->callbacks.validate_buffer(link, buf)) {
-    E_LOG_DEBUG(buf_list, "Buffer rejected by validation");
+    LOG_DEBUG(buf_list, "Buffer rejected by validation");
     return 0;
   }
 
@@ -120,7 +120,7 @@ error:
 int links_dequeue_from_sink(buffer_list_t *buf_list) {
   buffer_t *buf = buffer_list_dequeue(buf_list);
   if (!buf) {
-    E_LOG_ERROR(buf, "No buffer dequeued from sink?");
+    LOG_ERROR(buf, "No buffer dequeued from sink?");
   }
 
   return 0;
@@ -163,7 +163,7 @@ int links_step(link_t *all_links, int timeout_now_ms, int *timeout_next_ms)
     buffer_list_t *buf_list = buf_lists[i];
     link_t *link = links[i];
 
-    E_LOG_DEBUG(buf_list, "pool event=%s%s%s%s%s%08x streaming=%d enqueued=%d/%d paused=%d",
+    LOG_DEBUG(buf_list, "pool event=%s%s%s%s%s%08x streaming=%d enqueued=%d/%d paused=%d",
       !fds[i].revents ? "NONE/" : "",
       fds[i].revents & POLLIN ? "IN/" : "",
       fds[i].revents & POLLOUT ? "OUT/" : "",
@@ -189,12 +189,12 @@ int links_step(link_t *all_links, int timeout_now_ms, int *timeout_next_ms)
     }
 
     if (fds[i].revents & POLLHUP) {
-      E_LOG_INFO(buf_list, "Device disconnected.");
+      LOG_INFO(buf_list, "Device disconnected.");
       return -1;
     }
 
     if (fds[i].revents & POLLERR) {
-      E_LOG_INFO(buf_list, "Got an error");
+      LOG_INFO(buf_list, "Got an error");
       return -1;
     }
 
@@ -205,13 +205,13 @@ int links_step(link_t *all_links, int timeout_now_ms, int *timeout_next_ms)
       if (buf_list->fmt_interval_us > 0 && now_us - buf_list->last_enqueued_us < buf_list->fmt_interval_us) {
         *timeout_next_ms = MIN(*timeout_next_ms, (buf_list->last_enqueued_us + buf_list->fmt_interval_us - now_us) / 1000);
 
-        E_LOG_DEBUG(buf_list, "skipping dequeue: %.1f / %.1f. enqueued=%d",
+        LOG_DEBUG(buf_list, "skipping dequeue: %.1f / %.1f. enqueued=%d",
           (now_us - buf_list->last_enqueued_us) / 1000.0f,
           buf_list->fmt_interval_us / 1000.0f,
           buffer_list_count_enqueued(buf_list));
         continue;
       } else if (buf_list->fmt_interval_us > 0) {
-        E_LOG_DEBUG(buf_list, "since last: %.1f / %.1f. enqueued=%d",
+        LOG_DEBUG(buf_list, "since last: %.1f / %.1f. enqueued=%d",
           (now_us - buf_list->last_enqueued_us) / 1000.0f,
           buf_list->fmt_interval_us / 1000.0f,
           buffer_list_count_enqueued(buf_list));
@@ -238,12 +238,12 @@ int links_stream(link_t *all_links, bool do_stream)
     link_t *link = &all_links[i];
 
     if (buffer_list_set_stream(link->source, streaming) < 0) {
-      E_LOG_ERROR(link->source, "Failed to start streaming");
+      LOG_ERROR(link->source, "Failed to start streaming");
     }
 
     for (int j = 0; link->sinks[j]; j++) {
       if (buffer_list_set_stream(link->sinks[j], streaming) < 0) {
-        E_LOG_ERROR(link->sinks[j], "Failed to start streaming");
+        LOG_ERROR(link->sinks[j], "Failed to start streaming");
       }
     }
   }

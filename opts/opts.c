@@ -70,7 +70,7 @@ static int parse_opt(option_t *options, const char *key)
     }
   }
 
-  E_LOG_DEBUG(NULL, "Parsing '%s'. Got value='%s', and option='%s'", key, value, option ? option->name : NULL);
+  LOG_DEBUG(NULL, "Parsing '%s'. Got value='%s', and option='%s'", key, value, option ? option->name : NULL);
 
   if (!option || !value) {
     return -EINVAL;
@@ -115,7 +115,7 @@ int parse_opts(option_t *options, int argc, char *argv[])
       if (key[0] == '-')
         key++;
     } else {
-      E_LOG_ERROR(NULL, "The '%s' is not option (should start with - or --).", key);
+      LOG_ERROR(NULL, "The '%s' is not option (should start with - or --).", key);
     }
 
     if (!strcmp(key, "help")) {
@@ -125,7 +125,7 @@ int parse_opts(option_t *options, int argc, char *argv[])
 
     int ret = parse_opt(options, key);
     if (ret <= 0) {
-      E_LOG_ERROR(NULL, "Parsing '%s' returned '%d'.", argv[arg], ret);
+      LOG_ERROR(NULL, "Parsing '%s' returned '%d'.", argv[arg], ret);
     }
   }
 

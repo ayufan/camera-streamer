@@ -25,7 +25,7 @@ extern "C" device_t *device_libcamera_open(const char *name, const char *path)
 #else // USE_LIBCAMERA
 extern "C" device_t *device_libcamera_open(const char *name, const char *path)
 {
-  E_LOG_INFO(NULL, "libcamera is not supported");
+  LOG_INFO(NULL, "libcamera is not supported");
   return NULL;
 }
 #endif // USE_LIBCAMERA

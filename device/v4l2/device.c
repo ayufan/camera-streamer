@@ -10,18 +10,18 @@ int v4l2_device_open(device_t *dev)
 
   dev->v4l2->dev_fd = open(dev->path, O_RDWR|O_NONBLOCK);
   if (dev->v4l2->dev_fd < 0) {
-		E_LOG_ERROR(dev, "Can't open device: %s", dev->path);
+		LOG_ERROR(dev, "Can't open device: %s", dev->path);
     goto error;
   }
 
-	E_LOG_INFO(dev, "Device path=%s fd=%d opened", dev->path, dev->v4l2->dev_fd);
+	LOG_INFO(dev, "Device path=%s fd=%d opened", dev->path, dev->v4l2->dev_fd);
 
-	E_LOG_DEBUG(dev, "Querying device capabilities ...");
+	LOG_DEBUG(dev, "Querying device capabilities ...");
   struct v4l2_capability v4l2_cap;
-  E_XIOCTL(dev, dev->v4l2->dev_fd, VIDIOC_QUERYCAP, &v4l2_cap, "Can't query device capabilities");
+  ERR_IOCTL(dev, dev->v4l2->dev_fd, VIDIOC_QUERYCAP, &v4l2_cap, "Can't query device capabilities");
 
 	if (!(v4l2_cap.capabilities & V4L2_CAP_STREAMING)) {
-		E_LOG_ERROR(dev, "Device doesn't support streaming IO");
+		LOG_ERROR(dev, "Device doesn't support streaming IO");
 	}
 
   strcpy(dev->bus_info, v4l2_cap.bus_info);
@@ -55,8 +55,8 @@ int v4l2_device_set_decoder_start(device_t *dev, bool do_on)
 
   cmd.cmd = do_on ? V4L2_DEC_CMD_START : V4L2_DEC_CMD_STOP;
 
-  E_LOG_DEBUG(dev, "Setting decoder state %s...", do_on ? "Start" : "Stop");
-  E_XIOCTL(dev, dev->v4l2->dev_fd, VIDIOC_DECODER_CMD, &cmd, "Cannot set decoder state");
+  LOG_DEBUG(dev, "Setting decoder state %s...", do_on ? "Start" : "Stop");
+  ERR_IOCTL(dev, dev->v4l2->dev_fd, VIDIOC_DECODER_CMD, &cmd, "Cannot set decoder state");
 
   return 0;
 
@@ -69,8 +69,8 @@ int v4l2_device_video_force_key(device_t *dev)
   struct v4l2_control ctl = {0};
   ctl.id = V4L2_CID_MPEG_VIDEO_FORCE_KEY_FRAME;
   ctl.value = 1;
-  E_LOG_DEBUG(dev, "Forcing keyframe ...");
-  E_XIOCTL(dev, dev->v4l2->dev_fd, VIDIOC_S_CTRL, &ctl, "Can't force keyframe");
+  LOG_DEBUG(dev, "Forcing keyframe ...");
+  ERR_IOCTL(dev, dev->v4l2->dev_fd, VIDIOC_S_CTRL, &ctl, "Can't force keyframe");
   return 0;
 
 error:
@@ -88,8 +88,8 @@ int v4l2_device_set_fps(device_t *dev, int desired_fps)
   setfps.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
   setfps.parm.output.timeperframe.numerator = 1;
   setfps.parm.output.timeperframe.denominator = desired_fps;
-  E_LOG_DEBUG(dev, "Configuring FPS ...");
-  E_XIOCTL(dev, dev->v4l2->dev_fd, VIDIOC_S_PARM, &setfps, "Can't set FPS");
+  LOG_DEBUG(dev, "Configuring FPS ...");
+  ERR_IOCTL(dev, dev->v4l2->dev_fd, VIDIOC_S_PARM, &setfps, "Can't set FPS");
   return 0;
 error:
   return -1;

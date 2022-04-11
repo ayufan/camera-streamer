@@ -44,7 +44,7 @@ static int http_ffmpeg_read_from_buf(void *opaque, uint8_t *buf, int buf_size)
   if (!buf_size)
     return FFMPEG_DATA_PACKET_EOF;
 
-  E_LOG_DEBUG(status, "http_ffmpeg_read_from_buf: offset=%d, n=%d", status->buf_offset, buf_size);
+  LOG_DEBUG(status, "http_ffmpeg_read_from_buf: offset=%d, n=%d", status->buf_offset, buf_size);
   memcpy(buf, (char*)status->buf->start + status->buf_offset, buf_size);
   status->buf_offset += buf_size;
   return buf_size;
@@ -64,7 +64,7 @@ static int http_ffmpeg_write_to_stream(void *opaque, uint8_t *buf, int buf_size)
   size_t n = fwrite(buf, 1, buf_size, status->stream);
   fflush(status->stream);
 
-  E_LOG_DEBUG(status, "http_ffmpeg_write_to_stream: offset=%d, n=%d, buf_size=%d, error=%d",
+  LOG_DEBUG(status, "http_ffmpeg_write_to_stream: offset=%d, n=%d, buf_size=%d, error=%d",
     status->stream_offset, n, buf_size, ferror(status->stream));
   status->stream_offset += n;
   if (ferror(status->stream))

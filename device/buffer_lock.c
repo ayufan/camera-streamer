@@ -51,7 +51,7 @@ void buffer_lock_capture(buffer_lock_t *buf_lock, buffer_t *buf)
   } else if (now - buf_lock->buf_time_us < buf_lock->frame_interval_ms * 1000) {
     buf_lock->dropped++;
 
-    E_LOG_DEBUG(buf_lock, "Dropped buffer %s (refs=%d), frame=%d/%d, frame_ms=%.1f",
+    LOG_DEBUG(buf_lock, "Dropped buffer %s (refs=%d), frame=%d/%d, frame_ms=%.1f",
       dev_name(buf), buf ? buf->mmap_reflinks : 0,
       buf_lock->counter, buf_lock->dropped,
       (now - buf->captured_time_us) / 1000.0f);
@@ -60,7 +60,7 @@ void buffer_lock_capture(buffer_lock_t *buf_lock, buffer_t *buf)
     buffer_use(buf);
     buf_lock->buf = buf;
     buf_lock->counter++;
-    E_LOG_DEBUG(buf_lock, "Captured buffer %s (refs=%d), frame=%d/%d, processing_ms=%.1f, frame_ms=%.1f",
+    LOG_DEBUG(buf_lock, "Captured buffer %s (refs=%d), frame=%d/%d, processing_ms=%.1f, frame_ms=%.1f",
       dev_name(buf), buf ? buf->mmap_reflinks : 0,
       buf_lock->counter, buf_lock->dropped,
       (now - buf->captured_time_us) / 1000.0f,
@@ -123,7 +123,7 @@ int buffer_lock_write_loop(buffer_lock_t *buf_lock, int nframes, buffer_write_fn
     } else if (ret < 0) {
       goto error;
     } else if(!frames && deadline_ms < get_monotonic_time_us(NULL, NULL)) {
-      E_LOG_DEBUG(buf_lock, "Deadline getting frame elapsed.");
+      LOG_DEBUG(buf_lock, "Deadline getting frame elapsed.");
       goto error;
     }
   }

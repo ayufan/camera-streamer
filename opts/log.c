@@ -84,26 +84,21 @@ uint64_t get_monotonic_time_us(struct timespec *ts, struct timeval *tv)
 	return get_time_us(CLOCK_MONOTONIC, ts, tv, 0);
 }
 
-int xioctl(const char *name, int fd, int request, void *arg)
+int ioctl_retried(const char *name, int fd, int request, void *arg)
 {
-	int retries = XIOCTL_RETRIES;
-	int retval = -1;
+#define MAX_RETRIES 4
 
-	do {
-		retval = ioctl(fd, request, arg);
-	} while (
-		retval
-		&& retries--
-		&& (
-			errno == EINTR
-			|| errno == EAGAIN
-			|| errno == ETIMEDOUT
-		)
-	);
+	int retries = 4;
+	int ret = -1;
 
-	// cppcheck-suppress knownConditionTrueFalse
-	if (retval && retries <= 0) {
-		E_LOG_PERROR(NULL, "%s: ioctl(%08x) retried %u times; giving up", name, request, XIOCTL_RETRIES);
+	while (retries-- > 0) {
+		ret = ioctl(fd, request, arg);
+		if (errno != EINTR && errno != EAGAIN && errno != ETIMEDOUT)
+			break;
 	}
-	return retval;
+
+	if (ret && retries <= 0) {
+		LOG_PERROR(NULL, "%s: ioctl(%08x) retried %u times; giving up", name, request, MAX_RETRIES);
+	}
+	return ret;
 }

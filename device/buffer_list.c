@@ -18,7 +18,7 @@ buffer_list_t *buffer_list_open(const char *name, struct device_s *dev, unsigned
     goto error;
   }
 
-	E_LOG_INFO(
+	LOG_INFO(
     buf_list,
     "Using: %ux%u/%s, bytesperline=%d",
     buf_list->fmt_width,
@@ -35,13 +35,13 @@ buffer_list_t *buffer_list_open(const char *name, struct device_s *dev, unsigned
     sprintf(name, "%s:buf%d", buf_list->name, i);
     buffer_t *buf = buffer_open(name, buf_list, i);
     if (!buf) {
-		  E_LOG_ERROR(buf_list, "Cannot open buffer: %u", i);
+		  LOG_ERROR(buf_list, "Cannot open buffer: %u", i);
       goto error;
     }
     buf_list->bufs[i] = buf;
   }
 
-	E_LOG_DEBUG(buf_list, "Opened %u buffers", buf_list->nbufs);
+	LOG_DEBUG(buf_list, "Opened %u buffers", buf_list->nbufs);
 
   return buf_list;
 
@@ -86,7 +86,7 @@ int buffer_list_set_stream(buffer_list_t *buf_list, bool do_on)
   buf_list->streaming = do_on;
 
   int enqueued = buffer_list_count_enqueued(buf_list);
-  E_LOG_VERBOSE(buf_list, "Streaming %s... Was %d of %d enqueud", do_on ? "started" : "stopped", enqueued, buf_list->nbufs);
+  LOG_VERBOSE(buf_list, "Streaming %s... Was %d of %d enqueud", do_on ? "started" : "stopped", enqueued, buf_list->nbufs);
   return 0;
 
 error:

@@ -14,26 +14,26 @@ int libcamera_device_open(device_t *dev)
   dev->libcamera->camera_manager = std::make_shared<libcamera::CameraManager>();
   int ret = dev->libcamera->camera_manager->start();
   if (ret < 0) {
-    E_LOG_ERROR(dev, "Cannot start camera_manager.");
+    LOG_ERROR(dev, "Cannot start camera_manager.");
   }
 
   dev->libcamera->camera = dev->libcamera->camera_manager->get(dev->path);
   if (!dev->libcamera->camera) {
     if (dev->libcamera->camera_manager->cameras().size()) {
       for(auto const &camera : dev->libcamera->camera_manager->cameras()) {
-        E_LOG_INFO(dev, "Available Camera: %s", camera->id().c_str());
+        LOG_INFO(dev, "Available Camera: %s", camera->id().c_str());
       }
     } else {
-      E_LOG_INFO(dev, "No available cameras");
+      LOG_INFO(dev, "No available cameras");
     }
-    E_LOG_ERROR(dev, "Camera `%s` was not found.", dev->path);
+    LOG_ERROR(dev, "Camera `%s` was not found.", dev->path);
   }
 
   if (dev->libcamera->camera->acquire()) {
-    E_LOG_ERROR(dev, "Failed to acquire `%s` camera.", dev->path);
+    LOG_ERROR(dev, "Failed to acquire `%s` camera.", dev->path);
   }
 
-	E_LOG_INFO(dev, "Device path=%s opened", dev->path);
+	LOG_INFO(dev, "Device path=%s opened", dev->path);
 
   for (auto const &control : dev->libcamera->camera->controls()) {
     if (!control.first)
@@ -42,7 +42,7 @@ int libcamera_device_open(device_t *dev)
     auto control_id = control.first;
     auto control_key = libcamera_device_option_normalize(control_id->name());
 
-    E_LOG_VERBOSE(dev, "Available control: %s (%08x, type=%d)",
+    LOG_VERBOSE(dev, "Available control: %s (%08x, type=%d)",
       control_key.c_str(), control_id->id(), control_id->type());
   }
   return 0;
@@ -113,10 +113,10 @@ int libcamera_device_set_option(device_t *dev, const char *keyp, const char *val
     }
 
     if (control_value.isNone()) {
-      E_LOG_ERROR(dev, "The `%s` type `%d` is not supported.", control_key.c_str(), control_id->type());
+      LOG_ERROR(dev, "The `%s` type `%d` is not supported.", control_key.c_str(), control_id->type());
     }
 
-    E_LOG_INFO(dev, "Configuring option %s (%08x, type=%d) = %s", 
+    LOG_INFO(dev, "Configuring option %s (%08x, type=%d) = %s", 
       control_key.c_str(), control_id->id(), control_id->type(),
       control_value.toString().c_str());
     dev->libcamera->controls.set(control_id->id(), control_value);

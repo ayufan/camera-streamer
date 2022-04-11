@@ -6,7 +6,7 @@ int libcamera_buffer_open(buffer_t *buf)
   buf->libcamera = new buffer_libcamera_t{};
   buf->libcamera->request = buf->buf_list->dev->libcamera->camera->createRequest(buf->index);
   if (!buf->libcamera->request) {
-    E_LOG_ERROR(buf, "Can't create request");
+    LOG_ERROR(buf, "Can't create request");
   }
 
   for (libcamera::StreamConfiguration &stream_cfg : *buf->buf_list->libcamera->configuration) {
@@ -16,12 +16,12 @@ int libcamera_buffer_open(buffer_t *buf)
     auto const &buffer = buffers[buf->index];
 
     if (buf->libcamera->request->addBuffer(stream, buffer.get()) < 0) {
-      E_LOG_ERROR(buf, "Can't set buffer for request");
+      LOG_ERROR(buf, "Can't set buffer for request");
     }
 
     for (auto const &plane : buffer->planes()) {
       if (buf->start) {
-        E_LOG_ERROR(buf, "Too many planes open.");
+        LOG_ERROR(buf, "Too many planes open.");
       }
 
       buf->start = mmap(NULL, plane.length, PROT_READ | PROT_WRITE, MAP_SHARED, plane.fd.get(), 0);
@@ -30,10 +30,10 @@ int libcamera_buffer_open(buffer_t *buf)
       buf->dma_fd = plane.fd.get();
 
       if (!buf->start) {
-        E_LOG_ERROR(buf, "Failed to mmap DMA buffer");
+        LOG_ERROR(buf, "Failed to mmap DMA buffer");
       }
 
-      E_LOG_DEBUG(buf, "Mapped buffer: start=%p, length=%d, fd=%d",
+      LOG_DEBUG(buf, "Mapped buffer: start=%p, length=%d, fd=%d",
         buf->start, buf->length, buf->dma_fd);
     }
   }
@@ -66,7 +66,7 @@ int libcamera_buffer_enqueue(buffer_t *buf, const char *who)
   // }
 
   if (buf->buf_list->dev->libcamera->camera->queueRequest(buf->libcamera->request.get()) < 0) {
-    E_LOG_ERROR(buf, "Can't queue buffer.");
+    LOG_ERROR(buf, "Can't queue buffer.");
   }
   return 0;
 
@@ -92,12 +92,12 @@ int libcamera_buffer_list_dequeue(buffer_list_t *buf_list, buffer_t **bufp)
   unsigned index = 0;
   int n = read(buf_list->libcamera->fds[0], &index, sizeof(index));
   if (n != sizeof(index)) {
-    E_LOG_INFO(buf_list, "Received invalid result from `read`: %d", n);
+    LOG_INFO(buf_list, "Received invalid result from `read`: %d", n);
     return -1;
   }
 
   if (index >= buf_list->nbufs) {
-    E_LOG_INFO(buf_list, "Received invalid index from `read`: %d >= %d", index, buf_list->nbufs);
+    LOG_INFO(buf_list, "Received invalid index from `read`: %d >= %d", index, buf_list->nbufs);
     return -1;
   }
 

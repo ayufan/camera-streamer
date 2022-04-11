@@ -14,11 +14,11 @@ int v4l2_device_open_media_device(device_t *dev)
 {
   struct stat st;
   if (fstat(dev->v4l2->dev_fd, &st) < 0) {
-    E_LOG_ERROR(dev, "Cannot get fstat");
+    LOG_ERROR(dev, "Cannot get fstat");
     return -1;
   }
   if (~st.st_mode & S_IFCHR) {
-    E_LOG_ERROR(dev, "FD is not char");
+    LOG_ERROR(dev, "FD is not char");
     return -1;
   }
 
@@ -28,7 +28,7 @@ int v4l2_device_open_media_device(device_t *dev)
   struct dirent **namelist;
   int n = scandir(path, &namelist, NULL, NULL);
   if (n < 0) {
-    E_LOG_ERROR(dev, "Cannot scan: %s", path);
+    LOG_ERROR(dev, "Cannot scan: %s", path);
     return -1;
   }
 
@@ -39,7 +39,7 @@ int v4l2_device_open_media_device(device_t *dev)
       sprintf(path, "/dev/%s", namelist[n]->d_name);
       ret = open(path, O_RDWR);
       if (ret >= 0) {
-        E_LOG_VERBOSE(dev, "Opened '%s' (fd=%d)", path, ret);
+        LOG_VERBOSE(dev, "Opened '%s' (fd=%d)", path, ret);
       }
     }
 
@@ -59,7 +59,7 @@ int v4l2_device_open_v4l2_subdev(device_t *dev, int subdev)
 
   media_fd = v4l2_device_open_media_device(dev);
   if (media_fd < 0) {
-    E_LOG_ERROR(dev, "Cannot find media controller");
+    LOG_ERROR(dev, "Cannot find media controller");
   }
 
   for (;;) {
@@ -82,26 +82,26 @@ int v4l2_device_open_v4l2_subdev(device_t *dev, int subdev)
 
     char link[256];
     if ((rc = readlink(path, link, sizeof(link)-1)) < 0) {
-      E_LOG_ERROR(dev, "Cannot readlink '%s'", path);
+      LOG_ERROR(dev, "Cannot readlink '%s'", path);
     }
     link[rc] = 0;
 
     char *last = strrchr(link, '/');
     if (!last) {
-      E_LOG_ERROR(dev, "Link '%s' for '%s' does not end with '/'", link, path);
+      LOG_ERROR(dev, "Link '%s' for '%s' does not end with '/'", link, path);
     }
 
     if (strstr(last, "/v4l-subdev") != last) {
-      E_LOG_ERROR(dev, "Link '%s' does not contain '/v4l-subdev'", link, path);
+      LOG_ERROR(dev, "Link '%s' does not contain '/v4l-subdev'", link, path);
     }
 
     sprintf(path, "/dev%s", last);
     ret = open(path, O_RDWR);
     if (ret < 0) {
-      E_LOG_ERROR(dev, "Cannot open '%s' (ret=%d)", path, ret);
+      LOG_ERROR(dev, "Cannot open '%s' (ret=%d)", path, ret);
     }
 
-    E_LOG_INFO(dev, "Opened '%s' (fd=%d)", path, ret);
+    LOG_INFO(dev, "Opened '%s' (fd=%d)", path, ret);
     break;
   }
 
@@ -126,8 +126,8 @@ int v4l2_device_set_pad_format(device_t *dev, unsigned width, unsigned height, u
   fmt.format.colorspace = V4L2_COLORSPACE_RAW;
   fmt.format.field = V4L2_FIELD_ANY;
 
-  E_LOG_DEBUG(dev, "Configuring mpad %d (subdev_fd=%d)...", fmt.pad, dev->v4l2->subdev_fd);
-  E_XIOCTL(dev, dev->v4l2->subdev_fd, VIDIOC_SUBDEV_S_FMT, &fmt, "Can't configure mpad %d (subdev_fd=%d)", fmt.pad, dev->v4l2->subdev_fd);
+  LOG_DEBUG(dev, "Configuring mpad %d (subdev_fd=%d)...", fmt.pad, dev->v4l2->subdev_fd);
+  ERR_IOCTL(dev, dev->v4l2->subdev_fd, VIDIOC_SUBDEV_S_FMT, &fmt, "Can't configure mpad %d (subdev_fd=%d)", fmt.pad, dev->v4l2->subdev_fd);
   return 0;
 
 error:

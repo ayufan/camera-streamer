@@ -53,10 +53,10 @@ bool h264_is_key_frame(buffer_t *buf)
   unsigned char *data = buf->start;
 
   if (buf->flags.is_keyframe) {
-    E_LOG_DEBUG(buf, "Got key frame (from V4L2)!");
+    LOG_DEBUG(buf, "Got key frame (from V4L2)!");
     return true;
   } else if (buf->used >= 5 && (data[4] & 0x1F) == 0x07) {
-    E_LOG_DEBUG(buf, "Got key frame (from buffer)!");
+    LOG_DEBUG(buf, "Got key frame (from buffer)!");
     return true;
   }
 

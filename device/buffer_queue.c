@@ -32,13 +32,13 @@ bool buffer_consumed(buffer_t *buf, const char *who)
 
   pthread_mutex_lock(&buffer_lock);
   if (buf->mmap_reflinks == 0) {
-    E_LOG_PERROR(buf, "Non symmetric reference counts");
+    LOG_PERROR(buf, "Non symmetric reference counts");
   }
 
   buf->mmap_reflinks--;
 
   if (!buf->enqueued && buf->mmap_reflinks == 0) {
-    E_LOG_DEBUG(buf, "Queuing buffer... used=%zu length=%zu (linked=%s) by %s",
+    LOG_DEBUG(buf, "Queuing buffer... used=%zu length=%zu (linked=%s) by %s",
       buf->used,
       buf->length,
       buf->dma_source ? buf->dma_source->name : NULL,
@@ -105,7 +105,7 @@ int buffer_list_count_enqueued(buffer_list_t *buf_list)
 int buffer_list_enqueue(buffer_list_t *buf_list, buffer_t *dma_buf)
 {
   if (!buf_list->do_mmap && !dma_buf->buf_list->do_mmap) {
-    E_LOG_PERROR(buf_list, "Cannot enqueue non-mmap to non-mmap: %s.", dma_buf->name);
+    LOG_PERROR(buf_list, "Cannot enqueue non-mmap to non-mmap: %s.", dma_buf->name);
   }
 
   buffer_t *buf = buffer_list_find_slot(buf_list);
@@ -118,7 +118,7 @@ int buffer_list_enqueue(buffer_list_t *buf_list, buffer_t *dma_buf)
 
   if (buf_list->do_mmap) {
     if (dma_buf->used > buf->length) {
-      E_LOG_INFO(buf_list, "The dma_buf (%s) is too long: %zu vs space=%zu",
+      LOG_INFO(buf_list, "The dma_buf (%s) is too long: %zu vs space=%zu",
         dma_buf->name, dma_buf->used, buf->length);
       dma_buf->used = buf->length;
     }
@@ -127,10 +127,10 @@ int buffer_list_enqueue(buffer_list_t *buf_list, buffer_t *dma_buf)
     memcpy(buf->start, dma_buf->start, dma_buf->used);
     uint64_t after = get_monotonic_time_us(NULL, NULL);
 
-    E_LOG_DEBUG(buf, "mmap copy: dest=%p, src=%p (%s), size=%zu, space=%zu, time=%dllus",
+    LOG_DEBUG(buf, "mmap copy: dest=%p, src=%p (%s), size=%zu, space=%zu, time=%dllus",
       buf->start, dma_buf->start, dma_buf->name, dma_buf->used, buf->length, after-before);
   } else {
-    E_LOG_DEBUG(buf, "dmabuf copy: dest=%p, src=%p (%s, dma_fd=%d), size=%zu",
+    LOG_DEBUG(buf, "dmabuf copy: dest=%p, src=%p (%s, dma_fd=%d), size=%zu",
       buf->start, dma_buf->start, dma_buf->name, dma_buf->dma_fd, dma_buf->used);
 
     buf->dma_source = dma_buf;
@@ -156,13 +156,13 @@ buffer_t *buffer_list_dequeue(buffer_list_t *buf_list)
   buf_list->last_dequeued_us = get_monotonic_time_us(NULL, NULL);
 
   if (buf->mmap_reflinks > 0) {
-    E_LOG_PERROR(buf, "Buffer appears to be enqueued? (links=%d)", buf->mmap_reflinks);
+    LOG_PERROR(buf, "Buffer appears to be enqueued? (links=%d)", buf->mmap_reflinks);
   }
 
   buf->enqueued = false;
   buf->mmap_reflinks = 1;
 
-	E_LOG_DEBUG(buf_list, "Grabbed mmap buffer=%u, bytes=%d, used=%d, frame=%d, linked=%s",
+	LOG_DEBUG(buf_list, "Grabbed mmap buffer=%u, bytes=%d, used=%d, frame=%d, linked=%s",
     buf->index,
     buf->length,
     buf->used,

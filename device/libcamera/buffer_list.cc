@@ -6,12 +6,12 @@ int libcamera_buffer_list_open(buffer_list_t *buf_list, unsigned width, unsigned
   int got_bufs = 0;
 
   if (!buf_list->do_capture) {
-    E_LOG_INFO(buf_list, "Only capture mode is supported.");
+    LOG_INFO(buf_list, "Only capture mode is supported.");
     return -1;
   }
 
   if (!buf_list->do_mmap) {
-    E_LOG_INFO(buf_list, "Only mmap buffers are supported.");
+    LOG_INFO(buf_list, "Only mmap buffers are supported.");
     return -1;
   }
 
@@ -21,7 +21,7 @@ int libcamera_buffer_list_open(buffer_list_t *buf_list, unsigned width, unsigned
   buf_list->libcamera->fds[1] = -1;
 
   if (pipe2(buf_list->libcamera->fds, O_DIRECT|O_CLOEXEC) < 0) {
-    E_LOG_INFO(buf_list, "Cannot open `pipe2`.");
+    LOG_INFO(buf_list, "Cannot open `pipe2`.");
     return -1;
   }
 
@@ -38,11 +38,11 @@ int libcamera_buffer_list_open(buffer_list_t *buf_list, unsigned width, unsigned
     configuration.bufferCount = nbufs;
   }
   if (buf_list->libcamera->configuration->validate() == libcamera::CameraConfiguration::Invalid) {
-    E_LOG_ERROR(buf_list, "Camera configuration invalid");
+    LOG_ERROR(buf_list, "Camera configuration invalid");
   }
 
   if (buf_list->dev->libcamera->camera->configure(buf_list->libcamera->configuration.get()) < 0) {
-    E_LOG_ERROR(buf_list, "Failed to configure camera");
+    LOG_ERROR(buf_list, "Failed to configure camera");
   }
 
   buf_list->fmt_width = configuration.size.width;
@@ -57,7 +57,7 @@ int libcamera_buffer_list_open(buffer_list_t *buf_list, unsigned width, unsigned
 
   for (libcamera::StreamConfiguration &stream_config : *buf_list->libcamera->configuration) {
     if (buf_list->libcamera->allocator->allocate(stream_config.stream()) < 0) {
-      E_LOG_ERROR(buf_list, "Can't allocate buffers");
+      LOG_ERROR(buf_list, "Can't allocate buffers");
     }
 
     int allocated = buf_list->libcamera->allocator->buffers(
@@ -89,14 +89,14 @@ int libcamera_buffer_list_set_stream(buffer_list_t *buf_list, bool do_on)
       buf_list->libcamera, &buffer_list_libcamera_t::libcamera_buffer_list_dequeued);
 
     if (buf_list->dev->libcamera->camera->start() < 0) {
-      E_LOG_ERROR(buf_list, "Failed to start camera.");
+      LOG_ERROR(buf_list, "Failed to start camera.");
     }
   } else {
     buf_list->dev->libcamera->camera->requestCompleted.disconnect(
       buf_list->libcamera, &buffer_list_libcamera_t::libcamera_buffer_list_dequeued);
 
     if (buf_list->dev->libcamera->camera->stop() < 0) {
-      E_LOG_ERROR(buf_list, "Failed to stop camera.");
+      LOG_ERROR(buf_list, "Failed to stop camera.");
     }
   }
 

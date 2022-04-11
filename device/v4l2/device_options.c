@@ -13,8 +13,8 @@ int v4l2_device_set_option_by_id(device_t *dev, const char *name, uint32_t id, i
 
   ctl.id = id;
   ctl.value = value;
-  E_LOG_DEBUG(dev, "Configuring option %s (%08x) = %d", name, id, value);
-  E_XIOCTL(dev, dev->v4l2->subdev_fd >= 0 ? dev->v4l2->subdev_fd : dev->v4l2->dev_fd, VIDIOC_S_CTRL, &ctl, "Can't set option %s", name);
+  LOG_DEBUG(dev, "Configuring option %s (%08x) = %d", name, id, value);
+  ERR_IOCTL(dev, dev->v4l2->subdev_fd >= 0 ? dev->v4l2->subdev_fd : dev->v4l2->dev_fd, VIDIOC_S_CTRL, &ctl, "Can't set option %s", name);
   return 0;
 error:
   return -1;
@@ -33,14 +33,14 @@ static int v4l2_device_query_control_iter_id(device_t *dev, int fd, uint32_t *id
   device_option_normalize_name(qctrl.name, qctrl.name);
 
   if (qctrl.flags & V4L2_CTRL_FLAG_DISABLED) {
-    E_LOG_VERBOSE(dev, "The '%s' is disabled", qctrl.name);
+    LOG_VERBOSE(dev, "The '%s' is disabled", qctrl.name);
     return 0;
   } else if (qctrl.flags & V4L2_CTRL_FLAG_READ_ONLY) {
-    E_LOG_VERBOSE(dev, "The '%s' is read-only", qctrl.name);
+    LOG_VERBOSE(dev, "The '%s' is read-only", qctrl.name);
     return 0;
   }
 
-  E_LOG_VERBOSE(dev, "Available control: %s (%08x, type=%d)",
+  LOG_VERBOSE(dev, "Available control: %s (%08x, type=%d)",
     qctrl.name, qctrl.id, qctrl.type);
 
   dev->v4l2->controls = reallocarray(dev->v4l2->controls, dev->v4l2->ncontrols+1, sizeof(device_v4l2_control_t));
@@ -83,7 +83,7 @@ int v4l2_device_set_option(device_t *dev, const char *key, const char *value)
 
   if (!control) {
     ret = 0;
-    E_LOG_ERROR(dev, "The '%s=%s' was failed to find.", key, value);
+    LOG_ERROR(dev, "The '%s=%s' was failed to find.", key, value);
   }
 
   switch(control->control.type) {
@@ -95,8 +95,8 @@ int v4l2_device_set_option(device_t *dev, const char *key, const char *value)
         .id = control->control.id,
         .value = atoi(value)
       };
-      E_LOG_INFO(dev, "Configuring option %s (%08x) = %d", control->control.name, ctl.id, ctl.value);
-      E_XIOCTL(dev, control->fd, VIDIOC_S_CTRL, &ctl, "Can't set option %s", control->control.name);
+      LOG_INFO(dev, "Configuring option %s (%08x) = %d", control->control.name, ctl.id, ctl.value);
+      ERR_IOCTL(dev, control->fd, VIDIOC_S_CTRL, &ctl, "Can't set option %s", control->control.name);
       ret = 1;
     }
     break;
@@ -139,15 +139,15 @@ int v4l2_device_set_option(device_t *dev, const char *key, const char *value)
         }
       }
 
-      E_LOG_INFO(dev, "Configuring option %s (%08x) = [%d tokens, expected %d]",
+      LOG_INFO(dev, "Configuring option %s (%08x) = [%d tokens, expected %d]",
         control->control.name, ctl.id, tokens, control->control.elems);
-      E_XIOCTL(dev, control->fd, VIDIOC_S_EXT_CTRLS, &ctrls, "Can't set option %s", control->control.name);
+      ERR_IOCTL(dev, control->fd, VIDIOC_S_EXT_CTRLS, &ctrls, "Can't set option %s", control->control.name);
       ret = 1;
     }
     break;
 
   default:
-    E_LOG_ERROR(dev, "The '%s' control type '%d' is not supported", control->control.name, control->control.type);
+    LOG_ERROR(dev, "The '%s' control type '%d' is not supported", control->control.name, control->control.type);
   }
 
 error:

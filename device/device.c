@@ -12,7 +12,7 @@ device_t *device_open(const char *name, const char *path, device_hw_t *hw) {
   dev->allow_dma = true;
 
   if (dev->hw->device_open(dev) < 0) {
-		E_LOG_ERROR(dev, "Can't open device: %s", path);
+		LOG_ERROR(dev, "Can't open device: %s", path);
   }
 
   return dev;
@@ -61,7 +61,7 @@ int device_open_buffer_list(device_t *dev, bool do_capture, unsigned width, unsi
     buf_list = &dev->capture_list;
 
     if (dev->capture_list) {
-      E_LOG_ERROR(dev, "The capture_list is already created.");
+      LOG_ERROR(dev, "The capture_list is already created.");
     }
 
     sprintf(name, "%s:capture", dev->name);
@@ -69,7 +69,7 @@ int device_open_buffer_list(device_t *dev, bool do_capture, unsigned width, unsi
     buf_list = &dev->output_list;
 
     if (dev->output_list) {
-      E_LOG_ERROR(dev, "The output_list is already created.");
+      LOG_ERROR(dev, "The output_list is already created.");
     }
 
     sprintf(name, "%s:output", dev->name);
@@ -118,8 +118,8 @@ int device_set_stream(device_t *dev, bool do_on)
   struct v4l2_event_subscription sub = {0};
   sub.type = V4L2_EVENT_SOURCE_CHANGE;
 
-  E_LOG_DEBUG(dev, "Subscribing to DV-timings events ...");
-  xioctl(dev_name(dev), dev->v4l2->dev_fd, do_on ? VIDIOC_SUBSCRIBE_EVENT : VIDIOC_UNSUBSCRIBE_EVENT, &sub);
+  LOG_DEBUG(dev, "Subscribing to DV-timings events ...");
+  ioctl_retried(dev_name(dev), dev->v4l2->dev_fd, do_on ? VIDIOC_SUBSCRIBE_EVENT : VIDIOC_UNSUBSCRIBE_EVENT, &sub);
 #endif
 
   if (dev->capture_list) {
@@ -148,15 +148,15 @@ int device_consume_event(device_t *dev)
     return -1;
   }
 
-	E_LOG_DEBUG(dev, "Consuming V4L2 event ...");
-  E_XIOCTL(dev, dev->v4l2->dev_fd, VIDIOC_DQEVENT, &event, "Got some V4L2 device event, but where is it?");
+	LOG_DEBUG(dev, "Consuming V4L2 event ...");
+  ERR_IOCTL(dev, dev->v4l2->dev_fd, VIDIOC_DQEVENT, &event, "Got some V4L2 device event, but where is it?");
 
   switch (event.type) {
     case V4L2_EVENT_SOURCE_CHANGE:
-      E_LOG_INFO(dev, "Got V4L2_EVENT_SOURCE_CHANGE: source changed");
+      LOG_INFO(dev, "Got V4L2_EVENT_SOURCE_CHANGE: source changed");
       return -1;
     case V4L2_EVENT_EOS:
-      E_LOG_INFO(dev, "Got V4L2_EVENT_EOS: end of stream (ignored)");
+      LOG_INFO(dev, "Got V4L2_EVENT_EOS: end of stream (ignored)");
       return 0;
   }
 
@@ -219,7 +219,7 @@ void device_set_option_list(device_t *dev, const char *option_list)
     if (value) {
       device_set_option_string(dev, key, value);
     } else {
-      E_LOG_INFO(dev, "Missing 'key=value' for '%s'", option);
+      LOG_INFO(dev, "Missing 'key=value' for '%s'", option);
       continue;
     }
 
