@@ -42,7 +42,7 @@ int libcamera_device_open(device_t *dev)
     auto control_id = control.first;
     auto control_key = libcamera_device_option_normalize(control_id->name());
 
-    E_LOG_VERBOSE(dev, "Available control: %s (%08x, type=%d)", 
+    E_LOG_VERBOSE(dev, "Available control: %s (%08x, type=%d)",
       control_key.c_str(), control_id->id(), control_id->type());
   }
   return 0;

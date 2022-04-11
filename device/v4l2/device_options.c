@@ -20,68 +20,111 @@ error:
   return -1;
 }
 
-static int v4l2_device_set_option_string_fd_iter_id(device_t *dev, int fd, uint32_t *id, char *name, char *value)
+static int v4l2_device_query_control_iter_id(device_t *dev, int fd, uint32_t *id)
 {
   struct v4l2_query_ext_ctrl qctrl = { .id = *id };
   void *data = NULL;
 
   if (0 != ioctl (fd, VIDIOC_QUERY_EXT_CTRL, &qctrl)) {
-    *id = 0;
-    return 0;
+    return -1;
   }
   *id = qctrl.id;
 
   device_option_normalize_name(qctrl.name, qctrl.name);
 
-  if (strcmp(qctrl.name, name) != 0)
-    return 0;
-
   if (qctrl.flags & V4L2_CTRL_FLAG_DISABLED) {
-    E_LOG_INFO(dev, "The '%s' is disabled", name);
+    E_LOG_VERBOSE(dev, "The '%s' is disabled", qctrl.name);
     return 0;
   } else if (qctrl.flags & V4L2_CTRL_FLAG_READ_ONLY) {
-    E_LOG_INFO(dev, "The '%s' is read-only", name);
+    E_LOG_VERBOSE(dev, "The '%s' is read-only", qctrl.name);
     return 0;
   }
 
-  switch(qctrl.type) {
+  E_LOG_VERBOSE(dev, "Available control: %s (%08x, type=%d)",
+    qctrl.name, qctrl.id, qctrl.type);
+
+  dev->v4l2->controls = reallocarray(dev->v4l2->controls, dev->v4l2->ncontrols+1, sizeof(device_v4l2_control_t));
+  dev->v4l2->controls[dev->v4l2->ncontrols++] = (device_v4l2_control_t){
+    .fd = fd,
+    .control = qctrl
+  };
+
+  return 0;
+}
+
+void v4l2_device_query_controls(device_t *dev, int fd)
+{
+  if (fd < 0)
+    return;
+
+  int ret = 0;
+  uint32_t id = V4L2_CTRL_FLAG_NEXT_CTRL | V4L2_CTRL_FLAG_NEXT_COMPOUND;
+  while ((ret = v4l2_device_query_control_iter_id(dev, fd, &id)) == 0) {
+    id |= V4L2_CTRL_FLAG_NEXT_CTRL | V4L2_CTRL_FLAG_NEXT_COMPOUND;
+  }
+}
+
+int v4l2_device_set_option(device_t *dev, const char *key, const char *value)
+{
+  char *keyp = strdup(key);
+  char *valuep = strdup(value);
+  void *data = NULL;
+  device_v4l2_control_t *control = NULL;
+  int ret = -1;
+
+  device_option_normalize_name(keyp, keyp);
+
+  for (int i = 0; i < dev->v4l2->ncontrols; i++) {
+    if (strcmp(dev->v4l2->controls[i].control.name, keyp) == 0) {
+      control = &dev->v4l2->controls[i];
+      break;
+    }
+  }
+
+  if (!control) {
+    ret = 0;
+    E_LOG_ERROR(dev, "The '%s=%s' was failed to find.", key, value);
+  }
+
+  switch(control->control.type) {
   case V4L2_CTRL_TYPE_INTEGER:
   case V4L2_CTRL_TYPE_BOOLEAN:
   case V4L2_CTRL_TYPE_MENU:
     {
       struct v4l2_control ctl = {
-        .id = *id,
+        .id = control->control.id,
         .value = atoi(value)
       };
-      E_LOG_INFO(dev, "Configuring option %s (%08x) = %d", name, ctl.id, ctl.value);
-      E_XIOCTL(dev, fd, VIDIOC_S_CTRL, &ctl, "Can't set option %s", name);
+      E_LOG_INFO(dev, "Configuring option %s (%08x) = %d", control->control.name, ctl.id, ctl.value);
+      E_XIOCTL(dev, control->fd, VIDIOC_S_CTRL, &ctl, "Can't set option %s", control->control.name);
+      ret = 1;
     }
-    return 1;
+    break;
 
   case V4L2_CTRL_TYPE_U8:
   case V4L2_CTRL_TYPE_U16:
   case V4L2_CTRL_TYPE_U32:
     {
       struct v4l2_ext_control ctl = {
-        .id = *id,
-        .size = qctrl.elem_size * qctrl.elems,
-        .ptr = data = calloc(qctrl.elems, qctrl.elem_size)
+        .id = control->control.id,
+        .size = control->control.elem_size * control->control.elems,
+        .ptr = data = calloc(control->control.elems, control->control.elem_size)
       };
       struct v4l2_ext_controls ctrls = {
         .count = 1,
-        .ctrl_class = V4L2_CTRL_ID2CLASS(*id),
+        .ctrl_class = V4L2_CTRL_ID2CLASS(control->control.id),
         .controls = &ctl,
       };
 
-      char *string = value;
+      char *string = valuep;
       char *token;
       int tokens = 0;
 
       for ( ; token = strsep(&string, ","); tokens++) {
-        if (tokens >= qctrl.elems)
+        if (tokens >= control->control.elems)
           continue;
 
-        switch(qctrl.type) {
+        switch(control->control.type) {
         case V4L2_CTRL_TYPE_U8:
           ctl.p_u8[tokens] = atoi(token);
           break;
@@ -96,58 +139,20 @@ static int v4l2_device_set_option_string_fd_iter_id(device_t *dev, int fd, uint3
         }
       }
 
-      E_LOG_INFO(dev, "Configuring option %s (%08x) = [%d tokens, expected %d]", name, ctl.id, tokens, qctrl.elems);
-      E_XIOCTL(dev, fd, VIDIOC_S_EXT_CTRLS, &ctrls, "Can't set option %s", name);
-      free(data);
+      E_LOG_INFO(dev, "Configuring option %s (%08x) = [%d tokens, expected %d]",
+        control->control.name, ctl.id, tokens, control->control.elems);
+      E_XIOCTL(dev, control->fd, VIDIOC_S_EXT_CTRLS, &ctrls, "Can't set option %s", control->control.name);
+      ret = 1;
     }
-    return 1;
+    break;
 
   default:
-    E_LOG_INFO(dev, "The '%s' control type '%d' is not supported", name, qctrl.type);
-    return -1;
+    E_LOG_ERROR(dev, "The '%s' control type '%d' is not supported", control->control.name, control->control.type);
   }
 
 error:
   free(data);
-  return -1;
-}
-
-static int v4l2_device_set_option_string_fd(device_t *dev, int fd, char *name, char *value)
-{
-  int ret = 0;
-
-  uint32_t id = V4L2_CTRL_FLAG_NEXT_CTRL | V4L2_CTRL_FLAG_NEXT_COMPOUND;
-  while ((ret = v4l2_device_set_option_string_fd_iter_id(dev, fd, &id, name, value)) == 0 && id) {
-    id |= V4L2_CTRL_FLAG_NEXT_CTRL | V4L2_CTRL_FLAG_NEXT_COMPOUND;
-  }
-
-  return ret;
-}
-
-int v4l2_device_set_option(device_t *dev, const char *key, const char *value)
-{
-  char *keyp = strdup(key);
-  char *valuep = strdup(value);
-
-  int ret = 0;
-
-  device_option_normalize_name(keyp, keyp);
-
-  if (dev->v4l2->subdev_fd >= 0)
-    ret = v4l2_device_set_option_string_fd(dev, dev->v4l2->subdev_fd, keyp, valuep);
-  if (ret <= 0)
-    ret = v4l2_device_set_option_string_fd(dev, dev->v4l2->dev_fd, keyp, valuep);
-
   free(keyp);
   free(valuep);
-
-  if (ret == 0)
-    E_LOG_ERROR(dev, "The '%s=%s' was failed to find.", key, value);
-  else if (ret < 0)
-    E_LOG_ERROR(dev, "The '%s=%s' did fail to be set.", key, value);
-
-  return 0;
-
-error:
-  return -1;
+  return ret;
 }

@@ -10,9 +10,16 @@ typedef struct buffer_list_s buffer_list_t;
 typedef struct device_s device_t;
 struct pollfd;
 
+typedef struct device_v4l2_control_s {
+  int fd;
+  struct v4l2_query_ext_ctrl control;
+} device_v4l2_control_t;
+
 typedef struct device_v4l2_s {
   int dev_fd;
   int subdev_fd;
+  device_v4l2_control_t *controls;
+  int ncontrols;
 } device_v4l2_t;
 
 typedef struct buffer_list_v4l2_s {
@@ -45,3 +52,4 @@ int v4l2_buffer_list_set_stream(buffer_list_t *buf_list, bool do_on);
 int v4l2_device_open_media_device(device_t *dev);
 int v4l2_device_open_v4l2_subdev(device_t *dev, int subdev);
 int v4l2_device_set_pad_format(device_t *dev, unsigned width, unsigned height, unsigned format);
+void v4l2_device_query_controls(device_t *dev, int fd);

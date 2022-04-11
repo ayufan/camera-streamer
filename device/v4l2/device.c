@@ -26,6 +26,9 @@ int v4l2_device_open(device_t *dev)
 
   strcpy(dev->bus_info, v4l2_cap.bus_info);
   dev->v4l2->subdev_fd = v4l2_device_open_v4l2_subdev(dev, 0);
+
+  v4l2_device_query_controls(dev, dev->v4l2->dev_fd);
+  v4l2_device_query_controls(dev, dev->v4l2->subdev_fd);
   return 0;
 
 error:
