@@ -9,10 +9,16 @@
 #define CAMERA_DEVICE_CAMERA 0
 #define CAMERA_OPTIONS_LENGTH 4096
 
+typedef enum {
+  CAMERA_V4L2 = 0,
+  CAMERA_LIBCAMERA
+} camera_type_t;
+
 typedef struct camera_options_s {
   char path[256];
   unsigned width, height, format;
   unsigned nbufs, fps;
+  camera_type_t type;
   bool allow_dma;
   float high_res_factor;
   float low_res_factor;

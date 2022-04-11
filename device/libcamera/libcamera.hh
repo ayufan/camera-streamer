@@ -11,6 +11,7 @@ extern "C" {
 #include "device/buffer_list.h"
 #include "device/buffer.h"
 #include "opts/log.h"
+#include "opts/fourcc.h"
 };
 
 #include <optional>
@@ -34,12 +35,17 @@ typedef struct device_s device_t;
 struct pollfd;
 
 typedef struct device_libcamera_s {
+  std::shared_ptr<libcamera::CameraManager> camera_manager;
+  std::shared_ptr<libcamera::Camera> camera;
 } device_libcamera_t;
 
 typedef struct buffer_list_libcamera_s {
+  std::shared_ptr<libcamera::CameraConfiguration> configuration;
+  std::shared_ptr<libcamera::FrameBufferAllocator> allocator;
 } buffer_list_libcamera_t;
 
 typedef struct buffer_libcamera_s {
+  std::shared_ptr<libcamera::Request> request;
 } buffer_libcamera_t;
 
 int libcamera_device_open(device_t *dev);

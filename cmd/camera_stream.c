@@ -60,12 +60,19 @@ option_value_t camera_formats[] = {
   {}
 };
 
+option_value_t camera_type[] = {
+  { "v4l2", CAMERA_V4L2 },
+  { "libcamera", CAMERA_LIBCAMERA },
+  {}
+};
+
 option_t all_options[] = {
   DEFINE_OPTION_PTR(camera, path, string),
   DEFINE_OPTION(camera, width, uint),
   DEFINE_OPTION(camera, height, uint),
   DEFINE_OPTION_VALUES(camera, format, camera_formats),
   DEFINE_OPTION(camera, nbufs, uint),
+  DEFINE_OPTION_VALUES(camera, type, camera_type),
   DEFINE_OPTION(camera, fps, uint),
   DEFINE_OPTION_DEFAULT(camera, allow_dma, bool, "1"),
   DEFINE_OPTION(camera, high_res_factor, float),

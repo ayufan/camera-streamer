@@ -40,7 +40,19 @@ camera_t *camera_open(camera_options_t *options)
   camera->name = "CAMERA";
   camera->options = *options;
 
-  camera->camera = device_v4l2_open(camera->name, camera->options.path);
+  switch (camera->options.type) {
+  case CAMERA_V4L2:
+    camera->camera = device_v4l2_open(camera->name, camera->options.path);
+    break;
+
+  case CAMERA_LIBCAMERA:
+    camera->camera = device_libcamera_open(camera->name, camera->options.path);
+    break;
+
+  default:
+    E_LOG_ERROR(camera, "Unsupported camera type");
+  }
+
   if (!camera->camera) {
     goto error;
   }
