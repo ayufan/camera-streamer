@@ -13,14 +13,16 @@ typedef void (*link_on_buffer)(buffer_t *buf);
 typedef bool (*link_check_streaming)();
 typedef bool (*link_validate_buffer)(struct link_s *link, buffer_t *buf);
 
+typedef struct link_callbacks_s {
+  link_on_buffer on_buffer;
+  link_check_streaming check_streaming;
+  link_validate_buffer validate_buffer;
+} link_callbacks_t;
+
 typedef struct link_s {
-  struct buffer_list_s *source; // capture_list
-  struct buffer_list_s *sinks[10];
-  struct {
-    link_on_buffer on_buffer;
-    link_check_streaming check_streaming;
-    link_validate_buffer validate_buffer;
-  } callbacks;
+  buffer_list_t *source; // capture_list
+  buffer_list_t *sinks[10];
+  link_callbacks_t callbacks;
 } link_t;
 
 int links_init(link_t *all_links);

@@ -49,10 +49,9 @@ typedef struct camera_s {
       device_t *camera;
       device_t *decoder; // decode JPEG/H264 into YUVU
       device_t *isp;
-      device_t *codec_jpeg; // encode YUVU into JPEG
-      device_t *codec_h264; // encode YUVU into H264
-      device_t *codec_jpeg_lowres; // encode YUVU into JPEG
-      device_t *codec_h264_lowres; // encode YUVU into H264
+      device_t *legacy_isp;
+      device_t *codec_jpeg[2]; // encode YUVU into JPEG
+      device_t *codec_h264[2]; // encode YUVU into H264
     };
   };
 
@@ -67,9 +66,14 @@ int camera_set_params(camera_t *camera);
 void camera_close(camera_t *camera);
 int camera_run(camera_t *camera);
 
+link_t *camera_ensure_capture(camera_t *camera, buffer_list_t *capture);
+void camera_capture_add_output(camera_t *camera, buffer_list_t *capture, buffer_list_t *output);
+void camera_capture_set_callbacks(camera_t *camera, buffer_list_t *capture, link_callbacks_t callbacks);
+
+int camera_configure_output(camera_t *camera, buffer_list_t *src_capture, int res);
+int camera_configure_decoder(camera_t *camera, buffer_list_t *src_capture);
+
 int camera_configure_v4l2(camera_t *camera);
 int camera_configure_libcamera(camera_t *camera);
 int camera_configure_isp(camera_t *camera, buffer_list_t *src, float high_div, float low_div);
 int camera_configure_legacy_isp(camera_t *camera, buffer_list_t *src, float div);
-int camera_configure_direct(camera_t *camera, buffer_list_t *src);
-int camera_configure_decoder(camera_t *camera, buffer_list_t *src);

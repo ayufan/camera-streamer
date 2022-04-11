@@ -16,7 +16,8 @@ int camera_configure_libcamera(camera_t *camera)
 
   camera->camera->opts.allow_dma = camera->options.allow_dma;
 
-  buffer_list_t *camera_capture = device_open_buffer_list(camera->camera, true, camera->options.width / camera->options.high_res_factor, camera->options.height / camera->options.high_res_factor, camera->options.format, 0, camera->options.nbufs, true);
+  buffer_list_t *camera_capture = device_open_buffer_list(
+    camera->camera, true, camera->options.width / camera->options.high_res_factor, camera->options.height / camera->options.high_res_factor, camera->options.format, 0, camera->options.nbufs, true);
   if (!camera_capture) {
     goto error;
   }
@@ -26,7 +27,7 @@ int camera_configure_libcamera(camera_t *camera)
     camera_capture->fmt.interval_us = 1000 * 1000 / camera->options.fps;
   }
 
-  if (camera_configure_direct(camera, camera_capture) < 0) {
+  if (camera_configure_output(camera, camera_capture, 0) < 0) {
     goto error;
   }
 

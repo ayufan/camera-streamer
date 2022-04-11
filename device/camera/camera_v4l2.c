@@ -39,7 +39,7 @@ int camera_configure_v4l2(camera_t *camera)
   case V4L2_PIX_FMT_YUV420:
   case V4L2_PIX_FMT_RGB565:
   case V4L2_PIX_FMT_RGB24:
-    if (camera_configure_direct(camera, camera_capture) < 0) {
+    if (camera_configure_output(camera, camera_capture, 0) < 0) {
       goto error;
     }
     break;
