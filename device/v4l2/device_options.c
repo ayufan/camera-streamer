@@ -1,8 +1,7 @@
 #include "v4l2.h"
 #include "device/device.h"
 #include "opts/log.h"
-
-#include <ctype.h>
+#include "opts/control.h"
 
 int v4l2_device_set_option_by_id(device_t *dev, const char *name, uint32_t id, int32_t value)
 {
@@ -21,24 +20,6 @@ error:
   return -1;
 }
 
-void v4l2_device_option_normalize_name(char *in)
-{
-  char *out = in;
-
-  while (*in) {
-    if (isalnum(*in)) {
-      *out++ = tolower(*in++);
-    } else if (isprint(*in)) {
-      *out++ = '_';
-      while (*++in && isprint(*in) && !isalnum(*in));
-    } else {
-      in++;
-    }
-  }
-
-  *out++ = 0;
-}
-
 static int v4l2_device_set_option_string_fd_iter_id(device_t *dev, int fd, uint32_t *id, char *name, char *value)
 {
   struct v4l2_query_ext_ctrl qctrl = { .id = *id };
@@ -50,7 +31,7 @@ static int v4l2_device_set_option_string_fd_iter_id(device_t *dev, int fd, uint3
   }
   *id = qctrl.id;
 
-  v4l2_device_option_normalize_name(qctrl.name);
+  device_option_normalize_name(qctrl.name, qctrl.name);
 
   if (strcmp(qctrl.name, name) != 0)
     return 0;
@@ -150,7 +131,7 @@ int v4l2_device_set_option(device_t *dev, const char *key, const char *value)
 
   int ret = 0;
 
-  v4l2_device_option_normalize_name(keyp);
+  device_option_normalize_name(keyp, keyp);
 
   if (dev->v4l2->subdev_fd >= 0)
     ret = v4l2_device_set_option_string_fd(dev, dev->v4l2->subdev_fd, keyp, valuep);

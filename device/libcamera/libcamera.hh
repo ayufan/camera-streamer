@@ -12,6 +12,7 @@ extern "C" {
 #include "device/buffer.h"
 #include "opts/log.h"
 #include "opts/fourcc.h"
+#include "opts/control.h"
 };
 
 #ifdef USE_LIBCAMERA
@@ -38,6 +39,7 @@ struct pollfd;
 typedef struct device_libcamera_s {
   std::shared_ptr<libcamera::CameraManager> camera_manager;
   std::shared_ptr<libcamera::Camera> camera;
+  libcamera::ControlList controls;
 } device_libcamera_t;
 
 typedef struct buffer_list_libcamera_s {
@@ -55,8 +57,6 @@ typedef struct buffer_libcamera_s {
 
 int libcamera_device_open(device_t *dev);
 void libcamera_device_close(device_t *dev);
-int libcamera_device_set_decoder_start(device_t *dev, bool do_on);
-int libcamera_device_video_force_key(device_t *dev);
 int libcamera_device_set_fps(device_t *dev, int desired_fps);
 int libcamera_device_set_option(device_t *dev, const char *key, const char *value);
 

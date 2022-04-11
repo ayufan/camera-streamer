@@ -4,8 +4,6 @@
 device_hw_t libcamera_device_hw = {
   .device_open = libcamera_device_open,
   .device_close = libcamera_device_close,
-  .device_set_decoder_start = libcamera_device_set_decoder_start,
-  .device_video_force_key = libcamera_device_video_force_key,
   .device_set_fps = libcamera_device_set_fps,
   .device_set_option = libcamera_device_set_option,
 
