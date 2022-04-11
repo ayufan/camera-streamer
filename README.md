@@ -32,6 +32,14 @@ uname -a
 v4l2-ctl --list-devices
 ```
 
+The `5.15 kernel` is easy to get since this is LTS kernel for Raspberry PI OS:
+
+```bash
+apt-get update
+apt-get dist-upgrade
+reboot
+```
+
 ## Compile
 
 ```bash
@@ -138,11 +146,6 @@ Depending on control they have to be used for camera, ISP, or JPEG or H264 codec
 -camera-jpeg.options=compression_quality=60
 ```
 
-
-
-
-
-
 ## List all available formats and use proper one
 
 You might list all available capture formats for your camera:
@@ -158,6 +161,29 @@ Some of them might be specified to streamer:
 ./*_camera.sh -camera-format=YUYV
 ./*_camera.sh -camera-format=MJPEG
 ./*_camera.sh -camera-format=H264 # This is unstable due to h264 key frames support
+```
+
+## Camera support
+
+### Arducam 16MP
+
+The 16MP sensor is supported by default in Raspberry PI OS after adding to `/boot/config.txt`.
+However it will not support auto-focus nor manual focus due to lack of `ak7535` compiled
+and enabled in `imx519`. Focus can be manually controlled via `i2c-tools`:
+
+```shell
+# /boot/config.txt
+dtoverlay=imx519,media-controller=0
+
+# /etc/modules-load.d/modules.conf
+i2c-dev
+
+# after starting camera execute to control the focus with `0xXX`, any value between `0x00` to `0xff`
+# RPI02W (and possible 2+, 3+):
+i2ctransfer -y 22 w4@0x0c 0x0 0x85 0x00 0x00
+
+# RPI4:
+i2ctransfer -y 11 w4@0x0c 0x0 0xXX 0x00 0x00
 ```
 
 ## License
