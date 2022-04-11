@@ -26,6 +26,14 @@ int camera_configure_decoder(camera_t *camera, buffer_list_t *src_capture)
     return -1;
   }
 
+  if (camera->options.low_res_factor > 1) {
+    float div = camera->options.low_res_factor / camera->options.high_res_factor;
+
+    if (camera_configure_legacy_isp(camera, decoder_capture, div, 1) < 0) {
+      return -1;
+    }
+  }
+
   if (device_set_decoder_start(camera->decoder, true) < 0) {
     return -1;
   }

@@ -49,7 +49,7 @@ typedef struct camera_s {
       device_t *camera;
       device_t *decoder; // decode JPEG/H264 into YUVU
       device_t *isp;
-      device_t *legacy_isp;
+      device_t *legacy_isp[2];
       device_t *codec_jpeg[2]; // encode YUVU into JPEG
       device_t *codec_h264[2]; // encode YUVU into H264
     };
@@ -76,4 +76,4 @@ int camera_configure_decoder(camera_t *camera, buffer_list_t *src_capture);
 int camera_configure_v4l2(camera_t *camera);
 int camera_configure_libcamera(camera_t *camera);
 int camera_configure_isp(camera_t *camera, buffer_list_t *src, float high_div, float low_div);
-int camera_configure_legacy_isp(camera_t *camera, buffer_list_t *src, float div);
+int camera_configure_legacy_isp(camera_t *camera, buffer_list_t *src, float div, int res);

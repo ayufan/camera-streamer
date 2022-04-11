@@ -57,7 +57,7 @@ int camera_configure_v4l2(camera_t *camera)
       goto error;
     }
 #else
-    if (camera_configure_legacy_isp(camera, camera_capture, camera->options.high_res_factor) < 0) {
+    if (camera_configure_legacy_isp(camera, camera_capture, camera->options.high_res_factor, 0) < 0) {
       goto error;
     }
 #endif

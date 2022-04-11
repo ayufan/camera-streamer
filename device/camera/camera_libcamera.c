@@ -31,6 +31,14 @@ int camera_configure_libcamera(camera_t *camera)
     goto error;
   }
 
+  if (camera->options.low_res_factor > 1) {
+    float div = camera->options.low_res_factor / camera->options.high_res_factor;
+
+    if (camera_configure_legacy_isp(camera, camera_capture, div, 1) < 0) {
+      return -1;
+    }
+  }
+
   return 0;
 
 error:
