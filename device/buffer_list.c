@@ -4,16 +4,18 @@
 #include "opts/log.h"
 #include "opts/fourcc.h"
 
-buffer_list_t *buffer_list_open(const char *name, struct device_s *dev, unsigned width, unsigned height, unsigned format, unsigned bytesperline, int nbufs, bool do_capture, bool do_mmap)
+buffer_list_t *buffer_list_open(const char *name, const char *path, struct device_s *dev, unsigned width, unsigned height, unsigned format, unsigned bytesperline, int nbufs, bool do_capture, bool do_mmap)
 {
   buffer_list_t *buf_list = calloc(1, sizeof(buffer_list_t));
 
   buf_list->dev = dev;
   buf_list->name = strdup(name);
+  if (path)
+    buf_list->path = strdup(path);
   buf_list->do_capture = do_capture;
   buf_list->do_mmap = do_mmap;
 
-  int got_bufs = dev->hw->buffer_list_open(buf_list, width, height, format, bytesperline, nbufs);
+  int got_bufs = dev->hw->buffer_list_open(buf_list, path, width, height, format, bytesperline, nbufs);
   if (got_bufs <= 0) {
     goto error;
   }

@@ -1,7 +1,7 @@
 #ifdef USE_LIBCAMERA
 #include "libcamera.hh"
 
-int libcamera_buffer_list_open(buffer_list_t *buf_list, unsigned width, unsigned height, unsigned format, unsigned bytesperline, int nbufs)
+int libcamera_buffer_list_open(buffer_list_t *buf_list, const char *path, unsigned width, unsigned height, unsigned format, unsigned bytesperline, int nbufs)
 {
   int got_bufs = 0;
 

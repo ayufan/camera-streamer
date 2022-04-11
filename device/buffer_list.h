@@ -9,6 +9,7 @@ struct pollfd;
 
 typedef struct buffer_list_s {
   char *name;
+  char *path;
   device_t *dev;
   buffer_t **bufs;
   int nbufs;
@@ -30,7 +31,7 @@ typedef struct buffer_list_s {
   int frames;
 } buffer_list_t;
 
-buffer_list_t *buffer_list_open(const char *name, struct device_s *dev, unsigned width, unsigned height, unsigned format, unsigned bytesperline, int nbufs, bool do_capture, bool do_mmap);
+buffer_list_t *buffer_list_open(const char *name, const char *path, struct device_s *dev, unsigned width, unsigned height, unsigned format, unsigned bytesperline, int nbufs, bool do_capture, bool do_mmap);
 void buffer_list_close(buffer_list_t *buf_list);
 
 int buffer_list_set_stream(buffer_list_t *buf_list, bool do_on);

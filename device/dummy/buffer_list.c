@@ -3,7 +3,7 @@
 
 #include <stdlib.h>
 
-int dummy_buffer_list_open(buffer_list_t *buf_list, unsigned width, unsigned height, unsigned format, unsigned bytesperline, int nbufs)
+int dummy_buffer_list_open(buffer_list_t *buf_list, const char *path, unsigned width, unsigned height, unsigned format, unsigned bytesperline, int nbufs)
 {
   buf_list->dummy = calloc(1, sizeof(buffer_list_dummy_t));
   return 0;

@@ -5,7 +5,7 @@
 #include "opts/log.h"
 #include "opts/fourcc.h"
 
-int v4l2_buffer_list_open(buffer_list_t *buf_list, unsigned width, unsigned height, unsigned format, unsigned bytesperline, int nbufs)
+int v4l2_buffer_list_open(buffer_list_t *buf_list, const char *path, unsigned width, unsigned height, unsigned format, unsigned bytesperline, int nbufs)
 {
   device_t *dev = buf_list->dev;
 
