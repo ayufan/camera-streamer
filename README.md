@@ -204,6 +204,21 @@ device/buffer_lock.c: http_jpeg: Captured buffer JPEG:capture:mplane:buf2 (refs=
 device/buffer_lock.c: http_jpeg: Captured buffer JPEG:capture:mplane:buf0 (refs=2), frame=34/0, processing_ms=49.7, frame_ms=33.4
 ```
 
+#### 2328x1748@10fps
+
+```shell
+# libcamera
+$ ./camera_stream -camera-path=/base/soc/i2c0mux/i2c@1/imx519@1a -camera-type=libcamera -camera-format=YUYV -camera-fps=10 -camera-width=2328 -camera-height=1748 -camera-high_res_factor=1.5 -log-filter=buffer_lock
+device/buffer_lock.c: http_jpeg: Captured buffer JPEG:capture:mplane:buf2 (refs=2), frame=585/0, processing_ms=155.3, frame_ms=100.0
+device/buffer_lock.c: http_jpeg: Captured buffer JPEG:capture:mplane:buf0 (refs=2), frame=586/0, processing_ms=155.5, frame_ms=100.2
+
+# direct ISP-mode
+$ ./camera_stream -camera-path=/dev/video0 -camera-format=RG10 -camera-fps=10 -camera-width=2328 -camera-height=1748 -camera-high_res_factor=1.5 -log-filter=buffer_lock
+device/buffer_lock.c: http_jpeg: Captured buffer JPEG:capture:mplane:buf1 (refs=2), frame=260/0, processing_ms=57.5, frame_ms=99.7
+device/buffer_lock.c: http_jpeg: Captured buffer JPEG:capture:mplane:buf2 (refs=2), frame=261/0, processing_ms=57.6, frame_ms=100.0
+device/buffer_lock.c: http_jpeg: Captured buffer JPEG:capture:mplane:buf0 (refs=2), frame=262/0, processing_ms=58.0, frame_ms=100.4
+```
+
 #### 1280x720@120fps for Arducam 16MP
 
 ```shell
