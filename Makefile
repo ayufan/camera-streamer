@@ -1,4 +1,4 @@
-TARGET := camera_stream
+TARGET := camera-streamer
 SRC := $(wildcard **/*.c **/*/*.c **/*.cc **/*/*.cc)
 HEADERS := $(wildcard **/*.h **/*/*.h **/*.hh **/*/*.hh)
 HTML := $(wildcard html/*.js html/*.html)

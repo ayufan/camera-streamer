@@ -41,7 +41,7 @@ camera_options_t camera_options = {
 };
 
 http_server_options_t http_options = {
-  .port = 9092,
+  .port = 8080,
   .maxcons = 10
 };
 

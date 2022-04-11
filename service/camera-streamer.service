@@ -1,0 +1,29 @@
+[Unit]
+Description=camera-streamer web camera
+After=network.target
+
+[Service]
+User=nobody
+Group=nogroup
+SupplementaryGroups=video i2c
+ExecStart=/usr/local/bin/camera-streamer \
+  -camera-path=/base/soc/i2c0mux/i2c@1/imx519@1a \
+  -camera-type=libcamera \
+  -camera-format=YUYV \
+  -camera-width=2328 -camera-height=1748 \
+  -camera-high_res_factor=1.5 \
+  -camera-fps=30
+# set auto-focus for IMX519
+ExecStartPost=-/bin/bash -c 'sleep 3s; /usr/sbin/i2ctransfer -y 11 w4@0x0c 0x0 0x85 0x00 0x00'
+Restart=always
+RestartSec=10
+
+Nice=10
+IOSchedulingClass=idle
+IOSchedulingPriority=7
+CPUWeight=20
+AllowedCPUs=1-2
+MemoryMax=250M
+
+[Install]
+WantedBy=multi-user.target
