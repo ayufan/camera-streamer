@@ -22,20 +22,6 @@ int camera_configure_decoder(camera_t *camera, buffer_list_t *src_capture)
 
   camera_capture_add_output(camera, src_capture, decoder_output);
 
-  if (camera_configure_output(camera, decoder_capture, 0) < 0) {
-    return -1;
-  }
-
-  if (camera->options.low_res_factor > 1) {
-    float div = camera->options.low_res_factor / camera->options.high_res_factor;
-
-    if (camera_configure_legacy_isp(camera, decoder_capture, div, 1) < 0) {
-      return -1;
-    }
-  }
-
-  if (device_set_decoder_start(camera->decoder, true) < 0) {
-    return -1;
-  }
-  return 0;
+  return camera_configure_output_rescaler(camera, decoder_capture,
+    camera->options.high_res_factor, camera->options.low_res_factor);
 }

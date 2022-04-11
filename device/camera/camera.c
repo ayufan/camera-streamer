@@ -6,10 +6,25 @@
 #include "opts/log.h"
 #include "opts/fourcc.h"
 
-void camera_init(camera_t *camera)
+camera_t *camera_open(camera_options_t *options)
 {
-  memset(camera, 0, sizeof(*camera));
+  camera_t *camera = calloc(1, sizeof(camera_t));
   camera->name = "CAMERA";
+  camera->options = *options;
+
+  if (camera_configure_input(camera) < 0) {
+    goto error;
+  }
+
+  if (camera_set_params(camera) < 0) {
+    goto error;
+  }
+
+  return camera;
+
+error:
+  camera_close(camera);
+  return NULL;
 }
 
 void camera_close(camera_t *camera)
@@ -34,38 +49,32 @@ void camera_close(camera_t *camera)
   free(camera);
 }
 
-camera_t *camera_open(camera_options_t *options)
+link_t *camera_ensure_capture(camera_t *camera, buffer_list_t *capture)
 {
-  camera_t *camera = calloc(1, sizeof(camera_t));
-  camera->name = "CAMERA";
-  camera->options = *options;
-
-  switch (camera->options.type) {
-  case CAMERA_V4L2:
-    if (camera_configure_v4l2(camera) < 0) {
-      goto error;
+  for (int i = 0; i < camera->nlinks; i++) {
+    if (camera->links[i].source == capture) {
+      return &camera->links[i];
     }
-    break;
-
-  case CAMERA_LIBCAMERA:
-    if (camera_configure_libcamera(camera) < 0) {
-      goto error;
-    }
-    break;
-
-  default:
-    LOG_ERROR(camera, "Unsupported camera type");
   }
 
-  if (camera_set_params(camera) < 0) {
-    goto error;
-  }
+  link_t *link = &camera->links[camera->nlinks++];
+  link->source = capture;
+  return link;
+}
 
-  return camera;
+void camera_capture_add_output(camera_t *camera, buffer_list_t *capture, buffer_list_t *output)
+{
+  link_t *link = camera_ensure_capture(camera, capture);
 
-error:
-  camera_close(camera);
-  return NULL;
+  int nsinks;
+  for (nsinks = 0; link->sinks[nsinks]; nsinks++);
+  link->sinks[nsinks] = output;
+}
+
+void camera_capture_set_callbacks(camera_t *camera, buffer_list_t *capture, link_callbacks_t callbacks)
+{
+  link_t *link = camera_ensure_capture(camera, capture);
+  link->callbacks = callbacks;
 }
 
 int camera_set_params(camera_t *camera)
@@ -76,6 +85,7 @@ int camera_set_params(camera_t *camera)
 
   // Set some defaults
   for (int i = 0; i < 2; i++) {
+    device_set_option_list(camera->legacy_isp[2], camera->options.isp.options);
     device_set_option_string(camera->codec_jpeg[i], "compression_quality", "80");
     device_set_option_string(camera->codec_h264[i], "video_bitrate_mode", "0");
     device_set_option_string(camera->codec_h264[i], "video_bitrate", "5000000");
@@ -88,16 +98,6 @@ int camera_set_params(camera_t *camera)
     device_set_option_list(camera->codec_jpeg[i], camera->options.jpeg.options);
     device_set_option_list(camera->codec_h264[i], camera->options.h264.options);
   }
-
-  // DEVICE_SET_OPTION(camera->camera, EXPOSURE, 2684);
-  // DEVICE_SET_OPTION(camera->camera, ANALOGUE_GAIN, 938);
-  // DEVICE_SET_OPTION(camera->camera, DIGITAL_GAIN, 512);
-  // DEVICE_SET_OPTION(camera->camera, VBLANK, 1636);
-  // DEVICE_SET_OPTION(camera->camera, HBLANK, 6906);
-
-  // DEVICE_SET_OPTION(camera->isp_srgb, RED_BALANCE, 2120);
-  // DEVICE_SET_OPTION(camera->isp_srgb, BLUE_BALANCE, 1472);
-  // DEVICE_SET_OPTION(camera->isp_srgb, DIGITAL_GAIN, 1007);
   return 0;
 }
 

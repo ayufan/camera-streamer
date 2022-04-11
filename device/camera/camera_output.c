@@ -76,3 +76,28 @@ int camera_configure_output(camera_t *camera, buffer_list_t *src_capture, int re
   return camera_configure_h264_output(camera, src_capture, res) == 0 &&
     camera_configure_jpeg_output(camera, src_capture, res) == 0;
 }
+
+int camera_configure_output_rescaler(camera_t *camera, buffer_list_t *src_capture, float high_div, float low_div)
+{
+  if (high_div > 1) {
+    if (camera_configure_legacy_isp(camera, src_capture, high_div, 0) < 0) {
+      return -1;
+    }
+  } else if (high_div > 0) {
+    if (camera_configure_output(camera, src_capture, 0) < 0) {
+      return -1;
+    }
+  }
+
+  if (low_div > 1) {
+    if (camera_configure_legacy_isp(camera, src_capture, low_div, 1) < 0) {
+      return -1;
+    }
+  } else if (low_div > 0) {
+    if (camera_configure_output(camera, src_capture, 1) < 0) {
+      return -1;
+    }
+  }
+
+  return 0;
+}

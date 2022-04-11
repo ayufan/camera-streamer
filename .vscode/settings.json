@@ -65,6 +65,9 @@
     "thread": "cpp",
     "cinttypes": "cpp",
     "typeinfo": "cpp",
-    "fourcc.h": "c"
+    "fourcc.h": "c",
+    "device.h": "c",
+    "log.h": "c",
+    "buffer_list.h": "c"
   }
 }
