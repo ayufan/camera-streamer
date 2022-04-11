@@ -43,14 +43,14 @@ void device_close(device_t *dev) {
   free(dev);
 }
 
-int device_open_buffer_list(device_t *dev, bool do_capture, unsigned width, unsigned height, unsigned format, unsigned bytesperline, int nbufs, bool do_mmap)
+buffer_list_t *device_open_buffer_list(device_t *dev, bool do_capture, unsigned width, unsigned height, unsigned format, unsigned bytesperline, int nbufs, bool do_mmap)
 {
   unsigned type;
   char name[64];
   struct buffer_list_s **buf_list = NULL;
 
   if (!dev) {
-    return -1;
+    return NULL;
   }
 
   if (!dev->opts.allow_dma) {
@@ -88,21 +88,25 @@ int device_open_buffer_list(device_t *dev, bool do_capture, unsigned width, unsi
     goto error;
   }
 
-  return 0;
+  return *buf_list;
 
 error:
   buffer_list_close(*buf_list);
   *buf_list = NULL;
-  return -1;
+  return NULL;
 }
 
 int device_open_buffer_list_output(device_t *dev, buffer_list_t *capture_list)
 {
-  return device_open_buffer_list(dev, false,
+  if (device_open_buffer_list(dev, false,
     capture_list->fmt.width, capture_list->fmt.height,
     capture_list->fmt.format, capture_list->fmt.bytesperline,
     capture_list->nbufs,
-    capture_list->dev->opts.allow_dma ? !capture_list->do_mmap : true);
+    capture_list->dev->opts.allow_dma ? !capture_list->do_mmap : true)) {
+      return 0;
+    }
+
+  return -1;
 }
 
 int device_open_buffer_list_capture(device_t *dev, buffer_list_t *output_list, float div, unsigned format, bool do_mmap)
@@ -114,9 +118,13 @@ int device_open_buffer_list_capture(device_t *dev, buffer_list_t *output_list, f
     return -1;
   }
 
-  return device_open_buffer_list(dev, true,
+  if (device_open_buffer_list(dev, true,
     output_list->fmt.width / div, output_list->fmt.height / div,
-    format, 0, output_list->nbufs, do_mmap);
+    format, 0, output_list->nbufs, do_mmap)) {
+      return 0;
+    }
+
+  return -1;
 }
 
 int device_set_stream(device_t *dev, bool do_on)

@@ -9,10 +9,8 @@
 #include "device/buffer_list.h"
 #include "http/http.h"
 
-int camera_configure_direct(camera_t *camera)
+int camera_configure_direct(camera_t *camera, buffer_list_t *src)
 {
-  buffer_list_t *src = camera->camera->capture_list;
-
   camera->codec_jpeg = device_v4l2_open("JPEG", "/dev/video31");
   camera->codec_h264 = device_v4l2_open("H264", "/dev/video11");
 

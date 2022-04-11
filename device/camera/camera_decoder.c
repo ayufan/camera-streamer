@@ -9,9 +9,8 @@
 #include "device/buffer_list.h"
 #include "http/http.h"
 
-int camera_configure_decoder(camera_t *camera)
+int camera_configure_decoder(camera_t *camera, buffer_list_t *camera_src)
 {
-  buffer_list_t *camera_src = camera->camera->capture_list;
   buffer_list_t *src = camera_src;
   device_video_force_key(camera->camera);
 

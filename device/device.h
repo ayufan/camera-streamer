@@ -54,7 +54,7 @@ typedef struct device_s {
 device_t *device_open(const char *name, const char *path, device_hw_t *hw);
 void device_close(device_t *dev);
 
-int device_open_buffer_list(device_t *dev, bool do_capture, unsigned width, unsigned height, unsigned format, unsigned bytesperline, int nbufs, bool do_mmap);
+buffer_list_t *device_open_buffer_list(device_t *dev, bool do_capture, unsigned width, unsigned height, unsigned format, unsigned bytesperline, int nbufs, bool do_mmap);
 int device_open_buffer_list_output(device_t *dev, buffer_list_t *capture_list);
 int device_open_buffer_list_capture(device_t *dev, buffer_list_t *output_list, float div, unsigned format, bool do_mmap);
 int device_consume_event(device_t *dev);

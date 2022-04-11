@@ -21,10 +21,8 @@ void write_yuvu(buffer_t *buffer)
 #endif
 }
 
-int camera_configure_legacy_isp(camera_t *camera, float div)
+int camera_configure_legacy_isp(camera_t *camera, buffer_list_t *src, float div)
 {
-  buffer_list_t *src = camera->camera->capture_list;
-
   camera->legacy_isp = device_v4l2_open("ISP", "/dev/video12");
   camera->codec_jpeg = device_v4l2_open("JPEG", "/dev/video31");
   camera->codec_h264 = device_v4l2_open("H264", "/dev/video11");
