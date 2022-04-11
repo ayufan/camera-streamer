@@ -76,12 +76,6 @@ int libcamera_buffer_enqueue(buffer_t *buf, const char *who)
 
   request->reuse(libcamera::Request::ReuseBuffers);
 
-  // TODO: assign timestamps
-  // for (auto const &pair : request->buffers()) {
-  //   v4l2_buf.timestamp.tv_sec = buf->captured_time_us / (1000LL * 1000LL);
-  //   v4l2_buf.timestamp.tv_usec = buf->captured_time_us % (1000LL * 1000LL);
-  // }
-
   if (buf->buf_list->dev->libcamera->camera->queueRequest(buf->libcamera->request.get()) < 0) {
     LOG_ERROR(buf, "Can't queue buffer.");
   }
@@ -119,11 +113,6 @@ int libcamera_buffer_list_dequeue(buffer_list_t *buf_list, buffer_t **bufp)
   }
 
   *bufp = buf_list->bufs[index];
-
-  // TODO: fix timestamps
-  // buf->v4l2->flags = v4l2_buf.flags;
-  // buf->flags.is_keyframe = (v4l2_buf.flags & V4L2_BUF_FLAG_KEYFRAME) != 0;
-  // buf->captured_time_us = get_time_us(CLOCK_FROM_PARAMS, NULL, &v4l2_buf.timestamp, 0);
   return 0;
 }
 
