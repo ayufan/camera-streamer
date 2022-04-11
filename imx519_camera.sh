@@ -8,8 +8,14 @@ CAMERA_PATH=$(echo /dev/v4l/by-path/*.csi-video-index0)
 if [[ "$1" == "dump" ]]; then
   shift
   libcamera-still "$@"
-  v4l2-ctl -d /dev/v4l-subdev0 -C exposure -C vertical_blanking -C analogue_gain -C digital_gain 
-  v4l2-ctl -d /dev/video13 -C red_balance -C colour_correction_matrix -C black_level -C green_equalisation -C gamma -C denoise -C sharpen -C defective_pixel_correction -C colour_denoise
+  echo
+  v4l2-ctl -d /dev/v4l-subdev0 \
+    -C exposure -C vertical_blanking -C analogue_gain -C digital_gain | \
+    sed -e 's/ //g' -e 's/:/=/g' -e 's/^/-camera-options=/g' -e 's/$/ \\/g'
+  v4l2-ctl -d /dev/video13 -C red_balance -C colour_correction_matrix \
+    -C black_level -C green_equalisation -C gamma -C denoise -C sharpen \
+    -C defective_pixel_correction -C colour_denoise | \
+    sed -e 's/ //g' -e 's/:/=/g' -e 's/^/-camera-isp.options=/g' -e 's/$/ \\/g'
   exit 0
 fi
 
