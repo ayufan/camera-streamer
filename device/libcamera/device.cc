@@ -1,6 +1,12 @@
 #ifdef USE_LIBCAMERA
 #include "libcamera.hh"
 
+std::string libcamera_device_option_normalize(std::string key)
+{
+  key.resize(device_option_normalize_name(key.data(), key.data()));
+  return key;
+}
+
 int libcamera_device_open(device_t *dev)
 {
   dev->libcamera = new device_libcamera_t{};
@@ -27,7 +33,18 @@ int libcamera_device_open(device_t *dev)
     E_LOG_ERROR(dev, "Failed to acquire `%s` camera.", dev->path);
   }
 
-  printf("camera manager started, and camera was found: %s\n", dev->libcamera->camera->id().c_str());
+	E_LOG_INFO(dev, "Device path=%s opened", dev->path);
+
+  for (auto const &control : dev->libcamera->camera->controls()) {
+    if (!control.first)
+      continue;
+
+    auto control_id = control.first;
+    auto control_key = libcamera_device_option_normalize(control_id->name());
+
+    E_LOG_VERBOSE(dev, "Available control: %s (%08x, type=%d)", 
+      control_key.c_str(), control_id->id(), control_id->type());
+  }
   return 0;
 
 error:
@@ -51,12 +68,6 @@ int libcamera_device_set_fps(device_t *dev, int desired_fps)
   int64_t frame_time = 1000000 / desired_fps;
   dev->libcamera->controls.set(libcamera::controls::FrameDurationLimits, { frame_time, frame_time });
   return -1;
-}
-
-std::string libcamera_device_option_normalize(std::string key)
-{
-  key.resize(device_option_normalize_name(key.data(), key.data()));
-  return key;
 }
 
 int libcamera_device_set_option(device_t *dev, const char *keyp, const char *value)
