@@ -7,7 +7,7 @@ buffer_list_t *buffer_list_open(const char *name, struct device_s *dev, unsigned
 {
   buffer_list_t *buf_list = calloc(1, sizeof(buffer_list_t));
 
-  buf_list->device = dev;
+  buf_list->dev = dev;
   buf_list->name = strdup(name);
   buf_list->do_capture = do_capture;
   buf_list->do_mmap = do_mmap;
@@ -38,14 +38,14 @@ void buffer_list_close(buffer_list_t *buf_list)
     buf_list->nbufs = 0;
   }
 
-  buf_list->device->hw->buffer_list_close(buf_list);
+  buf_list->dev->hw->buffer_list_close(buf_list);
   free(buf_list->name);
   free(buf_list);
 }
 
 int buffer_list_set_buffers(buffer_list_t *buf_list, int nbufs)
 {
-  int got_bufs = buf_list->device->hw->buffer_list_set_buffers(buf_list, nbufs);
+  int got_bufs = buf_list->dev->hw->buffer_list_set_buffers(buf_list, nbufs);
   if (got_bufs <= 0) {
     goto error;
   }
@@ -81,7 +81,7 @@ int buffer_list_set_stream(buffer_list_t *buf_list, bool do_on)
     return 0;
   }
 
-  if (buf_list->device->hw->buffer_list_set_stream(buf_list, do_on) < 0) {
+  if (buf_list->dev->hw->buffer_list_set_stream(buf_list, do_on) < 0) {
     goto error;
   }
   buf_list->streaming = do_on;

@@ -7,7 +7,7 @@
 
 int v4l2_buffer_list_open(buffer_list_t *buf_list, unsigned width, unsigned height, unsigned format, unsigned bytesperline)
 {
-  device_t *dev = buf_list->device;
+  device_t *dev = buf_list->dev;
 
   buf_list->v4l2 = calloc(1, sizeof(buffer_list_v4l2_t));
 
@@ -60,7 +60,7 @@ int v4l2_buffer_list_open(buffer_list_t *buf_list, unsigned width, unsigned heig
   }
 
   E_LOG_DEBUG(buf_list, "Get current format ...");
-  E_XIOCTL(buf_list, buf_list->device->v4l2->dev_fd, VIDIOC_G_FMT, &fmt, "Can't set format");
+  E_XIOCTL(buf_list, buf_list->dev->v4l2->dev_fd, VIDIOC_G_FMT, &fmt, "Can't set format");
 
   if (buf_list->v4l2->do_mplanes) {
     fmt.fmt.pix_mp.colorspace = V4L2_COLORSPACE_JPEG;
@@ -88,7 +88,7 @@ int v4l2_buffer_list_open(buffer_list_t *buf_list, unsigned width, unsigned heig
   }
 
   E_LOG_DEBUG(buf_list, "Configuring format (%s)...", fourcc_to_string(format).buf);
-  E_XIOCTL(buf_list, buf_list->device->v4l2->dev_fd, VIDIOC_S_FMT, &fmt, "Can't set format");
+  E_XIOCTL(buf_list, buf_list->dev->v4l2->dev_fd, VIDIOC_S_FMT, &fmt, "Can't set format");
 
   if (buf_list->v4l2->do_mplanes) {
     buf_list->fmt_width = fmt.fmt.pix_mp.width;
@@ -147,7 +147,7 @@ int v4l2_buffer_list_set_buffers(buffer_list_t *buf_list, int nbufs)
 
 	E_LOG_DEBUG(buf_list, "Requesting %u buffers", v4l2_req.count);
 
-	E_XIOCTL(buf_list, buf_list->device->v4l2->dev_fd, VIDIOC_REQBUFS, &v4l2_req, "Can't request buffers");
+	E_XIOCTL(buf_list, buf_list->dev->v4l2->dev_fd, VIDIOC_REQBUFS, &v4l2_req, "Can't request buffers");
 	if (v4l2_req.count < 1) {
 		E_LOG_ERROR(buf_list, "Insufficient buffer memory: %u", v4l2_req.count);
 	}
@@ -162,7 +162,7 @@ error:
 int v4l2_buffer_list_set_stream(buffer_list_t *buf_list, bool do_on)
 {
 	enum v4l2_buf_type type = buf_list->v4l2->type;
-  E_XIOCTL(buf_list, buf_list->device->v4l2->dev_fd, do_on ? VIDIOC_STREAMON : VIDIOC_STREAMOFF, &type, "Cannot set streaming state");
+  E_XIOCTL(buf_list, buf_list->dev->v4l2->dev_fd, do_on ? VIDIOC_STREAMON : VIDIOC_STREAMOFF, &type, "Cannot set streaming state");
 
   return 0;
 error:

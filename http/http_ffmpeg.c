@@ -81,7 +81,7 @@ static int http_ffmpeg_video_buf_part(buffer_lock_t *buf_lock, buffer_t *buf, in
 
   if (!status->had_key_frame) {
     if (!status->requested_key_frame) {
-      device_video_force_key(buf->buf_list->device);
+      device_video_force_key(buf->buf_list->dev);
       status->requested_key_frame = true;
     }
     return 0;

@@ -38,7 +38,7 @@ bool buffer_consumed(buffer_t *buf, const char *who)
   buf->mmap_reflinks--;
 
   if (!buf->enqueued && buf->mmap_reflinks == 0) {
-    if (buf->buf_list->device->hw->buffer_enqueue(buf, who) < 0) {
+    if (buf->buf_list->dev->hw->buffer_enqueue(buf, who) < 0) {
       goto error;
     }
 
@@ -138,7 +138,7 @@ buffer_t *buffer_list_dequeue(buffer_list_t *buf_list)
 {
   buffer_t *buf = NULL;
 
-  if (buf_list->device->hw->buffer_list_dequeue(buf_list, &buf) < 0) {
+  if (buf_list->dev->hw->buffer_list_dequeue(buf_list, &buf) < 0) {
     goto error;
   }
 
@@ -173,5 +173,5 @@ error:
 
 int buffer_list_pollfd(buffer_list_t *buf_list, struct pollfd *pollfd, bool can_dequeue)
 {
-  return buf_list->device->hw->buffer_list_pollfd(buf_list, pollfd, can_dequeue);
+  return buf_list->dev->hw->buffer_list_pollfd(buf_list, pollfd, can_dequeue);
 }

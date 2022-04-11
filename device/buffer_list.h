@@ -9,7 +9,7 @@ struct pollfd;
 
 typedef struct buffer_list_s {
   char *name;
-  device_t *device;
+  device_t *dev;
   buffer_t **bufs;
   int nbufs;
 

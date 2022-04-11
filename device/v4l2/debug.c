@@ -28,7 +28,7 @@ int v4l2_buffer_list_refresh_states(buffer_list_t *buf_list)
   for (int i = 0; i < buf_list->nbufs; i++) {
     v4l2_buf.index = i;
 
-  	E_XIOCTL(buf_list, buf_list->device->v4l2->dev_fd, VIDIOC_QUERYBUF, &v4l2_buf, "Can't query buffer (flags=%08x)", i);
+  	E_XIOCTL(buf_list, buf_list->dev->v4l2->dev_fd, VIDIOC_QUERYBUF, &v4l2_buf, "Can't query buffer (flags=%08x)", i);
     E_LOG_INFO(buf_list, "Buffer: %d, Flags: %08x. Offset: %d", i, v4l2_buf.flags,
       buf_list->v4l2->do_mplanes ? v4l2_plane.m.mem_offset : v4l2_buf.m.offset);
   }

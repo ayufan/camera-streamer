@@ -53,15 +53,15 @@ int _build_fds(link_t *all_links, struct pollfd *fds, link_t **links, buffer_lis
 
       // Can this chain pauses
       int count_enqueued = buffer_list_count_enqueued(sink);
-      if (!sink->device->paused && count_enqueued < sink->nbufs) {
+      if (!sink->dev->paused && count_enqueued < sink->nbufs) {
         paused = false;
       }
     }
 
-    source->device->paused = paused;
+    source->dev->paused = paused;
 
-    if (source->device->output_device) {
-      source->device->output_device->paused = paused;
+    if (source->dev->output_device) {
+      source->dev->output_device->paused = paused;
     }
 
     int count_enqueued = buffer_list_count_enqueued(source);
@@ -101,7 +101,7 @@ int links_enqueue_from_source(buffer_list_t *buf_list, link_t *link)
   }
 
   for (int j = 0; link->sinks[j]; j++) {
-    if (link->sinks[j]->device->paused) {
+    if (link->sinks[j]->dev->paused) {
       continue;
     }
     buffer_list_enqueue(link->sinks[j], buf);
@@ -173,7 +173,7 @@ int links_step(link_t *all_links, int timeout_now_ms, int *timeout_next_ms)
       buf_list->streaming,
       buffer_list_count_enqueued(buf_list),
       buf_list->nbufs,
-      buf_list->device->paused);
+      buf_list->dev->paused);
 
     if (fds[i].revents & POLLIN) {
       if (links_enqueue_from_source(buf_list, link) < 0) {
@@ -198,7 +198,7 @@ int links_step(link_t *all_links, int timeout_now_ms, int *timeout_next_ms)
       return -1;
     }
 
-    if (!buf_list->device->paused && buf_list->do_capture && buf_list->do_mmap) {
+    if (!buf_list->dev->paused && buf_list->do_capture && buf_list->do_mmap) {
       buffer_t *buf;
 
 #ifdef QUEUE_ON_CAPTURE

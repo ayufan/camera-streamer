@@ -10,7 +10,7 @@ int v4l2_buffer_open(buffer_t *buf)
   struct v4l2_plane v4l2_plane = {0};
 
   buffer_list_t *buf_list = buf->buf_list;
-  device_t *dev = buf_list->device;
+  device_t *dev = buf_list->dev;
 
   buf->v4l2 = calloc(1, sizeof(buffer_v4l2_t));
 
@@ -131,7 +131,7 @@ int v4l2_buffer_enqueue(buffer_t *buf, const char *who)
     v4l2_buf.timestamp.tv_usec = buf->captured_time_us % (1000LL * 1000LL);
   }
 
-  E_XIOCTL(buf, buf->buf_list->device->v4l2->dev_fd, VIDIOC_QBUF, &v4l2_buf, "Can't queue buffer.");
+  E_XIOCTL(buf, buf->buf_list->dev->v4l2->dev_fd, VIDIOC_QBUF, &v4l2_buf, "Can't queue buffer.");
 
   return 0;
 
@@ -152,7 +152,7 @@ int v4l2_buffer_list_dequeue(buffer_list_t *buf_list, buffer_t **bufp)
 		v4l2_buf.m.planes = &v4l2_plane;
 	}
 
-	E_XIOCTL(buf_list, buf_list->device->v4l2->dev_fd, VIDIOC_DQBUF, &v4l2_buf, "Can't grab capture buffer (flags=%08x)", v4l2_buf.flags);
+	E_XIOCTL(buf_list, buf_list->dev->v4l2->dev_fd, VIDIOC_DQBUF, &v4l2_buf, "Can't grab capture buffer (flags=%08x)", v4l2_buf.flags);
 
   buffer_t *buf = *bufp = buf_list->bufs[v4l2_buf.index];
 	if (buf_list->v4l2->do_mplanes) {
@@ -175,7 +175,7 @@ int v4l2_buffer_list_pollfd(buffer_list_t *buf_list, struct pollfd *pollfd, bool
   int count_enqueued = buffer_list_count_enqueued(buf_list);
 
   // Can something be dequeued?
-  pollfd->fd = buf_list->device->v4l2->dev_fd;
+  pollfd->fd = buf_list->dev->v4l2->dev_fd;
   pollfd->events = POLLHUP;
   if (count_enqueued > 0 && can_dequeue) {
     if (buf_list->do_capture)

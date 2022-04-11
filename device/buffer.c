@@ -5,7 +5,7 @@
 
 buffer_t *buffer_open(const char *name, buffer_list_t *buf_list, int index) {
   buffer_t *buf = calloc(1, sizeof(buffer_t));
-  device_t *dev = buf_list->device;
+  device_t *dev = buf_list->dev;
 
   buf->name = strdup(name);
   buf->index = index;
@@ -31,7 +31,7 @@ void buffer_close(buffer_t *buf)
     return;
   }
 
-  buf->buf_list->device->hw->buffer_close(buf);
+  buf->buf_list->dev->hw->buffer_close(buf);
   free(buf->name);
   free(buf);
 }
