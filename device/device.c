@@ -105,22 +105,18 @@ buffer_list_t *device_open_buffer_list_output(device_t *dev, buffer_list_t *capt
     capture_list->dev->opts.allow_dma ? !capture_list->do_mmap : true);
 }
 
-int device_open_buffer_list_capture(device_t *dev, buffer_list_t *output_list, float div, unsigned format, bool do_mmap)
+buffer_list_t *device_open_buffer_list_capture(device_t *dev, buffer_list_t *output_list, float div, unsigned format, bool do_mmap)
 {
   if (!output_list) {
     output_list = dev->output_list;
   }
   if (!output_list) {
-    return -1;
+    return NULL;
   }
 
-  if (device_open_buffer_list(dev, true,
+  return device_open_buffer_list(dev, true,
     output_list->fmt.width / div, output_list->fmt.height / div,
-    format, 0, output_list->nbufs, do_mmap)) {
-      return 0;
-    }
-
-  return -1;
+    format, 0, output_list->nbufs, do_mmap);
 }
 
 int device_set_stream(device_t *dev, bool do_on)

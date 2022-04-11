@@ -28,19 +28,19 @@ int camera_configure_legacy_isp(camera_t *camera, buffer_list_t *src, float div)
   camera->codec_h264 = device_v4l2_open("H264", "/dev/video11");
 
   if (!device_open_buffer_list_output(camera->legacy_isp, src) ||
-    device_open_buffer_list_capture(camera->legacy_isp, src, div, V4L2_PIX_FMT_YUYV, true) < 0) {
+    !device_open_buffer_list_capture(camera->legacy_isp, src, div, V4L2_PIX_FMT_YUYV, true)) {
     return -1;
   }
 
   src = camera->legacy_isp->capture_list;
 
   if (!device_open_buffer_list_output(camera->codec_jpeg, src) ||
-    device_open_buffer_list_capture(camera->codec_jpeg, src, 1.0, V4L2_PIX_FMT_JPEG, true) < 0) {
+    !device_open_buffer_list_capture(camera->codec_jpeg, src, 1.0, V4L2_PIX_FMT_JPEG, true)) {
     return -1;
   }
 
   if (!device_open_buffer_list_output(camera->codec_h264, src) ||
-    device_open_buffer_list_capture(camera->codec_h264, src, 1.0, V4L2_PIX_FMT_H264, true) < 0) {
+    !device_open_buffer_list_capture(camera->codec_h264, src, 1.0, V4L2_PIX_FMT_H264, true)) {
     return -1;
   }
 

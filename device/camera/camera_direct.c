@@ -20,11 +20,11 @@ int camera_configure_direct(camera_t *camera, buffer_list_t *src)
     return -1;
   }
 
-  if (device_open_buffer_list_capture(camera->codec_jpeg, src, 1.0, V4L2_PIX_FMT_JPEG, true) < 0) {
+  if (!device_open_buffer_list_capture(camera->codec_jpeg, src, 1.0, V4L2_PIX_FMT_JPEG, true)) {
     return -1;
   }
 
-  if (device_open_buffer_list_capture(camera->codec_h264, src, 1.0, V4L2_PIX_FMT_H264, true) < 0) {
+  if (!device_open_buffer_list_capture(camera->codec_h264, src, 1.0, V4L2_PIX_FMT_H264, true)) {
     return -1;
   }
 

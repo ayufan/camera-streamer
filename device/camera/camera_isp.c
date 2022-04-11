@@ -19,7 +19,7 @@ int camera_configure_isp(camera_t *camera, buffer_list_t *src, float high_div, f
   camera->codec_h264 = device_v4l2_open("H264", "/dev/video11");
 
   if (!device_open_buffer_list_output(camera->isp_srgb, src) ||
-    device_open_buffer_list_capture(camera->isp_yuuv, camera->isp_srgb->output_list, high_div, V4L2_PIX_FMT_YUYV, true) < 0) {
+    !device_open_buffer_list_capture(camera->isp_yuuv, camera->isp_srgb->output_list, high_div, V4L2_PIX_FMT_YUYV, true)) {
     return -1;
   }
 
@@ -31,12 +31,12 @@ int camera_configure_isp(camera_t *camera, buffer_list_t *src, float high_div, f
   src = camera->isp_yuuv->capture_list;
 
   if (!device_open_buffer_list_output(camera->codec_jpeg, src) ||
-    device_open_buffer_list_capture(camera->codec_jpeg, src, 1.0, V4L2_PIX_FMT_JPEG, true) < 0) {
+    !device_open_buffer_list_capture(camera->codec_jpeg, src, 1.0, V4L2_PIX_FMT_JPEG, true) < 0) {
     return -1;
   }
 
   if (!device_open_buffer_list_output(camera->codec_h264, src) ||
-    device_open_buffer_list_capture(camera->codec_h264, src, 1.0, V4L2_PIX_FMT_H264, true) < 0) {
+    !device_open_buffer_list_capture(camera->codec_h264, src, 1.0, V4L2_PIX_FMT_H264, true)) {
     return -1;
   }
 
@@ -53,7 +53,7 @@ int camera_configure_isp(camera_t *camera, buffer_list_t *src, float high_div, f
   camera->codec_jpeg_lowres = device_v4l2_open("JPEG-LOW", "/dev/video31");
   camera->codec_h264_lowres = device_v4l2_open("H264-LOW", "/dev/video11");
 
-  if (device_open_buffer_list_capture(camera->isp_yuuv_lowres, camera->camera->capture_list, low_div, V4L2_PIX_FMT_YUYV, true) < 0) {
+  if (!device_open_buffer_list_capture(camera->isp_yuuv_lowres, camera->camera->capture_list, low_div, V4L2_PIX_FMT_YUYV, true)) {
     return -1;
   }
 
@@ -61,12 +61,12 @@ int camera_configure_isp(camera_t *camera, buffer_list_t *src, float high_div, f
   src = camera->isp_yuuv_lowres->capture_list;
 
   if (!device_open_buffer_list_output(camera->codec_jpeg_lowres, src) ||
-    device_open_buffer_list_capture(camera->codec_jpeg_lowres, src, 1.0, V4L2_PIX_FMT_JPEG, true) < 0) {
+    !device_open_buffer_list_capture(camera->codec_jpeg_lowres, src, 1.0, V4L2_PIX_FMT_JPEG, true)) {
     return -1;
   }
 
   if (!device_open_buffer_list_output(camera->codec_h264_lowres, src) ||
-    device_open_buffer_list_capture(camera->codec_h264_lowres, src, 1.0, V4L2_PIX_FMT_H264, true) < 0) {
+    !device_open_buffer_list_capture(camera->codec_h264_lowres, src, 1.0, V4L2_PIX_FMT_H264, true)) {
     return -1;
   }
 

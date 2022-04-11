@@ -20,7 +20,7 @@ int camera_configure_decoder(camera_t *camera, buffer_list_t *camera_src)
     return -1;
   }
 
-  if (device_open_buffer_list_capture(camera->decoder, NULL, 1.0, 0, true) < 0) {
+  if (!device_open_buffer_list_capture(camera->decoder, NULL, 1.0, 0, true)) {
     return -1;
   }
 
@@ -34,7 +34,7 @@ int camera_configure_decoder(camera_t *camera, buffer_list_t *camera_src)
     camera->codec_jpeg = device_v4l2_open("JPEG", "/dev/video31");
 
     if (!device_open_buffer_list_output(camera->codec_jpeg, src) ||
-      device_open_buffer_list_capture(camera->codec_jpeg, src, 1.0, V4L2_PIX_FMT_JPEG, true) < 0) {
+      !device_open_buffer_list_capture(camera->codec_jpeg, src, 1.0, V4L2_PIX_FMT_JPEG, true)) {
       return -1;
     }
   }
@@ -43,7 +43,7 @@ int camera_configure_decoder(camera_t *camera, buffer_list_t *camera_src)
     camera->codec_h264 = device_v4l2_open("H264", "/dev/video11");
 
     if (!device_open_buffer_list_output(camera->codec_h264, src) ||
-      device_open_buffer_list_capture(camera->codec_h264, src, 1.0, V4L2_PIX_FMT_H264, true) < 0) {
+      !device_open_buffer_list_capture(camera->codec_h264, src, 1.0, V4L2_PIX_FMT_H264, true)) {
       return -1;
     }
   }
