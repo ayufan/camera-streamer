@@ -1,5 +1,6 @@
 #include "libcamera.hh"
 
+#ifdef USE_LIBCAMERA
 device_hw_t libcamera_device_hw = {
   .device_open = libcamera_device_open,
   .device_close = libcamera_device_close,
@@ -23,3 +24,10 @@ extern "C" device_t *device_libcamera_open(const char *name, const char *path)
 {
   return device_open(name, path, &libcamera_device_hw);
 }
+#else // USE_LIBCAMERA
+extern "C" device_t *device_libcamera_open(const char *name, const char *path)
+{
+  E_LOG_INFO(NULL, "libcamera is not supported");
+  return NULL;
+}
+#endif // USE_LIBCAMERA

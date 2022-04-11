@@ -1,3 +1,4 @@
+#ifdef USE_LIBCAMERA
 #include "libcamera.hh"
 
 int libcamera_buffer_list_open(buffer_list_t *buf_list, unsigned width, unsigned height, unsigned format, unsigned bytesperline, int nbufs)
@@ -104,3 +105,4 @@ int libcamera_buffer_list_set_stream(buffer_list_t *buf_list, bool do_on)
 error:
   return -1;
 }
+#endif // USE_LIBCAMERA

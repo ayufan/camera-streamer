@@ -14,6 +14,7 @@ extern "C" {
 #include "opts/fourcc.h"
 };
 
+#ifdef USE_LIBCAMERA
 #include <optional>
 #include <memory>
 
@@ -69,3 +70,4 @@ int libcamera_buffer_list_pollfd(buffer_list_t *buf_list, struct pollfd *pollfd,
 int libcamera_buffer_list_open(buffer_list_t *buf_list, unsigned width, unsigned height, unsigned format, unsigned bytesperline, int nbufs);
 void libcamera_buffer_list_close(buffer_list_t *buf_list);
 int libcamera_buffer_list_set_stream(buffer_list_t *buf_list, bool do_on);
+#endif // USE_LIBCAMERA

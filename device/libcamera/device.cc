@@ -1,3 +1,4 @@
+#ifdef USE_LIBCAMERA
 #include "libcamera.hh"
 
 int libcamera_device_open(device_t *dev)
@@ -65,3 +66,4 @@ int libcamera_device_set_option(device_t *dev, const char *key, const char *valu
 {
   return -1;
 }
+#endif // USE_LIBCAMERA

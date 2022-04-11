@@ -1,3 +1,4 @@
+#ifdef USE_LIBCAMERA
 #include "libcamera.hh"
 
 int libcamera_buffer_open(buffer_t *buf)
@@ -122,3 +123,4 @@ int libcamera_buffer_list_pollfd(buffer_list_t *buf_list, struct pollfd *pollfd,
   pollfd->revents = 0;
   return 0;
 }
+#endif // USE_LIBCAMERA
