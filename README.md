@@ -139,6 +139,27 @@ Depending on control they have to be used for camera, ISP, or JPEG or H264 codec
 ```
 
 
+
+
+
+
+## List all available formats and use proper one
+
+You might list all available capture formats for your camera:
+
+```bash
+v4l2-ctl -d /dev/video0 --list-formats-ext
+```
+
+Some of them might be specified to streamer:
+
+```bash
+./*_camera.sh -camera-format=RG10 # Bayer 10 packet
+./*_camera.sh -camera-format=YUYV
+./*_camera.sh -camera-format=MJPEG
+./*_camera.sh -camera-format=H264 # This is unstable due to h264 key frames support
+```
+
 ## License
 
 GNU General Public License v3.0
