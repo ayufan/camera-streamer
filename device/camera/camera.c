@@ -120,20 +120,7 @@ error:
 
 int camera_set_params(camera_t *camera)
 {
-  device_set_fps(camera->camera, camera->options.fps);
-  device_set_option_list(camera->camera, camera->options.options);
-  device_set_option_list(camera->isp_srgb, camera->options.isp.options);
-
-  // DEVICE_SET_OPTION(camera->camera, EXPOSURE, 2684);
-  // DEVICE_SET_OPTION(camera->camera, ANALOGUE_GAIN, 938);
-  // DEVICE_SET_OPTION(camera->camera, DIGITAL_GAIN, 512);
-  // DEVICE_SET_OPTION(camera->camera, VBLANK, 1636);
-  // DEVICE_SET_OPTION(camera->camera, HBLANK, 6906);
-
-  // DEVICE_SET_OPTION(camera->isp_srgb, RED_BALANCE, 2120);
-  // DEVICE_SET_OPTION(camera->isp_srgb, BLUE_BALANCE, 1472);
-  // DEVICE_SET_OPTION(camera->isp_srgb, DIGITAL_GAIN, 1007);
-
+  // Set some defaults
   device_set_option_string(camera->codec_jpeg, "compression_quality", "80");
 
   device_set_option_string(camera->codec_h264, "video_bitrate_mode", "0");
@@ -144,6 +131,22 @@ int camera_set_params(camera_t *camera)
   device_set_option_string(camera->codec_h264, "h264_profile", "4");
   device_set_option_string(camera->codec_h264, "h264_minimum_qp_value", "16");
   device_set_option_string(camera->codec_h264, "h264_maximum_qp_value", "32");
+
+  device_set_fps(camera->camera, camera->options.fps);
+  device_set_option_list(camera->camera, camera->options.options);
+  device_set_option_list(camera->isp_srgb, camera->options.isp.options);
+  device_set_option_list(camera->codec_h264, camera->options.h264.options);
+  device_set_option_list(camera->codec_jpeg, camera->options.jpeg.options);
+
+  // DEVICE_SET_OPTION(camera->camera, EXPOSURE, 2684);
+  // DEVICE_SET_OPTION(camera->camera, ANALOGUE_GAIN, 938);
+  // DEVICE_SET_OPTION(camera->camera, DIGITAL_GAIN, 512);
+  // DEVICE_SET_OPTION(camera->camera, VBLANK, 1636);
+  // DEVICE_SET_OPTION(camera->camera, HBLANK, 6906);
+
+  // DEVICE_SET_OPTION(camera->isp_srgb, RED_BALANCE, 2120);
+  // DEVICE_SET_OPTION(camera->isp_srgb, BLUE_BALANCE, 1472);
+  // DEVICE_SET_OPTION(camera->isp_srgb, DIGITAL_GAIN, 1007);
   return 0;
 }
 

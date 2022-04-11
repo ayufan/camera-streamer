@@ -28,6 +28,14 @@ typedef struct camera_options_s {
   struct {
     char options[CAMERA_OPTIONS_LENGTH];
   } isp;
+
+  struct {
+    char options[CAMERA_OPTIONS_LENGTH];
+  } jpeg;
+
+  struct {
+    char options[CAMERA_OPTIONS_LENGTH];
+  } h264;
 } camera_options_t;
 
 typedef struct camera_s {

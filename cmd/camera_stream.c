@@ -80,6 +80,8 @@ option_t all_options[] = {
   DEFINE_OPTION_PTR(camera, options, list),
 
   DEFINE_OPTION_PTR(camera, isp.options, list),
+  DEFINE_OPTION_PTR(camera, jpeg.options, list),
+  DEFINE_OPTION_PTR(camera, h264.options, list),
 
   DEFINE_OPTION(http, port, uint),
   DEFINE_OPTION(http, maxcons, uint),
