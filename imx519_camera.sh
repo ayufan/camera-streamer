@@ -21,7 +21,7 @@ fi
 
 set -xeo pipefail
 make -j$(nproc)
-$GDB ./camera_stream -camera-path=$(echo /dev/v4l/by-path/*.csi-video-index0) \
+$GDB ./camera-streamer -camera-path=$(echo /dev/v4l/by-path/*.csi-video-index0) \
   -camera-options=vertical_blanking=728 \
   -camera-options=exposure=2444 \
   -camera-options=analogue_gain=600 \
