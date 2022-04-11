@@ -15,9 +15,18 @@ int libcamera_buffer_list_open(buffer_list_t *buf_list, unsigned width, unsigned
   }
 
   buf_list->libcamera = new buffer_list_libcamera_t{};
+  buf_list->libcamera->buf_list = buf_list;
+  buf_list->libcamera->fds[0] = -1;
+  buf_list->libcamera->fds[1] = -1;
+
+  if (pipe2(buf_list->libcamera->fds, O_DIRECT|O_CLOEXEC) < 0) {
+    E_LOG_INFO(buf_list, "Cannot open `pipe2`.");
+    return -1;
+  }
+
   buf_list->libcamera->configuration = buf_list->dev->libcamera->camera->generateConfiguration(
     { libcamera::StreamRole::Viewfinder });
-  
+
   auto &configuration = buf_list->libcamera->configuration->at(0);
   configuration.size = libcamera::Size(width, height);
   configuration.pixelFormat = libcamera::PixelFormat(format);
@@ -64,6 +73,9 @@ error:
 void libcamera_buffer_list_close(buffer_list_t *buf_list)
 {
   if (buf_list->libcamera) {
+    close(buf_list->libcamera->fds[0]);
+    close(buf_list->libcamera->fds[1]);
+
     delete buf_list->libcamera;
     buf_list->libcamera = NULL;
   }
@@ -72,10 +84,16 @@ void libcamera_buffer_list_close(buffer_list_t *buf_list)
 int libcamera_buffer_list_set_stream(buffer_list_t *buf_list, bool do_on)
 {
   if (do_on) {
+    buf_list->dev->libcamera->camera->requestCompleted.connect(
+      buf_list->libcamera, &buffer_list_libcamera_t::libcamera_buffer_list_dequeued);
+
     if (buf_list->dev->libcamera->camera->start() < 0) {
       E_LOG_ERROR(buf_list, "Failed to start camera.");
     }
   } else {
+    buf_list->dev->libcamera->camera->requestCompleted.disconnect(
+      buf_list->libcamera, &buffer_list_libcamera_t::libcamera_buffer_list_dequeued);
+
     if (buf_list->dev->libcamera->camera->stop() < 0) {
       E_LOG_ERROR(buf_list, "Failed to stop camera.");
     }

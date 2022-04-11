@@ -42,6 +42,10 @@ typedef struct device_libcamera_s {
 typedef struct buffer_list_libcamera_s {
   std::shared_ptr<libcamera::CameraConfiguration> configuration;
   std::shared_ptr<libcamera::FrameBufferAllocator> allocator;
+  buffer_list_t *buf_list;
+  int fds[2];
+
+  void libcamera_buffer_list_dequeued(libcamera::Request *request);
 } buffer_list_libcamera_t;
 
 typedef struct buffer_libcamera_s {
@@ -58,6 +62,7 @@ int libcamera_device_set_option(device_t *dev, const char *key, const char *valu
 int libcamera_buffer_open(buffer_t *buf);
 void libcamera_buffer_close(buffer_t *buf);
 int libcamera_buffer_enqueue(buffer_t *buf, const char *who);
+void libcamera_buffer_list_dequeued(buffer_list_t *buf_list, libcamera::Request *request);
 int libcamera_buffer_list_dequeue(buffer_list_t *buf_list, buffer_t **bufp);
 int libcamera_buffer_list_pollfd(buffer_list_t *buf_list, struct pollfd *pollfd, bool can_dequeue);
 
