@@ -76,8 +76,6 @@ error:
 
 void buffer_list_libcamera_t::libcamera_buffer_list_dequeued(libcamera::Request *request)
 {
-  E_LOG_INFO(buf_list, "Dequeued: index=%d, status=%d", request->cookie(), request->status());
-
   if (request->status() == libcamera::Request::RequestComplete) {
     unsigned index = request->cookie();
     if (write(buf_list->libcamera->fds[1], &index, sizeof(index)) == sizeof(index)) {
