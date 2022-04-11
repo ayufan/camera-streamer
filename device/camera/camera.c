@@ -93,7 +93,7 @@ int camera_set_params(camera_t *camera)
 
   device_set_fps(camera->camera, camera->options.fps);
   device_set_option_list(camera->camera, camera->options.options);
-  device_set_option_list(camera->isp_srgb, camera->options.isp.options);
+  device_set_option_list(camera->isp, camera->options.isp.options);
   device_set_option_list(camera->codec_h264, camera->options.h264.options);
   device_set_option_list(camera->codec_h264_lowres, camera->options.h264.options);
   device_set_option_list(camera->codec_jpeg, camera->options.jpeg.options);

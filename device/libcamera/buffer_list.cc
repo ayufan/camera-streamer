@@ -8,6 +8,11 @@ int libcamera_buffer_list_open(buffer_list_t *buf_list)
     return -1;
   }
 
+  if (buf_list->index > 0) {
+    LOG_INFO(buf_list, "Only single capture device is supported.");
+    return -1;
+  }
+
   if (!buf_list->do_mmap) {
     LOG_INFO(buf_list, "Only mmap buffers are supported.");
     return -1;

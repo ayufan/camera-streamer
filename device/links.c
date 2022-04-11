@@ -60,10 +60,6 @@ int _build_fds(link_t *all_links, struct pollfd *fds, link_t **links, buffer_lis
 
     source->dev->paused = paused;
 
-    if (source->dev->output_device) {
-      source->dev->output_device->paused = paused;
-    }
-
     int count_enqueued = buffer_list_count_enqueued(source);
     bool can_dequeue = count_enqueued > 0;
 

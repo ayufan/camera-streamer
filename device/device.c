@@ -49,6 +49,11 @@ void device_close(device_t *dev) {
 
 buffer_list_t *device_open_buffer_list(device_t *dev, bool do_capture, unsigned width, unsigned height, unsigned format, unsigned bytesperline, int nbufs, bool do_mmap)
 {
+  return device_open_buffer_list2(dev, NULL, do_capture, width, height, format, bytesperline, nbufs, do_mmap);
+}
+
+buffer_list_t *device_open_buffer_list2(device_t *dev, const char *path, bool do_capture, unsigned width, unsigned height, unsigned format, unsigned bytesperline, int nbufs, bool do_mmap)
+{
   unsigned type;
   char name[64];
   int index = 0;
@@ -85,7 +90,7 @@ buffer_list_t *device_open_buffer_list(device_t *dev, bool do_capture, unsigned 
     .nbufs = nbufs
   };
 
-  buf_list = buffer_list_open(name, index, dev, NULL, fmt, do_capture, do_mmap);
+  buf_list = buffer_list_open(name, index, dev, path, fmt, do_capture, do_mmap);
   if (!buf_list) {
     goto error;
   }
@@ -119,11 +124,16 @@ buffer_list_t *device_open_buffer_list_output(device_t *dev, buffer_list_t *capt
 
 buffer_list_t *device_open_buffer_list_capture(device_t *dev, buffer_list_t *output_list, float div, unsigned format, bool do_mmap)
 {
+  return device_open_buffer_list_capture2(dev, NULL, output_list, div, format, do_mmap);
+}
+
+buffer_list_t *device_open_buffer_list_capture2(device_t *dev, const char *path, buffer_list_t *output_list, float div, unsigned format, bool do_mmap)
+{
   if (!dev || !output_list) {
     return NULL;
   }
 
-  return device_open_buffer_list(dev, true,
+  return device_open_buffer_list2(dev, path, true,
     output_list->fmt.width / div, output_list->fmt.height / div,
     format, 0, output_list->nbufs, do_mmap);
 }

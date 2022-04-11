@@ -15,16 +15,12 @@ int camera_configure_isp(camera_t *camera, buffer_list_t *camera_capture, float 
 {
   link_t *links = camera->links;
 
-  camera->isp_srgb = device_v4l2_open("ISP", "/dev/video13");
-  camera->isp_yuuv = device_v4l2_open("ISP-YUUV", "/dev/video14");
-  if (camera->isp_yuuv) {
-    camera->isp_yuuv->output_device = camera->isp_srgb;
-  }
+  camera->isp = device_v4l2_open("ISP", "/dev/video13");
   camera->codec_jpeg = device_v4l2_open("JPEG", "/dev/video31");
   camera->codec_h264 = device_v4l2_open("H264", "/dev/video11");
 
-  buffer_list_t *isp_output = device_open_buffer_list_output(camera->isp_srgb, camera_capture);
-  buffer_list_t *isp_capture = device_open_buffer_list_capture(camera->isp_yuuv, isp_output, high_div, V4L2_PIX_FMT_YUYV, true);
+  buffer_list_t *isp_output = device_open_buffer_list_output(camera->isp, camera_capture);
+  buffer_list_t *isp_capture = device_open_buffer_list_capture2(camera->isp, "/dev/video14", isp_output, high_div, V4L2_PIX_FMT_YUYV, true);
 
   *links++ = (link_t){ camera_capture, { isp_output } };
 
@@ -47,14 +43,10 @@ int camera_configure_isp(camera_t *camera, buffer_list_t *camera_capture, float 
     return 0;
   }
 
-  camera->isp_yuuv_lowres = device_v4l2_open("ISP-YUUV-LOW", "/dev/video15");
-  if (camera->isp_yuuv_lowres) {
-    camera->isp_yuuv_lowres->output_device = camera->isp_srgb;
-  }
   camera->codec_jpeg_lowres = device_v4l2_open("JPEG-LOW", "/dev/video31");
   camera->codec_h264_lowres = device_v4l2_open("H264-LOW", "/dev/video11");
 
-  buffer_list_t *isp_lowres_capture = device_open_buffer_list_capture(camera->isp_yuuv_lowres, isp_output, low_div, V4L2_PIX_FMT_YUYV, true);
+  buffer_list_t *isp_lowres_capture = device_open_buffer_list_capture2(camera->isp, "/dev/video15", isp_output, low_div, V4L2_PIX_FMT_YUYV, true);
 
   buffer_list_t *jpeg_lowres_output = device_open_buffer_list_output(camera->codec_jpeg_lowres, isp_lowres_capture);
   buffer_list_t *jpeg_lowres_capture = device_open_buffer_list_capture(camera->codec_jpeg_lowres, jpeg_lowres_output, 1.0, V4L2_PIX_FMT_JPEG, true);

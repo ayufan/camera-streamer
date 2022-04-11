@@ -15,6 +15,16 @@ int v4l2_buffer_list_open(buffer_list_t *buf_list)
     return -1;
   }
 
+  if (buf_list->path) {
+    buf_list->v4l2->dev_fd = open(buf_list->path, O_RDWR|O_NONBLOCK);
+    if (buf_list->v4l2->dev_fd < 0) {
+      LOG_ERROR(buf_list, "Can't open device: %s", buf_list->path);
+      return -1;
+    }
+
+	  LOG_INFO(buf_list, "Device path=%s fd=%d opened", buf_list->path, buf_list->v4l2->dev_fd);
+  }
+
   struct v4l2_capability v4l2_cap;
   ERR_IOCTL(dev, buf_list->v4l2->dev_fd, VIDIOC_QUERYCAP, &v4l2_cap, "Can't query device capabilities");
 
@@ -25,7 +35,7 @@ int v4l2_buffer_list_open(buffer_list_t *buf_list)
       buf_list->v4l2->type = V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE;
       buf_list->v4l2->do_mplanes = true;
     } else {
-      LOG_ERROR(dev, "Video capture is not supported by device: %08x", v4l2_cap.capabilities);
+      LOG_ERROR(buf_list, "Video capture is not supported by device: %08x", v4l2_cap.capabilities);
     }
   } else {
     if (v4l2_cap.capabilities & V4L2_CAP_VIDEO_OUTPUT) {
@@ -34,7 +44,7 @@ int v4l2_buffer_list_open(buffer_list_t *buf_list)
       buf_list->v4l2->type = V4L2_BUF_TYPE_VIDEO_OUTPUT_MPLANE;
       buf_list->v4l2->do_mplanes = true;
     } else {
-      LOG_ERROR(dev, "Video output is not supported by device: %08x", v4l2_cap.capabilities);
+      LOG_ERROR(buf_list, "Video output is not supported by device: %08x", v4l2_cap.capabilities);
     }
   }
 
