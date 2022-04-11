@@ -10,9 +10,13 @@ int v4l2_buffer_list_open(buffer_list_t *buf_list, unsigned width, unsigned heig
   device_t *dev = buf_list->dev;
 
   buf_list->v4l2 = calloc(1, sizeof(buffer_list_v4l2_t));
+  buf_list->v4l2->dev_fd = dev->v4l2->dev_fd;
+  if (buf_list->v4l2->dev_fd < 0) {
+    return -1;
+  }
 
   struct v4l2_capability v4l2_cap;
-  ERR_IOCTL(dev, dev->v4l2->dev_fd, VIDIOC_QUERYCAP, &v4l2_cap, "Can't query device capabilities");
+  ERR_IOCTL(dev, buf_list->v4l2->dev_fd, VIDIOC_QUERYCAP, &v4l2_cap, "Can't query device capabilities");
 
   if (buf_list->do_capture) {
      if (v4l2_cap.capabilities & V4L2_CAP_VIDEO_CAPTURE) {
@@ -60,7 +64,7 @@ int v4l2_buffer_list_open(buffer_list_t *buf_list, unsigned width, unsigned heig
   }
 
   LOG_DEBUG(buf_list, "Get current format ...");
-  ERR_IOCTL(buf_list, buf_list->dev->v4l2->dev_fd, VIDIOC_G_FMT, &fmt, "Can't set format");
+  ERR_IOCTL(buf_list, buf_list->v4l2->dev_fd, VIDIOC_G_FMT, &fmt, "Can't set format");
 
   if (buf_list->v4l2->do_mplanes) {
     fmt.fmt.pix_mp.colorspace = V4L2_COLORSPACE_JPEG;
@@ -88,7 +92,7 @@ int v4l2_buffer_list_open(buffer_list_t *buf_list, unsigned width, unsigned heig
   }
 
   LOG_DEBUG(buf_list, "Configuring format (%s)...", fourcc_to_string(format).buf);
-  ERR_IOCTL(buf_list, buf_list->dev->v4l2->dev_fd, VIDIOC_S_FMT, &fmt, "Can't set format");
+  ERR_IOCTL(buf_list, buf_list->v4l2->dev_fd, VIDIOC_S_FMT, &fmt, "Can't set format");
 
   if (buf_list->v4l2->do_mplanes) {
     buf_list->fmt_width = fmt.fmt.pix_mp.width;
@@ -135,7 +139,7 @@ int v4l2_buffer_list_open(buffer_list_t *buf_list, unsigned width, unsigned heig
 
 	LOG_DEBUG(buf_list, "Requesting %u buffers", v4l2_req.count);
 
-	ERR_IOCTL(buf_list, buf_list->dev->v4l2->dev_fd, VIDIOC_REQBUFS, &v4l2_req, "Can't request buffers");
+	ERR_IOCTL(buf_list, buf_list->v4l2->dev_fd, VIDIOC_REQBUFS, &v4l2_req, "Can't request buffers");
 	if (v4l2_req.count < 1) {
 		LOG_ERROR(buf_list, "Insufficient buffer memory: %u", v4l2_req.count);
 	}
@@ -150,7 +154,7 @@ error:
 int v4l2_buffer_list_set_stream(buffer_list_t *buf_list, bool do_on)
 {
 	enum v4l2_buf_type type = buf_list->v4l2->type;
-  ERR_IOCTL(buf_list, buf_list->dev->v4l2->dev_fd, do_on ? VIDIOC_STREAMON : VIDIOC_STREAMOFF, &type, "Cannot set streaming state");
+  ERR_IOCTL(buf_list, buf_list->v4l2->dev_fd, do_on ? VIDIOC_STREAMON : VIDIOC_STREAMOFF, &type, "Cannot set streaming state");
 
   return 0;
 error:
@@ -158,6 +162,12 @@ error:
 }
 
 void v4l2_buffer_list_close(buffer_list_t *buf_list) {
+  if (!buf_list->v4l2)
+    return;
+
+  if (buf_list->dev->v4l2->dev_fd != buf_list->v4l2->dev_fd) {
+    close(buf_list->v4l2->dev_fd);
+  }
   free(buf_list->v4l2);
   buf_list->v4l2 = NULL;
 }

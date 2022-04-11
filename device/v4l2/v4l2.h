@@ -23,6 +23,7 @@ typedef struct device_v4l2_s {
 } device_v4l2_t;
 
 typedef struct buffer_list_v4l2_s {
+  int dev_fd;
   bool do_mplanes;
   int type;
 } buffer_list_v4l2_t;
