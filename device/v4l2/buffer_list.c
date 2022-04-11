@@ -123,6 +123,11 @@ int v4l2_buffer_list_open(buffer_list_t *buf_list, unsigned width, unsigned heig
 			fourcc_to_string(buf_list->fmt_format).buf);
 	}
 
+  // Some devices require setting pad size via media-controller
+  if (buf_list->do_capture) {
+    v4l2_device_set_pad_format(dev, width, height, format);
+  }
+
 	E_LOG_INFO(
     buf_list,
     "Using: %ux%u/%s, bytesperline=%d",
