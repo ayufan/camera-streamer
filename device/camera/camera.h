@@ -70,6 +70,8 @@ int camera_set_params(camera_t *camera);
 void camera_close(camera_t *camera);
 int camera_run(camera_t *camera);
 
+int camera_configure_v4l2(camera_t *camera);
+int camera_configure_libcamera(camera_t *camera);
 int camera_configure_isp(camera_t *camera, float high_div, float low_div);
 int camera_configure_legacy_isp(camera_t *camera, float div);
 int camera_configure_direct(camera_t *camera);

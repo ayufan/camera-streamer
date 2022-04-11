@@ -67,7 +67,7 @@ int libcamera_device_set_fps(device_t *dev, int desired_fps)
 {
   int64_t frame_time = 1000000 / desired_fps;
   dev->libcamera->controls.set(libcamera::controls::FrameDurationLimits, { frame_time, frame_time });
-  return -1;
+  return 0;
 }
 
 int libcamera_device_set_option(device_t *dev, const char *keyp, const char *value)
