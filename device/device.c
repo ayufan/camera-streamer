@@ -9,7 +9,7 @@ device_t *device_open(const char *name, const char *path, device_hw_t *hw) {
   dev->name = strdup(name);
   dev->path = strdup(path);
   dev->hw = hw;
-  dev->allow_dma = true;
+  dev->opts.allow_dma = true;
 
   if (dev->hw->device_open(dev) < 0) {
 		LOG_ERROR(dev, "Can't open device: %s", path);
@@ -53,7 +53,7 @@ int device_open_buffer_list(device_t *dev, bool do_capture, unsigned width, unsi
     return -1;
   }
 
-  if (!dev->allow_dma) {
+  if (!dev->opts.allow_dma) {
     do_mmap = true;
   }
 
@@ -94,7 +94,7 @@ int device_open_buffer_list_output(device_t *dev, buffer_list_t *capture_list)
     capture_list->fmt_width, capture_list->fmt_height,
     capture_list->fmt_format, capture_list->fmt_bytesperline,
     capture_list->nbufs,
-    capture_list->dev->allow_dma ? !capture_list->do_mmap : true);
+    capture_list->dev->opts.allow_dma ? !capture_list->do_mmap : true);
 }
 
 int device_open_buffer_list_capture(device_t *dev, buffer_list_t *output_list, float div, unsigned format, bool do_mmap)

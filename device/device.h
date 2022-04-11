@@ -31,11 +31,14 @@ typedef struct device_s {
   char *name;
   char *path;
   char bus_info[64];
-  bool allow_dma;
 
   device_hw_t *hw;
   buffer_list_t *capture_list;
   buffer_list_t *output_list;
+
+  struct {
+    bool allow_dma;
+  } opts;
 
   union {
     struct device_v4l2_s *v4l2;

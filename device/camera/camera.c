@@ -57,11 +57,11 @@ camera_t *camera_open(camera_options_t *options)
     goto error;
   }
 
-  camera->camera->allow_dma = camera->options.allow_dma;
+  camera->camera->opts.allow_dma = camera->options.allow_dma;
 
   if (strstr(camera->camera->bus_info, "usb")) {
     LOG_INFO(camera, "Disabling DMA since device uses USB (which is likely not working properly).");
-    camera->camera->allow_dma = false;
+    camera->camera->opts.allow_dma = false;
   }
 
   // TODO: mpad format
