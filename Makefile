@@ -6,6 +6,10 @@ HTML := $(wildcard html/*.js html/*.html)
 CFLAGS := -Werror -g -I$(PWD)
 LDLIBS := -lpthread
 
+ifneq (x,x$(shell which ccache))
+CCACHE ?= ccache
+endif
+
 USE_FFMPEG ?= $(shell pkg-config libavutil libavformat libavcodec && echo 1)
 
 ifeq (1,$(USE_FFMPEG))
@@ -21,7 +25,7 @@ OBJS = $(subst .c,.o,$(SRC) $(HTML_SRC))
 all: $(TARGET)
 
 %: cmd/%.c $(filter-out cmd/%, $(OBJS))
-	gcc $(CFLAGS) -o $@ $^ $(LDLIBS)
+	$(CCACHE) $(CC) $(CFLAGS) -o $@ $^ $(LDLIBS)
 
 install: $(TARGET)
 	install $(TARGET) /usr/local/bin/
@@ -30,12 +34,12 @@ clean:
 	rm -f .depend $(OBJS) $(OBJS:.o=.d) $(HTML_SRC) $(TARGET)
 
 headers:
-	find -name '*.h' | xargs -n1 gcc $(CFLAGS) -Wno-error -c -o /dev/null
+	find -name '*.h' | xargs -n1 $(CCACHE) $(CC) $(CFLAGS) -Wno-error -c -o /dev/null
 
 -include $(OBJS:.o=.d)
 
 %.o: %.c
-	gcc -MMD $(CFLAGS) -c -o $@ $<
+	$(CCACHE) $(CC) -MMD $(CFLAGS) -c -o $@ $<
 
 html/%.c: html/%
 	xxd -i $< > $@.tmp
