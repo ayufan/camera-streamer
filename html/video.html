@@ -6,38 +6,38 @@
 <title></title>
 <link rel="icon" href="data:;base64,iVBORw0KGgo=">
 <style>
-body{
-margin:0;
-padding:0;
-background-color:#303030;
+body {
+  margin:0;
+  padding:0;
+  background-color:#303030;
 }
 
-#streamStage{
-position:fixed;
-top:0;
-left:0;
-width:100%;
-height:100%;
+#streamStage {
+  position:fixed;
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
 }
 
 #streamStage:before {
-content: '';
-box-sizing: border-box;
-position: absolute;
-top: 50%;
-left: 50%;
-width: 2rem;
-height: 2rem;
-margin-top: -1rem;
-margin-left: -1rem;
+  content: '';
+  box-sizing: border-box;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 2rem;
+  height: 2rem;
+  margin-top: -1rem;
+  margin-left: -1rem;
 }
 
-#stream{
-max-height: 100%;
-max-width: 100%;
-margin: auto;
-position: absolute;
-top: 0; left: 0; bottom: 0; right: 0;
+#stream {
+  max-height: 100%;
+  max-width: 100%;
+  margin: auto;
+  position: absolute;
+  top: 0; left: 0; bottom: 0; right: 0;
 }
 </style>
 <script src="/jmuxer.min.js"></script>
@@ -57,7 +57,7 @@ top: 0; left: 0; bottom: 0; right: 0;
 			debug: false
 		 });
 
-    fetch('/video.h264').then(function(response) {
+    fetch('/video.h264' + window.location.search).then(function(response) {
       console.log(response);
 
       const reader = response.body.getReader();
