@@ -13,11 +13,19 @@
 		<li>
 			<a href="snapshot"><b>/snapshot</b></a><br>
 			Get a current actual image from the server.
+			<br>
+			<ul>
+				<li><a href="snapshot?res=low">/snapshot?res=low</a> get a low low resolution stream (if -camera-low_res_factor=X is configured).</li>
+			</ul>
 		</li>
 		<br>
 		<li>
 			<a href="stream"><b>/stream</b></a><br>
 			Get a live stream.<br>
+			<br>
+			<ul>
+				<li><a href="stream?res=low">/stream?res=low</a> get a low low resolution stream (if -camera-low_res_factor=X is configured).</li>
+			</ul>
 		</li>
 		<br>
 		<li>
@@ -38,6 +46,8 @@
 				<li><a href="video.mp4"><b>/video.mp4</b></a><br> get a live video stream in MP4 format (if FFMPEG enabled).</li>
 				<br>
 				<li><a href="video.mkv"><b>/video.mp4</b></a><br> get a live video stream in MKV format (if FFMPEG enabled).</li>
+				<br>
+				<li><a href="video?res=low">/video?res=low</a> get a low resolution stream (if -camera-low_res_factor=X is configured).</li>
 			</ul>
 		</li>
 	</ul>
