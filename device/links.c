@@ -3,6 +3,7 @@
 #include "device/buffer.h"
 #include "device/buffer_list.h"
 #include "opts/log.h"
+#include "opts/fourcc.h"
 
 #define N_FDS 50
 #define QUEUE_ON_CAPTURE // seems to provide better latency
@@ -272,4 +273,41 @@ int links_loop(link_t *all_links, bool *running)
 
   links_stream(all_links, false);
   return 0;
+}
+
+static void links_dump_buf_list(char *output, buffer_list_t *buf_list)
+{
+  sprintf(output + strlen(output), "%s[%dx%d/%s/%d]", \
+    buf_list->name, buf_list->fmt.width, buf_list->fmt.height, \
+    fourcc_to_string(buf_list->fmt.format).buf, buf_list->fmt.nbufs);
+}
+
+void links_dump(link_t *all_links)
+{
+  char line[4096];
+  int n;
+
+  for (n = 0; all_links[n].source; n++) {
+    link_t *link = &all_links[n];
+
+    line[0] = 0;
+    links_dump_buf_list(line, link->source);
+    strcat(line, " => [");
+    for (int j = 0; link->sinks[j]; j++) {
+      if (j > 0)
+        strcat(line, ", ");
+      links_dump_buf_list(line, link->sinks[j]);
+    }
+
+    if (link->callbacks.callback_name) {
+      if (link->sinks[0])
+        strcat(line, ", ");
+      strcat(line, link->callbacks.callback_name);
+    }
+    strcat(line, "]");
+
+    LOG_INFO(NULL, "Link %d: %s", n, line);
+  }
+
+  LOG_INFO(NULL, "%d links.", n);
 }

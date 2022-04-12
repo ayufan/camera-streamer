@@ -20,6 +20,8 @@ camera_t *camera_open(camera_options_t *options)
     goto error;
   }
 
+  links_dump(camera->links);
+
   return camera;
 
 error:
