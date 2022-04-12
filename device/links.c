@@ -285,9 +285,8 @@ static void links_dump_buf_list(char *output, buffer_list_t *buf_list)
 void links_dump(link_t *all_links)
 {
   char line[4096];
-  int n;
 
-  for (n = 0; all_links[n].source; n++) {
+  for (int n = 0; all_links[n].source; n++) {
     link_t *link = &all_links[n];
 
     line[0] = 0;
@@ -308,6 +307,4 @@ void links_dump(link_t *all_links)
 
     LOG_INFO(NULL, "Link %d: %s", n, line);
   }
-
-  LOG_INFO(NULL, "%d links.", n);
 }

@@ -14,11 +14,11 @@ int v4l2_device_open_media_device(device_t *dev)
 {
   struct stat st;
   if (fstat(dev->v4l2->dev_fd, &st) < 0) {
-    LOG_ERROR(dev, "Cannot get fstat");
+    LOG_VERBOSE(dev, "Cannot get fstat");
     return -1;
   }
   if (~st.st_mode & S_IFCHR) {
-    LOG_ERROR(dev, "FD is not char");
+    LOG_VERBOSE(dev, "FD is not char");
     return -1;
   }
 
@@ -28,7 +28,7 @@ int v4l2_device_open_media_device(device_t *dev)
   struct dirent **namelist;
   int n = scandir(path, &namelist, NULL, NULL);
   if (n < 0) {
-    LOG_ERROR(dev, "Cannot scan: %s", path);
+    LOG_VERBOSE(dev, "Cannot scan: %s", path);
     return -1;
   }
 
@@ -59,7 +59,8 @@ int v4l2_device_open_v4l2_subdev(device_t *dev, int subdev)
 
   media_fd = v4l2_device_open_media_device(dev);
   if (media_fd < 0) {
-    LOG_ERROR(dev, "Cannot find media controller");
+    LOG_VERBOSE(dev, "Cannot find media controller");
+    return -1;
   }
 
   for (;;) {
@@ -82,26 +83,29 @@ int v4l2_device_open_v4l2_subdev(device_t *dev, int subdev)
 
     char link[256];
     if ((rc = readlink(path, link, sizeof(link)-1)) < 0) {
-      LOG_ERROR(dev, "Cannot readlink '%s'", path);
+      LOG_VERBOSE(dev, "Cannot readlink '%s'", path);
     }
     link[rc] = 0;
 
     char *last = strrchr(link, '/');
     if (!last) {
-      LOG_ERROR(dev, "Link '%s' for '%s' does not end with '/'", link, path);
+      LOG_VERBOSE(dev, "Link '%s' for '%s' does not end with '/'", link, path);
+      goto error;
     }
 
     if (strstr(last, "/v4l-subdev") != last) {
-      LOG_ERROR(dev, "Link '%s' does not contain '/v4l-subdev'", link, path);
+      LOG_VERBOSE(dev, "Link '%s' does not contain '/v4l-subdev'", link, path);
+      goto error;
     }
 
     sprintf(path, "/dev%s", last);
     ret = open(path, O_RDWR);
     if (ret < 0) {
       LOG_ERROR(dev, "Cannot open '%s' (ret=%d)", path, ret);
+      goto error;
     }
 
-    LOG_INFO(dev, "Opened '%s' (fd=%d)", path, ret);
+    LOG_VERBOSE(dev, "Opened '%s' (fd=%d)", path, ret);
     break;
   }
 
