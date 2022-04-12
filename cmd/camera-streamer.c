@@ -38,6 +38,20 @@ camera_options_t camera_options = {
   .allow_dma = true,
   .high_res_factor = 1.0,
   .low_res_factor = 0.0,
+  .h264 = {
+    .options =
+      "video_bitrate_mode=0" OPTION_VALUE_LIST_SEP
+      "video_bitrate=5000000" OPTION_VALUE_LIST_SEP
+      "repeat_sequence_header=5000000" OPTION_VALUE_LIST_SEP
+      "h264_i_frame_period=30" OPTION_VALUE_LIST_SEP
+      "h264_level=11" OPTION_VALUE_LIST_SEP
+      "h264_profile=4" OPTION_VALUE_LIST_SEP
+      "h264_minimum_qp_value=16" OPTION_VALUE_LIST_SEP
+      "h264_maximum_qp_value=32"
+  },
+  .jpeg = {
+    .options = "compression_quality=80"
+  },
 };
 
 http_server_options_t http_options = {

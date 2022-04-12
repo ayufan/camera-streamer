@@ -92,7 +92,7 @@ int buffer_list_set_stream(buffer_list_t *buf_list, bool do_on)
   buf_list->streaming = do_on;
 
   int enqueued = buffer_list_count_enqueued(buf_list);
-  LOG_VERBOSE(buf_list, "Streaming %s... Was %d of %d enqueud", do_on ? "started" : "stopped", enqueued, buf_list->nbufs);
+  LOG_INFO(buf_list, "Streaming %s... Was %d of %d enqueud", do_on ? "started" : "stopped", enqueued, buf_list->nbufs);
   return 0;
 
 error:
