@@ -2,28 +2,20 @@
 
 #include <ctype.h>
 #include <stdbool.h>
+#include <stdio.h>
 
 int device_option_normalize_name(const char *in, char *outp)
 {
   // The output is always shorter, so `outp=in`
-  // colour_correction_matrix => ColourCorrectionMatrix
-  // Colour Correction Matrix => ColourCorrectionMatrix
-  // ColourCorrectionMatrix => ColourCorrectionMatrix
+  // colour_correction_matrix => colourcorrectionmatrix
+  // Colour Correction Matrix => colourcorrectionmatrix
+  // ColourCorrectionMatrix => colourcorrectionmatrix
 
   char *out = outp;
-  bool upper = true;
 
   while (*in) {
     if (isalnum(*in)) {
-      if (upper) {
-        *out++ = toupper(*in++);
-        upper = false;
-      } else {
-        *out++ = *in++;
-      }
-    } else if (isprint(*in)) {
-      upper = true;
-      while (*++in && isprint(*in) && !isalnum(*in));
+      *out++ = tolower(*in++);
     } else {
       in++;
     }
