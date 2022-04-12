@@ -35,3 +35,26 @@ int camera_configure_isp(camera_t *camera, buffer_list_t *src_capture, float hig
 
   return 0;
 }
+
+static const char *isp_names[2] = {
+  "ISP",
+  "ISP-LOW"
+};
+
+int camera_configure_legacy_isp(camera_t *camera, buffer_list_t *src_capture, float div, int res)
+{
+  camera->legacy_isp[res] = device_v4l2_open(isp_names[res], "/dev/video12");
+
+  buffer_list_t *isp_output = device_open_buffer_list_output(
+    camera->legacy_isp[res], src_capture);
+  buffer_list_t *isp_capture = device_open_buffer_list_capture(
+    camera->legacy_isp[res], isp_output, div, V4L2_PIX_FMT_YUYV, true);
+
+  camera_capture_add_output(camera, src_capture, isp_output);
+
+  if (camera_configure_output(camera, isp_capture, res) < 0) {
+    return -1;
+  }
+
+  return 0;
+}
