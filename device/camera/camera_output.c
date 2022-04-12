@@ -73,8 +73,12 @@ static int camera_configure_jpeg_output(camera_t *camera, buffer_list_t *src_cap
 
 int camera_configure_output(camera_t *camera, buffer_list_t *src_capture, int res)
 {
-  return camera_configure_h264_output(camera, src_capture, res) == 0 &&
-    camera_configure_jpeg_output(camera, src_capture, res) == 0;
+  if (camera_configure_h264_output(camera, src_capture, res) < 0 ||
+    camera_configure_jpeg_output(camera, src_capture, res) < 0) {
+      return -1;
+    }
+
+  return 0;
 }
 
 int camera_configure_output_rescaler2(camera_t *camera, buffer_list_t *src_capture, float div, int res)

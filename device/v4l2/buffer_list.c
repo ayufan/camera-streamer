@@ -118,7 +118,8 @@ int v4l2_buffer_list_open(buffer_list_t *buf_list)
 
   if (buf_list->fmt.width != fmt.width || buf_list->fmt.height != fmt.height) {
     if (fmt.bytesperline) {
-      LOG_ERROR(buf_list, "Requested resolution=%ux%u is unavailable. Got %ux%u.",
+      LOG_ERROR(buf_list, "Requested resolution=%ux%u is unavailable. Got %ux%u. "
+        "Consider using the `-camera-high_res_factor=2` or `-camera-low_res_factor=3`",
         fmt.width, fmt.height, buf_list->fmt.width, buf_list->fmt.height);
     } else {
       LOG_INFO(buf_list, "Requested resolution=%ux%u is unavailable. Got %ux%u. Accepted",
