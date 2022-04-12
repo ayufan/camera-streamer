@@ -1,6 +1,9 @@
+#define _GNU_SOURCE
+
 #include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -12,8 +15,6 @@
 
 #include "http/http.h"
 #include "opts/log.h"
-
-#define BUFSIZE 256
 
 static int http_listen(int port, int maxcons)
 {
@@ -58,6 +59,8 @@ static void http_process(http_worker_t *worker, FILE *stream)
     return;
   }
 
+  worker->range_header[0] = 0;
+
   // Consume headers
   for(int i = 0; i < 50; i++) {
     char line[BUFSIZE];
@@ -65,6 +68,10 @@ static void http_process(http_worker_t *worker, FILE *stream)
       return;
     if (line[0] == '\r' && line[1] == '\n')
       break;
+
+    if (strcasestr(line, "Range:") == line) {
+      strcpy(worker->range_header, line);
+    }
   }
 
   worker->current_method = NULL;

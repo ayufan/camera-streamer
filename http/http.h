@@ -11,6 +11,8 @@ typedef struct http_worker_s http_worker_t;
 
 typedef void (*http_method_fn)(struct http_worker_s *worker, FILE *stream);
 
+#define BUFSIZE 256
+
 typedef struct http_method_s {
   const char *name;
   http_method_fn func;
@@ -29,7 +31,8 @@ typedef struct http_worker_s {
   int client_fd;
   struct sockaddr_in client_addr;
   char *client_host;
-  char client_method[256];
+  char client_method[BUFSIZE];
+  char range_header[BUFSIZE];
 
   http_method_t *current_method;
 } http_worker_t;

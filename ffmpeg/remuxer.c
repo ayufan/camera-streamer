@@ -114,6 +114,8 @@ int ffmpeg_remuxer_open(ffmpeg_remuxer_t *remuxer)
 
 int ffmpeg_remuxer_close(ffmpeg_remuxer_t *remuxer)
 {
+  if (remuxer->output_context)
+    av_write_trailer(remuxer->output_context);
   ffmpeg_remuxer_close_avcontext(&remuxer->input_context);
   ffmpeg_remuxer_close_avcontext(&remuxer->output_context);
   av_packet_free(&remuxer->packet);
