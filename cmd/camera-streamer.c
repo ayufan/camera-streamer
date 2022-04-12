@@ -38,6 +38,7 @@ camera_options_t camera_options = {
   .allow_dma = true,
   .high_res_factor = 1.0,
   .low_res_factor = 0.0,
+  .auto_reconnect = 0,
   .h264 = {
     .options =
       "video_bitrate_mode=0" OPTION_VALUE_LIST_SEP
@@ -98,6 +99,7 @@ option_t all_options[] = {
   DEFINE_OPTION(camera, high_res_factor, float),
   DEFINE_OPTION(camera, low_res_factor, float),
   DEFINE_OPTION_PTR(camera, options, list),
+  DEFINE_OPTION(camera, auto_reconnect, uint),
 
   DEFINE_OPTION_PTR(camera, isp.options, list),
   DEFINE_OPTION_PTR(camera, jpeg.options, list),
@@ -118,15 +120,9 @@ int main(int argc, char *argv[])
   int http_fd = -1;
   int ret = -1;
   const char *env;
-  camera_t *camera;
 
   if (parse_opts(all_options, argc, argv) < 0) {
     return -1;
-  }
-
-  camera = camera_open(&camera_options);
-  if (!camera) {
-    goto error;
   }
 
   http_fd = http_server(&http_options, http_methods);
@@ -134,10 +130,22 @@ int main(int argc, char *argv[])
     goto error;
   }
 
-  ret = camera_run(camera);
+  while (true) {
+    camera_t *camera = camera_open(&camera_options);
+    if (camera) {
+      ret = camera_run(camera);
+      camera_close(camera);
+    }
+
+    if (camera_options.auto_reconnect > 0) {
+      LOG_INFO(NULL, "Automatically reconnecting in %d seconds...", camera_options.auto_reconnect);
+      sleep(camera_options.auto_reconnect);
+    } else {
+      break;
+    }
+  }
 
 error:
   close(http_fd);
-  camera_close(camera);
   return ret;
 }
