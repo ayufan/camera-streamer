@@ -45,6 +45,7 @@ clean:
 
 headers:
 	find -name '*.h' | xargs -n1 $(CCACHE) $(CC) $(CFLAGS) -Wno-error -c -o /dev/null
+	find -name '*.hh' | xargs -n1 $(CCACHE) $(CXX) $(CFLAGS) -std=c++17 -Wno-error -c -o /dev/null
 
 -include $(OBJS:.o=.d)
 
