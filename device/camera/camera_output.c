@@ -77,26 +77,56 @@ int camera_configure_output(camera_t *camera, buffer_list_t *src_capture, int re
     camera_configure_jpeg_output(camera, src_capture, res) == 0;
 }
 
+int camera_configure_output_rescaler2(camera_t *camera, buffer_list_t *src_capture, float div, int res)
+{
+  if (div > 1) {
+    return camera_configure_legacy_isp(camera, src_capture, div, res);
+  } else if (div > 0) {
+    return camera_configure_output(camera, src_capture, 0);
+  } else {
+    return 0;
+  }
+}
+
 int camera_configure_output_rescaler(camera_t *camera, buffer_list_t *src_capture, float high_div, float low_div)
 {
-  if (high_div > 1) {
-    if (camera_configure_legacy_isp(camera, src_capture, high_div, 0) < 0) {
-      return -1;
-    }
-  } else if (high_div > 0) {
-    if (camera_configure_output(camera, src_capture, 0) < 0) {
-      return -1;
-    }
+  if (camera_configure_output_rescaler2(camera, src_capture, high_div, 0) < 0 ||
+    camera_configure_output_rescaler2(camera, src_capture, low_div, 1) < 0) {
+    return -1;
   }
 
-  if (low_div > 1) {
-    if (camera_configure_legacy_isp(camera, src_capture, low_div, 1) < 0) {
+  return 0;
+}
+
+int camera_configure_decoder(camera_t *camera, buffer_list_t *src_capture)
+{
+  device_video_force_key(camera->camera);
+
+  camera->decoder = device_v4l2_open("DECODER", "/dev/video10");
+
+  buffer_list_t *decoder_output = device_open_buffer_list_output(
+    camera->decoder, src_capture);
+  buffer_list_t *decoder_capture = device_open_buffer_list_capture(
+    camera->decoder, decoder_output, 1.0, 0, true);
+
+  camera_capture_add_output(camera, src_capture, decoder_output);
+
+  if (camera->options.high_res_factor <= 1 && (src_capture->fmt.format == V4L2_PIX_FMT_JPEG || src_capture->fmt.format == V4L2_PIX_FMT_MJPEG)) {
+    camera_capture_set_callbacks(camera, src_capture, jpeg_callbacks[0]);
+
+    if (camera_configure_h264_output(camera, decoder_capture, 0) < 0)
       return -1;
-    }
-  } else if (low_div > 0) {
-    if (camera_configure_output(camera, src_capture, 1) < 0) {
+  } else if (camera->options.high_res_factor <= 1 && src_capture->fmt.format == V4L2_PIX_FMT_H264) {
+    camera_capture_set_callbacks(camera, src_capture, h264_callbacks[0]);
+
+    if (camera_configure_jpeg_output(camera, decoder_capture, 0) < 0)
       return -1;
-    }
+  } else if (camera_configure_output_rescaler2(camera, decoder_capture, camera->options.high_res_factor, 0) < 0) {
+    return -1;
+  }
+
+  if (camera->options.low_res_factor > 1 && camera_configure_output_rescaler2(camera, decoder_capture, camera->options.low_res_factor, 1) < 0) {
+    return -1;
   }
 
   return 0;
