@@ -94,7 +94,7 @@ static int http_ffmpeg_video_buf_part(buffer_lock_t *buf_lock, buffer_t *buf, in
 
   if ((ret = ffmpeg_remuxer_open(status->remuxer)) < 0)
     goto error;
-  if ((ret = ffmpeg_remuxer_feed(status->remuxer)) < 0)
+  if ((ret = ffmpeg_remuxer_feed(status->remuxer, 0)) < 0)
     goto error;
 
   ret = 1;

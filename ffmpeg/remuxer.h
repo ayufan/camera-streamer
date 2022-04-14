@@ -19,6 +19,11 @@ typedef struct ffmpeg_remuxer_s {
   void *opaque;
   ffmpeg_data_packet read_packet;
   ffmpeg_data_packet write_packet;
+  unsigned read_buffer_size;
+  unsigned write_buffer_size;
+
+  uint64_t start_time;
+  unsigned frames;
 
 #ifdef USE_FFMPEG
   AVIOContext *input_avio;
@@ -29,10 +34,10 @@ typedef struct ffmpeg_remuxer_s {
   AVPacket *packet;
   AVDictionary *output_opts;
   int video_stream;
-  uint64_t start_time;
 #endif
 } ffmpeg_remuxer_t;
 
 int ffmpeg_remuxer_open(ffmpeg_remuxer_t *remuxer);
-int ffmpeg_remuxer_feed(ffmpeg_remuxer_t *remuxer);
-int ffmpeg_remuxer_close(ffmpeg_remuxer_t *remuxer);
+int ffmpeg_remuxer_feed(ffmpeg_remuxer_t *remuxer, int nframes);
+int ffmpeg_remuxer_flush(ffmpeg_remuxer_t *remuxer);
+void ffmpeg_remuxer_close(ffmpeg_remuxer_t *remuxer);

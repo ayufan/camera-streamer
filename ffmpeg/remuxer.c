@@ -3,18 +3,22 @@
 
 #ifdef USE_FFMPEG
 static AVRational time_base = {1, 1000LL * 1000LL};
-static int avio_ctx_buffer_size = 4096;
+static unsigned avio_ctx_buffer_size = 4096;
 
 static int ffmpeg_remuxer_init_avcontext(AVFormatContext **context, ffmpeg_remuxer_t *remuxer, int output, int (*packet)(void *opaque, uint8_t *buf, int buf_size))
 {
   uint8_t *buffer = NULL;
   AVIOContext *avio = NULL;
   int ret = -1;
+
+  unsigned buffer_size = MAX(
+    output ? remuxer->write_buffer_size : remuxer->read_buffer_size,
+    avio_ctx_buffer_size);
   
-  buffer = av_malloc(avio_ctx_buffer_size);
+  buffer = av_malloc(buffer_size);
   if (!buffer)
     return AVERROR(ENOMEM);
-  avio = avio_alloc_context(buffer, avio_ctx_buffer_size, output, remuxer->opaque, output ? NULL : packet, output ? packet : NULL, NULL);
+  avio = avio_alloc_context(buffer, buffer_size, output, remuxer->opaque, output ? NULL : packet, output ? packet : NULL, NULL);
   if (!avio)
     goto error;
   if (output && (ret = avformat_alloc_output_context2(context, NULL, remuxer->video_format, NULL)) < 0)
@@ -112,7 +116,7 @@ int ffmpeg_remuxer_open(ffmpeg_remuxer_t *remuxer)
   return 0;
 }
 
-int ffmpeg_remuxer_close(ffmpeg_remuxer_t *remuxer)
+void ffmpeg_remuxer_close(ffmpeg_remuxer_t *remuxer)
 {
   if (remuxer->output_context)
     av_write_trailer(remuxer->output_context);
@@ -123,11 +127,16 @@ int ffmpeg_remuxer_close(ffmpeg_remuxer_t *remuxer)
   av_dict_free(&remuxer->output_opts);
 }
 
-int ffmpeg_remuxer_feed(ffmpeg_remuxer_t *remuxer)
+int ffmpeg_remuxer_feed(ffmpeg_remuxer_t *remuxer, int nframes)
 {
   int ret = 0;
+  int frames = 0;
 
   while (ret >= 0) {
+    if (nframes > 0 && frames >= nframes) {
+      break;
+    }
+
     ret = av_read_frame(remuxer->input_context, remuxer->packet);
     if (ret == AVERROR_EOF) {
       ret = 0;
@@ -142,6 +151,9 @@ int ffmpeg_remuxer_feed(ffmpeg_remuxer_t *remuxer)
       av_packet_unref(remuxer->packet);
       continue;
     }
+
+    remuxer->frames++;
+    frames++;
 
     AVStream *in_stream = remuxer->input_context->streams[remuxer->packet->stream_index];
     remuxer->packet->stream_index = 0;
@@ -167,6 +179,22 @@ int ffmpeg_remuxer_feed(ffmpeg_remuxer_t *remuxer)
     }
   }
 
+  if (ret >= 0) {
+    return frames;
+  }
+
+  return ret;
+}
+
+int ffmpeg_remuxer_flush(ffmpeg_remuxer_t *remuxer)
+{
+  int ret = av_write_frame(remuxer->output_context, NULL);
+  if (ret == AVERROR_EOF) {
+    LOG_DEBUG(remuxer, "av_write_frame (flush): EOF", ret);
+  } else {
+    LOG_DEBUG(remuxer, "av_write_frame (flush): %08x", ret);
+  }
+
   return ret;
 }
 #else
@@ -175,13 +203,17 @@ int ffmpeg_remuxer_open(ffmpeg_remuxer_t *remuxer)
   return -1;
 }
 
-int ffmpeg_remuxer_feed(ffmpeg_remuxer_t *remuxer)
+int ffmpeg_remuxer_feed(ffmpeg_remuxer_t *remuxer, int nframes)
 {
   return -1;
 }
 
-int ffmpeg_remuxer_close(ffmpeg_remuxer_t *remuxer)
+int ffmpeg_remuxer_flush(ffmpeg_remuxer_t *remuxer)
 {
   return -1;
+}
+
+void ffmpeg_remuxer_close(ffmpeg_remuxer_t *remuxer)
+{
 }
 #endif
