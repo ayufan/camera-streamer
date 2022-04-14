@@ -44,13 +44,13 @@ clean:
 	rm -f .depend $(OBJS) $(OBJS:.o=.d) $(HTML_SRC) $(TARGET)
 
 headers:
-	find -name '*.h' | xargs -n1 $(CCACHE) $(CC) $(CFLAGS) -Wno-error -c -o /dev/null
+	find -name '*.h' | xargs -n1 $(CCACHE) $(CC) $(CFLAGS) -std=gnu17 -Wno-error -c -o /dev/null
 	find -name '*.hh' | xargs -n1 $(CCACHE) $(CXX) $(CFLAGS) -std=c++17 -Wno-error -c -o /dev/null
 
 -include $(OBJS:.o=.d)
 
 %.o: %.c
-	$(CCACHE) $(CC) -MMD $(CFLAGS) -c -o $@ $<
+	$(CCACHE) $(CC) -std=gnu17 -MMD $(CFLAGS) -c -o $@ $<
 
 %.o: %.cc
 	$(CCACHE) $(CXX) -std=c++17 -MMD $(CFLAGS) -c -o $@ $<
