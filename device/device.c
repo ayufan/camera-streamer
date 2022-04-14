@@ -54,7 +54,6 @@ buffer_list_t *device_open_buffer_list(device_t *dev, bool do_capture, unsigned 
 
 buffer_list_t *device_open_buffer_list2(device_t *dev, const char *path, bool do_capture, unsigned width, unsigned height, unsigned format, unsigned bytesperline, int nbufs, bool do_mmap)
 {
-  unsigned type;
   char name[64];
   int index = 0;
   buffer_list_t *buf_list;
@@ -239,7 +238,7 @@ void device_set_option_list(device_t *dev, const char *option_list)
   char *string = start;
   char *option;
 
-  while (option = strsep(&string, OPTION_VALUE_LIST_SEP)) {
+  while ((option = strsep(&string, OPTION_VALUE_LIST_SEP)) != NULL) {
     char *value = option;
     char *key = strsep(&value, "=");
 

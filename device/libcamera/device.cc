@@ -86,6 +86,9 @@ int libcamera_device_set_option(device_t *dev, const char *keyp, const char *val
     libcamera::ControlValue control_value;
 
     switch (control_id->type()) {
+    case libcamera::ControlTypeNone:
+      break;
+
     case libcamera::ControlTypeBool:
       control_value.set<bool>(atoi(value));
       break;

@@ -10,7 +10,6 @@ int v4l2_buffer_open(buffer_t *buf)
   struct v4l2_plane v4l2_plane = {0};
 
   buffer_list_t *buf_list = buf->buf_list;
-  device_t *dev = buf_list->dev;
 
   buf->v4l2 = calloc(1, sizeof(buffer_v4l2_t));
 
@@ -29,7 +28,7 @@ int v4l2_buffer_open(buffer_t *buf)
     v4l2_buf.memory = V4L2_MEMORY_DMABUF;
   }
 
-  ERR_IOCTL(buf_list, buf_list->v4l2->dev_fd, VIDIOC_QUERYBUF, &v4l2_buf, "Cannot query buffer %d", index);
+  ERR_IOCTL(buf_list, buf_list->v4l2->dev_fd, VIDIOC_QUERYBUF, &v4l2_buf, "Cannot query buffer %d", buf->index);
 
   uint64_t mem_offset = 0;
 
@@ -51,7 +50,7 @@ int v4l2_buffer_open(buffer_t *buf)
     v4l2_exp.type = v4l2_buf.type;
     v4l2_exp.index = buf->index;
     v4l2_exp.plane = 0;
-    ERR_IOCTL(buf_list, buf_list->v4l2->dev_fd, VIDIOC_EXPBUF, &v4l2_exp, "Can't export queue buffer=%u to DMA", index);
+    ERR_IOCTL(buf_list, buf_list->v4l2->dev_fd, VIDIOC_EXPBUF, &v4l2_exp, "Can't export queue buffer=%u to DMA", buf->index);
     buf->dma_fd = v4l2_exp.fd;
   }
 

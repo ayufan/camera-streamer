@@ -84,7 +84,7 @@ static void http_process(http_worker_t *worker, FILE *stream)
       continue;
 
     // allow last character to match `?` or ` `
-    if (worker->client_method[nlen-1] == name[nlen-1] || name[nlen-1] == '?' && worker->client_method[nlen-1] == ' ') {
+    if (worker->client_method[nlen-1] == name[nlen-1] || (name[nlen-1] == '?' && worker->client_method[nlen-1] == ' ')) {
       worker->current_method = &worker->methods[i];
       break;
     }
@@ -130,7 +130,7 @@ static void http_client(http_worker_t *worker)
 static int http_worker(http_worker_t *worker)
 {
   while (1) {
-    int addrlen = sizeof(worker->client_addr);
+    unsigned addrlen = sizeof(worker->client_addr);
     worker->client_fd = accept(worker->listen_fd, (struct sockaddr *)&worker->client_addr, &addrlen);
     if (worker->client_fd < 0) {
       goto error;
@@ -152,7 +152,7 @@ int http_server(http_server_options_t *options, http_method_t *methods)
     return -1;
   }
 
-  sigaction(SIGPIPE, &(struct sigaction){ SIG_IGN }, NULL);
+  sigaction(SIGPIPE, &(struct sigaction){{ SIG_IGN }}, NULL);
 
   for (int worker = 0; worker < options->maxcons; worker++) {
     char name[20];

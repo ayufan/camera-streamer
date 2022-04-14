@@ -62,7 +62,7 @@ int v4l2_buffer_list_open(buffer_list_t *buf_list)
 
   // JPEG is in 16x16 blocks (shrink image to fit) (but adapt to 32x32)
   // And ISP output
-  if (strstr(buf_list->name, "JPEG") || strstr(buf_list->name, "H264") || buf_list->do_capture && strstr(buf_list->name, "ISP")) {
+  if (strstr(buf_list->name, "JPEG") || strstr(buf_list->name, "H264") || (buf_list->do_capture && strstr(buf_list->name, "ISP"))) {
     buffer_format_t org_fmt = buf_list->fmt;
     fmt.width = shrink_to_block(fmt.width, 32);
     fmt.height = shrink_to_block(fmt.height, 32);

@@ -18,14 +18,6 @@ static const char *const STREAM_HEADER = "HTTP/1.0 200 OK\r\n"
                                          "Content-Type: multipart/x-mixed-replace;boundary=" PART_BOUNDARY "\r\n"
                                          "\r\n"
                                          "--" PART_BOUNDARY "\r\n";
-static const char *const STREAM_ERROR = "Content-Type: text/plain\r\n"
-                                        "\r\n"
-                                        "Error: %d (%s).\r\n"
-                                        "--" PART_BOUNDARY "\r\n";
-static const char *const STREAM_TIMEDOUT = "Content-Type: text/plain\r\n"
-                                        "\r\n"
-                                        "Timedout.\r\n"
-                                        "--" PART_BOUNDARY "\r\n";
 static const char *const STREAM_PART = "Content-Type: " CONTENT_TYPE "\r\n" CONTENT_LENGTH ": %u\r\n\r\n";
 static const char *const STREAM_BOUNDARY = "\r\n"
                                            "--" PART_BOUNDARY "\r\n";
@@ -57,7 +49,7 @@ int http_snapshot_buf_part(buffer_lock_t *buf_lock, buffer_t *buf, int frame, FI
 {
   fprintf(stream, "HTTP/1.1 200 OK\r\n");
   fprintf(stream, "Content-Type: image/jpeg\r\n");
-  fprintf(stream, "Content-Length: %d\r\n", buf->used);
+  fprintf(stream, "Content-Length: %zu\r\n", buf->used);
   fprintf(stream, "\r\n");
   fwrite(buf->start, buf->used, 1, stream);
   return 1;

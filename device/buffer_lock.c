@@ -128,7 +128,6 @@ int buffer_lock_write_loop(buffer_lock_t *buf_lock, int nframes, buffer_write_fn
     }
   }
 
-ok:
   buffer_lock_use(buf_lock, -1);
   return frames;
 

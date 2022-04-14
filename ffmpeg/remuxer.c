@@ -140,10 +140,10 @@ int ffmpeg_remuxer_feed(ffmpeg_remuxer_t *remuxer, int nframes)
     ret = av_read_frame(remuxer->input_context, remuxer->packet);
     if (ret == AVERROR_EOF) {
       ret = 0;
-      LOG_DEBUG(remuxer, "av_read_frame: EOF", ret);
+      LOG_DEBUG(remuxer, "av_read_frame: EOF");
       break;
     } else if (ret < 0) {
-      LOG_DEBUG(remuxer, "av_read_frame: %08x, pts: %d", ret, remuxer->packet->pts);
+      LOG_DEBUG(remuxer, "av_read_frame: %08x, pts: %ld", ret, remuxer->packet->pts);
       break;
     }
 
@@ -155,7 +155,6 @@ int ffmpeg_remuxer_feed(ffmpeg_remuxer_t *remuxer, int nframes)
     remuxer->frames++;
     frames++;
 
-    AVStream *in_stream = remuxer->input_context->streams[remuxer->packet->stream_index];
     remuxer->packet->stream_index = 0;
     AVStream *out_stream = remuxer->output_context->streams[remuxer->packet->stream_index];
 
@@ -173,7 +172,7 @@ int ffmpeg_remuxer_feed(ffmpeg_remuxer_t *remuxer, int nframes)
     av_packet_unref(remuxer->packet);
 
     if (ret == AVERROR_EOF) {
-      LOG_DEBUG(remuxer, "av_interleaved_write_frame: EOF, pts: %d, since_start: %d", ret, pts, since_start);
+      LOG_DEBUG(remuxer, "av_interleaved_write_frame: EOF, pts: %d, since_start: %d", pts, since_start);
     } else {
       LOG_DEBUG(remuxer, "av_interleaved_write_frame: %08x, pts: %d, since_start: %d", ret, pts, since_start);
     }
@@ -190,7 +189,7 @@ int ffmpeg_remuxer_flush(ffmpeg_remuxer_t *remuxer)
 {
   int ret = av_write_frame(remuxer->output_context, NULL);
   if (ret == AVERROR_EOF) {
-    LOG_DEBUG(remuxer, "av_write_frame (flush): EOF", ret);
+    LOG_DEBUG(remuxer, "av_write_frame (flush): EOF");
   } else {
     LOG_DEBUG(remuxer, "av_write_frame (flush): %08x", ret);
   }

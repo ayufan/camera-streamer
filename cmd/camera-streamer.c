@@ -119,7 +119,6 @@ int main(int argc, char *argv[])
 {
   int http_fd = -1;
   int ret = -1;
-  const char *env;
 
   if (parse_opts(all_options, argc, argv) < 0) {
     return -1;

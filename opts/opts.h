@@ -27,12 +27,12 @@ typedef struct options_s {
 
 #define OPTION_VALUE_LIST_SEP ";"
 
-#define OPTION_FORMAT_uint   "%d"
+#define OPTION_FORMAT_uint   "%u"
 #define OPTION_FORMAT_hex    "%08x"
 #define OPTION_FORMAT_bool   "%d"
 #define OPTION_FORMAT_float  "%f"
 #define OPTION_FORMAT_string "%s"
-#define OPTION_FORMAT_list "%s"
+#define OPTION_FORMAT_list   "%s"
 
 #define DEFINE_OPTION(_section, _name, _type) \
   { \

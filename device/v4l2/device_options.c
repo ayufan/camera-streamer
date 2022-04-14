@@ -23,7 +23,6 @@ error:
 static int v4l2_device_query_control_iter_id(device_t *dev, int fd, uint32_t *id)
 {
   struct v4l2_query_ext_ctrl qctrl = { .id = *id };
-  void *data = NULL;
 
   if (0 != ioctl (fd, VIDIOC_QUERY_EXT_CTRL, &qctrl)) {
     return -1;
@@ -120,7 +119,7 @@ int v4l2_device_set_option(device_t *dev, const char *key, const char *value)
       char *token;
       int tokens = 0;
 
-      for ( ; token = strsep(&string, ","); tokens++) {
+      for ( ; (token = strsep(&string, ",")) != NULL; tokens++) {
         if (tokens >= control->control.elems)
           continue;
 

@@ -22,7 +22,7 @@ int v4l2_device_open_media_device(device_t *dev)
     return -1;
   }
 
-  char path[256];
+  char path[300];
   sprintf(path, "/sys/dev/char/%d:%d/device", major(st.st_rdev), minor(st.st_rdev));
 
   struct dirent **namelist;
@@ -47,7 +47,6 @@ int v4l2_device_open_media_device(device_t *dev)
   }
   free(namelist);
 
-error:
   return ret;
 }
 
@@ -94,7 +93,7 @@ int v4l2_device_open_v4l2_subdev(device_t *dev, int subdev)
     }
 
     if (strstr(last, "/v4l-subdev") != last) {
-      LOG_VERBOSE(dev, "Link '%s' does not contain '/v4l-subdev'", link, path);
+      LOG_VERBOSE(dev, "Link '%s' does not contain '/v4l-subdev'", link);
       goto error;
     }
 

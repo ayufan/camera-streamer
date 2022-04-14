@@ -64,7 +64,7 @@ static int http_ffmpeg_write_to_stream(void *opaque, uint8_t *buf, int buf_size)
   size_t n = fwrite(buf, 1, buf_size, status->stream);
   fflush(status->stream);
 
-  LOG_DEBUG(status, "http_ffmpeg_write_to_stream: offset=%d, n=%d, buf_size=%d, error=%d",
+  LOG_DEBUG(status, "http_ffmpeg_write_to_stream: offset=%d, n=%zu, buf_size=%d, error=%d",
     status->stream_offset, n, buf_size, ferror(status->stream));
   status->stream_offset += n;
   if (ferror(status->stream))

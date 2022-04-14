@@ -24,7 +24,7 @@ int v4l2_device_open(device_t *dev)
 		LOG_ERROR(dev, "Device doesn't support streaming IO");
 	}
 
-  strcpy(dev->bus_info, v4l2_cap.bus_info);
+  strcpy(dev->bus_info, (char *)v4l2_cap.bus_info);
   dev->v4l2->subdev_fd = v4l2_device_open_v4l2_subdev(dev, 0);
 
   v4l2_device_query_controls(dev, dev->v4l2->dev_fd);

@@ -68,6 +68,8 @@
     "fourcc.h": "c",
     "device.h": "c",
     "log.h": "c",
-    "buffer_list.h": "c"
+    "buffer_list.h": "c",
+    "buffer.h": "c",
+    "stdbool.h": "c"
   }
 }

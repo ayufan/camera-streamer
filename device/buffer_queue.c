@@ -127,7 +127,7 @@ int buffer_list_enqueue(buffer_list_t *buf_list, buffer_t *dma_buf)
     memcpy(buf->start, dma_buf->start, dma_buf->used);
     uint64_t after = get_monotonic_time_us(NULL, NULL);
 
-    LOG_DEBUG(buf, "mmap copy: dest=%p, src=%p (%s), size=%zu, space=%zu, time=%dllus",
+    LOG_DEBUG(buf, "mmap copy: dest=%p, src=%p (%s), size=%zu, space=%zu, time=%luus",
       buf->start, dma_buf->start, dma_buf->name, dma_buf->used, buf->length, after-before);
   } else {
     LOG_DEBUG(buf, "dmabuf copy: dest=%p, src=%p (%s, dma_fd=%d), size=%zu",
@@ -141,8 +141,6 @@ int buffer_list_enqueue(buffer_list_t *buf_list, buffer_t *dma_buf)
   buf->used = dma_buf->used;
   buffer_consumed(buf, "copy-data");
   return 1;
-error:
-  return -1;
 }
 
 buffer_t *buffer_list_dequeue(buffer_list_t *buf_list)
@@ -162,7 +160,7 @@ buffer_t *buffer_list_dequeue(buffer_list_t *buf_list)
   buf->enqueued = false;
   buf->mmap_reflinks = 1;
 
-	LOG_DEBUG(buf_list, "Grabbed mmap buffer=%u, bytes=%d, used=%d, frame=%d, linked=%s",
+	LOG_DEBUG(buf_list, "Grabbed mmap buffer=%u, bytes=%zu, used=%zu, frame=%d, linked=%s",
     buf->index,
     buf->length,
     buf->used,

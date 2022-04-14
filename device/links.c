@@ -11,7 +11,6 @@
 int _build_fds(link_t *all_links, struct pollfd *fds, link_t **links, buffer_list_t **buf_lists, int max_n, int *max_timeout_ms)
 {
   int n = 0, nlinks = 0;
-  uint64_t now_us = get_monotonic_time_us(NULL, NULL);
 
   for (nlinks = 0; all_links[nlinks].source; nlinks++);
 
@@ -143,7 +142,6 @@ int links_step(link_t *all_links, int timeout_now_ms, int *timeout_next_ms)
   struct pollfd fds[N_FDS] = {0};
   link_t *links[N_FDS];
   buffer_list_t *buf_lists[N_FDS];
-  buffer_t *buf;
 
   int n = _build_fds(all_links, fds, links, buf_lists, N_FDS, &timeout_now_ms);
   print_pollfds(fds, n);
@@ -220,7 +218,7 @@ int links_step(link_t *all_links, int timeout_now_ms, int *timeout_next_ms)
           continue;
 #endif
 
-      if (buf = buffer_list_find_slot(buf_list)) {
+      if ((buf = buffer_list_find_slot(buf_list)) != NULL) {
         buffer_consumed(buf, "enqueued");
       }
     }

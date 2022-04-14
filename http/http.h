@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <pthread.h>
 #include <netinet/ip.h>
 
 typedef struct buffer_s buffer_t;
@@ -17,7 +18,7 @@ typedef struct http_method_s {
   const char *name;
   http_method_fn func;
   const char *content_type;
-  const char *content_body;
+  const void *content_body;
   unsigned content_length;
   unsigned *content_lengthp;
 } http_method_t;
@@ -38,8 +39,8 @@ typedef struct http_worker_s {
 } http_worker_t;
 
 typedef struct http_server_options_s {
-  int port;
-  int maxcons;
+  unsigned port;
+  unsigned maxcons;
 } http_server_options_t;
 
 int http_server(http_server_options_t *options, http_method_t *methods);

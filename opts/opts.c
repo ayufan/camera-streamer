@@ -5,9 +5,6 @@
 #include <stdio.h>
 #include <limits.h>
 
-static int option_handler_print(option_t *option, char *data);
-static int option_handler_set(option_t *option, char *data);
-
 static void print_help(option_t *options)
 {
   for (int i = 0; options[i].name; i++) {
@@ -20,7 +17,7 @@ static void print_help(option_t *options)
       char *token;
       int tokens = 0;
 
-      while (token = strsep(&string, OPTION_VALUE_LIST_SEP)) {
+      while ((token = strsep(&string, OPTION_VALUE_LIST_SEP)) != NULL) {
         if (tokens++ > 0)
           printf("\n%40s\t", "");
         printf("%s", token);

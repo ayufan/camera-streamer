@@ -37,7 +37,7 @@ int libcamera_buffer_open(buffer_t *buf)
       }
 
       if (offset + length != plane.offset) {
-        LOG_ERROR(buf, "Plane is not continuous: offset=%lld, expected=%lld", plane.offset, offset + length);
+        LOG_ERROR(buf, "Plane is not continuous: offset=%u, expected=%lu", plane.offset, offset + length);
       }
 
       length += plane.length;
@@ -51,7 +51,7 @@ int libcamera_buffer_open(buffer_t *buf)
     buf->dma_fd = dma_fd.get();
     buf->length = length;
 
-    LOG_DEBUG(buf, "Mapped buffer: start=%p, length=%d, fd=%d, planes=%d",
+    LOG_DEBUG(buf, "Mapped buffer: start=%p, length=%zu, fd=%d, planes=%lu",
       buf->start, buf->length, buf->dma_fd, buffer->planes().size());
   }
 
@@ -76,7 +76,7 @@ int libcamera_buffer_enqueue(buffer_t *buf, const char *who)
 
   request->reuse(libcamera::Request::ReuseBuffers);
 
-  if (buf->buf_list->dev->libcamera->camera->queueRequest(buf->libcamera->request.get()) < 0) {
+  if (camera->queueRequest(buf->libcamera->request.get()) < 0) {
     LOG_ERROR(buf, "Can't queue buffer.");
   }
   return 0;
@@ -107,7 +107,7 @@ int libcamera_buffer_list_dequeue(buffer_list_t *buf_list, buffer_t **bufp)
     return -1;
   }
 
-  if (index >= buf_list->nbufs) {
+  if (index >= (unsigned)buf_list->nbufs) {
     LOG_INFO(buf_list, "Received invalid index from `read`: %d >= %d", index, buf_list->nbufs);
     return -1;
   }

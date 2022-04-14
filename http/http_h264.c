@@ -65,8 +65,6 @@ bool h264_is_key_frame(buffer_t *buf)
 
 int http_video_buf_part(buffer_lock_t *buf_lock, buffer_t *buf, int frame, http_video_status_t *status)
 {
-  unsigned char *data = buf->start;
-
   if (!status->had_key_frame) {
     status->had_key_frame = h264_is_key_frame(buf);
   }
