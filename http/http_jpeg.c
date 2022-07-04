@@ -67,7 +67,7 @@ void http_snapshot(http_worker_t *worker, FILE *stream)
 
 int http_stream_buf_part(buffer_lock_t *buf_lock, buffer_t *buf, int frame, FILE *stream)
 {
-  if (!frame && !fprintf(stream, STREAM_HEADER)) {
+  if (!frame && !fputs(STREAM_HEADER, stream)) {
     return -1;
   }
   if (!fprintf(stream, STREAM_PART, buf->used)) {
@@ -76,7 +76,7 @@ int http_stream_buf_part(buffer_lock_t *buf_lock, buffer_t *buf, int frame, FILE
   if (!fwrite(buf->start, buf->used, 1, stream)) {
     return -1;
   }
-  if (!fprintf(stream, STREAM_BOUNDARY)) {
+  if (!fputs(STREAM_BOUNDARY, stream)) {
     return -1;
   }
 

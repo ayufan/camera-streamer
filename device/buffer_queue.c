@@ -4,6 +4,7 @@
 #include "opts/log.h"
 
 #include <pthread.h>
+#include <inttypes.h>
 
 pthread_mutex_t buffer_lock = PTHREAD_MUTEX_INITIALIZER;
 
@@ -127,7 +128,7 @@ int buffer_list_enqueue(buffer_list_t *buf_list, buffer_t *dma_buf)
     memcpy(buf->start, dma_buf->start, dma_buf->used);
     uint64_t after = get_monotonic_time_us(NULL, NULL);
 
-    LOG_DEBUG(buf, "mmap copy: dest=%p, src=%p (%s), size=%zu, space=%zu, time=%luus",
+    LOG_DEBUG(buf, "mmap copy: dest=%p, src=%p (%s), size=%zu, space=%zu, time=%" PRIu64 "us",
       buf->start, dma_buf->start, dma_buf->name, dma_buf->used, buf->length, after-before);
   } else {
     LOG_DEBUG(buf, "dmabuf copy: dest=%p, src=%p (%s, dma_fd=%d), size=%zu",

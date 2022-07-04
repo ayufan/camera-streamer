@@ -78,7 +78,7 @@ int http_video_buf_part(buffer_lock_t *buf_lock, buffer_t *buf, int frame, http_
   }
 
   if (!status->wrote_header) {
-    fprintf(status->stream, VIDEO_HEADER);
+    fputs(VIDEO_HEADER, status->stream);
     status->wrote_header = true;
   }
   if (!fwrite(buf->start, buf->used, 1, status->stream)) {
