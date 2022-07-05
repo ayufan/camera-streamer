@@ -7,6 +7,11 @@ std::string libcamera_device_option_normalize(std::string key)
   return key;
 }
 
+libcamera::ControlInfoMap libcamera_control_list(device_t *dev)
+{
+  return dev->libcamera->camera->controls();
+}
+
 int libcamera_device_open(device_t *dev)
 {
   dev->libcamera = new device_libcamera_t{};
@@ -35,7 +40,7 @@ int libcamera_device_open(device_t *dev)
 
 	LOG_INFO(dev, "Device path=%s opened", dev->path);
 
-  for (auto const &control : dev->libcamera->camera->controls()) {
+  for (auto const &control : libcamera_control_list(dev)) {
     if (!control.first)
       continue;
 
@@ -74,7 +79,7 @@ int libcamera_device_set_option(device_t *dev, const char *keyp, const char *val
 {
   auto key = libcamera_device_option_normalize(keyp);
 
-  for (auto const &control : dev->libcamera->camera->controls()) {
+  for (auto const &control : libcamera_control_list(dev)) {
     if (!control.first)
       continue;
 

@@ -1,6 +1,8 @@
 #ifdef USE_LIBCAMERA
 #include "libcamera.hh"
 
+#include <inttypes.h>
+
 int libcamera_buffer_open(buffer_t *buf)
 {
   buf->libcamera = new buffer_libcamera_t{};
@@ -37,7 +39,7 @@ int libcamera_buffer_open(buffer_t *buf)
       }
 
       if (offset + length != plane.offset) {
-        LOG_ERROR(buf, "Plane is not continuous: offset=%u, expected=%lu", plane.offset, offset + length);
+        LOG_ERROR(buf, "Plane is not continuous: offset=%u, expected=%" PRIu64, plane.offset, offset + length);
       }
 
       length += plane.length;
@@ -51,7 +53,7 @@ int libcamera_buffer_open(buffer_t *buf)
     buf->dma_fd = dma_fd.get();
     buf->length = length;
 
-    LOG_DEBUG(buf, "Mapped buffer: start=%p, length=%zu, fd=%d, planes=%lu",
+    LOG_DEBUG(buf, "Mapped buffer: start=%p, length=%zu, fd=%d, planes=%zu",
       buf->start, buf->length, buf->dma_fd, buffer->planes().size());
   }
 
