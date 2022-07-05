@@ -43,7 +43,7 @@ reboot
 ## Compile
 
 ```bash
-apt-get -y install libavformat-dev libavutil-dev libavcodec-dev libcamera-dev v4l-utils pkg-config build-essential
+apt-get -y install libavformat-dev libavutil-dev libavcodec-dev libcamera-dev v4l-utils pkg-config xxd build-essential
 make
 sudo make install
 ```

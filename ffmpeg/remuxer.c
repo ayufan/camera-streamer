@@ -1,6 +1,8 @@
 #include "ffmpeg/remuxer.h"
 #include "opts/log.h"
 
+#include <inttypes.h>
+
 #ifdef USE_FFMPEG
 static AVRational time_base = {1, 1000LL * 1000LL};
 static unsigned avio_ctx_buffer_size = 4096;
@@ -143,7 +145,7 @@ int ffmpeg_remuxer_feed(ffmpeg_remuxer_t *remuxer, int nframes)
       LOG_DEBUG(remuxer, "av_read_frame: EOF");
       break;
     } else if (ret < 0) {
-      LOG_DEBUG(remuxer, "av_read_frame: %08x, pts: %ld", ret, remuxer->packet->pts);
+      LOG_DEBUG(remuxer, "av_read_frame: %08x, pts: %" PRId64, ret, remuxer->packet->pts);
       break;
     }
 
@@ -162,7 +164,7 @@ int ffmpeg_remuxer_feed(ffmpeg_remuxer_t *remuxer, int nframes)
 
     // TODO: fix a PTS to be valid
     remuxer->packet->pos = -1;
-    int pts = remuxer->packet->dts = remuxer->packet->pts = av_rescale_q(
+    int64_t pts = remuxer->packet->dts = remuxer->packet->pts = av_rescale_q(
       get_monotonic_time_us(NULL, NULL) - remuxer->start_time,
       time_base,
       out_stream->time_base
@@ -172,9 +174,9 @@ int ffmpeg_remuxer_feed(ffmpeg_remuxer_t *remuxer, int nframes)
     av_packet_unref(remuxer->packet);
 
     if (ret == AVERROR_EOF) {
-      LOG_DEBUG(remuxer, "av_interleaved_write_frame: EOF, pts: %d, since_start: %d", pts, since_start);
+      LOG_DEBUG(remuxer, "av_interleaved_write_frame: EOF, pts: %" PRId64 ", since_start: %d", pts, since_start);
     } else {
-      LOG_DEBUG(remuxer, "av_interleaved_write_frame: %08x, pts: %d, since_start: %d", ret, pts, since_start);
+      LOG_DEBUG(remuxer, "av_interleaved_write_frame: %08x, pts: %" PRId64 ", since_start: %d", ret, pts, since_start);
     }
   }
 
