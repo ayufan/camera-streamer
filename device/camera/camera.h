@@ -64,7 +64,7 @@ typedef struct camera_s {
 
 camera_t *camera_open(camera_options_t *camera);
 int camera_set_params(camera_t *camera);
-void camera_close(camera_t *camera);
+void camera_close(camera_t **camera);
 int camera_run(camera_t *camera);
 
 link_t *camera_ensure_capture(camera_t *camera, buffer_list_t *capture);

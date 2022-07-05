@@ -14,6 +14,22 @@ extern unsigned int html_video_html_len;
 extern unsigned char html_jmuxer_min_js[];
 extern unsigned int html_jmuxer_min_js_len;
 
+camera_t *camera;
+
+void camera_http_option(http_worker_t *worker, FILE *stream)
+{
+  if (strstr(worker->client_method, "autofocus")) {
+    if (camera && !device_set_option_string(camera->camera, "AfTrigger", "1")) {
+      http_200(stream, "Auto-focus triggered.\r\n");
+    } else {
+      http_500(stream, "Cannot set auto-focus.\r\n");
+    }
+    return;
+  }
+
+  http_404(stream, "No option found.\r\n");
+}
+
 http_method_t http_methods[] = {
   { "GET /snapshot?", http_snapshot },
   { "GET /stream?", http_stream },
@@ -23,6 +39,7 @@ http_method_t http_methods[] = {
   { "GET /video.h264?", http_h264_video },
   { "GET /video.mkv?", http_mkv_video },
   { "GET /video.mp4?", http_mp4_video },
+  { "GET /option?", camera_http_option },
   { "GET /jmuxer.min.js?", http_content, "text/javascript", html_jmuxer_min_js, 0, &html_jmuxer_min_js_len },
   { "GET /?", http_content, "text/html", html_index_html, 0, &html_index_html_len },
   { }
@@ -130,10 +147,10 @@ int main(int argc, char *argv[])
   }
 
   while (true) {
-    camera_t *camera = camera_open(&camera_options);
+    camera = camera_open(&camera_options);
     if (camera) {
       ret = camera_run(camera);
-      camera_close(camera);
+      camera_close(&camera);
     }
 
     if (camera_options.auto_reconnect > 0) {

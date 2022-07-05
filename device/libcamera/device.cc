@@ -7,9 +7,14 @@ std::string libcamera_device_option_normalize(std::string key)
   return key;
 }
 
-libcamera::ControlInfoMap libcamera_control_list(device_t *dev)
+libcamera::ControlInfoMap::Map libcamera_control_list(device_t *dev)
 {
-  return dev->libcamera->camera->controls();
+  libcamera::ControlInfoMap::Map controls_map;
+  for (auto const &control : dev->libcamera->camera->controls()) {
+    controls_map[control.first] = control.second;
+  }
+  controls_map[&libcamera::controls::draft::AfTrigger] = libcamera::ControlInfo();
+  return controls_map;
 }
 
 int libcamera_device_open(device_t *dev)

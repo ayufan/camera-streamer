@@ -45,6 +45,7 @@ typedef struct http_server_options_s {
 
 int http_server(http_server_options_t *options, http_method_t *methods);
 void http_content(http_worker_t *worker, FILE *stream);
+void http_200(FILE *stream, const char *data);
 void http_404(FILE *stream, const char *data);
 void http_500(FILE *stream, const char *data);
 
@@ -54,6 +55,7 @@ void http_stream(http_worker_t *worker, FILE *stream);
 void http_jpeg_capture(struct buffer_s *buf);
 void http_jpeg_lowres_capture(struct buffer_s *buf);
 bool http_jpeg_needs_buffer();
+void http_option(http_worker_t *worker, FILE *stream);
 
 // H264
 bool http_h264_needs_buffer();

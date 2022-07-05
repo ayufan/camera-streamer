@@ -25,14 +25,17 @@ camera_t *camera_open(camera_options_t *options)
   return camera;
 
 error:
-  camera_close(camera);
+  camera_close(&camera);
   return NULL;
 }
 
-void camera_close(camera_t *camera)
+void camera_close(camera_t **camerap)
 {
-  if (!camera)
+  if (!camerap || !*camerap)
     return;
+
+  camera_t *camera = *camerap;
+  *camerap = NULL;
 
   for (int i = MAX_DEVICES; i-- > 0; ) {
     if (camera->devices[i]) {
