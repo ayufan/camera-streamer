@@ -1,6 +1,39 @@
 #ifdef USE_LIBCAMERA
 #include "libcamera.hh"
 
+struct libcamera_format_s {
+  unsigned fourcc;
+  libcamera::PixelFormat pixelFormat;
+};
+
+static libcamera_format_s libcamera_formats[] = {
+  { V4L2_PIX_FMT_RGB24, libcamera::formats::RGB888 },
+  { V4L2_PIX_FMT_BGR24, libcamera::formats::BGR888 },
+  { 0 },
+};
+
+libcamera::PixelFormat libcamera_from_fourcc(unsigned fourcc)
+{
+  for (int i = 0; libcamera_formats[i].fourcc; i++) {
+    if (libcamera_formats[i].fourcc == fourcc) {
+      return libcamera_formats[i].pixelFormat;
+    }
+  }
+
+  return libcamera::PixelFormat(fourcc);
+}
+
+unsigned libcamera_to_fourcc(libcamera::PixelFormat pixelFormat)
+{
+  for (int i = 0; libcamera_formats[i].fourcc; i++) {
+    if (libcamera_formats[i].pixelFormat == pixelFormat) {
+      return libcamera_formats[i].fourcc;
+    }
+  }
+
+  return pixelFormat.fourcc();
+}
+
 int libcamera_buffer_list_open(buffer_list_t *buf_list)
 {
   if (!buf_list->do_capture) {
@@ -33,7 +66,7 @@ int libcamera_buffer_list_open(buffer_list_t *buf_list)
 
   auto &configuration = buf_list->libcamera->configuration->at(0);
   configuration.size = libcamera::Size(buf_list->fmt.width, buf_list->fmt.height);
-  configuration.pixelFormat = libcamera::PixelFormat(buf_list->fmt.format);
+  configuration.pixelFormat = libcamera_from_fourcc(buf_list->fmt.format);
   if (buf_list->fmt.bytesperline > 0) {
     configuration.stride = buf_list->fmt.bytesperline;
   }
@@ -50,7 +83,7 @@ int libcamera_buffer_list_open(buffer_list_t *buf_list)
 
   buf_list->fmt.width = configuration.size.width;
   buf_list->fmt.height = configuration.size.height;
-  buf_list->fmt.format = configuration.pixelFormat.fourcc();
+  buf_list->fmt.format = libcamera_to_fourcc(configuration.pixelFormat);
   buf_list->fmt.bytesperline = configuration.stride;
   buf_list->fmt.nbufs = configuration.bufferCount;
 
