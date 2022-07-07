@@ -53,6 +53,22 @@ sudo make install
 There are three modes of operation implemented offering different
 compatibility to performance.
 
+### Use a preconfigured systemd services
+
+The simplest is to use preconfigured `service/camera-streamer*.service`.
+Those can be used as an example, and can be configured to fine tune parameters.
+
+Example:
+
+```bash
+systemctl enable $PWD/service/camera-streamer-arducam-16MP.service
+systemctl start camera-streamer-arducam-16MP
+```
+
+If everything was OK, there will be web-server at `http://<IP>:8080/`.
+
+Error messages can be read `journalctl -xef -u camera-streamer-arducam-16MP`.
+
 ### High-compatibility via `libcamera`
 
 This script uses `libcamera` to access camera and provide

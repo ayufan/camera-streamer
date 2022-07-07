@@ -1,0 +1,32 @@
+[Unit]
+Description=camera-streamer web camera
+After=network.target
+
+[Service]
+ExecStartPre=-/usr/bin/v4l2-ctl -d /dev/v4l-subdev1 -c focus_absolute=2200 # set fixed-focus
+ExecStart=/usr/local/bin/camera-streamer \
+  -camera-path=/base/soc/i2c0mux/i2c@1/arducam_64mp@1a \
+  -camera-type=libcamera \
+  -camera-format=YUYV \
+  -camera-width=2328 -camera-height=1748 \
+  -camera-fps=30 \
+  -camera-nbufs=2 \ # use two memory buffers to optimise usage
+  -camera-high_res_factor=1.5 \ # the high-res is 1552x1165
+  -camera-low_res_factor=3.0 \ # the low-res is 776x582
+  -camera-options=brightness=0.1 \ # bump brightness slightly
+  -camera-auto-focus=0 # disable auto-focus
+
+User=nobody
+Group=nogroup
+SupplementaryGroups=video i2c
+Restart=always
+RestartSec=10
+Nice=10
+IOSchedulingClass=idle
+IOSchedulingPriority=7
+CPUWeight=20
+AllowedCPUs=1-2
+MemoryMax=250M
+
+[Install]
+WantedBy=multi-user.target

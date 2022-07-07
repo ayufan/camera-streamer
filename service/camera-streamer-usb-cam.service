@@ -1,0 +1,28 @@
+[Unit]
+Description=camera-streamer web camera
+After=network.target
+
+[Service]
+ExecStart=/usr/local/bin/camera-streamer \
+  -camera-path=/dev/video0 \
+  -camera-format=JPEG \
+  -camera-width=1920 -camera-height=1080 \
+  -camera-fps=30 \
+  -camera-nbufs=2 \ # use two memory buffers to optimise usage
+  -camera-high_res_factor=1.0 \ # the high-res is 1920x1080
+  -camera-low_res_factor=2.0 # the low-res is 960x540
+
+User=nobody
+Group=nogroup
+SupplementaryGroups=video i2c
+Restart=always
+RestartSec=10
+Nice=10
+IOSchedulingClass=idle
+IOSchedulingPriority=7
+CPUWeight=20
+AllowedCPUs=1-2
+MemoryMax=250M
+
+[Install]
+WantedBy=multi-user.target
