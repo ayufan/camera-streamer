@@ -56,8 +56,7 @@ camera_options_t camera_options = {
   .high_res_factor = 1.0,
   .low_res_factor = 0.0,
   .auto_reconnect = 0,
-  .options =
-    "aftrigger=1",
+  .options = "",
   .h264 = {
     .options =
       "video_bitrate_mode=0" OPTION_VALUE_LIST_SEP
@@ -97,6 +96,7 @@ option_value_t camera_formats[] = {
   { "RGBP", V4L2_PIX_FMT_RGB565 },
   { "RGB24", V4L2_PIX_FMT_RGB24 },
   { "RGB", V4L2_PIX_FMT_RGB24 },
+  { "BGR", V4L2_PIX_FMT_BGR24 },
   {}
 };
 
@@ -119,6 +119,7 @@ option_t all_options[] = {
   DEFINE_OPTION(camera, low_res_factor, float),
   DEFINE_OPTION_PTR(camera, options, list),
   DEFINE_OPTION(camera, auto_reconnect, uint),
+  DEFINE_OPTION(camera, auto_focus, bool, "1"),
 
   DEFINE_OPTION_PTR(camera, isp.options, list),
   DEFINE_OPTION_PTR(camera, jpeg.options, list),

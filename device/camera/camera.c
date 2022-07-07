@@ -88,6 +88,10 @@ int camera_set_params(camera_t *camera)
   device_set_option_list(camera->camera, camera->options.options);
   device_set_option_list(camera->isp, camera->options.isp.options);
 
+  if (camera->options.auto_focus) {
+    device_set_option_string(camera->camera, "AfTrigger", "1");
+  }
+
   // Set some defaults
   for (int i = 0; i < 2; i++) {
     device_set_option_list(camera->legacy_isp[i], camera->options.isp.options);

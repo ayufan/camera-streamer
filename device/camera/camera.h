@@ -22,6 +22,7 @@ typedef struct camera_options_s {
   bool allow_dma;
   float high_res_factor;
   float low_res_factor;
+  bool auto_focus;
   unsigned auto_reconnect;
 
   char options[CAMERA_OPTIONS_LENGTH];
