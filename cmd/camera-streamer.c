@@ -16,18 +16,43 @@ extern unsigned int html_jmuxer_min_js_len;
 
 camera_t *camera;
 
-void camera_http_option(http_worker_t *worker, FILE *stream)
+void *camera_http_set_option(http_worker_t *worker, FILE *stream, const char *key, const char *value, void *headersp)
 {
-  if (strstr(worker->client_method, "autofocus")) {
-    if (camera && !device_set_option_string(camera->camera, "AfTrigger", "1")) {
-      http_200(stream, "Auto-focus triggered.\r\n");
-    } else {
-      http_500(stream, "Cannot set auto-focus.\r\n");
+  bool *headers = headersp;
+
+  if (!camera) {
+    if (!*headers) {
+      http_500(stream, "");
+      *headers = true;
     }
-    return;
+    fprintf(stream, "No camera attached.\r\n");
+    return NULL;
   }
 
-  http_404(stream, "No option found.\r\n");
+  if (device_set_option_string(camera->camera, key, value) == 0) {
+    if (!*headers) {
+      http_200(stream, "");
+      *headers = true;
+    }
+    fprintf(stream, "The '%s' was set to '%s'.\r\n", key, value);
+  } else {
+    if (!*headers) {
+      http_500(stream, "");
+      *headers = true;
+    }
+    fprintf(stream, "Cannot set '%s' to '%s'.\r\n", key, value);
+  }
+
+  return NULL;
+}
+
+void camera_http_option(http_worker_t *worker, FILE *stream)
+{
+  bool headers = false;
+  http_enum_params(worker, stream, camera_http_set_option, &headers);
+  if (!headers) {
+    http_404(stream, "No options passed.\r\n");
+  }
 }
 
 http_method_t http_methods[] = {

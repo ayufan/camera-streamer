@@ -11,6 +11,7 @@ typedef struct buffer_s buffer_t;
 typedef struct http_worker_s http_worker_t;
 
 typedef void (*http_method_fn)(struct http_worker_s *worker, FILE *stream);
+typedef void *(*http_param_fn)(struct http_worker_s *worker, FILE *stream, const char *key, const char *value, void *opaque);
 
 #define BUFSIZE 256
 
@@ -48,6 +49,7 @@ void http_content(http_worker_t *worker, FILE *stream);
 void http_200(FILE *stream, const char *data);
 void http_404(FILE *stream, const char *data);
 void http_500(FILE *stream, const char *data);
+void *http_enum_params(http_worker_t *worker, FILE *stream, http_param_fn fn, void *opaque);
 
 // M-JPEG
 void http_snapshot(http_worker_t *worker, FILE *stream);

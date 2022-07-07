@@ -52,6 +52,40 @@ error:
   return -1;
 }
 
+void *http_enum_params(http_worker_t *worker, FILE *stream, http_param_fn fn, void *opaque)
+{
+  const char *params = strstr(worker->client_method, "?");
+  if (!params) {
+    return NULL;
+  }
+
+  void *ret = NULL;
+  char *start = strdup(params + 1);
+  char *string = start;
+  char *option;
+
+  // Drop after ` `
+  if ((option = strstr(start, " ")) != NULL) {
+    *option = 0;
+  }
+
+  while ((option = strsep(&string, "&")) != NULL) {
+    char *value = option;
+    char *key = strsep(&value, "=");
+
+    ret = fn(worker, stream, key, value, opaque);
+    if (ret) {
+      break;
+    }
+
+    // consume all separators
+    while (strsep(&value, "="));
+  }
+
+  free(start);
+  return ret;
+}
+
 static void http_process(http_worker_t *worker, FILE *stream)
 {
   // Read headers
