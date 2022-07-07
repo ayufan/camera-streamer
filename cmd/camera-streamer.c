@@ -119,7 +119,7 @@ option_t all_options[] = {
   DEFINE_OPTION(camera, low_res_factor, float),
   DEFINE_OPTION_PTR(camera, options, list),
   DEFINE_OPTION(camera, auto_reconnect, uint),
-  DEFINE_OPTION(camera, auto_focus, bool, "1"),
+  DEFINE_OPTION_DEFAULT(camera, auto_focus, bool, "1"),
 
   DEFINE_OPTION_PTR(camera, isp.options, list),
   DEFINE_OPTION_PTR(camera, jpeg.options, list),
