@@ -89,6 +89,28 @@ error:
   return -1;
 }
 
+void libcamera_buffer_dump_metadata(buffer_t *buf)
+{
+  auto &metadata = buf->libcamera->request->metadata();
+  auto idMap = metadata.idMap();
+
+  for (auto const &control : metadata) {
+    if (!control.first)
+      continue;
+
+    auto control_id = control.first;
+    auto control_value = control.second;
+    std::string control_id_name = "";
+
+    if (auto control_id_info = idMap ? idMap->at(control_id) : NULL) {
+      control_id_name = control_id_info->name();
+    }
+
+    LOG_VERBOSE(buf, "Metadata: %s (%08x, type=%d): %s",
+      control_id_name.c_str(), control_id, control_value.type(), control_value.toString().c_str());
+  }
+}
+
 void buffer_list_libcamera_t::libcamera_buffer_list_dequeued(libcamera::Request *request)
 {
   if (request->status() == libcamera::Request::RequestComplete) {
@@ -117,6 +139,10 @@ int libcamera_buffer_list_dequeue(buffer_list_t *buf_list, buffer_t **bufp)
   }
 
   *bufp = buf_list->bufs[index];
+
+  if (index == 0) {
+    libcamera_buffer_dump_metadata(*bufp);
+  }
   return 0;
 }
 
