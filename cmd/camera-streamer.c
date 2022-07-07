@@ -56,6 +56,7 @@ camera_options_t camera_options = {
   .high_res_factor = 1.0,
   .low_res_factor = 0.0,
   .auto_reconnect = 0,
+  .auto_focus = true,
   .options = "",
   .h264 = {
     .options =

@@ -9,13 +9,18 @@ ExecStart=/usr/local/bin/camera-streamer \
   -camera-format=YUYV \
   -camera-width=2328 -camera-height=1748 \
   -camera-fps=30 \
-  -camera-nbufs=2 \ # use two memory buffers to optimise usage
-  -camera-high_res_factor=1.5 \ # the high-res is 1552x1165
-  -camera-low_res_factor=3.0 \ # the low-res is 776x582
-  -camera-options=brightness=0.1 # bump brightness slightly
+  ; use two memory buffers to optimise usage
+  -camera-nbufs=2 \
+  ; the high-res is 1552x1165
+  -camera-high_res_factor=1.5 \
+  ; the low-res is 776x582
+  -camera-low_res_factor=3.0 \
+  ; bump brightness slightly
+  -camera-options=brightness=0.1 \
+  ; disable auto-focus
+  -camera-auto_focus=0
 
-User=nobody
-Group=nogroup
+DynamicUser=yes
 SupplementaryGroups=video i2c
 Restart=always
 RestartSec=10

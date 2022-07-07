@@ -8,12 +8,14 @@ ExecStart=/usr/local/bin/camera-streamer \
   -camera-format=JPEG \
   -camera-width=1920 -camera-height=1080 \
   -camera-fps=30 \
-  -camera-nbufs=2 \ # use two memory buffers to optimise usage
-  -camera-high_res_factor=1.0 \ # the high-res is 1920x1080
-  -camera-low_res_factor=2.0 # the low-res is 960x540
+  ; use two memory buffers to optimise usage
+  -camera-nbufs=2 \
+  ; the high-res is 1920x1080
+  -camera-high_res_factor=1.0 \
+  ; the low-res is 960x540
+  -camera-low_res_factor=2.0
 
-User=nobody
-Group=nogroup
+DynamicUser=yes
 SupplementaryGroups=video i2c
 Restart=always
 RestartSec=10
