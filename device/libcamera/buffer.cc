@@ -77,10 +77,12 @@ int libcamera_buffer_enqueue(buffer_t *buf, const char *who)
   auto const &camera = buf->buf_list->dev->libcamera->camera;
 
   request->reuse(libcamera::Request::ReuseBuffers);
+  request->controls() = std::move(buf->buf_list->dev->libcamera->controls);
 
   if (camera->queueRequest(buf->libcamera->request.get()) < 0) {
     LOG_ERROR(buf, "Can't queue buffer.");
   }
+  buf->buf_list->dev->libcamera->controls.clear();
   return 0;
 
 error:
