@@ -72,6 +72,8 @@
     "buffer.h": "c",
     "stdbool.h": "c",
     "v4l2.h": "c",
-    "stdlib.h": "c"
+    "stdlib.h": "c",
+    "stdint.h": "c",
+    "videodev2.h": "c"
   }
 }
