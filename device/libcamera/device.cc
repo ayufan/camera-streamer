@@ -64,8 +64,10 @@ int libcamera_device_open(device_t *dev)
   dev->libcamera->camera = dev->libcamera->camera_manager->get(dev->path);
   if (!dev->libcamera->camera) {
     if (dev->libcamera->camera_manager->cameras().size()) {
-      for(auto const &camera : dev->libcamera->camera_manager->cameras()) {
-        LOG_INFO(dev, "Available Camera: %s", camera->id().c_str());
+      LOG_INFO(dev, "Available cameras (%zu)", dev->libcamera->camera_manager->cameras().size());
+
+      for (auto const &camera : dev->libcamera->camera_manager->cameras()) {
+        LOG_INFO(dev, "- %s", camera->id().c_str());
       }
     } else {
       LOG_INFO(dev, "No available cameras");
