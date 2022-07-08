@@ -1,7 +1,6 @@
 #include "opts/log.h"
 #include "opts/opts.h"
 
-#define _GNU_SOURCE
 #include <string.h>
 
 char *

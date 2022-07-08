@@ -3,7 +3,7 @@ SRC := $(wildcard **/*.c **/*/*.c **/*.cc **/*/*.cc)
 HEADERS := $(wildcard **/*.h **/*/*.h **/*.hh **/*/*.hh)
 HTML := $(wildcard html/*.js html/*.html)
 
-CFLAGS := -Werror -Wall -g -I$(CURDIR)
+CFLAGS := -Werror -Wall -g -I$(CURDIR) -D_GNU_SOURCE
 LDLIBS := -lpthread -lstdc++
 
 ifneq (x,x$(shell which ccache))
