@@ -51,7 +51,14 @@ void camera_http_option(http_worker_t *worker, FILE *stream)
   bool headers = false;
   http_enum_params(worker, stream, camera_http_set_option, &headers);
   if (!headers) {
-    http_404(stream, "No options passed.\r\n");
+    http_404(stream, "");
+    fprintf(stream, "No options passed.\r\n");
+  }
+
+  fprintf(stream, "\r\nSet: /option?name=value\r\n\r\n");
+
+  if (camera) {
+    device_dump_options(camera->camera, stream);
   }
 }
 

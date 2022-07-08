@@ -17,22 +17,12 @@ libcamera::ControlInfoMap::Map libcamera_control_list(device_t *dev)
   return controls_map;
 }
 
-void libcamera_device_dump(device_t *dev)
+void libcamera_device_dump_options(device_t *dev, FILE *stream)
 {
   auto &properties = dev->libcamera->camera->properties();
   auto idMap = properties.idMap();
 
-  for (auto const &control : libcamera_control_list(dev)) {
-    if (!control.first)
-      continue;
-
-    auto control_id = control.first;
-    auto control_key = libcamera_device_option_normalize(control_id->name());
-    auto control_info = control.second;
-
-    LOG_VERBOSE(dev, "Available control: %s (%08x, type=%d): %s",
-      control_id->name().c_str(), control_id->id(), control_id->type(), control_info.toString().c_str());
-  }
+  fprintf(stream, "Properties:\n");
 
   for (auto const &control : properties) {
     if (!control.first)
@@ -46,8 +36,25 @@ void libcamera_device_dump(device_t *dev)
       control_id_name = control_id_info->name();
     }
 
-    LOG_VERBOSE(dev, "Property: %s (%08x, type=%d): %s",
-      control_id_name.c_str(), control_id, control_value.type(), control_value.toString().c_str());
+    fprintf(stream, "- property: %s (%08x, type=%d): %s\n",
+      control_id_name.c_str(), control_id, control_value.type(),
+      control_value.toString().c_str());
+  }
+
+  fprintf(stream, "\n");
+  fprintf(stream, "Options:\n");
+
+  for (auto const &control : libcamera_control_list(dev)) {
+    if (!control.first)
+      continue;
+
+    auto control_id = control.first;
+    auto control_key = libcamera_device_option_normalize(control_id->name());
+    auto control_info = control.second;
+
+    fprintf(stream, "- available option: %s (%08x, type=%d): %s\n",
+      control_id->name().c_str(), control_id->id(), control_id->type(),
+      control_info.toString().c_str());
   }
 }
 
@@ -80,8 +87,6 @@ int libcamera_device_open(device_t *dev)
   }
 
 	LOG_INFO(dev, "Device path=%s opened", dev->path);
-
-  libcamera_device_dump(dev);
   return 0;
 
 error:

@@ -57,6 +57,7 @@ typedef struct buffer_libcamera_s {
 
 int libcamera_device_open(device_t *dev);
 void libcamera_device_close(device_t *dev);
+void libcamera_device_dump_options(device_t *dev, FILE *stream);
 int libcamera_device_set_fps(device_t *dev, int desired_fps);
 int libcamera_device_set_option(device_t *dev, const char *key, const char *value);
 

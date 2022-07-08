@@ -211,6 +211,13 @@ int device_video_force_key(device_t *dev)
   return 0;
 }
 
+void device_dump_options(device_t *dev, FILE *stream)
+{
+  if (dev || dev->hw->device_dump_options) {
+    dev->hw->device_dump_options(dev, stream);
+  }
+}
+
 int device_set_fps(device_t *dev, int desired_fps)
 {
   if (!dev || dev->hw->device_set_fps(dev, desired_fps) < 0)
