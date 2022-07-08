@@ -22,7 +22,7 @@ void libcamera_device_dump_options(device_t *dev, FILE *stream)
   auto &properties = dev->libcamera->camera->properties();
   auto idMap = properties.idMap();
 
-  fprintf(stream, "Properties:\n");
+  fprintf(stream, "%s Properties:\n", dev->name);
 
   for (auto const &control : properties) {
     if (!control.first)
@@ -42,7 +42,7 @@ void libcamera_device_dump_options(device_t *dev, FILE *stream)
   }
 
   fprintf(stream, "\n");
-  fprintf(stream, "Options:\n");
+  fprintf(stream, "%s Options:\n", dev->name);
 
   for (auto const &control : libcamera_control_list(dev)) {
     if (!control.first)

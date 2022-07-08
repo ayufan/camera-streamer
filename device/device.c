@@ -213,7 +213,7 @@ int device_video_force_key(device_t *dev)
 
 void device_dump_options(device_t *dev, FILE *stream)
 {
-  if (dev || dev->hw->device_dump_options) {
+  if (dev && dev->hw->device_dump_options) {
     dev->hw->device_dump_options(dev, stream);
   }
 }

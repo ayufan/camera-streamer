@@ -29,7 +29,16 @@ void *camera_http_set_option(http_worker_t *worker, FILE *stream, const char *ke
     return NULL;
   }
 
-  if (device_set_option_string(camera->camera, key, value) == 0) {
+  bool set = false;
+
+  for (int i = 0; i < MAX_DEVICES; i++) {
+    if (device_set_option_string(camera->devices[i], key, value) == 0) {
+      set = true;
+      break;
+    }
+  }
+
+  if (set) {
     if (!*headers) {
       http_200(stream, "");
       *headers = true;
@@ -58,7 +67,9 @@ void camera_http_option(http_worker_t *worker, FILE *stream)
   fprintf(stream, "\r\nSet: /option?name=value\r\n\r\n");
 
   if (camera) {
-    device_dump_options(camera->camera, stream);
+    for (int i = 0; i < MAX_DEVICES; i++) {
+      device_dump_options(camera->devices[i], stream);
+    }
   }
 }
 
