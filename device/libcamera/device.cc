@@ -56,6 +56,7 @@ void libcamera_device_dump_options(device_t *dev, FILE *stream)
       control_id->name().c_str(), control_id->id(), control_id->type(),
       control_info.toString().c_str());
   }
+  fprintf(stream, "\n");
 }
 
 int libcamera_device_open(device_t *dev)

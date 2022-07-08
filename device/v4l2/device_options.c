@@ -155,3 +155,58 @@ error:
   free(valuep);
   return ret;
 }
+
+void v4l2_device_dump_options(device_t *dev, FILE *stream)
+{
+  fprintf(stream, "%s Options:\n", dev->name);
+
+  for (int i = 0; i < dev->v4l2->ncontrols; i++) {
+    device_v4l2_control_t *control = &dev->v4l2->controls[i];
+
+    fprintf(stream, "- available option: %s (%08x, type=%d): ",
+      control->control.name, control->control.id, control->control.type);
+
+    switch(control->control.type) {
+    case V4L2_CTRL_TYPE_U8:
+    case V4L2_CTRL_TYPE_U16:
+    case V4L2_CTRL_TYPE_U32:
+    case V4L2_CTRL_TYPE_BOOLEAN:
+    case V4L2_CTRL_TYPE_INTEGER:
+      fprintf(stream, "[%lld..%lld]\n", control->control.minimum, control->control.maximum);
+      break;
+
+    case V4L2_CTRL_TYPE_BUTTON:
+      fprintf(stream, "button\n");
+      break;
+
+    case V4L2_CTRL_TYPE_MENU:
+    case V4L2_CTRL_TYPE_INTEGER_MENU:
+      fprintf(stream, "[%lld..%lld]\n", control->control.minimum, control->control.maximum);
+
+      for (int j = control->control.minimum; j <= control->control.maximum; j++) {
+        struct v4l2_querymenu menu = {
+          .id = control->control.id,
+          .index = j
+        };
+
+        if (0 == ioctl(control->fd, VIDIOC_QUERYMENU, &menu)) {
+          if (control->control.type == V4L2_CTRL_TYPE_MENU) {
+            fprintf(stream, "\t\t%d: %s\n", j, menu.name);
+          } else {
+            fprintf(stream, "\t\t%d: %lld\n", j, menu.value);
+          }
+        }
+      }
+      break;
+
+    case V4L2_CTRL_TYPE_STRING:
+      fprintf(stream, "(string)\n");
+      break;
+
+    default:
+      fprintf(stream, "(unsupported)\n");
+      break;
+    }
+  }
+  fprintf(stream, "\n");
+}
