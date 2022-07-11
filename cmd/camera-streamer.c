@@ -75,6 +75,7 @@ void camera_http_option(http_worker_t *worker, FILE *stream)
 
 http_method_t http_methods[] = {
   { "GET /snapshot?", http_snapshot },
+  { "GET /snapshot.jpg?", http_snapshot },
   { "GET /stream?", http_stream },
   { "GET /?action=snapshot", http_snapshot },
   { "GET /?action=stream", http_stream },
