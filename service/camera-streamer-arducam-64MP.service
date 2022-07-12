@@ -3,6 +3,7 @@ Description=camera-streamer web camera
 After=network.target
 
 [Service]
+ConditionPathExists=/sys/bus/i2c/drivers/arducam_64mp/10-001a/video4linux
 ; set fixed-focus
 ExecStartPre=-/usr/bin/v4l2-ctl -d /dev/v4l-subdev1 -c focus_absolute=2200
 
