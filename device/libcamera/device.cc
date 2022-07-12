@@ -13,7 +13,6 @@ libcamera::ControlInfoMap::Map libcamera_control_list(device_t *dev)
   for (auto const &control : dev->libcamera->camera->controls()) {
     controls_map[control.first] = control.second;
   }
-  controls_map[&libcamera::controls::draft::AfTrigger] = libcamera::ControlInfo();
   return controls_map;
 }
 
