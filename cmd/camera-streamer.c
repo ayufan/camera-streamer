@@ -90,7 +90,7 @@ http_method_t http_methods[] = {
 };
 
 camera_options_t camera_options = {
-  .path = "/dev/video0",
+  .path = "",
   .width = 1920,
   .height = 1080,
   .format = 0,
@@ -154,12 +154,12 @@ option_value_t camera_type[] = {
 };
 
 option_t all_options[] = {
-  DEFINE_OPTION_PTR(camera, path, string, "Chooses the camera to use."),
+  DEFINE_OPTION_PTR(camera, path, string, "Chooses the camera to use. If empty connect to default."),
+  DEFINE_OPTION_VALUES(camera, type, camera_type, "Select camera type."),
   DEFINE_OPTION(camera, width, uint, "Set the camera capture width."),
   DEFINE_OPTION(camera, height, uint, "Set the camera capture height."),
   DEFINE_OPTION_VALUES(camera, format, camera_formats, "Set the camera capture format."),
   DEFINE_OPTION(camera, nbufs, uint, "Set number of capture buffers. Preferred 2 or 3."),
-  DEFINE_OPTION_VALUES(camera, type, camera_type, "Select camera capture."),
   DEFINE_OPTION(camera, fps, uint, "Set the desired capture framerate."),
   DEFINE_OPTION_DEFAULT(camera, allow_dma, bool, "1", "Prefer to use DMA access to reduce memory copy."),
   DEFINE_OPTION(camera, high_res_factor, float, "Set the desired high resolution output scale factor."),

@@ -58,6 +58,19 @@ void libcamera_device_dump_options(device_t *dev, FILE *stream)
   fprintf(stream, "\n");
 }
 
+void libcamera_print_cameras(device_t *dev)
+{
+  if (dev->libcamera->camera_manager->cameras().size()) {
+    LOG_INFO(dev, "Available cameras (%zu)", dev->libcamera->camera_manager->cameras().size());
+
+    for (auto const &camera : dev->libcamera->camera_manager->cameras()) {
+      LOG_INFO(dev, "- %s", camera->id().c_str());
+    }
+  } else {
+    LOG_INFO(dev, "No available cameras");
+  }
+}
+
 int libcamera_device_open(device_t *dev)
 {
   dev->libcamera = new device_libcamera_t{};
@@ -68,25 +81,27 @@ int libcamera_device_open(device_t *dev)
     LOG_ERROR(dev, "Cannot start camera_manager.");
   }
 
-  dev->libcamera->camera = dev->libcamera->camera_manager->get(dev->path);
-  if (!dev->libcamera->camera) {
-    if (dev->libcamera->camera_manager->cameras().size()) {
-      LOG_INFO(dev, "Available cameras (%zu)", dev->libcamera->camera_manager->cameras().size());
-
-      for (auto const &camera : dev->libcamera->camera_manager->cameras()) {
-        LOG_INFO(dev, "- %s", camera->id().c_str());
-      }
-    } else {
-      LOG_INFO(dev, "No available cameras");
+  if (strlen(dev->path) == 0) {
+    if (dev->libcamera->camera_manager->cameras().size() != 1) {
+      libcamera_print_cameras(dev);
+      LOG_ERROR(dev, "Too many cameras was found. Cannot select default.");
     }
+
+    dev->libcamera->camera = dev->libcamera->camera_manager->cameras().front();
+  } else {
+    dev->libcamera->camera = dev->libcamera->camera_manager->get(dev->path);
+  }
+
+  if (!dev->libcamera->camera) {
+    libcamera_print_cameras(dev);
     LOG_ERROR(dev, "Camera `%s` was not found.", dev->path);
   }
 
   if (dev->libcamera->camera->acquire()) {
-    LOG_ERROR(dev, "Failed to acquire `%s` camera.", dev->path);
+    LOG_ERROR(dev, "Failed to acquire `%s` camera.", dev->libcamera->camera->id().c_str());
   }
 
-	LOG_INFO(dev, "Device path=%s opened", dev->path);
+	LOG_INFO(dev, "Device path=%s opened", dev->libcamera->camera->id().c_str());
   return 0;
 
 error:
