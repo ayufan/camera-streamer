@@ -1,8 +1,13 @@
+;
+; Official Raspberry Pi v2.1 8MP camera based on the Sony IMX219 chip
+; https://www.raspberrypi.com/products/camera-module-v2/
+;
 [Unit]
 Description=camera-streamer web camera
 After=network.target
 
 [Service]
+ConditionPathExists=/sys/bus/i2c/drivers/imx219/10-0010/video4linux
 ExecStart=/usr/local/bin/camera-streamer \
   -camera-path=/base/soc/i2c0mux/i2c@1/imx219@10 \
   -camera-type=libcamera \
@@ -17,8 +22,6 @@ ExecStart=/usr/local/bin/camera-streamer \
   -camera-low_res_factor=4 \
   ; bump brightness slightly
   -camera-options=brightness=0.1 \
-  ; disable auto-focus
-  -camera-auto_focus=0
 
 DynamicUser=yes
 SupplementaryGroups=video i2c
