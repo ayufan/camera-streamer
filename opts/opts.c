@@ -5,29 +5,75 @@
 #include <stdio.h>
 #include <limits.h>
 
-static void print_help(option_t *options)
+#define OPT_LENGTH 30
+
+static void print_help(option_t *options, const char *cmd)
 {
+  printf("Usage:\n");
+  printf("$ %s <options...>\n", cmd);
+  printf("\n");
+
+  printf("Options:\n");
   for (int i = 0; options[i].name; i++) {
     option_t *option = &options[i];
+    int len = 0;
 
-    printf("%40s\t", option->name);
+    len += printf("  -%s", option->name);
+    if (option->default_value) {
+      len += printf("[=%s]", option->default_value);
+    } else if (option->value_mapping) {
+      len += printf("=arg");
+    } else {
+      len += printf("=%s", option->format);
+    }
+    if (len < OPT_LENGTH) {
+      printf("%*s", OPT_LENGTH-len, " ");
+    }
+
+    printf("- %s", option->description);
+    if (option->value_mapping) {
+      printf(" Values: ");
+      for (int j = 0; option->value_mapping[j].name; j++) {
+        if (j > 0) printf(", ");
+        printf("%s", option->value_mapping[j].name);
+      }
+      printf(".");
+    }
+    printf("\n");
+  }
+  printf("\n");
+
+  printf("Configuration:\n");
+  for (int i = 0; options[i].name; i++) {
+    option_t *option = &options[i];
+    int len = 0;
 
     if (option->value_list) {
       char *string = option->value_list;
       char *token;
-      int tokens = 0;
+
+      if (!*string)
+        continue;
 
       while ((token = strsep(&string, OPTION_VALUE_LIST_SEP)) != NULL) {
-        if (tokens++ > 0)
-          printf("\n%40s\t", "");
-        printf("%s", token);
+        len = printf("  -%s=", option->name);
+        if (len < OPT_LENGTH) {
+          printf("%*s", OPT_LENGTH-len, " ");
+        }
+        printf("%s\n", token);
       }
-
-      if (!tokens)
-        printf("(none)");
     } else if (option->value_string) {
+      len += printf("  -%s=", option->name);
+      if (len < OPT_LENGTH) {
+        printf("%*s", OPT_LENGTH-len, " ");
+      }
       printf(option->format, option->value_string);
+      printf("\n");
     } else {
+      len += printf("  -%s=", option->name);
+      if (len < OPT_LENGTH) {
+        printf("%*s", OPT_LENGTH-len, " ");
+      }
       if (option->value_mapping) {
         for (int j = 0; option->value_mapping[j].name; j++) {
           if (option->value_mapping[j].value == *option->value) {
@@ -39,10 +85,10 @@ static void print_help(option_t *options)
 
       unsigned mask = UINT_MAX >> ((sizeof(*option->value) - option->size) * 8);
       printf(option->format, *option->value & mask);
+      printf("\n");
     }
-
-    printf("\n");
   }
+  printf("\n");
 }
 
 static int parse_opt(option_t *options, const char *key)
@@ -116,7 +162,7 @@ int parse_opts(option_t *options, int argc, char *argv[])
     }
 
     if (!strcmp(key, "help")) {
-      print_help(options);
+      print_help(options, argv[0]);
       return -1;
     }
 

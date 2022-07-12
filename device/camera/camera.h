@@ -26,6 +26,7 @@ typedef struct camera_options_s {
   unsigned auto_reconnect;
 
   char options[CAMERA_OPTIONS_LENGTH];
+  bool list_options;
 
   struct {
     char options[CAMERA_OPTIONS_LENGTH];

@@ -23,6 +23,7 @@ typedef struct options_s {
   option_value_t *value_mapping;
   unsigned size;
   const char *default_value;
+  const char *description;
 } option_t;
 
 #define OPTION_VALUE_LIST_SEP ";"
@@ -34,38 +35,42 @@ typedef struct options_s {
 #define OPTION_FORMAT_string "%s"
 #define OPTION_FORMAT_list   "%s"
 
-#define DEFINE_OPTION(_section, _name, _type) \
+#define DEFINE_OPTION(_section, _name, _type, _desc) \
   { \
     .name = #_section "-" #_name, \
     .value_##_type = &_section##_options._name, \
     .format = OPTION_FORMAT_##_type, \
     .size = sizeof(_section##_options._name), \
+    .description = _desc, \
   }
 
-#define DEFINE_OPTION_DEFAULT(_section, _name, _type, _default_value) \
+#define DEFINE_OPTION_DEFAULT(_section, _name, _type, _default_value, _desc) \
   { \
     .name = #_section "-" #_name, \
     .value_##_type = &_section##_options._name, \
     .format = OPTION_FORMAT_##_type, \
     .size = sizeof(_section##_options._name), \
     .default_value = _default_value, \
+    .description = _desc, \
   }
 
-#define DEFINE_OPTION_VALUES(_section, _name, _value_mapping) \
+#define DEFINE_OPTION_VALUES(_section, _name, _value_mapping, _desc) \
   { \
     .name = #_section "-" #_name, \
     .value_hex = &_section##_options._name, \
     .format = OPTION_FORMAT_hex, \
     .value_mapping = _value_mapping, \
     .size = sizeof(_section##_options._name), \
+    .description = _desc, \
   }
 
-#define DEFINE_OPTION_PTR(_section, _name, _type) \
+#define DEFINE_OPTION_PTR(_section, _name, _type, _desc) \
   { \
     .name = #_section "-" #_name, \
     .value_##_type = _section##_options._name, \
     .format = OPTION_FORMAT_##_type, \
     .size = sizeof(_section##_options._name), \
+    .description = _desc, \
   }
 
 int parse_opts(option_t *options, int argc, char *argv[]);

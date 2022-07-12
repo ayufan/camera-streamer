@@ -102,6 +102,7 @@ camera_options_t camera_options = {
   .auto_reconnect = 0,
   .auto_focus = true,
   .options = "",
+  .list_options = false,
   .h264 = {
     .options =
       "video_bitrate_mode=0" OPTION_VALUE_LIST_SEP
@@ -153,30 +154,31 @@ option_value_t camera_type[] = {
 };
 
 option_t all_options[] = {
-  DEFINE_OPTION_PTR(camera, path, string),
-  DEFINE_OPTION(camera, width, uint),
-  DEFINE_OPTION(camera, height, uint),
-  DEFINE_OPTION_VALUES(camera, format, camera_formats),
-  DEFINE_OPTION(camera, nbufs, uint),
-  DEFINE_OPTION_VALUES(camera, type, camera_type),
-  DEFINE_OPTION(camera, fps, uint),
-  DEFINE_OPTION_DEFAULT(camera, allow_dma, bool, "1"),
-  DEFINE_OPTION(camera, high_res_factor, float),
-  DEFINE_OPTION(camera, low_res_factor, float),
-  DEFINE_OPTION_PTR(camera, options, list),
-  DEFINE_OPTION(camera, auto_reconnect, uint),
-  DEFINE_OPTION_DEFAULT(camera, auto_focus, bool, "1"),
+  DEFINE_OPTION_PTR(camera, path, string, "Chooses the camera to use."),
+  DEFINE_OPTION(camera, width, uint, "Set the camera capture width."),
+  DEFINE_OPTION(camera, height, uint, "Set the camera capture height."),
+  DEFINE_OPTION_VALUES(camera, format, camera_formats, "Set the camera capture format."),
+  DEFINE_OPTION(camera, nbufs, uint, "Set number of capture buffers. Preferred 2 or 3."),
+  DEFINE_OPTION_VALUES(camera, type, camera_type, "Select camera capture."),
+  DEFINE_OPTION(camera, fps, uint, "Set the desired capture framerate."),
+  DEFINE_OPTION_DEFAULT(camera, allow_dma, bool, "1", "Prefer to use DMA access to reduce memory copy."),
+  DEFINE_OPTION(camera, high_res_factor, float, "Set the desired high resolution output scale factor."),
+  DEFINE_OPTION(camera, low_res_factor, float, "Set the desired low resolution output scale factor."),
+  DEFINE_OPTION_PTR(camera, options, list, "Set the camera options. List all available options with `-camera-list_options`."),
+  DEFINE_OPTION(camera, auto_reconnect, uint, "Set the camera auto-reconnect delay in seconds."),
+  DEFINE_OPTION_DEFAULT(camera, auto_focus, bool, "1", "Do auto-focus on start-up."),
 
-  DEFINE_OPTION_PTR(camera, isp.options, list),
-  DEFINE_OPTION_PTR(camera, jpeg.options, list),
-  DEFINE_OPTION_PTR(camera, h264.options, list),
+  DEFINE_OPTION_PTR(camera, isp.options, list, "Set the ISP processing options. List all available options with `-camera-list_options`."),
+  DEFINE_OPTION_PTR(camera, jpeg.options, list, "Set the JPEG compression options. List all available options with `-camera-list_options`."),
+  DEFINE_OPTION_PTR(camera, h264.options, list, "Set the H264 encoding options. List all available options with `-camera-list_options`."),
+  DEFINE_OPTION_DEFAULT(camera, list_options, bool, "1", "List all available options and exit."),
 
-  DEFINE_OPTION(http, port, uint),
-  DEFINE_OPTION(http, maxcons, uint),
+  DEFINE_OPTION(http, port, uint, "Set the HTTP web-server port."),
+  DEFINE_OPTION(http, maxcons, uint, "Set maximum number of concurrent HTTP connections."),
 
-  DEFINE_OPTION_DEFAULT(log, debug, bool, "1"),
-  DEFINE_OPTION_DEFAULT(log, verbose, bool, "1"),
-  DEFINE_OPTION_PTR(log, filter, list),
+  DEFINE_OPTION_DEFAULT(log, debug, bool, "1", "Enable debug logging."),
+  DEFINE_OPTION_DEFAULT(log, verbose, bool, "1", "Enable verbose logging."),
+  DEFINE_OPTION_PTR(log, filter, list, "Enable debug logging from the given files. Ex.: `-log-filter=buffer.cc`"),
 
   {}
 };
@@ -187,6 +189,18 @@ int main(int argc, char *argv[])
   int ret = -1;
 
   if (parse_opts(all_options, argc, argv) < 0) {
+    return -1;
+  }
+
+  if (camera_options.list_options) {
+    camera = camera_open(&camera_options);
+    if (camera) {
+      printf("\n");
+      for (int i = 0; i < MAX_DEVICES; i++) {
+        device_dump_options(camera->devices[i], stdout);
+      }
+      camera_close(&camera);
+    }
     return -1;
   }
 
