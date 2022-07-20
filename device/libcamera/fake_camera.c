@@ -15,7 +15,7 @@
 
 void fake_camera_sensor(struct media_v2_topology *topology)
 {
-  struct media_v2_entity *ents = (struct media_v2_entity *)topology->ptr_entities;
+  struct media_v2_entity *ents = (struct media_v2_entity *)(intptr_t)topology->ptr_entities;
   if (!ents) {
     return;
   }
