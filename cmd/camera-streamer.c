@@ -168,9 +168,9 @@ option_t all_options[] = {
   DEFINE_OPTION(camera, low_res_factor, float, "Set the desired low resolution output scale factor."),
   DEFINE_OPTION_PTR(camera, options, list, "Set the camera options. List all available options with `-camera-list_options`."),
   DEFINE_OPTION(camera, auto_reconnect, uint, "Set the camera auto-reconnect delay in seconds."),
-  DEFINE_OPTION_DEFAULT(camera, auto_focus, bool, "1", "Do auto-focus on start-up."),
-  DEFINE_OPTION_DEFAULT(camera, vflip, bool, "1", "Do vertical image flip."),
-  DEFINE_OPTION_DEFAULT(camera, hflip, bool, "1", "Do horizontal image flip."),
+  DEFINE_OPTION_DEFAULT(camera, auto_focus, bool, "1", "Do auto-focus on start-up (does not work with all camera)."),
+  DEFINE_OPTION_DEFAULT(camera, vflip, bool, "1", "Do vertical image flip (does not work with all camera)."),
+  DEFINE_OPTION_DEFAULT(camera, hflip, bool, "1", "Do horizontal image flip (does not work with all camera)."),
 
   DEFINE_OPTION_PTR(camera, isp.options, list, "Set the ISP processing options. List all available options with `-camera-list_options`."),
   DEFINE_OPTION_PTR(camera, jpeg.options, list, "Set the JPEG compression options. List all available options with `-camera-list_options`."),

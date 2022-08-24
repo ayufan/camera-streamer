@@ -9,7 +9,8 @@ ExecStart=/usr/local/bin/camera-streamer \
   -camera-type=libcamera \
   -camera-format=YUYV \
   -camera-width=2328 -camera-height=1748 \
-  -camera-fps=30 \
+  -camera-options=rotation=90 \
+  -camera-fps=15 \
   ; use two memory buffers to optimise usage
   -camera-nbufs=2 \
   ; the high-res is 1552x1165
@@ -19,7 +20,7 @@ ExecStart=/usr/local/bin/camera-streamer \
   ; bump brightness slightly
   -camera-options=brightness=0.1 \
   ; disable auto-focus
-  -camera-auto_focus=0
+  -camera-auto_focus=1
 
 DynamicUser=yes
 SupplementaryGroups=video i2c

@@ -74,6 +74,10 @@
     "v4l2.h": "c",
     "stdlib.h": "c",
     "stdint.h": "c",
-    "videodev2.h": "c"
+    "videodev2.h": "c",
+    "opts.h": "c",
+    "ioctl.h": "c",
+    "syscall.h": "c",
+    "unistd.h": "c"
   }
 }
