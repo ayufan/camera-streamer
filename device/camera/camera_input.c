@@ -22,6 +22,8 @@ static int camera_configure_input_v4l2(camera_t *camera)
     return -1;
   }
 
+  device_set_rotation(camera->camera, camera->options.vflip, camera->options.hflip);
+
   camera->camera->opts.allow_dma = camera->options.allow_dma;
 
   if (strstr(camera->camera->bus_info, "usb")) {
@@ -79,10 +81,20 @@ static int camera_configure_input_libcamera(camera_t *camera)
     return -1;
   }
 
+  device_set_rotation(camera->camera, camera->options.vflip, camera->options.hflip);
+
   camera->camera->opts.allow_dma = camera->options.allow_dma;
 
   buffer_list_t *camera_capture = device_open_buffer_list(
-    camera->camera, true, camera->options.width / camera->options.high_res_factor, camera->options.height / camera->options.high_res_factor, camera->options.format, 0, camera->options.nbufs, true);
+    camera->camera,
+    true,
+    camera->options.width / camera->options.high_res_factor,
+    camera->options.height / camera->options.high_res_factor,
+    camera->options.format,
+    0,
+    camera->options.nbufs,
+    true
+  );
   if (!camera_capture) {
     return -1;
   }

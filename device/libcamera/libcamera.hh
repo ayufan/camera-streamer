@@ -40,6 +40,7 @@ typedef struct device_libcamera_s {
   std::shared_ptr<libcamera::CameraManager> camera_manager;
   std::shared_ptr<libcamera::Camera> camera;
   libcamera::ControlList controls;
+  bool vflip, hflip;
 } device_libcamera_t;
 
 typedef struct buffer_list_libcamera_s {
@@ -59,6 +60,7 @@ int libcamera_device_open(device_t *dev);
 void libcamera_device_close(device_t *dev);
 void libcamera_device_dump_options(device_t *dev, FILE *stream);
 int libcamera_device_set_fps(device_t *dev, int desired_fps);
+int libcamera_device_set_rotation(device_t *dev, bool vflip, bool hflip);
 int libcamera_device_set_option(device_t *dev, const char *key, const char *value);
 
 int libcamera_buffer_open(buffer_t *buf);

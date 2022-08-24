@@ -127,6 +127,13 @@ int libcamera_device_set_fps(device_t *dev, int desired_fps)
   return 0;
 }
 
+int libcamera_device_set_rotation(device_t *dev, bool vflip, bool hflip)
+{
+  dev->libcamera->vflip = vflip;
+  dev->libcamera->hflip = hflip;
+  return 0;
+}
+
 int libcamera_device_set_option(device_t *dev, const char *keyp, const char *value)
 {
   auto key = libcamera_device_option_normalize(keyp);

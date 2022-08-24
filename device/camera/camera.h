@@ -24,6 +24,14 @@ typedef struct camera_options_s {
   float low_res_factor;
   bool auto_focus;
   unsigned auto_reconnect;
+  union {
+    bool vflip;
+    unsigned vflip_align;
+  };
+  union {
+    bool hflip;
+    unsigned hflip_align;
+  };
 
   char options[CAMERA_OPTIONS_LENGTH];
   bool list_options;

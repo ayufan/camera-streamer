@@ -226,6 +226,20 @@ int device_set_fps(device_t *dev, int desired_fps)
   return 0;
 }
 
+int device_set_rotation(device_t *dev, bool vflip, bool hflip)
+{
+  if (!dev)
+    return -1;
+
+  if (dev->hw->device_set_rotation) {
+    return dev->hw->device_set_rotation(dev, vflip, hflip);
+  }
+
+  int hret = device_set_option_string(dev, "horizontal_flip", hflip ? "1" : "0");
+  int vret = device_set_option_string(dev, "vertical_flip", vflip ? "1" : "0");
+  return hret ? hret : vret;
+}
+
 int device_set_option_string(device_t *dev, const char *key, const char *value)
 {
   if (!dev) {

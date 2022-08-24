@@ -16,6 +16,7 @@ typedef struct device_hw_s {
   int (*device_video_force_key)(device_t *dev);
   void (*device_dump_options)(device_t *dev, FILE *stream);
   int (*device_set_fps)(device_t *dev, int desired_fps);
+  int (*device_set_rotation)(device_t *dev, bool vflip, bool hflip);
   int (*device_set_option)(device_t *dev, const char *key, const char *value);
 
   int (*buffer_open)(buffer_t *buf);
@@ -69,6 +70,7 @@ int device_video_force_key(device_t *dev);
 
 void device_dump_options(device_t *dev, FILE *stream);
 int device_set_fps(device_t *dev, int desired_fps);
+int device_set_rotation(device_t *dev, bool vflip, bool hflip);
 int device_set_option_string(device_t *dev, const char *option, const char *value);
 void device_set_option_list(device_t *dev, const char *option_list);
 

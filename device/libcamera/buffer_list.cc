@@ -76,6 +76,15 @@ int libcamera_buffer_list_open(buffer_list_t *buf_list)
   if (buf_list->libcamera->configuration->validate() == libcamera::CameraConfiguration::Invalid) {
     LOG_ERROR(buf_list, "Camera configuration invalid");
   }
+  if (buf_list->dev->libcamera->vflip) {
+    buf_list->libcamera->configuration->transform |= libcamera::Transform::VFlip;
+  }
+  if (buf_list->dev->libcamera->hflip) {
+    buf_list->libcamera->configuration->transform |= libcamera::Transform::HFlip;
+  }
+  if (!!(buf_list->libcamera->configuration->transform & libcamera::Transform::Transpose)) {
+    LOG_ERROR(buf_list, "Transformation requiring transpose not supported");
+  }
 
   if (buf_list->dev->libcamera->camera->configure(buf_list->libcamera->configuration.get()) < 0) {
     LOG_ERROR(buf_list, "Failed to configure camera");
@@ -89,7 +98,6 @@ int libcamera_buffer_list_open(buffer_list_t *buf_list)
 
   buf_list->libcamera->allocator = std::make_shared<libcamera::FrameBufferAllocator>(
     buf_list->dev->libcamera->camera);
-
 
   for (libcamera::StreamConfiguration &stream_config : *buf_list->libcamera->configuration) {
     if (buf_list->libcamera->allocator->allocate(stream_config.stream()) < 0) {

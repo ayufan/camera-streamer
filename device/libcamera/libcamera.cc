@@ -6,6 +6,7 @@ device_hw_t libcamera_device_hw = {
   .device_close = libcamera_device_close,
   .device_dump_options = libcamera_device_dump_options,
   .device_set_fps = libcamera_device_set_fps,
+  .device_set_rotation = libcamera_device_set_rotation,
   .device_set_option = libcamera_device_set_option,
 
   .buffer_open = libcamera_buffer_open,
