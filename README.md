@@ -263,6 +263,24 @@ device/buffer_lock.c: http_jpeg: Captured buffer JPEG:capture:mplane:buf1 (refs=
 device/buffer_lock.c: http_jpeg: Captured buffer JPEG:capture:mplane:buf2 (refs=2), frame=159/0, processing_ms=18.5, frame_ms=8.3
 ```
 
+## WebRTC experimental support
+
+A proof of concept of integrated WebRTC support using python library aiortc is implemented.
+Currently the HTTP server is hardcoded and run on `http://<ip>:8000/`.
+
+It does require main branch version of aiortc installed.
+
+```bash
+apt-get install -y libvpx-dev libopus-dev python3-pip
+git clone https://github.com/aiortc/aiortc.git /usr/src/aiortc
+cd /usr/src/aiortc
+pip3 install .
+
+make clean
+make -j5
+./camera-streamer ... -webrtc-enable
+```
+
 ## License
 
 GNU General Public License v3.0

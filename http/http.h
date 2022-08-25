@@ -69,4 +69,10 @@ void http_mkv_video(http_worker_t *worker, FILE *stream);
 void http_mp4_video(http_worker_t *worker, FILE *stream);
 void http_mov_video(http_worker_t *worker, FILE *stream);
 
+// WebRTC
+bool http_webrtc_needs_buffer();
+void http_webrtc_capture(buffer_t *buf);
+
+void http_run_webrtc();
+
 #define HTTP_LOW_RES_PARAM "res=low"

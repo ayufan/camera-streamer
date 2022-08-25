@@ -28,6 +28,7 @@ static const char *h264_names[2] = {
 static void h264_capture(buffer_t *buf)
 {
   http_h264_capture(buf);
+  http_webrtc_capture(buf);
   rtsp_h264_capture(buf);
 }
 
@@ -39,7 +40,7 @@ static void h264_lowres_capture(buffer_t *buf)
 
 static bool h264_needs_buffer()
 {
-  return http_h264_needs_buffer() | rtsp_h264_needs_buffer();
+  return http_h264_needs_buffer() | rtsp_h264_needs_buffer() | http_webrtc_needs_buffer();
 }
 
 static link_callbacks_t h264_callbacks[2] = {

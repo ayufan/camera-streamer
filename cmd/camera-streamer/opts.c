@@ -1,4 +1,5 @@
 #include "http/http.h"
+#include "http/aiortc/aiortc.h"
 #include "opts/opts.h"
 #include "opts/log.h"
 #include "opts/fourcc.h"
@@ -47,6 +48,10 @@ log_options_t log_options = {
 
 rtsp_options_t rtsp_options = {
   .port = 0,
+};
+
+webrtc_options_t webrtc_options = {
+  .enable = true,
 };
 
 option_value_t camera_formats[] = {
@@ -105,6 +110,8 @@ option_t all_options[] = {
   DEFINE_OPTION_DEFAULT(log, debug, bool, "1", "Enable debug logging."),
   DEFINE_OPTION_DEFAULT(log, verbose, bool, "1", "Enable verbose logging."),
   DEFINE_OPTION_PTR(log, filter, list, "Enable debug logging from the given files. Ex.: `-log-filter=buffer.cc`"),
+
+  DEFINE_OPTION_DEFAULT(webrtc, enable, bool, "1", "Enable experimental support for WebRTC under http://<ip>:8000/."),
 
   {}
 };

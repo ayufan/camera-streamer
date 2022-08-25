@@ -1,4 +1,5 @@
 #include "http/http.h"
+#include "http/aiortc/aiortc.h"
 #include "opts/opts.h"
 #include "opts/log.h"
 #include "opts/fourcc.h"
@@ -11,6 +12,7 @@
 extern option_t all_options[];
 extern camera_options_t camera_options;
 extern http_server_options_t http_options;
+extern webrtc_options_t webrtc_options;
 extern http_method_t http_methods[];
 
 camera_t *camera;
@@ -34,6 +36,10 @@ int main(int argc, char *argv[])
       camera_close(&camera);
     }
     return -1;
+  }
+
+  if (webrtc_options.enable) {
+    http_run_webrtc();
   }
 
   http_fd = http_server(&http_options, http_methods);
