@@ -12,6 +12,7 @@ endif
 
 USE_FFMPEG ?= $(shell pkg-config libavutil libavformat libavcodec && echo 1)
 USE_LIBCAMERA ?= $(shell pkg-config libcamera && echo 1)
+USE_RTSP ?= $(shell pkg-config live555 && echo 1)
 
 ifeq (1,$(DEBUG))
 CFLAGS += -g
@@ -25,6 +26,11 @@ endif
 ifeq (1,$(USE_LIBCAMERA))
 CFLAGS += -DUSE_LIBCAMERA $(shell pkg-config --cflags libcamera)
 LDLIBS +=  $(shell pkg-config --libs libcamera)
+endif
+
+ifeq (1,$(USE_RTSP))
+CFLAGS += -DUSE_RTSP $(shell pkg-config --cflags live555)
+LDLIBS +=  $(shell pkg-config --libs live555)
 endif
 
 HTML_SRC = $(addsuffix .c,$(HTML))

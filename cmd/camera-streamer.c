@@ -3,6 +3,7 @@
 #include "opts/log.h"
 #include "opts/fourcc.h"
 #include "device/camera/camera.h"
+#include "rtsp/rtsp.h"
 
 #include <signal.h>
 #include <unistd.h>
@@ -212,6 +213,8 @@ int main(int argc, char *argv[])
   if (http_fd < 0) {
     goto error;
   }
+
+  rtsp_server();
 
   while (true) {
     camera = camera_open(&camera_options);

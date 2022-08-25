@@ -4,11 +4,16 @@
             "name": "Linux",
             "includePath": [
                 "${workspaceFolder}/**",
-                "/usr/include/libcamera"
+                "/usr/include/libcamera",
+                "/usr/include/liveMedia",
+                "/usr/include/groupsock",
+                "/usr/include/BasicUsageEnvironment",
+                "/usr/include/UsageEnvironment"
             ],
             "defines": [
                 "USE_LIBCAMERA=1",
-                "USE_FFMPEG=1"
+                "USE_FFMPEG=1",
+                "USE_RTSP=1"
             ],
             "compilerPath": "/usr/bin/gcc",
             "cStandard": "gnu17",

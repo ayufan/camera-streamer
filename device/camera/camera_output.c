@@ -8,6 +8,7 @@
 #include "opts/fourcc.h"
 #include "device/buffer_list.h"
 #include "http/http.h"
+#include "rtsp/rtsp.h"
 
 static const char *jpeg_names[2] = {
   "JPEG",
@@ -24,8 +25,19 @@ static const char *h264_names[2] = {
   "H264-LOW"
 };
 
+static void h264_capture(buffer_t *buf)
+{
+  http_h264_capture(buf);
+  rtsp_h264_capture(buf);
+}
+
+static bool h264_needs_buffer()
+{
+  return http_h264_needs_buffer() | rtsp_h264_needs_buffer();
+}
+
 static link_callbacks_t h264_callbacks[2] = {
-  { "H264-CAPTURE", http_h264_capture, http_h264_needs_buffer },
+  { "H264-CAPTURE", h264_capture, h264_needs_buffer },
   { "H264-LOW-CAPTURE", http_h264_lowres_capture, http_h264_needs_buffer }
 };
 

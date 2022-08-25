@@ -78,6 +78,8 @@
     "opts.h": "c",
     "ioctl.h": "c",
     "syscall.h": "c",
-    "unistd.h": "c"
+    "unistd.h": "c",
+    "rtsp.h": "c",
+    "http.h": "c"
   }
 }
