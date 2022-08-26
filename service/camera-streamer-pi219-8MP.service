@@ -5,9 +5,9 @@
 [Unit]
 Description=camera-streamer web camera
 After=network.target
+ConditionPathExists=/sys/bus/i2c/drivers/imx219/10-0010/video4linux
 
 [Service]
-ConditionPathExists=/sys/bus/i2c/drivers/imx219/10-0010/video4linux
 ExecStart=/usr/local/bin/camera-streamer \
   -camera-path=/base/soc/i2c0mux/i2c@1/imx219@10 \
   -camera-type=libcamera \

@@ -1,9 +1,9 @@
 [Unit]
 Description=camera-streamer web camera
 After=network.target
+ConditionPathExistsGlob=/dev/v4l/by-id/usb-*-video-index0
 
 [Service]
-ConditionPathExistsGlob=/dev/v4l/by-id/usb-*-video-index0
 ExecStart=/usr/local/bin/camera-streamer \
   -camera-path=/dev/video0 \
   -camera-format=JPEG \
