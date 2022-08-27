@@ -43,7 +43,7 @@ reboot
 ## Compile
 
 ```bash
-apt-get -y install libavformat-dev libavutil-dev libavcodec-dev libcamera-dev v4l-utils pkg-config xxd build-essential
+apt-get -y install libavformat-dev libavutil-dev libavcodec-dev libcamera-dev liblivemedia-dev v4l-utils pkg-config xxd build-essential
 make
 sudo make install
 ```
@@ -136,6 +136,18 @@ Camera capture and resolution exposed is controlled by threee parameters:
 - `-camera-width` and `-camera-height` define capture resolution
 - (ISP mode only) `-camera-high_res_factor` a default resolution exposed via HTTP (`exposed_width = camera_width / factor, exposed_height = camera_height / factor`)
 - (ISP mode only) `-camera-low_res_factor` a low-resolution exposed via HTTP when `?res=low` is added (ex. `http://<ip>:8080/snapshot`)
+
+## RTSP server
+
+The camera-streamer implements RTSP server via `live555`. Enable it with:
+
+- adding `-rtsp-port`: will enable RTSP server on 8554
+- adding `-rtsp-port=1111`: will enable RTSP server on custom port
+
+The camera-streamer will expose two stream (if low res mode is enabled):
+
+- `rtsp://<ip>:8554/stream.h264` - high resolution stream (always enabled if H264 stream is available directly or via encoding)
+- `rtsp://<ip>:8554/stream_low_res.h264` - low resolution stream if low res mode is configured via `-camera-low_res_factor`
 
 ## List all available controls
 

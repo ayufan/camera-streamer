@@ -21,7 +21,8 @@ ExecStart=/usr/local/bin/camera-streamer \
   ; the low-res is 820x616
   -camera-low_res_factor=4 \
   ; bump brightness slightly
-  -camera-options=brightness=0.1
+  -camera-options=brightness=0.1 \
+  -rtsp-port
 
 DynamicUser=yes
 SupplementaryGroups=video i2c

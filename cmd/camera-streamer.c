@@ -130,6 +130,10 @@ log_options_t log_options = {
   .verbose = false
 };
 
+rtsp_options_t rtsp_options = {
+  .port = 0,
+};
+
 option_value_t camera_formats[] = {
   { "DEFAULT", 0 },
   { "YUYV", V4L2_PIX_FMT_YUYV },
@@ -181,6 +185,8 @@ option_t all_options[] = {
   DEFINE_OPTION(http, port, uint, "Set the HTTP web-server port."),
   DEFINE_OPTION(http, maxcons, uint, "Set maximum number of concurrent HTTP connections."),
 
+  DEFINE_OPTION_DEFAULT(rtsp, port, uint, "8554", "Set the RTSP server port (default: 8854)."),
+
   DEFINE_OPTION_DEFAULT(log, debug, bool, "1", "Enable debug logging."),
   DEFINE_OPTION_DEFAULT(log, verbose, bool, "1", "Enable verbose logging."),
   DEFINE_OPTION_PTR(log, filter, list, "Enable debug logging from the given files. Ex.: `-log-filter=buffer.cc`"),
@@ -214,7 +220,9 @@ int main(int argc, char *argv[])
     goto error;
   }
 
-  rtsp_server();
+  if (rtsp_options.port > 0 && rtsp_server() < 0) {
+    goto error;
+  }
 
   while (true) {
     camera = camera_open(&camera_options);

@@ -14,7 +14,8 @@ ExecStart=/usr/local/bin/camera-streamer \
   ; the high-res is 1920x1080
   -camera-high_res_factor=1.0 \
   ; the low-res is 960x540
-  -camera-low_res_factor=2.0
+  -camera-low_res_factor=2.0 \
+  -rtsp-port
 
 DynamicUser=yes
 SupplementaryGroups=video i2c

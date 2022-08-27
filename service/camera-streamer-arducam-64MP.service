@@ -22,7 +22,8 @@ ExecStart=/usr/local/bin/camera-streamer \
   ; bump brightness slightly
   -camera-options=brightness=0.1 \
   ; disable auto-focus
-  -camera-auto_focus=0
+  -camera-auto_focus=0 \
+  -rtsp-port
 
 DynamicUser=yes
 SupplementaryGroups=video i2c

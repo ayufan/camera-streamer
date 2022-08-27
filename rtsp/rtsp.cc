@@ -23,10 +23,14 @@ static pthread_t rtsp_thread;
 static pthread_mutex_t rtsp_lock = PTHREAD_RECURSIVE_MUTEX_INITIALIZER_NP;
 static class DynamicH264Stream *rtsp_streams;
 
+static const char *stream_name = "stream.h264";
+static const char *stream_low_res_name = "stream_low_res.h264";
+
 class DynamicH264Stream : public FramedSource
 {
 public:
-  DynamicH264Stream(UsageEnvironment& env) : FramedSource(env), fHaveStartedReading(False)
+  DynamicH264Stream(UsageEnvironment& env, Boolean lowResMode)
+    : FramedSource(env), fHaveStartedReading(False), fLowResMode(lowResMode)
   {
   }
 
@@ -59,10 +63,14 @@ public:
     pthread_mutex_unlock(&rtsp_lock);
   }
 
-  void receiveData(buffer_t *buf)
+  void receiveData(buffer_t *buf, bool lowResMode)
   {
     if (!isCurrentlyAwaitingData()) {
       return; // we're not ready for the data yet
+    }
+
+    if (fLowResMode != lowResMode) {
+      return;
     }
 
     if (h264_is_key_frame(buf)) {
@@ -100,6 +108,7 @@ private:
   Boolean fHaveStartedReading;
   Boolean fHadKeyFrame;
   Boolean fRequestedKeyFrame;
+  Boolean fLowResMode;
 
 public:
   DynamicH264Stream *pNextStream;
@@ -108,21 +117,24 @@ public:
 class DynamicH264VideoFileServerMediaSubsession : public OnDemandServerMediaSubsession
 {
 public:
-  DynamicH264VideoFileServerMediaSubsession(UsageEnvironment& env, Boolean reuseFirstSource)
-    : OnDemandServerMediaSubsession(env, reuseFirstSource)
+  DynamicH264VideoFileServerMediaSubsession(UsageEnvironment& env, Boolean reuseFirstSource, Boolean lowResMode)
+    : OnDemandServerMediaSubsession(env, reuseFirstSource), fLowResMode(lowResMode)
   {
   }
 
   virtual FramedSource* createNewStreamSource(unsigned clientSessionId, unsigned& estBitrate)
   {
     estBitrate = 500; // kbps, estimate
-    return H264VideoStreamFramer::createNew(envir(), new DynamicH264Stream(envir()));
+    return H264VideoStreamFramer::createNew(envir(), new DynamicH264Stream(envir(), fLowResMode));
   }
 
   virtual RTPSink* createNewRTPSink(Groupsock* rtpGroupsock, unsigned char rtpPayloadTypeIfDynamic, FramedSource* /*inputSource*/)
   {
     return H264VideoRTPSink::createNew(envir(), rtpGroupsock, rtpPayloadTypeIfDynamic);
   }
+
+private:
+  Boolean fLowResMode;
 };
 
 class DynamicRTSPServer: public RTSPServerSupportingHTTPStreaming
@@ -153,7 +165,17 @@ protected:
 protected: // redefined virtual functions
   virtual ServerMediaSession* lookupServerMediaSession(char const* streamName, Boolean isFirstLookupInSession)
   {
-    LOG_INFO(NULL, "Requesting %s stream...", streamName);
+    bool lowResMode = false;
+
+    if (strcmp(streamName, stream_name) == 0) {
+      LOG_INFO(NULL, "Requesting %s stream...", streamName);
+    } else if (strcmp(streamName, stream_low_res_name) == 0) {
+      LOG_INFO(NULL, "Requesting %s stream (low resolution mode)...", streamName);
+      lowResMode = true;
+    } else {
+      LOG_INFO(NULL, "No stream available: '%s'", streamName);
+      return NULL;
+    }
 
     auto sms = RTSPServer::lookupServerMediaSession(streamName);
 
@@ -167,11 +189,9 @@ protected: // redefined virtual functions
     sms = ServerMediaSession::createNew(envir(), streamName, streamName, "streamed by the LIVE555 Media Server");;
     OutPacketBuffer::maxSize = 2000000; // allow for some possibly large H.264 frames
 
-    auto subsession = new DynamicH264VideoFileServerMediaSubsession(envir(), false);
+    auto subsession = new DynamicH264VideoFileServerMediaSubsession(envir(), false, lowResMode);
     sms->addSubsession(subsession);
     addServerMediaSession(sms);
-
-    LOG_INFO(NULL, "StreamName=%s SMS=%p Sub=%p", streamName, sms, subsession);
     return sms;
   }
 };
@@ -199,17 +219,12 @@ extern "C" int rtsp_server()
 #endif
 
   RTSPServer* rtspServer;
-  portNumBits rtspServerPortNum = 554;
-  rtspServer = DynamicRTSPServer::createNew(*env, rtspServerPortNum, authDB);
-  if (rtspServer == NULL) {
-    rtspServerPortNum = 8554;
-    rtspServer = DynamicRTSPServer::createNew(*env, rtspServerPortNum, authDB);
-  }
+  rtspServer = DynamicRTSPServer::createNew(*env, rtsp_options.port, authDB);
   if (rtspServer == NULL) {
     LOG_ERROR(NULL, "Failed to create RTSP server: %s", env->getResultMsg());
     return -1;
   }
-  LOG_INFO(NULL, "Running RTSP server on '%d'", rtspServerPortNum);
+  LOG_INFO(NULL, "Running RTSP server on '%d'", rtsp_options.port);
 
   // if (rtspServer->setUpTunnelingOverHTTP(80) || rtspServer->setUpTunnelingOverHTTP(8000) || rtspServer->setUpTunnelingOverHTTP(8080)) {
   //   LOG_INFO(NULL, "Running RTSP-over-HTTP tunneling on '%d'", rtspServer->httpServerPortNum());
@@ -234,7 +249,16 @@ extern "C" void rtsp_h264_capture(buffer_t *buf)
 {
   pthread_mutex_lock(&rtsp_lock);
   for (DynamicH264Stream *stream = rtsp_streams; stream; stream = stream->pNextStream) {
-    stream->receiveData(buf);
+    stream->receiveData(buf, false);
+  }
+  pthread_mutex_unlock(&rtsp_lock);
+}
+
+extern "C" void rtsp_h264_low_res_capture(struct buffer_s *buf)
+{
+  pthread_mutex_lock(&rtsp_lock);
+  for (DynamicH264Stream *stream = rtsp_streams; stream; stream = stream->pNextStream) {
+    stream->receiveData(buf, true);
   }
   pthread_mutex_unlock(&rtsp_lock);
 }
@@ -252,6 +276,10 @@ extern "C" bool rtsp_h264_needs_buffer()
 }
 
 extern "C" void rtsp_h264_capture(buffer_t *buf)
+{
+}
+
+extern "C" void rtsp_h264_low_res_capture(struct buffer_s *buf)
 {
 }
 

@@ -31,6 +31,12 @@ static void h264_capture(buffer_t *buf)
   rtsp_h264_capture(buf);
 }
 
+static void h264_lowres_capture(buffer_t *buf)
+{
+  http_h264_lowres_capture(buf);
+  rtsp_h264_low_res_capture(buf);
+}
+
 static bool h264_needs_buffer()
 {
   return http_h264_needs_buffer() | rtsp_h264_needs_buffer();
@@ -38,7 +44,7 @@ static bool h264_needs_buffer()
 
 static link_callbacks_t h264_callbacks[2] = {
   { "H264-CAPTURE", h264_capture, h264_needs_buffer },
-  { "H264-LOW-CAPTURE", http_h264_lowres_capture, http_h264_needs_buffer }
+  { "H264-LOW-CAPTURE", h264_lowres_capture, h264_needs_buffer }
 };
 
 static int camera_configure_h264_output(camera_t *camera, buffer_list_t *src_capture, int res)
