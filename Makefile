@@ -40,8 +40,8 @@ OBJS = $(patsubst %.cc,%.o,$(patsubst %.c,%.o,$(SRC) $(HTML_SRC)))
 
 all: $(TARGET)
 
-%: cmd/%.c $(filter-out cmd/%, $(OBJS))
-	$(CCACHE) $(CC) $(CFLAGS) -o $@ $^ $(LDLIBS)
+%: cmd/% $(OBJS)
+	$(CCACHE) $(CXX) $(CFLAGS) -o $@ $(filter-out cmd/%, $^) $(filter $</%, $^) $(LDLIBS)
 
 install: $(TARGET)
 	install $(TARGET) /usr/local/bin/
