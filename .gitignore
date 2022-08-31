@@ -4,3 +4,4 @@ tmp/
 html/*.c
 /camera-streamer
 /test_*
+.vscode/settings.json
