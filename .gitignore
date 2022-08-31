@@ -1,7 +1,8 @@
 tmp/
 *.o
 *.d
-html/*.c
+*.html.c
+*.js.c
 /camera-streamer
 /test_*
 .vscode/settings.json

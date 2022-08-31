@@ -24,5 +24,5 @@ ADD / /src
 WORKDIR /src
 RUN git clean -ffdx
 RUN git submodule update --init --recursive --recommend-shallow
-RUN git submodule foreach git clean -ffdx
+RUN git submodule foreach --recursive git clean -ffdx
 RUN make -j$(nproc)

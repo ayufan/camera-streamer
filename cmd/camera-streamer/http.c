@@ -2,6 +2,7 @@
 #include "util/opts/opts.h"
 #include "util/opts/log.h"
 #include "util/opts/fourcc.h"
+#include "output/webrtc/webrtc.h"
 #include "device/camera/camera.h"
 #include "output/output.h"
 #include "output/rtsp/rtsp.h"
@@ -10,8 +11,6 @@ extern unsigned char html_index_html[];
 extern unsigned int html_index_html_len;
 extern unsigned char html_video_html[];
 extern unsigned int html_video_html_len;
-extern unsigned char html_jmuxer_min_js[];
-extern unsigned int html_jmuxer_min_js_len;
 extern camera_t *camera;
 
 void *camera_http_set_option(http_worker_t *worker, FILE *stream, const char *key, const char *value, void *headersp)
@@ -81,8 +80,8 @@ http_method_t http_methods[] = {
   { "GET /video.h264?", http_h264_video },
   { "GET /video.mkv?", http_mkv_video },
   { "GET /video.mp4?", http_mp4_video },
+  { "POST /video?", http_webrtc_offer },
   { "GET /option?", camera_http_option },
-  { "GET /jmuxer.min.js?", http_content, "text/javascript", html_jmuxer_min_js, 0, &html_jmuxer_min_js_len },
   { "GET /?", http_content, "text/html", html_index_html, 0, &html_index_html_len },
   { }
 };

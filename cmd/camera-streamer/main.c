@@ -1,9 +1,9 @@
 #include "util/http/http.h"
 #include "util/opts/opts.h"
 #include "util/opts/log.h"
-#include "util/opts/fourcc.h"
 #include "device/camera/camera.h"
 #include "output/rtsp/rtsp.h"
+#include "output/webrtc/webrtc.h"
 
 #include <signal.h>
 #include <unistd.h>
@@ -45,6 +45,8 @@ int main(int argc, char *argv[])
   if (rtsp_options.port > 0 && rtsp_server(&rtsp_options) < 0) {
     goto error;
   }
+
+  webrtc_server();
 
   while (true) {
     camera = camera_open(&camera_options);

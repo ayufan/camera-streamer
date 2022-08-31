@@ -35,11 +35,17 @@ bool h264_is_key_frame(buffer_t *buf)
 {
   unsigned char *data = buf->start;
 
+  static const int N = 8;
+  char buffer [3*N+1];
+  buffer[sizeof(buffer)-1] = 0;
+  for(int j = 0; j < N; j++)
+    sprintf(&buffer[sizeof(buffer)/N*j], "%02X ", data[j]);
+
   if (buf->flags.is_keyframe) {
-    LOG_DEBUG(buf, "Got key frame (from V4L2)!");
+    LOG_DEBUG(buf, "Got key frame (from V4L2)!: %s", buffer);
     return true;
   } else if (buf->used >= 5 && (data[4] & 0x1F) == 0x07) {
-    LOG_DEBUG(buf, "Got key frame (from buffer)!");
+    LOG_DEBUG(buf, "Got key frame (from buffer)!: %s", buffer);
     return true;
   }
 
