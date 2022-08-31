@@ -44,7 +44,7 @@ body {
 </head>
 <body>
 	<div id="streamtage">
-		 <video controls autoplay muted id="video"></video>
+		 <video controls autoplay muted id="stream"></video>
 	</div>
 <body>
   <script>
@@ -63,8 +63,8 @@ body {
         pc.addEventListener('track', function(evt) {
           console.log("track event " + evt.track.kind);
             if (evt.track.kind == 'video') {
-                if (document.getElementById('video'))
-                  document.getElementById('video').srcObject = evt.streams[0];
+                if (document.getElementById('stream'))
+                  document.getElementById('stream').srcObject = evt.streams[0];
             } else {
                 if (document.getElementById('audio'))
                   document.getElementById('audio').srcObject = evt.streams[0];
@@ -138,7 +138,7 @@ body {
   <script>
     function startJsMuxer() {
       var jmuxer = new JMuxer({
-        node: 'video',
+        node: 'stream',
         mode: 'video',
         flushingTime: 0,
         fps: 30,
