@@ -14,6 +14,9 @@
 #include "http.h"
 #include "util/opts/log.h"
 
+#define HEADER_RANGE "Range:"
+#define HEADER_CONTENT_LENGTH "Content-Length:"
+
 static int http_listen(int port, int maxcons)
 {
   struct sockaddr_in server = {0};
@@ -92,6 +95,7 @@ static void http_process(http_worker_t *worker, FILE *stream)
   }
 
   worker->range_header[0] = 0;
+  worker->content_length = -1;
 
   // Consume headers
   for(int i = 0; i < 50; i++) {
@@ -101,8 +105,11 @@ static void http_process(http_worker_t *worker, FILE *stream)
     if (line[0] == '\r' && line[1] == '\n')
       break;
 
-    if (strcasestr(line, "Range:") == line) {
+    if (strcasestr(line, HEADER_RANGE) == line) {
       strcpy(worker->range_header, line);
+    }
+    if (strcasestr(line, HEADER_CONTENT_LENGTH) == line) {
+      worker->content_length = atoi(line + strlen(HEADER_CONTENT_LENGTH));
     }
   }
 

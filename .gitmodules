@@ -1,0 +1,4 @@
+[submodule "third_party/libdatachannel"]
+	path = third_party/libdatachannel
+	url = https://github.com/paullouisageneau/libdatachannel.git
+	ignore = dirty

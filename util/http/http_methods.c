@@ -3,7 +3,7 @@
 
 #include "http.h"
 
-static void http_write_response(
+void http_write_response(
   FILE *stream,
   const char *status,
   const char *content_type,
@@ -44,6 +44,11 @@ void http_content(http_worker_t *worker, FILE *stream)
 void http_200(FILE *stream, const char *data)
 {
   http_write_response(stream, "200 OK", NULL, data ? data : "Nothing here.\n", 0);
+}
+
+void http_400(FILE *stream, const char *data)
+{
+  http_write_response(stream, "400 Bad Request", NULL, data ? data : "Nothing here.\n", 0);
 }
 
 void http_404(FILE *stream, const char *data)

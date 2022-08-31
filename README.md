@@ -43,7 +43,10 @@ reboot
 ## Compile
 
 ```bash
-apt-get -y install libavformat-dev libavutil-dev libavcodec-dev libcamera-dev liblivemedia-dev v4l-utils pkg-config xxd build-essential
+git clone https://github.com/ayufan-research/camera-streamer.git --recursive
+apt-get -y install libavformat-dev libavutil-dev libavcodec-dev libcamera-dev liblivemedia-dev v4l-utils pkg-config xxd build-essential cmake libssl-dev
+
+cd camera-streamer/
 make
 sudo make install
 ```
@@ -262,6 +265,14 @@ device/buffer_lock.c: http_jpeg: Captured buffer JPEG:capture:mplane:buf0 (refs=
 device/buffer_lock.c: http_jpeg: Captured buffer JPEG:capture:mplane:buf1 (refs=2), frame=158/0, processing_ms=18.5, frame_ms=8.3
 device/buffer_lock.c: http_jpeg: Captured buffer JPEG:capture:mplane:buf2 (refs=2), frame=159/0, processing_ms=18.5, frame_ms=8.3
 ```
+
+## WebRTC support
+
+The WebRTC is accessible via `http://<ip>:8080/video` by default and is available when there's H264 output generated.
+
+WebRTC support is implemented using awesome [libdatachannel](https://github.com/paullouisageneau/libdatachannel/) library.
+
+The support will be compiled by default when doing `make`.
 
 ## License
 

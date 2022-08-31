@@ -2,6 +2,7 @@
 #include "util/opts/opts.h"
 #include "util/opts/log.h"
 #include "util/opts/fourcc.h"
+#include "http/webrtc/webrtc.h"
 #include "device/camera/camera.h"
 #include "output/output.h"
 #include "output/rtsp/rtsp.h"
@@ -81,6 +82,7 @@ http_method_t http_methods[] = {
   { "GET /video.h264?", http_h264_video },
   { "GET /video.mkv?", http_mkv_video },
   { "GET /video.mp4?", http_mp4_video },
+  { "POST /video?", http_webrtc_offer },
   { "GET /option?", camera_http_option },
   { "GET /jmuxer.min.js?", http_content, "text/javascript", html_jmuxer_min_js, 0, &html_jmuxer_min_js_len },
   { "GET /?", http_content, "text/html", html_index_html, 0, &html_index_html_len },

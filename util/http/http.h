@@ -31,6 +31,7 @@ typedef struct http_worker_s {
   pthread_t thread;
 
   int client_fd;
+  int content_length;
   struct sockaddr_in client_addr;
   char *client_host;
   char client_method[BUFSIZE];
@@ -46,7 +47,9 @@ typedef struct http_server_options_s {
 
 int http_server(http_server_options_t *options, http_method_t *methods);
 void http_content(http_worker_t *worker, FILE *stream);
+void http_write_response(FILE *stream, const char *status, const char *content_type, const char *body, unsigned content_length);
 void http_200(FILE *stream, const char *data);
+void http_400(FILE *stream, const char *data);
 void http_404(FILE *stream, const char *data);
 void http_500(FILE *stream, const char *data);
 void *http_enum_params(http_worker_t *worker, FILE *stream, http_param_fn fn, void *opaque);
