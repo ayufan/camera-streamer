@@ -179,6 +179,18 @@ std::shared_ptr<Client> createPeerConnection(const rtc::Configuration &config)
   auto pc = std::make_shared<rtc::PeerConnection>(config);
   auto client = std::make_shared<Client>(pc);
 
+  pc->onTrack([wclient = make_weak_ptr(client)](std::shared_ptr<rtc::Track> track) {
+    if(auto client = wclient.lock()) {
+      LOG_DEBUG(client.get(), "onTrack: %s", track->mid().c_str());
+    }
+  });
+
+  pc->onLocalDescription([wclient = make_weak_ptr(client)](rtc::Description description) {
+    if(auto client = wclient.lock()) {
+      LOG_DEBUG(client.get(), "onLocalDescription: %s", description.typeString().c_str());
+    }
+  });
+
   pc->onSignalingStateChange([wclient = make_weak_ptr(client)](rtc::PeerConnection::SignalingState state) {
     if(auto client = wclient.lock()) {
       LOG_DEBUG(client.get(), "onSignalingStateChange: %d", (int)state);
@@ -269,6 +281,7 @@ static void http_webrtc_request(http_worker_t *worker, FILE *stream, const nlohm
     message["type"] = description->typeString();
     message["sdp"] = std::string(description.value());
     http_write_response(stream, "200 OK", "application/json", message.dump().c_str(), 0);
+    LOG_VERBOSE(client.get(), "Local SDP Offer: %s", std::string(message["sdp"]).c_str());
   } else {
     http_500(stream, "Not complete");
   }
@@ -283,6 +296,8 @@ static void http_webrtc_answer(http_worker_t *worker, FILE *stream, const nlohma
 
   if (auto client = findClient(message["id"])) {
     LOG_INFO(client.get(), "Answer received.");
+    LOG_VERBOSE(client.get(), "Remote SDP Answer: %s", std::string(message["sdp"]).c_str());
+
     auto answer = rtc::Description(std::string(message["sdp"]), std::string(message["type"]));
     client->pc->setRemoteDescription(answer);
     client->video.value()->startStreaming();
@@ -301,7 +316,9 @@ static void http_webrtc_offer(http_worker_t *worker, FILE *stream, const nlohman
 
   auto offer = rtc::Description(std::string(message["sdp"]), std::string(message["type"]));
   auto client = createPeerConnection(getRtcConfiguration());
+
   LOG_INFO(client.get(), "Offer received.");
+  LOG_VERBOSE(client.get(), "Remote SDP Offer: %s", std::string(message["sdp"]).c_str());
 
   client->video = addVideo(client->pc, client_video_payload_type, rand(), "video", "");
   client->video.value()->startStreaming();
@@ -319,6 +336,8 @@ static void http_webrtc_offer(http_worker_t *worker, FILE *stream, const nlohman
     message["type"] = description->typeString();
     message["sdp"] = std::string(description.value());
     http_write_response(stream, "200 OK", "application/json", message.dump().c_str(), 0);
+
+    LOG_VERBOSE(client.get(), "Local SDP Answer: %s", std::string(message["sdp"]).c_str());
   } else {
     http_500(stream, "Not complete");
   }
