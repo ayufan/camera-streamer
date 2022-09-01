@@ -131,6 +131,7 @@ static void http_ffmpeg_video(http_worker_t *worker, FILE *stream, const char *c
   av_dict_set_int(&remuxer.output_opts, "low_delay", 1, 0);
   av_dict_set_int(&remuxer.output_opts, "nobuffer", 1, 0);
   av_dict_set_int(&remuxer.output_opts, "flush_packets", 1, 0);
+  av_dict_set(&remuxer.output_opts, "movflags", "frag_keyframe+empty_moov+default_base_moof", 0);
 #endif
 
   int n = buffer_lock_write_loop(
