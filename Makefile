@@ -82,5 +82,5 @@ html/%.c: html/%
 	mv $@.tmp $@
 
 $(LIBDATACHANNEL_PATH)/libdatachannel-static.a: $(LIBDATACHANNEL_PATH)
-	cmake -S $< -B $<
+	[ -e $</Makefile ] || cmake -S $< -B $<
 	$(MAKE) -C $< datachannel-static
