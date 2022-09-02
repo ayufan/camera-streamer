@@ -8,7 +8,8 @@
 #include "util/opts/fourcc.h"
 #include "device/buffer_list.h"
 #include "util/http/http.h"
-#include "rtsp/rtsp.h"
+#include "output/rtsp/rtsp.h"
+#include "output/output.h"
 
 static const char *jpeg_names[2] = {
   "JPEG",

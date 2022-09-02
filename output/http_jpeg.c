@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "output.h"
 #include "util/http/http.h"
 #include "device/buffer.h"
 #include "device/buffer_lock.h"

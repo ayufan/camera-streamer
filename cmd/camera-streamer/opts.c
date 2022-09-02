@@ -3,7 +3,7 @@
 #include "util/opts/log.h"
 #include "util/opts/fourcc.h"
 #include "device/camera/camera.h"
-#include "rtsp/rtsp.h"
+#include "output/rtsp/rtsp.h"
 
 camera_options_t camera_options = {
   .path = "",

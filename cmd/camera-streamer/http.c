@@ -3,7 +3,8 @@
 #include "util/opts/log.h"
 #include "util/opts/fourcc.h"
 #include "device/camera/camera.h"
-#include "rtsp/rtsp.h"
+#include "output/output.h"
+#include "output/rtsp/rtsp.h"
 
 extern unsigned char html_index_html[];
 extern unsigned int html_index_html_len;

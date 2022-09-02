@@ -50,23 +50,3 @@ void http_200(FILE *stream, const char *data);
 void http_404(FILE *stream, const char *data);
 void http_500(FILE *stream, const char *data);
 void *http_enum_params(http_worker_t *worker, FILE *stream, http_param_fn fn, void *opaque);
-
-// M-JPEG
-void http_snapshot(http_worker_t *worker, FILE *stream);
-void http_stream(http_worker_t *worker, FILE *stream);
-void http_jpeg_capture(struct buffer_s *buf);
-void http_jpeg_lowres_capture(struct buffer_s *buf);
-bool http_jpeg_needs_buffer();
-void http_option(http_worker_t *worker, FILE *stream);
-
-// H264
-bool http_h264_needs_buffer();
-void http_h264_capture(buffer_t *buf);
-void http_h264_lowres_capture(buffer_t *buf);
-void http_h264_video(http_worker_t *worker, FILE *stream);
-bool h264_is_key_frame(buffer_t *buf);
-void http_mkv_video(http_worker_t *worker, FILE *stream);
-void http_mp4_video(http_worker_t *worker, FILE *stream);
-void http_mov_video(http_worker_t *worker, FILE *stream);
-
-#define HTTP_LOW_RES_PARAM "res=low"

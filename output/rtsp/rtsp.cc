@@ -7,6 +7,7 @@ extern "C" {
 #include "util/opts/log.h"
 #include "util/opts/fourcc.h"
 #include "util/opts/control.h"
+#include "output/output.h"
 #include "rtsp.h"
 
 };

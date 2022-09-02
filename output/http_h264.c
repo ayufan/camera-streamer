@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "output.h"
 #include "util/opts/log.h"
 #include "util/http/http.h"
 #include "device/buffer.h"
