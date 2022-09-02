@@ -7,7 +7,7 @@
 #include "device/buffer_lock.h"
 #include "device/buffer_list.h"
 #include "device/device.h"
-#include "ffmpeg/remuxer.h"
+#include "util/ffmpeg/remuxer.h"
 
 buffer_lock_t *http_h264_buffer_for_res(http_worker_t *worker);
 

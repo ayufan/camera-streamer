@@ -1,4 +1,4 @@
-#include "ffmpeg/remuxer.h"
+#include "remuxer.h"
 #include "util/opts/log.h"
 
 #include <inttypes.h>
