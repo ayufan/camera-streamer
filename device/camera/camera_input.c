@@ -3,6 +3,7 @@
 #include "device/buffer.h"
 #include "device/buffer_list.h"
 #include "device/device.h"
+#include "device/device_list.h"
 #include "device/links.h"
 #include "util/opts/log.h"
 #include "util/opts/fourcc.h"

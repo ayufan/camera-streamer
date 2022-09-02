@@ -1,6 +1,7 @@
 #include "camera.h"
 
 #include "device/device.h"
+#include "device/device_list.h"
 #include "device/buffer_list.h"
 #include "device/links.h"
 #include "util/opts/log.h"
@@ -11,6 +12,7 @@ camera_t *camera_open(camera_options_t *options)
   camera_t *camera = calloc(1, sizeof(camera_t));
   camera->name = "CAMERA";
   camera->options = *options;
+  camera->device_list = device_list_v4l2();
 
   if (camera_configure_input(camera) < 0) {
     goto error;
@@ -50,7 +52,7 @@ void camera_close(camera_t **camerap)
     }
   }
 
-  memset(camera->links, 0, sizeof(camera->links));
+  device_list_free(camera->device_list);
   free(camera);
 }
 

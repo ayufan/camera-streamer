@@ -66,6 +66,8 @@ typedef struct camera_s {
     };
   };
 
+  struct device_list_s *device_list;
+
   link_t links[MAX_DEVICES];
   int nlinks;
 } camera_t;

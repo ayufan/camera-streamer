@@ -3,6 +3,7 @@
 #include "device/buffer.h"
 #include "device/buffer_list.h"
 #include "device/device.h"
+#include "device/device_list.h"
 #include "device/links.h"
 #include "util/opts/log.h"
 #include "util/opts/fourcc.h"
@@ -55,7 +56,14 @@ static int camera_configure_h264_output(camera_t *camera, buffer_list_t *src_cap
     return 0;
   }
 
-  camera->codec_h264[res] = device_v4l2_open(h264_names[res], "/dev/video11");
+  device_info_t *device = device_list_find_m2m_format(camera->device_list, src_capture->fmt.format, V4L2_PIX_FMT_H264);
+
+  if (!device) {
+    LOG_INFO(camera, "Cannot find H264 encoder to convert from '%s'", fourcc_to_string(src_capture->fmt.format).buf);
+    return -1;
+  }
+
+  camera->codec_h264[res] = device_v4l2_open(h264_names[res], device->path);
 
   buffer_list_t *output = device_open_buffer_list_output(camera->codec_h264[res], src_capture);
   buffer_list_t *capture = device_open_buffer_list_capture(camera->codec_h264[res], output, 1.0, V4L2_PIX_FMT_H264, true);
@@ -76,7 +84,18 @@ static int camera_configure_jpeg_output(camera_t *camera, buffer_list_t *src_cap
     return 0;
   }
 
-  camera->codec_jpeg[res] = device_v4l2_open(jpeg_names[res], "/dev/video31");
+  device_info_t *device = device_list_find_m2m_format(camera->device_list, src_capture->fmt.format, V4L2_PIX_FMT_JPEG);
+
+  if (!device) {
+    device = device_list_find_m2m_format(camera->device_list, src_capture->fmt.format, V4L2_PIX_FMT_MJPEG);
+  }
+
+  if (!device) {
+    LOG_INFO(camera, "Cannot find JPEG encoder to convert from '%s'", fourcc_to_string(src_capture->fmt.format).buf);
+    return -1;
+  }
+
+  camera->codec_jpeg[res] = device_v4l2_open(jpeg_names[res], device->path);
 
   buffer_list_t *output = device_open_buffer_list_output(camera->codec_jpeg[res], src_capture);
   buffer_list_t *capture = device_open_buffer_list_capture(camera->codec_jpeg[res], output, 1.0, V4L2_PIX_FMT_JPEG, true);
@@ -123,9 +142,25 @@ int camera_configure_output_rescaler(camera_t *camera, buffer_list_t *src_captur
 
 int camera_configure_decoder(camera_t *camera, buffer_list_t *src_capture)
 {
+  unsigned decode_formats[] = {
+    V4L2_PIX_FMT_YUYV,
+    V4L2_PIX_FMT_YUV420,
+    V4L2_PIX_FMT_YVU420,
+    V4L2_PIX_FMT_NV12,
+    V4L2_PIX_FMT_NV21,
+    0
+  };
+  unsigned chosen_format = 0;
+  device_info_t *device = device_list_find_m2m_formats(camera->device_list, src_capture->fmt.format, decode_formats, &chosen_format);
+
+  if (!device) {
+    LOG_INFO(camera, "Cannot find '%s' decoder", fourcc_to_string(src_capture->fmt.format).buf);
+    return -1;
+  }
+
   device_video_force_key(camera->camera);
 
-  camera->decoder = device_v4l2_open("DECODER", "/dev/video10");
+  camera->decoder = device_v4l2_open("DECODER", device->path);
 
   buffer_list_t *decoder_output = device_open_buffer_list_output(
     camera->decoder, src_capture);

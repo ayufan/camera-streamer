@@ -3,6 +3,7 @@
 #include "device/buffer.h"
 #include "device/buffer_list.h"
 #include "device/device.h"
+#include "device/device_list.h"
 #include "device/links.h"
 #include "util/opts/log.h"
 #include "util/opts/fourcc.h"
@@ -43,7 +44,14 @@ static const char *isp_names[2] = {
 
 int camera_configure_legacy_isp(camera_t *camera, buffer_list_t *src_capture, float div, int res)
 {
-  camera->legacy_isp[res] = device_v4l2_open(isp_names[res], "/dev/video12");
+  device_info_t *device = device_list_find_m2m_format(camera->device_list, src_capture->fmt.format, V4L2_PIX_FMT_YUYV);
+
+  if (!device) {
+    LOG_INFO(camera, "Cannot find ISP to scale from '%s' to 'YUYV'", fourcc_to_string(src_capture->fmt.format).buf);
+    return -1;
+  }
+
+  camera->legacy_isp[res] = device_v4l2_open(isp_names[res], device->path);
 
   buffer_list_t *isp_output = device_open_buffer_list_output(
     camera->legacy_isp[res], src_capture);
