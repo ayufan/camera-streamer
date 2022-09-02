@@ -1,12 +1,9 @@
 extern "C" {
-#include "http/http.h"
+#include "webrtc.h"
 #include "device/buffer.h"
 #include "device/buffer_list.h"
 #include "device/device.h"
-#include "opts/log.h"
-#include "opts/fourcc.h"
-#include "opts/control.h"
-#include "webrtc.h"
+#include "output/output.h"
 };
 
 #ifdef USE_LIBDATACHANNEL
@@ -89,14 +86,14 @@ public:
       return false;
     if (pc->state() != rtc::PeerConnection::State::Connected)
       return false;
-    return video.value()->wantsFrame();
+    return video->wantsFrame();
   }
 
   void pushFrame(buffer_t *buf, bool low_res)
   {
     auto self = this;
 
-    if (!video || !video.value()->track) {
+    if (!video || !video->track) {
       return;
     }
 
@@ -114,15 +111,15 @@ public:
     }
 
     rtc::binary data((std::byte*)buf->start, (std::byte*)buf->start + buf->used);
-    video.value()->sendTime();
-    video.value()->track->send(data);
+    video->sendTime();
+    video->track->send(data);
   }
 
 public:
   char *name;
   std::string id;
   std::shared_ptr<rtc::PeerConnection> pc;
-  std::optional<std::shared_ptr<ClientTrackData>> video;
+  std::shared_ptr<ClientTrackData> video;
   std::mutex lock;
   std::condition_variable wait_for_complete;
   bool had_key_frame;
@@ -290,7 +287,7 @@ static void http_webrtc_request(http_worker_t *worker, FILE *stream, const nlohm
 static void http_webrtc_answer(http_worker_t *worker, FILE *stream, const nlohmann::json &message)
 {
   if (!message.contains("id") || !message.contains("sdp")) {
-    http_500(stream, "no sdp or id");
+    http_400(stream, "no sdp or id");
     return;
   }
 
@@ -300,7 +297,7 @@ static void http_webrtc_answer(http_worker_t *worker, FILE *stream, const nlohma
 
     auto answer = rtc::Description(std::string(message["sdp"]), std::string(message["type"]));
     client->pc->setRemoteDescription(answer);
-    client->video.value()->startStreaming();
+    client->video->startStreaming();
     http_write_response(stream, "200 OK", "application/json", "{}", 0);
   } else {
     http_404(stream, "No client found");
@@ -310,7 +307,7 @@ static void http_webrtc_answer(http_worker_t *worker, FILE *stream, const nlohma
 static void http_webrtc_offer(http_worker_t *worker, FILE *stream, const nlohmann::json &message)
 {
   if (!message.contains("sdp")) {
-    http_500(stream, "no sdp");
+    http_400(stream, "no sdp");
     return;
   }
 
@@ -321,7 +318,7 @@ static void http_webrtc_offer(http_worker_t *worker, FILE *stream, const nlohman
   LOG_VERBOSE(client.get(), "Remote SDP Offer: %s", std::string(message["sdp"]).c_str());
 
   client->video = addVideo(client->pc, client_video_payload_type, rand(), "video", "");
-  client->video.value()->startStreaming();
+  client->video->startStreaming();
 
   {
     std::unique_lock lock(client->lock);

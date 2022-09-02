@@ -1,10 +1,10 @@
 #pragma once
 
-#include "http/http.h"
+#include "util/http/http.h"
+#include "util/opts/log.h"
+#include "util/opts/fourcc.h"
+#include "util/opts/control.h"
 #include "device/buffer.h"
-#include "opts/log.h"
-#include "opts/fourcc.h"
-#include "opts/control.h"
 
 // WebRTC
 bool http_webrtc_needs_buffer();

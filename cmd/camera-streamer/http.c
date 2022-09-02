@@ -2,7 +2,7 @@
 #include "util/opts/opts.h"
 #include "util/opts/log.h"
 #include "util/opts/fourcc.h"
-#include "http/webrtc/webrtc.h"
+#include "output/webrtc/webrtc.h"
 #include "device/camera/camera.h"
 #include "output/output.h"
 #include "output/rtsp/rtsp.h"
