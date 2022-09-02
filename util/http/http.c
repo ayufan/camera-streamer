@@ -11,7 +11,7 @@
 #include <pthread.h>
 #include <signal.h>
 
-#include "http/http.h"
+#include "http.h"
 #include "util/opts/log.h"
 
 static int http_listen(int port, int maxcons)

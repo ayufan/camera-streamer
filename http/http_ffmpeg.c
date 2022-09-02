@@ -2,7 +2,7 @@
 #include <stdlib.h>
 
 #include "util/opts/log.h"
-#include "http/http.h"
+#include "util/http/http.h"
 #include "device/buffer.h"
 #include "device/buffer_lock.h"
 #include "device/buffer_list.h"

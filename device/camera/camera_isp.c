@@ -7,7 +7,7 @@
 #include "util/opts/log.h"
 #include "util/opts/fourcc.h"
 #include "device/buffer_list.h"
-#include "http/http.h"
+#include "util/http/http.h"
 
 int camera_configure_isp(camera_t *camera, buffer_list_t *src_capture, float high_div, float low_div)
 {

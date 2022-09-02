@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "http/http.h"
+#include "http.h"
 
 static void http_write_response(
   FILE *stream,

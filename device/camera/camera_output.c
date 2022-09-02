@@ -7,7 +7,7 @@
 #include "util/opts/log.h"
 #include "util/opts/fourcc.h"
 #include "device/buffer_list.h"
-#include "http/http.h"
+#include "util/http/http.h"
 #include "rtsp/rtsp.h"
 
 static const char *jpeg_names[2] = {

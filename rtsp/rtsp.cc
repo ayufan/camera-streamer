@@ -1,6 +1,6 @@
 extern "C" {
 
-#include "http/http.h"
+#include "util/http/http.h"
 #include "device/buffer.h"
 #include "device/buffer_list.h"
 #include "device/device.h"
