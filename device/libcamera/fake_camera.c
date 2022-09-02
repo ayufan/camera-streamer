@@ -8,7 +8,7 @@
 
 #include <linux/media.h>
 
-#include "opts/log.h"
+#include "util/opts/log.h"
 
 // This is special code to force `libcamera` to think that given sensor is different
 // ex.: fake `arducam_64mp` to be run as `imx519`

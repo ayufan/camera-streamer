@@ -1,7 +1,7 @@
 #include "device/buffer.h"
 #include "device/buffer_list.h"
 #include "device/device.h"
-#include "opts/log.h"
+#include "util/opts/log.h"
 
 #include <pthread.h>
 #include <inttypes.h>

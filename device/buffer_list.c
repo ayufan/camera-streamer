@@ -1,8 +1,8 @@
 #include "device/buffer.h"
 #include "device/buffer_list.h"
 #include "device/device.h"
-#include "opts/log.h"
-#include "opts/fourcc.h"
+#include "util/opts/log.h"
+#include "util/opts/fourcc.h"
 
 buffer_list_t *buffer_list_open(const char *name, int index, struct device_s *dev, const char *path, buffer_format_t fmt, bool do_capture, bool do_mmap)
 {

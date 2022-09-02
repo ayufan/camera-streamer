@@ -4,8 +4,8 @@
 #include "device/buffer_list.h"
 #include "device/device.h"
 #include "device/links.h"
-#include "opts/log.h"
-#include "opts/fourcc.h"
+#include "util/opts/log.h"
+#include "util/opts/fourcc.h"
 
 static int camera_configure_input_v4l2(camera_t *camera)
 {

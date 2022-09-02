@@ -1,7 +1,7 @@
 #include "http/http.h"
-#include "opts/opts.h"
-#include "opts/log.h"
-#include "opts/fourcc.h"
+#include "util/opts/opts.h"
+#include "util/opts/log.h"
+#include "util/opts/fourcc.h"
 #include "device/camera/camera.h"
 #include "rtsp/rtsp.h"
 

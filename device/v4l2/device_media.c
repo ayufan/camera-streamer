@@ -1,7 +1,7 @@
 #include "v4l2.h"
 
 #include "device/device.h"
-#include "opts/log.h"
+#include "util/opts/log.h"
 
 #include <unistd.h>
 #include <dirent.h>

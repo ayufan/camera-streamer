@@ -1,5 +1,5 @@
-#include "opts/log.h"
-#include "opts/opts.h"
+#include "util/opts/log.h"
+#include "util/opts/opts.h"
 
 #include <string.h>
 

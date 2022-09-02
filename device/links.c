@@ -2,8 +2,8 @@
 #include "device/device.h"
 #include "device/buffer.h"
 #include "device/buffer_list.h"
-#include "opts/log.h"
-#include "opts/fourcc.h"
+#include "util/opts/log.h"
+#include "util/opts/fourcc.h"
 
 #define N_FDS 50
 #define QUEUE_ON_CAPTURE // seems to provide better latency

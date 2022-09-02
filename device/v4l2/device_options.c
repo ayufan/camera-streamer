@@ -1,7 +1,7 @@
 #include "v4l2.h"
 #include "device/device.h"
-#include "opts/log.h"
-#include "opts/control.h"
+#include "util/opts/log.h"
+#include "util/opts/control.h"
 
 int v4l2_device_set_option_by_id(device_t *dev, const char *name, uint32_t id, int32_t value)
 {

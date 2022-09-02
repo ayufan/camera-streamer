@@ -3,8 +3,8 @@
 #include "device/device.h"
 #include "device/buffer_list.h"
 #include "device/links.h"
-#include "opts/log.h"
-#include "opts/fourcc.h"
+#include "util/opts/log.h"
+#include "util/opts/fourcc.h"
 
 camera_t *camera_open(camera_options_t *options)
 {

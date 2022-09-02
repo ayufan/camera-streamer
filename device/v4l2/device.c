@@ -1,6 +1,6 @@
 #include "v4l2.h"
 #include "device/device.h"
-#include "opts/log.h"
+#include "util/opts/log.h"
 
 int v4l2_device_open(device_t *dev)
 {
