@@ -2,6 +2,7 @@ extern "C" {
 #include "webrtc.h"
 #include "device/buffer.h"
 #include "device/buffer_list.h"
+#include "device/buffer_lock.h"
 #include "device/device.h"
 #include "output/output.h"
 };
@@ -224,7 +225,7 @@ std::shared_ptr<Client> createPeerConnection(const rtc::Configuration &config)
   return client;
 }
 
-extern "C" bool http_webrtc_needs_buffer()
+static bool webrtc_h264_needs_buffer(buffer_lock_t *buf_lock)
 {
   std::unique_lock lk(clients_lock);
   for (auto client : clients) {
@@ -235,17 +236,21 @@ extern "C" bool http_webrtc_needs_buffer()
   return false;
 }
 
-extern "C" void http_webrtc_capture(buffer_t *buf)
+static void webrtc_h264_capture(buffer_lock_t *buf_lock, buffer_t *buf)
 {
   std::unique_lock lk(clients_lock);
   for (auto client : clients) {
     if (client->wantsFrame()) {
       client->pushFrame(buf, false);
+
+      if (!http_h264_lowres.buf_list) {
+        client->pushFrame(buf, true);
+      }
     }
   }
 }
 
-extern "C" void http_webrtc_low_res_capture(buffer_t *buf)
+static void webrtc_h264_low_res_capture(buffer_lock_t *buf_lock, buffer_t *buf)
 {
   std::unique_lock lk(clients_lock);
   for (auto client : clients) {
@@ -383,31 +388,22 @@ extern "C" void http_webrtc_offer(http_worker_t *worker, FILE *stream)
   }
 }
 
-extern "C" void http_run_webrtc()
+extern "C" void webrtc_server()
 {
+  buffer_lock_register_check_streaming(&http_h264, webrtc_h264_needs_buffer);
+  buffer_lock_register_notify_buffer(&http_h264, webrtc_h264_capture);
+  buffer_lock_register_check_streaming(&http_h264_lowres, webrtc_h264_needs_buffer);
+  buffer_lock_register_notify_buffer(&http_h264_lowres, webrtc_h264_low_res_capture);
 }
 
 #else // USE_LIBDATACHANNEL
-
-extern "C" bool http_webrtc_needs_buffer()
-{
-  return false;
-}
-
-extern "C" void http_webrtc_capture(buffer_t *buf)
-{
-}
-
-extern "C" void http_webrtc_low_res_capture(buffer_t *buf)
-{
-}
 
 extern "C" void http_webrtc_offer(http_worker_t *worker, FILE *stream)
 {
   http_404(stream, NULL);
 }
 
-extern "C" void http_run_webrtc()
+extern "C" void webrtc_server()
 {
 }
 

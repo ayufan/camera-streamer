@@ -7,7 +7,5 @@
 #include "device/buffer.h"
 
 // WebRTC
-bool http_webrtc_needs_buffer();
-void http_webrtc_capture(buffer_t *buf);
-void http_webrtc_low_res_capture(buffer_t *buf);
 void http_webrtc_offer(http_worker_t *worker, FILE *stream);
+void webrtc_server();
