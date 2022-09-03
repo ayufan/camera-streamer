@@ -34,6 +34,9 @@ bool buffer_lock_needs_buffer(buffer_lock_t *buf_lock)
   if (buf_lock->refs > 0) {
     needs_buffer = true;
   }
+  for (int i = 0; !needs_buffer && buf_lock->notify_buffer[i] && i < BUFFER_LOCK_MAX_CALLBACKS; i++) {
+    needs_buffer = buf_lock->check_streaming[i](buf_lock);
+  }
   pthread_mutex_unlock(&buf_lock->lock);
 
   return needs_buffer;
@@ -67,6 +70,10 @@ void buffer_lock_capture(buffer_lock_t *buf_lock, buffer_t *buf)
       (now - buf_lock->buf_time_us) / 1000.0f);
     buf_lock->buf_time_us = now;
     pthread_cond_broadcast(&buf_lock->cond_wait);
+
+    for (int i = 0; buf_lock->notify_buffer[i] && i < BUFFER_LOCK_MAX_CALLBACKS; i++) {
+      buf_lock->notify_buffer[i](buf_lock, buf);
+    }
   }
 
   pthread_mutex_unlock(&buf_lock->lock);
@@ -134,4 +141,38 @@ int buffer_lock_write_loop(buffer_lock_t *buf_lock, int nframes, buffer_write_fn
 error:
   buffer_lock_use(buf_lock, -1);
   return -frames;
+}
+
+bool buffer_lock_register_check_streaming(buffer_lock_t *buf_lock, buffer_lock_check_streaming check_streaming)
+{
+  bool ret = false;
+
+  pthread_mutex_lock(&buf_lock->lock);
+  for (int i = 0; i < BUFFER_LOCK_MAX_CALLBACKS; i++) {
+    if (!buf_lock->check_streaming[i]) {
+      buf_lock->check_streaming[i] = check_streaming;
+      ret = true;
+      break;
+    }
+  }
+  pthread_mutex_unlock(&buf_lock->lock);
+
+  return ret;
+}
+
+bool buffer_lock_register_notify_buffer(buffer_lock_t *buf_lock, buffer_lock_notify_buffer notify_buffer)
+{
+  bool ret = false;
+
+  pthread_mutex_lock(&buf_lock->lock);
+  for (int i = 0; i < BUFFER_LOCK_MAX_CALLBACKS; i++) {
+    if (!buf_lock->notify_buffer[i]) {
+      buf_lock->notify_buffer[i] = notify_buffer;
+      ret = true;
+      break;
+    }
+  }
+  pthread_mutex_unlock(&buf_lock->lock);
+
+  return ret;
 }

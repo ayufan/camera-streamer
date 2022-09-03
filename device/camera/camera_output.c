@@ -18,8 +18,8 @@ static const char *jpeg_names[2] = {
 };
 
 static link_callbacks_t jpeg_callbacks[2] = {
-  { "JPEG-CAPTURE", http_jpeg_capture, http_jpeg_needs_buffer },
-  { "JPEG-LOW-CAPTURE", http_jpeg_lowres_capture, http_jpeg_needs_buffer }
+  { .name = "JPEG-CAPTURE", .buf_lock = &http_jpeg },
+  { .name = "JPEG-LOW-CAPTURE", .buf_lock = &http_jpeg_lowres }
 };
 
 static const char *h264_names[2] = {
@@ -27,26 +27,9 @@ static const char *h264_names[2] = {
   "H264-LOW"
 };
 
-static void h264_capture(buffer_t *buf)
-{
-  http_h264_capture(buf);
-  rtsp_h264_capture(buf);
-}
-
-static void h264_lowres_capture(buffer_t *buf)
-{
-  http_h264_lowres_capture(buf);
-  rtsp_h264_low_res_capture(buf);
-}
-
-static bool h264_needs_buffer()
-{
-  return http_h264_needs_buffer() | rtsp_h264_needs_buffer();
-}
-
 static link_callbacks_t h264_callbacks[2] = {
-  { "H264-CAPTURE", h264_capture, h264_needs_buffer },
-  { "H264-LOW-CAPTURE", h264_lowres_capture, h264_needs_buffer }
+  { .name = "H264-CAPTURE", .buf_lock = &http_h264 },
+  { .name = "H264-LOW-CAPTURE", .buf_lock = &http_h264_lowres }
 };
 
 static int camera_configure_h264_output(camera_t *camera, buffer_list_t *src_capture, int res)

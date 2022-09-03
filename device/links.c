@@ -2,6 +2,7 @@
 #include "device/device.h"
 #include "device/buffer.h"
 #include "device/buffer_list.h"
+#include "device/buffer_lock.h"
 #include "util/opts/log.h"
 #include "util/opts/fourcc.h"
 
@@ -31,6 +32,10 @@ int _build_fds(link_t *all_links, struct pollfd *fds, link_t **links, buffer_lis
     bool paused = true;
 
     if (link->callbacks.check_streaming && link->callbacks.check_streaming()) {
+      paused = false;
+    }
+
+    if (link->callbacks.buf_lock && buffer_lock_needs_buffer(link->callbacks.buf_lock)) {
       paused = false;
     }
 
@@ -105,6 +110,10 @@ int links_enqueue_from_source(buffer_list_t *buf_list, link_t *link)
 
   if (link->callbacks.on_buffer) {
     link->callbacks.on_buffer(buf);
+  }
+
+  if (link->callbacks.buf_lock) {
+    buffer_lock_capture(link->callbacks.buf_lock, buf);
   }
 
   return 0;
@@ -296,10 +305,10 @@ void links_dump(link_t *all_links)
       links_dump_buf_list(line, link->sinks[j]);
     }
 
-    if (link->callbacks.callback_name) {
+    if (link->callbacks.name) {
       if (link->sinks[0])
         strcat(line, ", ");
-      strcat(line, link->callbacks.callback_name);
+      strcat(line, link->callbacks.name);
     }
     strcat(line, "]");
 

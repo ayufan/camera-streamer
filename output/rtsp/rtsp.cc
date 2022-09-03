@@ -3,6 +3,7 @@ extern "C" {
 #include "util/http/http.h"
 #include "device/buffer.h"
 #include "device/buffer_list.h"
+#include "device/buffer_lock.h"
 #include "device/device.h"
 #include "util/opts/log.h"
 #include "util/opts/fourcc.h"
@@ -204,6 +205,33 @@ static void *rtsp_server_thread(void *opaque)
   return NULL;
 }
 
+static bool rtsp_h264_needs_buffer(buffer_lock_t *buf_lock)
+{
+  return rtsp_streams != NULL;
+}
+
+static void rtsp_h264_capture(buffer_lock_t *buf_lock, buffer_t *buf)
+{
+  pthread_mutex_lock(&rtsp_lock);
+  for (DynamicH264Stream *stream = rtsp_streams; stream; stream = stream->pNextStream) {
+    stream->receiveData(buf, false);
+
+    if (!http_h264_lowres.buf_list) {
+      stream->receiveData(buf, true);
+    }
+  }
+  pthread_mutex_unlock(&rtsp_lock);
+}
+
+static void rtsp_h264_low_res_capture(buffer_lock_t *buf_lock, buffer_t *buf)
+{
+  pthread_mutex_lock(&rtsp_lock);
+  for (DynamicH264Stream *stream = rtsp_streams; stream; stream = stream->pNextStream) {
+    stream->receiveData(buf, true);
+  }
+  pthread_mutex_unlock(&rtsp_lock);
+}
+
 extern "C" int rtsp_server(rtsp_options_t *options)
 {
   // Begin by setting up our usage environment:
@@ -234,6 +262,11 @@ extern "C" int rtsp_server(rtsp_options_t *options)
   //   LOG_INFO(NULL, "The RTSP-over-HTTP is not available.");
   // }
 
+  buffer_lock_register_check_streaming(&http_h264, rtsp_h264_needs_buffer);
+  buffer_lock_register_notify_buffer(&http_h264, rtsp_h264_capture);
+  buffer_lock_register_check_streaming(&http_h264_lowres, rtsp_h264_needs_buffer);
+  buffer_lock_register_notify_buffer(&http_h264_lowres, rtsp_h264_low_res_capture);
+
   pthread_create(&rtsp_thread, NULL, rtsp_server_thread, env);
   return 0;
 
@@ -241,47 +274,11 @@ error:
   return -1;
 }
 
-extern "C" bool rtsp_h264_needs_buffer()
-{
-  return rtsp_streams != NULL;
-}
-
-extern "C" void rtsp_h264_capture(buffer_t *buf)
-{
-  pthread_mutex_lock(&rtsp_lock);
-  for (DynamicH264Stream *stream = rtsp_streams; stream; stream = stream->pNextStream) {
-    stream->receiveData(buf, false);
-  }
-  pthread_mutex_unlock(&rtsp_lock);
-}
-
-extern "C" void rtsp_h264_low_res_capture(struct buffer_s *buf)
-{
-  pthread_mutex_lock(&rtsp_lock);
-  for (DynamicH264Stream *stream = rtsp_streams; stream; stream = stream->pNextStream) {
-    stream->receiveData(buf, true);
-  }
-  pthread_mutex_unlock(&rtsp_lock);
-}
-
 #else // USE_RTSP
 
 extern "C" int rtsp_server()
 {
   return 0;
-}
-
-extern "C" bool rtsp_h264_needs_buffer()
-{
-  return false;
-}
-
-extern "C" void rtsp_h264_capture(buffer_t *buf)
-{
-}
-
-extern "C" void rtsp_h264_low_res_capture(struct buffer_s *buf)
-{
 }
 
 #endif // USE_RTSP

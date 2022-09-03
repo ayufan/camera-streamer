@@ -9,9 +9,6 @@
 #include "device/buffer_list.h"
 #include "device/device.h"
 
-DEFINE_BUFFER_LOCK(http_h264, 0);
-DEFINE_BUFFER_LOCK(http_h264_lowres, 0);
-
 static const char *const VIDEO_HEADER =
   "HTTP/1.0 200 OK\r\n"
   "Access-Control-Allow-Origin: *\r\n"
@@ -19,24 +16,9 @@ static const char *const VIDEO_HEADER =
   "Content-Type: application/octet-stream\r\n"
   "\r\n";
 
-void http_h264_capture(buffer_t *buf)
-{
-  buffer_lock_capture(&http_h264, buf);
-}
-
-void http_h264_lowres_capture(buffer_t *buf)
-{
-  buffer_lock_capture(&http_h264_lowres, buf);
-}
-
-bool http_h264_needs_buffer()
-{
-  return buffer_lock_needs_buffer(&http_h264) | buffer_lock_needs_buffer(&http_h264_lowres);
-}
-
 buffer_lock_t *http_h264_buffer_for_res(http_worker_t *worker)
 {
-  if (strstr(worker->client_method, HTTP_LOW_RES_PARAM))
+  if (strstr(worker->client_method, HTTP_LOW_RES_PARAM) && http_jpeg_lowres.buf_list)
     return &http_h264_lowres;
   else
     return &http_h264;

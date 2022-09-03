@@ -3,6 +3,7 @@
 #include "device/device.h"
 #include "device/device_list.h"
 #include "device/buffer_list.h"
+#include "device/buffer_lock.h"
 #include "device/links.h"
 #include "util/opts/log.h"
 #include "util/opts/fourcc.h"
@@ -82,6 +83,10 @@ void camera_capture_set_callbacks(camera_t *camera, buffer_list_t *capture, link
 {
   link_t *link = camera_ensure_capture(camera, capture);
   link->callbacks = callbacks;
+
+  if (callbacks.buf_lock) {
+    callbacks.buf_lock->buf_list = capture;
+  }
 }
 
 int camera_set_params(camera_t *camera)

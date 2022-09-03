@@ -6,9 +6,6 @@
 #include "device/buffer.h"
 #include "device/buffer_lock.h"
 
-DEFINE_BUFFER_LOCK(http_jpeg, 1000);
-DEFINE_BUFFER_LOCK(http_jpeg_lowres, 1000);
-
 #define PART_BOUNDARY "123456789000000000000987654321"
 #define CONTENT_TYPE "image/jpeg"
 #define CONTENT_LENGTH "Content-Length"
@@ -23,24 +20,9 @@ static const char *const STREAM_PART = "Content-Type: " CONTENT_TYPE "\r\n" CONT
 static const char *const STREAM_BOUNDARY = "\r\n"
                                            "--" PART_BOUNDARY "\r\n";
 
-bool http_jpeg_needs_buffer()
-{
-  return buffer_lock_needs_buffer(&http_jpeg) | buffer_lock_needs_buffer(&http_jpeg_lowres);
-}
-
-void http_jpeg_capture(buffer_t *buf)
-{
-  buffer_lock_capture(&http_jpeg, buf);
-}
-
-void http_jpeg_lowres_capture(buffer_t *buf)
-{
-  buffer_lock_capture(&http_jpeg_lowres, buf);
-}
-
 buffer_lock_t *http_jpeg_buffer_for_res(http_worker_t *worker)
 {
-  if (strstr(worker->client_method, HTTP_LOW_RES_PARAM))
+  if (strstr(worker->client_method, HTTP_LOW_RES_PARAM) && http_jpeg_lowres.buf_list)
     return &http_jpeg_lowres;
   else
     return &http_jpeg;
