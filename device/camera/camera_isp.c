@@ -10,6 +10,8 @@
 #include "device/buffer_list.h"
 #include "util/http/http.h"
 
+int camera_configure_output_rescaler2(camera_t *camera, buffer_list_t *src_capture, float div, int res);
+
 int camera_configure_isp(camera_t *camera, buffer_list_t *src_capture, float high_div, float low_div)
 {
   camera->isp = device_v4l2_open("ISP", "/dev/video13");
@@ -25,7 +27,12 @@ int camera_configure_isp(camera_t *camera, buffer_list_t *src_capture, float hig
     return -1;
   }
 
+#if 1
+  return camera_configure_output_rescaler2(camera, isp_capture, low_div, 1);
+#else
   if (low_div > 1) {
+    // TODO: Currently we cannot pull the data at the same time from /dev/video14 and /dev/video15
+    // if only one path (consuming /dev/video15) is activated
     buffer_list_t *isp_lowres_capture = device_open_buffer_list_capture2(
       camera->isp, "/dev/video15", isp_output, low_div, V4L2_PIX_FMT_YUYV, true);
 
@@ -35,6 +42,7 @@ int camera_configure_isp(camera_t *camera, buffer_list_t *src_capture, float hig
   }
 
   return 0;
+#endif
 }
 
 static const char *isp_names[2] = {
