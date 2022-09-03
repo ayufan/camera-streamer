@@ -1,11 +1,14 @@
 #pragma once
 
-#include "util/http/http.h"
-#include "util/opts/log.h"
-#include "util/opts/fourcc.h"
-#include "util/opts/control.h"
-#include "device/buffer.h"
+#include <stdio.h>
+
+typedef struct http_worker_s http_worker_t;
+
+typedef struct webrtc_options_s {
+  bool running;
+  bool disabled;
+} webrtc_options_t;
 
 // WebRTC
 void http_webrtc_offer(http_worker_t *worker, FILE *stream);
-void webrtc_server();
+int webrtc_server(webrtc_options_t *options);

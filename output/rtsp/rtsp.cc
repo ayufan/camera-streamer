@@ -244,6 +244,7 @@ extern "C" int rtsp_server(rtsp_options_t *options)
   buffer_lock_register_notify_buffer(&video_lock, rtsp_h264_capture);
 
   pthread_create(&rtsp_thread, NULL, rtsp_server_thread, env);
+  options->running = true;
   return 0;
 
 error:

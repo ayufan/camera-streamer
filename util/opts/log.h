@@ -49,6 +49,7 @@ bool filter_log(const char *filename);
 uint64_t get_monotonic_time_us(struct timespec *ts, struct timeval *tv);
 uint64_t get_time_us(clockid_t clock, struct timespec *ts, struct timeval *tv, int64_t delays_us);
 int shrink_to_block(int size, int block);
+char *trim(char *s);
 
 int ioctl_retried(const char *name, int fd, int request, void *arg);
 

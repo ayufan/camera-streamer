@@ -44,6 +44,7 @@ typedef struct http_worker_s {
   char client_method[BUFSIZE];
   char range_header[BUFSIZE];
   char user_agent[BUFSIZE];
+  char host[BUFSIZE];
   char *request_method;
   char *request_uri;
   char *request_params;

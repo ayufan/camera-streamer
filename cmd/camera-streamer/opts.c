@@ -4,6 +4,7 @@
 #include "util/opts/fourcc.h"
 #include "device/camera/camera.h"
 #include "output/rtsp/rtsp.h"
+#include "output/webrtc/webrtc.h"
 #include "output/output.h"
 
 camera_options_t camera_options = {
@@ -51,6 +52,9 @@ log_options_t log_options = {
 
 rtsp_options_t rtsp_options = {
   .port = 0,
+};
+
+webrtc_options_t webrtc_options = {
 };
 
 option_value_t camera_formats[] = {

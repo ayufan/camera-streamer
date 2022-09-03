@@ -2,6 +2,7 @@
 #include "util/opts/opts.h"
 
 #include <string.h>
+#include <ctype.h>
 
 char *
 strstrn(const char *s, const char *find, size_t len)
@@ -100,4 +101,18 @@ int ioctl_retried(const char *name, int fd, int request, void *arg)
 		LOG_PERROR(NULL, "%s: ioctl(%08x, errno=%d) retried %u times; giving up", name, request, errno, MAX_RETRIES);
 	}
 	return ret;
+}
+
+char *trim(char *s)
+{
+	// skip left side white spaces
+	while (isspace (*s))
+		s++;
+
+	// skip right side white spaces
+	char *e = s + strlen(s) - 1;
+	while (e >= s && isspace(*e))
+		*e-- = 0;
+
+	return s;
 }

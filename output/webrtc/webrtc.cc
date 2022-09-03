@@ -5,6 +5,11 @@ extern "C" {
 #include "device/buffer_lock.h"
 #include "device/device.h"
 #include "output/output.h"
+#include "util/http/http.h"
+#include "util/opts/log.h"
+#include "util/opts/fourcc.h"
+#include "util/opts/control.h"
+#include "device/buffer.h"
 };
 
 #ifdef USE_LIBDATACHANNEL
@@ -381,10 +386,12 @@ extern "C" void http_webrtc_offer(http_worker_t *worker, FILE *stream)
   }
 }
 
-extern "C" void webrtc_server()
+extern "C" int webrtc_server(webrtc_options_t *options)
 {
   buffer_lock_register_check_streaming(&video_lock, webrtc_h264_needs_buffer);
   buffer_lock_register_notify_buffer(&video_lock, webrtc_h264_capture);
+  options->running = true;
+  return 0;
 }
 
 #else // USE_LIBDATACHANNEL
@@ -394,8 +401,9 @@ extern "C" void http_webrtc_offer(http_worker_t *worker, FILE *stream)
   http_404(stream, NULL);
 }
 
-extern "C" void webrtc_server()
+extern "C" int webrtc_server(webrtc_options_t *options)
 {
+  return 0;
 }
 
 #endif // USE_LIBDATACHANNEL

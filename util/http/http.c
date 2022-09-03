@@ -17,6 +17,7 @@
 #define HEADER_RANGE "Range:"
 #define HEADER_CONTENT_LENGTH "Content-Length:"
 #define HEADER_USER_AGENT "User-Agent:"
+#define HEADER_HOST "Host:"
 
 static int http_listen(int port, int maxcons)
 {
@@ -92,6 +93,7 @@ static void http_process(http_worker_t *worker, FILE *stream)
 
   worker->range_header[0] = 0;
   worker->user_agent[0] = 0;
+  worker->host[0] = 0;
   worker->content_length = -1;
 
   // request_uri
@@ -124,11 +126,13 @@ static void http_process(http_worker_t *worker, FILE *stream)
       break;
 
     if (strcasestr(line, HEADER_RANGE) == line) {
-      strcpy(worker->range_header, line);
+      strcpy(worker->range_header, trim(line));
     } else if (strcasestr(line, HEADER_CONTENT_LENGTH) == line) {
-      worker->content_length = atoi(line + strlen(HEADER_CONTENT_LENGTH));
+      worker->content_length = atoi(trim(line + strlen(HEADER_CONTENT_LENGTH)));
     } else if (strcasestr(line, HEADER_USER_AGENT) == line) {
-      strcpy(worker->user_agent, line + strlen(HEADER_USER_AGENT));
+      strcpy(worker->user_agent, trim(line + strlen(HEADER_USER_AGENT)));
+    } else if (strcasestr(line, HEADER_HOST) == line) {
+      strcpy(worker->host, trim(line + strlen(HEADER_HOST)));
     }
   }
 

@@ -13,6 +13,8 @@ extern unsigned char html_webrtc_html[];
 extern unsigned int html_webrtc_html_len;
 extern camera_t *camera;
 
+void camera_status_json(http_worker_t *worker, FILE *stream);
+
 static void http_once(FILE *stream, void (*fn)(FILE *stream, const char *data), void *headersp)
 {
   bool *headers = headersp;
@@ -101,6 +103,7 @@ http_method_t http_methods[] = {
   { "GET",  "/webrtc", http_content, "text/html", html_webrtc_html, 0, &html_webrtc_html_len },
   { "POST", "/webrtc", http_webrtc_offer },
   { "GET",  "/option", camera_http_option },
+  { "GET",  "/status.json", camera_status_json },
   { "GET",  "/", http_content, "text/html", html_index_html, 0, &html_index_html_len },
   { "OPTIONS", "*/", http_cors_options },
   { }

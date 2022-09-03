@@ -13,6 +13,7 @@ extern camera_options_t camera_options;
 extern http_server_options_t http_options;
 extern http_method_t http_methods[];
 extern rtsp_options_t rtsp_options;
+extern webrtc_options_t webrtc_options;
 
 camera_t *camera;
 
@@ -79,7 +80,9 @@ int main(int argc, char *argv[])
     goto error;
   }
 
-  webrtc_server();
+  if (!webrtc_options.disabled && webrtc_server(&webrtc_options) < 0) {
+    goto error;
+  }
 
   while (true) {
     camera = camera_open(&camera_options);
