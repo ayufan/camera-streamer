@@ -204,7 +204,7 @@ static void *rtsp_server_thread(void *opaque)
   return NULL;
 }
 
-extern "C" int rtsp_server()
+extern "C" int rtsp_server(rtsp_options_t *options)
 {
   // Begin by setting up our usage environment:
   TaskScheduler* scheduler = BasicTaskScheduler::createNew();
@@ -220,12 +220,12 @@ extern "C" int rtsp_server()
 #endif
 
   RTSPServer* rtspServer;
-  rtspServer = DynamicRTSPServer::createNew(*env, rtsp_options.port, authDB);
+  rtspServer = DynamicRTSPServer::createNew(*env, options->port, authDB);
   if (rtspServer == NULL) {
     LOG_ERROR(NULL, "Failed to create RTSP server: %s", env->getResultMsg());
     return -1;
   }
-  LOG_INFO(NULL, "Running RTSP server on '%d'", rtsp_options.port);
+  LOG_INFO(NULL, "Running RTSP server on '%d'", options->port);
 
   // if (rtspServer->setUpTunnelingOverHTTP(80) || rtspServer->setUpTunnelingOverHTTP(8000) || rtspServer->setUpTunnelingOverHTTP(8080)) {
   //   LOG_INFO(NULL, "Running RTSP-over-HTTP tunneling on '%d'", rtspServer->httpServerPortNum());
