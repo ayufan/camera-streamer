@@ -1,0 +1,21 @@
+#!/bin/bash
+
+if [[ $# -gt 1 ]]; then
+  echo "usage: $0 <amd64|arm32v7|arm64v8>"
+  exit 1
+fi
+
+docker_arch=""
+docker_image="camera_streamer_build_env"
+[[ -n "$1" ]] && docker_arch="$1/" && docker_image="${build_env}:${1}"
+
+echo "$UID"
+
+PWD=$(pwd)
+ROOT=$(cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd)
+
+set -xeo pipefail
+
+docker build -t "$docker_image" --build-arg "DOCKER_ARCH=$docker_arch" --target build_env - < Dockerfile
+
+exec docker run --rm -it -u "$UID" -v "$ROOT" -w "$ROOT" "$docker_image"
