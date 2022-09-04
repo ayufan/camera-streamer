@@ -1,21 +1,26 @@
 #!/bin/bash
 
-if [[ $# -gt 1 ]]; then
-  echo "usage: $0 <amd64|arm32v7|arm64v8>"
+if [[ $# -gt 2 ]]; then
+  echo "usage: $0 <buster|bullseye> <amd64|arm32v7|arm64v8>"
   exit 1
 fi
 
-docker_arch=""
 docker_image="camera_streamer_build_env"
-[[ -n "$1" ]] && docker_arch="$1/" && docker_image="${build_env}:${1}"
 
-echo "$UID"
+debian_version="bullseye"
+[[ -n "$1" ]] && debian_version="$1" && docker_image="${docker_image}_${1}"
+
+docker_arch=""
+[[ -n "$2" ]] && docker_arch="$2/" && docker_image="${docker_image}_${2}"
 
 PWD=$(pwd)
 ROOT=$(cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd)
 
 set -xeo pipefail
 
-docker build -t "$docker_image" --build-arg "DOCKER_ARCH=$docker_arch" --target build_env - < Dockerfile
+docker build -t "$docker_image" \
+  --build-arg "DOCKER_ARCH=$docker_arch" \
+  --build-arg "DEBIAN_VERSION=$debian_version" \
+  --target build_env - < Dockerfile
 
-exec docker run --rm -it -u "$UID" -v "$ROOT" -w "$ROOT" "$docker_image"
+exec docker run --rm -it -u "$UID" -v "$ROOT:$ROOT" -w "$ROOT" "$docker_image"
