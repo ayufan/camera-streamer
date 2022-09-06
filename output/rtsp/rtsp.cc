@@ -276,7 +276,7 @@ error:
 
 #else // USE_RTSP
 
-extern "C" int rtsp_server()
+extern "C" int rtsp_server(rtsp_options_t *options)
 {
   return 0;
 }
