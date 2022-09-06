@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdarg.h>
 
 #include "http.h"
 
@@ -21,6 +22,17 @@ void http_write_response(
   if (body) {
     fwrite(body, 1, content_length, stream);
   }
+}
+
+void http_write_responsef(FILE *stream, const char *status, const char *content_type, const char *fmt, ...)
+{
+  va_list arg;
+  va_start(arg, fmt);
+
+  char *body = NULL;
+  size_t n = vasprintf(&body, fmt, arg);
+  http_write_response(stream, status, content_type, body, n);
+  free(body);
 }
 
 void http_content(http_worker_t *worker, FILE *stream)

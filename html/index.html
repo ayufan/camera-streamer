@@ -40,14 +40,18 @@
 		<br>
 		<li>
 			<a href="video"><b>/video</b></a><br>
-			Get a live WebRTC (H264) stream.<br>
+			Get a live (H264) video stream best suited to current browser in a maximum compatibility mode choosing automatically between one of the below formats.<br>
 			<br>
 			<ul>
-				<li><a href="video.mp4"><b>/video.mp4</b></a><br> get a live video stream in MP4 format (if FFMPEG enabled).</li>
+				<li><a href="video.html"><b>/video.html</b></a><br> get a live video using WebRTC (low-latency streaming with latency of around 100ms).</li>
 				<br>
-				<li><a href="video.mkv"><b>/video.mkv</b></a><br> get a live video stream in MKV format (if FFMPEG enabled).</li>
+				<li><a href="video.mp4"><b>/video.mp4</b></a><br> get a live video stream in MP4 format (Firefox, with latency of around 1s if FFMPEG enabled).</li>
 				<br>
-				<li><a href="video?res=low">/video?res=low</a> get a low resolution stream (if -camera-low_res_factor=X is configured).</li>
+				<li><a href="video.mkv"><b>/video.mkv</b></a><br> get a live video stream in MKV format (Chrome, with latency of around 2s if FFMPEG enabled).</li>
+				<br>
+				<li><a href="video.m3u8"><b>/video.m3u8</b></a><br> get a live video stream in HLS format (Safari, with latency of around 1s).</li>
+				<br>
+				<li><a href="video.html?res=low">/video.html?res=low</a> get a low resolution stream (if -camera-low_res_factor=X is configured).</li>
 			</ul>
 		</li>
 		<br>

@@ -16,6 +16,7 @@
 
 #define HEADER_RANGE "Range:"
 #define HEADER_CONTENT_LENGTH "Content-Length:"
+#define HEADER_USER_AGENT "User-Agent:"
 
 static int http_listen(int port, int maxcons)
 {
@@ -95,6 +96,7 @@ static void http_process(http_worker_t *worker, FILE *stream)
   }
 
   worker->range_header[0] = 0;
+  worker->user_agent[0] = 0;
   worker->content_length = -1;
 
   // Consume headers
@@ -107,9 +109,10 @@ static void http_process(http_worker_t *worker, FILE *stream)
 
     if (strcasestr(line, HEADER_RANGE) == line) {
       strcpy(worker->range_header, line);
-    }
-    if (strcasestr(line, HEADER_CONTENT_LENGTH) == line) {
+    } else if (strcasestr(line, HEADER_CONTENT_LENGTH) == line) {
       worker->content_length = atoi(line + strlen(HEADER_CONTENT_LENGTH));
+    } else if (strcasestr(line, HEADER_USER_AGENT) == line) {
+      strcpy(worker->user_agent, line + strlen(HEADER_USER_AGENT));
     }
   }
 
@@ -128,6 +131,8 @@ static void http_process(http_worker_t *worker, FILE *stream)
       break;
     }
   }
+
+  LOG_INFO(worker, "Request '%s'", worker->client_method);
 
   if (worker->current_method) {
     worker->current_method->func(worker, stream);

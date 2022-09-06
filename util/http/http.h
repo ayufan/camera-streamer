@@ -36,6 +36,7 @@ typedef struct http_worker_s {
   char *client_host;
   char client_method[BUFSIZE];
   char range_header[BUFSIZE];
+  char user_agent[BUFSIZE];
 
   http_method_t *current_method;
 } http_worker_t;
@@ -48,6 +49,7 @@ typedef struct http_server_options_s {
 int http_server(http_server_options_t *options, http_method_t *methods);
 void http_content(http_worker_t *worker, FILE *stream);
 void http_write_response(FILE *stream, const char *status, const char *content_type, const char *body, unsigned content_length);
+void http_write_responsef(FILE *stream, const char *status, const char *content_type, const char *fmt, ...);
 void http_200(FILE *stream, const char *data);
 void http_400(FILE *stream, const char *data);
 void http_404(FILE *stream, const char *data);

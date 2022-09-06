@@ -137,6 +137,7 @@ static void http_ffmpeg_video(http_worker_t *worker, FILE *stream, const char *c
   int n = buffer_lock_write_loop(
     http_h264_buffer_for_res(worker),
     0,
+    0,
     (buffer_write_fn)http_ffmpeg_video_buf_part,
     &status);
   ffmpeg_remuxer_close(&remuxer);

@@ -108,15 +108,20 @@ ret:
   return buf;
 }
 
-int buffer_lock_write_loop(buffer_lock_t *buf_lock, int nframes, buffer_write_fn fn, void *data)
+int buffer_lock_write_loop(buffer_lock_t *buf_lock, int nframes, unsigned timeout_ms, buffer_write_fn fn, void *data)
 {
   int counter = 0;
   int frames = 0;
   uint64_t deadline_ms = get_monotonic_time_us(NULL, NULL) + DEFAULT_BUFFER_LOCK_GET_TIMEOUT * 1000LL;
+  uint64_t frame_stop_ms = get_monotonic_time_us(NULL, NULL) + timeout_ms * 1000LL;
 
   buffer_lock_use(buf_lock, 1);
 
   while (nframes == 0 || frames < nframes) {
+    if (timeout_ms && frame_stop_ms < get_monotonic_time_us(NULL, NULL)) {
+      break;
+    }
+
     buffer_t *buf = buffer_lock_get(buf_lock, 0, &counter);
     if (!buf) {
       goto error;

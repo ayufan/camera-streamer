@@ -52,6 +52,6 @@ buffer_t *buffer_lock_get(buffer_lock_t *buf_lock, int timeout_ms, int *counter)
 bool buffer_lock_needs_buffer(buffer_lock_t *buf_lock);
 void buffer_lock_use(buffer_lock_t *buf_lock, int ref);
 bool buffer_lock_is_used(buffer_lock_t *buf_lock);
-int buffer_lock_write_loop(buffer_lock_t *buf_lock, int nframes, buffer_write_fn fn, void *data);
+int buffer_lock_write_loop(buffer_lock_t *buf_lock, int nframes, unsigned timeout_ms, buffer_write_fn fn, void *data);
 bool buffer_lock_register_check_streaming(buffer_lock_t *buf_lock, buffer_lock_check_streaming check_streaming);
 bool buffer_lock_register_notify_buffer(buffer_lock_t *buf_lock, buffer_lock_notify_buffer notify_buffer);

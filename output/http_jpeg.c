@@ -40,7 +40,7 @@ int http_snapshot_buf_part(buffer_lock_t *buf_lock, buffer_t *buf, int frame, FI
 
 void http_snapshot(http_worker_t *worker, FILE *stream)
 {
-  int n = buffer_lock_write_loop(http_jpeg_buffer_for_res(worker), 1, (buffer_write_fn)http_snapshot_buf_part, stream);
+  int n = buffer_lock_write_loop(http_jpeg_buffer_for_res(worker), 1, 0, (buffer_write_fn)http_snapshot_buf_part, stream);
 
   if (n <= 0) {
     http_500(stream, NULL);
@@ -68,7 +68,7 @@ int http_stream_buf_part(buffer_lock_t *buf_lock, buffer_t *buf, int frame, FILE
 
 void http_stream(http_worker_t *worker, FILE *stream)
 {
-  int n = buffer_lock_write_loop(http_jpeg_buffer_for_res(worker), 0, (buffer_write_fn)http_stream_buf_part, stream);
+  int n = buffer_lock_write_loop(http_jpeg_buffer_for_res(worker), 0, 0, (buffer_write_fn)http_stream_buf_part, stream);
 
   if (n == 0) {
     http_500(stream, NULL);

@@ -81,7 +81,7 @@ void http_h264_video(http_worker_t *worker, FILE *stream)
 {
   http_video_status_t status = { stream };
 
-  int n = buffer_lock_write_loop(http_h264_buffer_for_res(worker), 0, (buffer_write_fn)http_video_buf_part, &status);
+  int n = buffer_lock_write_loop(http_h264_buffer_for_res(worker), 0, 0, (buffer_write_fn)http_video_buf_part, &status);
 
   if (status.wrote_header) {
     return;
