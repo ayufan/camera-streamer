@@ -22,7 +22,7 @@ static const char *const STREAM_BOUNDARY = "\r\n"
 
 buffer_lock_t *http_jpeg_buffer_for_res(http_worker_t *worker)
 {
-  if (strstr(worker->client_method, HTTP_LOW_RES_PARAM) && http_jpeg_lowres.buf_list)
+  if (strstr(worker->request_params, HTTP_LOW_RES_PARAM) && http_jpeg_lowres.buf_list)
     return &http_jpeg_lowres;
   else
     return &http_jpeg;

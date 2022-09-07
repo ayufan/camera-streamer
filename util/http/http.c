@@ -56,20 +56,15 @@ error:
 
 void *http_enum_params(http_worker_t *worker, FILE *stream, http_param_fn fn, void *opaque)
 {
-  const char *params = strstr(worker->client_method, "?");
+  const char *params = worker->request_params;
   if (!params) {
     return NULL;
   }
 
   void *ret = NULL;
-  char *start = strdup(params + 1);
+  char *start = strdup(params);
   char *string = start;
   char *option;
-
-  // Drop after ` `
-  if ((option = strstr(start, " ")) != NULL) {
-    *option = 0;
-  }
 
   while ((option = strsep(&string, "&")) != NULL) {
     char *value = option;
@@ -99,6 +94,28 @@ static void http_process(http_worker_t *worker, FILE *stream)
   worker->user_agent[0] = 0;
   worker->content_length = -1;
 
+
+  // request_uri
+  worker->request_method = worker->client_method;
+
+  if ((worker->request_uri = strstr(worker->request_method, " ")) != NULL) {
+    *worker->request_uri++ = 0;
+  } else {
+    worker->request_uri = "";
+  }
+
+  if ((worker->request_version = strstr(worker->request_uri, " ")) != NULL) {
+    *worker->request_version++ = 0;
+  } else {
+    worker->request_version = "";
+  }
+
+  if ((worker->request_params = strstr(worker->request_uri, "?")) != NULL) {
+    *worker->request_params++ = 0;
+  } else {
+    worker->request_params = "";
+  }
+
   // Consume headers
   for(int i = 0; i < 50; i++) {
     char line[BUFSIZE];
@@ -118,21 +135,30 @@ static void http_process(http_worker_t *worker, FILE *stream)
 
   worker->current_method = NULL;
 
-  for (int i = 0; worker->methods[i].name; i++) {
-    const char *name = worker->methods[i].name;
-    int nlen = strlen(worker->methods[i].name);
+  for (int i = 0; worker->methods[i].method; i++) {
+    http_method_t *method = &worker->methods[i];
 
-    if (strncmp(worker->client_method, name, nlen-1))
+    if (strcmp(worker->request_method, method->method))
       continue;
 
-    // allow last character to match `?` or ` `
-    if (worker->client_method[nlen-1] == name[nlen-1] || (name[nlen-1] == '?' && worker->client_method[nlen-1] == ' ')) {
-      worker->current_method = &worker->methods[i];
-      break;
+    const char *params = strstr(method->uri, "?");
+
+    if (params) {
+      // match request_uri and params
+      if (strncmp(worker->request_uri, method->uri, params - method->uri))
+        continue;
+      if (!strstr(worker->request_params, params+1))
+        continue;
+    } else {
+      if (strcmp(worker->request_uri, method->uri))
+        continue;
     }
+
+    worker->current_method = &worker->methods[i];
+    break;
   }
 
-  LOG_INFO(worker, "Request '%s'", worker->client_method);
+  LOG_INFO(worker, "Request '%s' '%s' '%s'", worker->request_method, worker->request_uri, worker->request_params);
 
   if (worker->current_method) {
     worker->current_method->func(worker, stream);

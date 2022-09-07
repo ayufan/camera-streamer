@@ -18,7 +18,7 @@ static const char *const VIDEO_HEADER =
 
 buffer_lock_t *http_h264_buffer_for_res(http_worker_t *worker)
 {
-  if (strstr(worker->client_method, HTTP_LOW_RES_PARAM) && http_jpeg_lowres.buf_list)
+  if (strstr(worker->request_params, HTTP_LOW_RES_PARAM) && http_h264_lowres.buf_list)
     return &http_h264_lowres;
   else
     return &http_h264;

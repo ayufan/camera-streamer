@@ -22,7 +22,7 @@ static const char *const LOCATION_REDIRECT =
   "HTTP/1.0 307 Temporary Redirect\r\n"
   "Access-Control-Allow-Origin: *\r\n"
   "Connection: close\r\n"
-  "Location: %s\r\n"
+  "Location: %s?%s\r\n"
   "\r\n";
 
 void http_m3u8_video(struct http_worker_s *worker, FILE *stream)
@@ -35,12 +35,12 @@ void http_detect_video(struct http_worker_s *worker, FILE *stream)
 {
   if (strstr(worker->user_agent, "Safari/") && !strstr(worker->user_agent, "Chrome/") && !strstr(worker->user_agent, "Chromium/")) {
     // Safari only supports m3u8
-    fprintf(stream, LOCATION_REDIRECT, "video.m3u8");
+    fprintf(stream, LOCATION_REDIRECT, "video.m3u8", worker->request_params);
   } else if (strstr(worker->user_agent, "Firefox/")) {
     // Firefox only supports mp4
-    fprintf(stream, LOCATION_REDIRECT, "video.mp4");
+    fprintf(stream, LOCATION_REDIRECT, "video.mp4", worker->request_params);
   } else {
     // Chrome offers best latency with mkv
-    fprintf(stream, LOCATION_REDIRECT, "video.mkv");
+    fprintf(stream, LOCATION_REDIRECT, "video.mkv", worker->request_params);
   }
 }

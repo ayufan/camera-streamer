@@ -16,7 +16,8 @@ typedef void *(*http_param_fn)(struct http_worker_s *worker, FILE *stream, const
 #define BUFSIZE 256
 
 typedef struct http_method_s {
-  const char *name;
+  const char *method;
+  const char *uri;
   http_method_fn func;
   const char *content_type;
   const void *content_body;
@@ -37,6 +38,10 @@ typedef struct http_worker_s {
   char client_method[BUFSIZE];
   char range_header[BUFSIZE];
   char user_agent[BUFSIZE];
+  char *request_method;
+  char *request_uri;
+  char *request_params;
+  char *request_version;
 
   http_method_t *current_method;
 } http_worker_t;
