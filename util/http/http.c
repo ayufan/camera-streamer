@@ -172,7 +172,7 @@ static void http_process(http_worker_t *worker, FILE *stream)
 static void http_client(http_worker_t *worker)
 {
   worker->client_host = inet_ntoa(worker->client_addr.sin_addr);
-  LOG_INFO(worker, "Client connected %s.", worker->client_host);
+  LOG_INFO(worker, "Client connected %s (fd=%d).", worker->client_host, worker->client_fd);
 
   struct timeval tv;
   tv.tv_sec = 3;
@@ -186,12 +186,16 @@ static void http_client(http_worker_t *worker)
 
   FILE *stream = fdopen(worker->client_fd, "r+");
   if (stream) {
+    worker->client_fd = -1; // ownership taken by stream
+
     http_process(worker, stream);
     fclose(stream);
   }
 
-  close(worker->client_fd);
-  worker->client_fd = -1;
+  if (worker->client_fd >= 0) {
+    close(worker->client_fd);
+    worker->client_fd = -1;
+  }
 
   LOG_INFO(worker, "Client disconnected %s.", worker->client_host);
   worker->client_host = NULL;
