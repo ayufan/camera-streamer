@@ -9,8 +9,8 @@
 
 extern unsigned char html_index_html[];
 extern unsigned int html_index_html_len;
-extern unsigned char html_video_html[];
-extern unsigned int html_video_html_len;
+extern unsigned char html_webrtc_html[];
+extern unsigned int html_webrtc_html_len;
 extern camera_t *camera;
 
 void *camera_http_set_option(http_worker_t *worker, FILE *stream, const char *key, const char *value, void *headersp)
@@ -77,12 +77,12 @@ http_method_t http_methods[] = {
   { "GET",  "/?action=snapshot", http_snapshot },
   { "GET",  "/?action=stream", http_stream },
   { "GET",  "/video", http_detect_video },
-  { "GET",  "/video.html", http_content, "text/html", html_video_html, 0, &html_video_html_len },
   { "GET",  "/video.m3u8", http_m3u8_video },
   { "GET",  "/video.h264", http_h264_video },
   { "GET",  "/video.mkv", http_mkv_video },
   { "GET",  "/video.mp4", http_mp4_video },
-  { "POST", "/video", http_webrtc_offer },
+  { "GET",  "/webrtc", http_content, "text/html", html_webrtc_html, 0, &html_webrtc_html_len },
+  { "POST", "/webrtc", http_webrtc_offer },
   { "GET",  "/option", camera_http_option },
   { "GET",  "/", http_content, "text/html", html_index_html, 0, &html_index_html_len },
   { }

@@ -42,7 +42,7 @@
 </head>
 <body>
   <div id="streamtage">
-    <video controls autoplay muted id="stream"></video>
+    <video controls autoplay muted playsinline id="stream"></video>
   </div>
 
   <script>
@@ -61,8 +61,9 @@
         pc.addEventListener('track', function(evt) {
           console.log("track event " + evt.track.kind);
             if (evt.track.kind == 'video') {
-                if (document.getElementById('stream'))
+                if (document.getElementById('stream')) {
                   document.getElementById('stream').srcObject = evt.streams[0];
+                }
             } else {
                 if (document.getElementById('audio'))
                   document.getElementById('audio').srcObject = evt.streams[0];
@@ -72,7 +73,7 @@
         const urlSearchParams = new URLSearchParams(window.location.search);
         const params = Object.fromEntries(urlSearchParams.entries());
 
-        fetch('/video', {
+        fetch('/webrtc', {
           body: JSON.stringify({
               type: 'request',
               res: params.res
@@ -108,7 +109,7 @@
         }).then(function(answer) {
           var offer = pc.localDescription;
 
-          return fetch('/video', {
+          return fetch('/webrtc', {
             body: JSON.stringify({
                 type: offer.type,
                 id: pc.remote_pc_id,
