@@ -33,8 +33,8 @@ static const auto webrtc_client_lock_timeout = 3 * 1000ms;
 static const auto webrtc_client_max_json_body = 10 * 1024;
 static const auto webrtc_client_video_payload_type = 102; // H264
 static const rtc::Configuration webrtc_configuration = {
-  .iceServers = { rtc::IceServer("stun:stun.l.google.com:19302") },
-  .disableAutoNegotiation = true  
+  // .iceServers = { rtc::IceServer("stun:stun.l.google.com:19302") },
+  .disableAutoNegotiation = true
 };
 
 struct ClientTrackData
