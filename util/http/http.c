@@ -94,7 +94,6 @@ static void http_process(http_worker_t *worker, FILE *stream)
   worker->user_agent[0] = 0;
   worker->content_length = -1;
 
-
   // request_uri
   worker->request_method = worker->client_method;
 
@@ -148,6 +147,9 @@ static void http_process(http_worker_t *worker, FILE *stream)
       if (strncmp(worker->request_uri, method->uri, params - method->uri))
         continue;
       if (!strstr(worker->request_params, params+1))
+        continue;
+    } else if (method->uri[0] == '*') {
+      if (strstr(worker->request_uri, method->uri + 1) != worker->request_uri)
         continue;
     } else {
       if (strcmp(worker->request_uri, method->uri))
@@ -237,6 +239,7 @@ int http_server(http_server_options_t *options, http_method_t *methods)
     worker->listen_fd = listen_fd;
     worker->methods = methods;
     worker->client_fd = -1;
+    worker->options = *options;
     pthread_create(&worker->thread, NULL, (void *(*)(void*))http_worker, worker);
   }
 

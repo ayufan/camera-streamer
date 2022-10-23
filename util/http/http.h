@@ -25,11 +25,17 @@ typedef struct http_method_s {
   unsigned *content_lengthp;
 } http_method_t;
 
+typedef struct http_server_options_s {
+  unsigned port;
+  unsigned maxcons;
+} http_server_options_t;
+
 typedef struct http_worker_s {
   char *name;
   int listen_fd;
   http_method_t *methods;
   pthread_t thread;
+  http_server_options_t options;
 
   int client_fd;
   int content_length;
@@ -45,11 +51,6 @@ typedef struct http_worker_s {
 
   http_method_t *current_method;
 } http_worker_t;
-
-typedef struct http_server_options_s {
-  unsigned port;
-  unsigned maxcons;
-} http_server_options_t;
 
 int http_server(http_server_options_t *options, http_method_t *methods);
 void http_content(http_worker_t *worker, FILE *stream);

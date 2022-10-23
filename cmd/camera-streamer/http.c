@@ -70,6 +70,15 @@ void camera_http_option(http_worker_t *worker, FILE *stream)
   }
 }
 
+void http_cors_options(http_worker_t *worker, FILE *stream)
+{
+  fprintf(stream, "HTTP/1.1 204 No Data\r\n");
+  fprintf(stream, "Access-Control-Allow-Origin: *\r\n");
+  fprintf(stream, "Access-Control-Allow-Methods: GET, POST, OPTIONS\r\n");
+  fprintf(stream, "Access-Control-Allow-Headers: Content-Type\r\n");
+  fprintf(stream, "\r\n");
+}
+
 http_method_t http_methods[] = {
   { "GET",  "/snapshot", http_snapshot },
   { "GET",  "/snapshot.jpg", http_snapshot },
@@ -85,5 +94,6 @@ http_method_t http_methods[] = {
   { "POST", "/webrtc", http_webrtc_offer },
   { "GET",  "/option", camera_http_option },
   { "GET",  "/", http_content, "text/html", html_index_html, 0, &html_index_html_len },
+  { "OPTIONS", "*/", http_cors_options },
   { }
 };
