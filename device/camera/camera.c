@@ -41,15 +41,22 @@ void camera_close(camera_t **camerap)
   *camerap = NULL;
 
   for (int i = MAX_DEVICES; i-- > 0; ) {
-    if (camera->devices[i]) {
-      device_close(camera->devices[i]);
-      camera->devices[i] = NULL;
+    link_t *link = &camera->links[i];
+
+    if (link->callbacks.on_buffer) {
+      link->callbacks.on_buffer(NULL);
+      link->callbacks.on_buffer = NULL;
+    }
+    if (link->callbacks.buf_lock) {
+      buffer_lock_capture(link->callbacks.buf_lock, NULL);
+      link->callbacks.buf_lock = NULL;
     }
   }
 
   for (int i = MAX_DEVICES; i-- > 0; ) {
-    if (camera->links[i].callbacks.on_buffer) {
-      camera->links[i].callbacks.on_buffer = NULL;
+    if (camera->devices[i]) {
+      device_close(camera->devices[i]);
+      camera->devices[i] = NULL;
     }
   }
 
