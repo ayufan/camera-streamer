@@ -91,11 +91,13 @@ public:
     free(name);
   }
 
-  bool wantsFrame() const
+  bool wantsFrame(bool low_res) const
   {
     if (!pc || !video)
       return false;
     if (pc->state() != rtc::PeerConnection::State::Connected)
+      return false;
+    if (use_low_res != low_res)
       return false;
     return video->wantsFrame();
   }
@@ -230,7 +232,9 @@ static bool webrtc_h264_needs_buffer(buffer_lock_t *buf_lock)
 {
   std::unique_lock lk(webrtc_clients_lock);
   for (auto client : webrtc_clients) {
-    if (client->wantsFrame())
+    if (client->wantsFrame(false))
+      return true;
+    if (!http_h264_lowres.buf_list && client->wantsFrame(true))
       return true;
   }
 
@@ -241,21 +245,29 @@ static void webrtc_h264_capture(buffer_lock_t *buf_lock, buffer_t *buf)
 {
   std::unique_lock lk(webrtc_clients_lock);
   for (auto client : webrtc_clients) {
-    if (client->wantsFrame()) {
+    if (client->wantsFrame(false))
       client->pushFrame(buf, false);
-
-      if (!http_h264_lowres.buf_list) {
-        client->pushFrame(buf, true);
-      }
-    }
+    if (!http_h264_lowres.buf_list && client->wantsFrame(true))
+      client->pushFrame(buf, true);
   }
+}
+
+static bool webrtc_h264_low_res_needs_buffer(buffer_lock_t *buf_lock)
+{
+  std::unique_lock lk(webrtc_clients_lock);
+  for (auto client : webrtc_clients) {
+    if (client->wantsFrame(true))
+      return true;
+  }
+
+  return false;
 }
 
 static void webrtc_h264_low_res_capture(buffer_lock_t *buf_lock, buffer_t *buf)
 {
   std::unique_lock lk(webrtc_clients_lock);
   for (auto client : webrtc_clients) {
-    if (client->wantsFrame()) {
+    if (client->wantsFrame(true)) {
       client->pushFrame(buf, true);
     }
   }
@@ -408,7 +420,7 @@ extern "C" void webrtc_server()
 {
   buffer_lock_register_check_streaming(&http_h264, webrtc_h264_needs_buffer);
   buffer_lock_register_notify_buffer(&http_h264, webrtc_h264_capture);
-  buffer_lock_register_check_streaming(&http_h264_lowres, webrtc_h264_needs_buffer);
+  buffer_lock_register_check_streaming(&http_h264_lowres, webrtc_h264_low_res_needs_buffer);
   buffer_lock_register_notify_buffer(&http_h264_lowres, webrtc_h264_low_res_capture);
 }
 

@@ -106,13 +106,11 @@ public:
     afterGetting(this); // we're preceded by a net read; no infinite recursion
   }
 
-private:
   Boolean fHaveStartedReading;
   Boolean fHadKeyFrame;
   Boolean fRequestedKeyFrame;
   Boolean fLowResMode;
 
-public:
   DynamicH264Stream *pNextStream;
 };
 
@@ -135,7 +133,6 @@ public:
     return H264VideoRTPSink::createNew(envir(), rtpGroupsock, rtpPayloadTypeIfDynamic);
   }
 
-private:
   Boolean fLowResMode;
 };
 
@@ -207,7 +204,15 @@ static void *rtsp_server_thread(void *opaque)
 
 static bool rtsp_h264_needs_buffer(buffer_lock_t *buf_lock)
 {
-  return rtsp_streams != NULL;
+  bool needsBuffer = false;
+
+  pthread_mutex_lock(&rtsp_lock);
+  for (DynamicH264Stream *stream = rtsp_streams; stream; stream = stream->pNextStream) {
+    if (!stream->fLowResMode)
+      needsBuffer = true;
+  }
+  pthread_mutex_unlock(&rtsp_lock);
+  return needsBuffer;
 }
 
 static void rtsp_h264_capture(buffer_lock_t *buf_lock, buffer_t *buf)
@@ -221,6 +226,19 @@ static void rtsp_h264_capture(buffer_lock_t *buf_lock, buffer_t *buf)
     }
   }
   pthread_mutex_unlock(&rtsp_lock);
+}
+
+static bool rtsp_h264_low_res_needs_buffer(buffer_lock_t *buf_lock)
+{
+  bool needsBuffer = false;
+
+  pthread_mutex_lock(&rtsp_lock);
+  for (DynamicH264Stream *stream = rtsp_streams; stream; stream = stream->pNextStream) {
+    if (stream->fLowResMode)
+      needsBuffer = true;
+  }
+  pthread_mutex_unlock(&rtsp_lock);
+  return needsBuffer;
 }
 
 static void rtsp_h264_low_res_capture(buffer_lock_t *buf_lock, buffer_t *buf)
@@ -264,7 +282,7 @@ extern "C" int rtsp_server(rtsp_options_t *options)
 
   buffer_lock_register_check_streaming(&http_h264, rtsp_h264_needs_buffer);
   buffer_lock_register_notify_buffer(&http_h264, rtsp_h264_capture);
-  buffer_lock_register_check_streaming(&http_h264_lowres, rtsp_h264_needs_buffer);
+  buffer_lock_register_check_streaming(&http_h264_lowres, rtsp_h264_low_res_needs_buffer);
   buffer_lock_register_notify_buffer(&http_h264_lowres, rtsp_h264_low_res_capture);
 
   pthread_create(&rtsp_thread, NULL, rtsp_server_thread, env);
