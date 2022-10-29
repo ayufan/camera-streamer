@@ -75,7 +75,7 @@ public:
       return;
     }
 
-    if (h264_is_key_frame(buf)) {
+    if (buf->flags.is_keyframe) {
       fHadKeyFrame = true;
     }
 

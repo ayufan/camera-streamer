@@ -77,7 +77,7 @@ static int http_ffmpeg_write_to_stream(void *opaque, uint8_t *buf, int buf_size)
 static int http_ffmpeg_video_buf_part(buffer_lock_t *buf_lock, buffer_t *buf, int frame, http_ffmpeg_status_t *status)
 {
   if (!status->had_key_frame) {
-    status->had_key_frame = h264_is_key_frame(buf);
+    status->had_key_frame = buf->flags.is_keyframe;
   }
 
   if (!status->had_key_frame) {

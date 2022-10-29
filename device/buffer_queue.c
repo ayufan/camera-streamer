@@ -2,6 +2,7 @@
 #include "device/buffer_list.h"
 #include "device/device.h"
 #include "util/opts/log.h"
+#include "util/opts/fourcc.h"
 
 #include <pthread.h>
 #include <inttypes.h>
@@ -144,6 +145,24 @@ int buffer_list_enqueue(buffer_list_t *buf_list, buffer_t *dma_buf)
   return 1;
 }
 
+static void buffer_update_h264_key_frame(buffer_t *buf)
+{
+  unsigned char *data = buf->start;
+
+  static const int N = 8;
+  char buffer [3*N+1];
+  buffer[sizeof(buffer)-1] = 0;
+  for(int j = 0; j < N; j++)
+    sprintf(&buffer[sizeof(buffer)/N*j], "%02X ", data[j]);
+
+  if (buf->flags.is_keyframe) {
+    LOG_DEBUG(buf, "Got key frame (from V4L2)!: %s", buffer);
+  } else if (buf->used >= 5 && (data[4] & 0x1F) == 0x07) {
+    LOG_DEBUG(buf, "Got key frame (from buffer)!: %s", buffer);
+    buf->flags.is_keyframe = true;
+  }
+}
+
 buffer_t *buffer_list_dequeue(buffer_list_t *buf_list)
 {
   buffer_t *buf = NULL;
@@ -172,6 +191,10 @@ buffer_t *buffer_list_dequeue(buffer_list_t *buf_list)
     buf->dma_source->used = 0;
     buffer_consumed(buf->dma_source, "mmap-dequeued");
     buf->dma_source = NULL;
+  }
+
+  if (buf_list->fmt.format == V4L2_PIX_FMT_H264) {
+    buffer_update_h264_key_frame(buf);
   }
 
   buf_list->frames++;

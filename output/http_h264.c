@@ -31,31 +31,10 @@ typedef struct {
   bool requested_key_frame;
 } http_video_status_t;
 
-bool h264_is_key_frame(buffer_t *buf)
-{
-  unsigned char *data = buf->start;
-
-  static const int N = 8;
-  char buffer [3*N+1];
-  buffer[sizeof(buffer)-1] = 0;
-  for(int j = 0; j < N; j++)
-    sprintf(&buffer[sizeof(buffer)/N*j], "%02X ", data[j]);
-
-  if (buf->flags.is_keyframe) {
-    LOG_DEBUG(buf, "Got key frame (from V4L2)!: %s", buffer);
-    return true;
-  } else if (buf->used >= 5 && (data[4] & 0x1F) == 0x07) {
-    LOG_DEBUG(buf, "Got key frame (from buffer)!: %s", buffer);
-    return true;
-  }
-
-  return false;
-}
-
 int http_video_buf_part(buffer_lock_t *buf_lock, buffer_t *buf, int frame, http_video_status_t *status)
 {
   if (!status->had_key_frame) {
-    status->had_key_frame = h264_is_key_frame(buf);
+    status->had_key_frame = buf->flags.is_keyframe;
   }
 
   if (!status->had_key_frame) {

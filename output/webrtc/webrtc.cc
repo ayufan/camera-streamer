@@ -115,7 +115,7 @@ public:
     }
 
     if (!had_key_frame) {
-      if (!h264_is_key_frame(buf)) {
+      if (!buf->flags.is_keyframe) {
         device_video_force_key(buf->buf_list->dev);
         LOG_VERBOSE(self, "Skipping as key frame was not yet sent.");
         return;
