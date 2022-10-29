@@ -59,14 +59,27 @@ int v4l2_buffer_list_open(buffer_list_t *buf_list)
   v4l2_fmt.type = buf_list->v4l2->type;
 
   buffer_format_t fmt = buf_list->fmt;
+  unsigned block_size = 1;
 
   // JPEG is in 16x16 blocks (shrink image to fit) (but adapt to 32x32)
   // And ISP output
-  if (strstr(buf_list->name, "JPEG") || strstr(buf_list->name, "H264") || (buf_list->do_capture && strstr(buf_list->name, "ISP"))) {
+  if (strstr(buf_list->name, "JPEG")) {
+    block_size = 32;
+  } else if (buf_list->do_capture && strstr(buf_list->name, "ISP")) {
+    block_size = 32;
+  } else if (strstr(buf_list->name, "H264")) {
+    // TODO: even though H264 encoder on RPI requires 32x32
+    // it appears that it breaks encoding creating a bar at top
+    // block_size = 32;
+  }
+
+  if (block_size > 1) {
     buffer_format_t org_fmt = buf_list->fmt;
-    fmt.width = shrink_to_block(fmt.width, 32);
-    fmt.height = shrink_to_block(fmt.height, 32);
-    LOG_VERBOSE(buf_list, "Adapting size to 32x32 block: %dx%d vs %dx%d", org_fmt.width, org_fmt.height, fmt.width, fmt.height);
+    fmt.width = shrink_to_block(fmt.width, block_size);
+    fmt.height = shrink_to_block(fmt.height, block_size);
+    LOG_VERBOSE(buf_list, "Adapting size to %dx%d block: %dx%d shrunk to %dx%d",
+      block_size, block_size,
+      org_fmt.width, org_fmt.height, fmt.width, fmt.height);
   }
 
   if (fmt.format == V4L2_PIX_FMT_H264) {
