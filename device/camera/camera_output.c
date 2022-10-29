@@ -126,11 +126,16 @@ int camera_configure_output_rescaler(camera_t *camera, buffer_list_t *src_captur
 int camera_configure_decoder(camera_t *camera, buffer_list_t *src_capture)
 {
   unsigned decode_formats[] = {
+    // best quality
     V4L2_PIX_FMT_YUYV,
+
+    // medium quality
     V4L2_PIX_FMT_YUV420,
-    V4L2_PIX_FMT_YVU420,
     V4L2_PIX_FMT_NV12,
+
+    // low quality
     V4L2_PIX_FMT_NV21,
+    V4L2_PIX_FMT_YVU420,
     0
   };
   unsigned chosen_format = 0;
@@ -148,7 +153,7 @@ int camera_configure_decoder(camera_t *camera, buffer_list_t *src_capture)
   buffer_list_t *decoder_output = device_open_buffer_list_output(
     camera->decoder, src_capture);
   buffer_list_t *decoder_capture = device_open_buffer_list_capture(
-    camera->decoder, decoder_output, 1.0, 0, true);
+    camera->decoder, decoder_output, 1.0, chosen_format, true);
 
   camera_capture_add_output(camera, src_capture, decoder_output);
 
