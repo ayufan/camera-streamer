@@ -76,15 +76,15 @@ static void print_help(option_t *options, const char *cmd)
       }
       if (option->value_mapping) {
         for (int j = 0; option->value_mapping[j].name; j++) {
-          if (option->value_mapping[j].value == *option->value) {
+          if (option->value_mapping[j].value == *option->value_uint) {
             printf("%s - ", option->value_mapping[j].name);
             break;
           }
         }
       }
 
-      unsigned mask = UINT_MAX >> ((sizeof(*option->value) - option->size) * 8);
-      printf(option->format, *option->value & mask);
+      unsigned mask = UINT_MAX >> ((sizeof(*option->value_uint) - option->size) * 8);
+      printf(option->format, *option->value_uint & mask);
       printf("\n");
     }
   }
