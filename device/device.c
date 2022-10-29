@@ -121,19 +121,14 @@ buffer_list_t *device_open_buffer_list_output(device_t *dev, buffer_list_t *capt
     capture_list->dev->opts.allow_dma ? !capture_list->do_mmap : true);
 }
 
-buffer_list_t *device_open_buffer_list_capture(device_t *dev, buffer_list_t *output_list, float div, unsigned format, bool do_mmap)
-{
-  return device_open_buffer_list_capture2(dev, NULL, output_list, div, format, do_mmap);
-}
-
-buffer_list_t *device_open_buffer_list_capture2(device_t *dev, const char *path, buffer_list_t *output_list, float div, unsigned format, bool do_mmap)
+buffer_list_t *device_open_buffer_list_capture(device_t *dev, const char *path, buffer_list_t *output_list, unsigned width, unsigned height, unsigned format, bool do_mmap)
 {
   if (!dev || !output_list) {
     return NULL;
   }
 
   return device_open_buffer_list2(dev, path, true,
-    output_list->fmt.width / div, output_list->fmt.height / div,
+    width ? width : output_list->fmt.width, height ? height : output_list->fmt.height,
     format, 0, output_list->nbufs, do_mmap);
 }
 

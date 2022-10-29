@@ -11,44 +11,56 @@
 	<ul>
 		<br>
 		<li>
-			<a href="snapshot"><b>/snapshot</b></a><br>
-			Get a current actual image from the server.<br>
+			<a href="snapshot"><b>/snapshot</b></a> (JPEG image)<br>
 			<br>
 			<ul>
-				<li><a href="snapshot?res=low">/snapshot?res=low</a> get a low resolution stream (if -camera-low_res_factor=X is configured).</li>
+				<li>Get a high-resolution snapshot image from the server.</li>
+				<li>Uses resolution specified by <i>-camera-snapshot.height=</i>.</li>
 			</ul>
 		</li>
 		<br>
 		<li>
 			<a href="stream"><b>/stream</b></a> (MJPEG stream)</b><br>
-			Get a live stream. Works everywhere, but consumes a ton of bandwidth.<br>
 			<br>
 			<ul>
-				<li><a href="stream?res=low">/stream?res=low</a> get a low resolution stream (if -camera-low_res_factor=X is configured).</li>
+				<li>Get a live stream. Works everywhere, but consumes a ton of bandwidth.</li>
+				<li>Uses resolution specified by <i>-camera-stream.height=</i>.</li>
 			</ul>
 		</li>
 		<br>
 		<li>
 			<a href="webrtc"><b>/webrtc</b></a> (HTTP page / iframe)<br>
-			Get a live video using WebRTC (low-latency streaming with latency of around 100ms).<br>
 			<br>
 			<ul>
-				<li><a href="webrtc?res=low">/webrtc?res=low</a> get a low resolution WebRTC stream (if -camera-low_res_factor=X is configured).</li>
+				<li>Get a live video using WebRTC (low-latency streaming with latency of around 100ms).</li>
+				<li>Uses resolution specified by <i>-camera-video.height=</i>.</li>
 			</ul>
 		</li>
 		<br>
 		<li>
 			<a href="video"><b>/video</b></a> (IP Camera)<br>
-			Get a live (H264) video stream best suited to current browser in a maximum compatibility mode choosing automatically between one of the below formats.<br>
 			<br>
 			<ul>
+				<li>Get a live (H264) video stream best suited to current browser in a maximum compatibility mode choosing automatically between one of the below formats.</li>
+				<li>Uses resolution specified by <i>-camera-video.height=</i>.</li>
+				<br>
 				<li><a href="video.mp4"><b>/video.mp4</b></a><br> get a live video stream in MP4 format (Firefox, with latency of around 1s if FFMPEG enabled).</li>
 				<br>
 				<li><a href="video.mkv"><b>/video.mkv</b></a><br> get a live video stream in MKV format (Chrome, with latency of around 2s if FFMPEG enabled).</li>
 				<br>
 				<li><a href="video.m3u8"><b>/video.m3u8</b></a><br> get a live video stream in HLS format (Safari, with latency of around 1s).</li>
+			</ul>
+		</li>
+		<br>
+		<li>
+			<a href="option"><b>/option</b></a><br>
+			<br>
+			<ul>
+				<li>See all configurable options cameras.</li>
 				<br>
-				<li><a href="video?res=low">/video?res=low</a> get a low resolution stream (if -camera-low_res_factor=X is configured).</li>
+				<li><a href="option?key=value">/option?key=value</a> set <i>key</i> to <i>value</i>.</li>
+				<br>
+				<li><a href="option?AfTrigger=1">/option?AfTrigger=1</a> trigger auto focus for ArduCams.</li>
 			</ul>
 		</li>
 		<br>
@@ -57,17 +69,7 @@
 			<br>
 			<ul>
 				<li><a href="?action=snapshot">/?action=snapshot</a> as alias to the <a href="snapshot">/snapshot</a>.</li>
-				<br>
 				<li><a href="?action=stream">/?action=stream</a> as alias to the <a href="stream">/stream</a>.</li>
-			</ul>
-		</li>
-		<br>
-		<li>
-			The commands available on some cameras:<br>
-			<br>
-			<ul>
-				<li><a href="option">/option</a> see all options.</li>
-				<li><a href="option?AfTrigger=1">/option?AfTrigger=1</a> trigger auto focus.</li>
 			</ul>
 		</li>
 	</ul>

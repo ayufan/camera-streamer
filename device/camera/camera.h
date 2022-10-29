@@ -4,6 +4,7 @@
 #include "device/device.h"
 
 #define MAX_DEVICES 20
+#define MAX_RESCALLERS 4
 #define MAX_HTTP_METHODS 20
 
 #define CAMERA_DEVICE_CAMERA 0
@@ -13,6 +14,12 @@ typedef enum {
   CAMERA_V4L2 = 0,
   CAMERA_LIBCAMERA
 } camera_type_t;
+
+typedef struct camera_output_options_s {
+  bool disabled;
+  unsigned height;
+  char options[CAMERA_OPTIONS_LENGTH];
+} camera_output_options_t;
 
 typedef struct camera_options_s {
   char path[256];
@@ -40,13 +47,9 @@ typedef struct camera_options_s {
     char options[CAMERA_OPTIONS_LENGTH];
   } isp;
 
-  struct {
-    char options[CAMERA_OPTIONS_LENGTH];
-  } jpeg;
-
-  struct {
-    char options[CAMERA_OPTIONS_LENGTH];
-  } h264;
+  camera_output_options_t snapshot;
+  camera_output_options_t stream;
+  camera_output_options_t video;
 } camera_options_t;
 
 typedef struct camera_s {
@@ -60,9 +63,10 @@ typedef struct camera_s {
       device_t *camera;
       device_t *decoder; // decode JPEG/H264 into YUVU
       device_t *isp;
-      device_t *legacy_isp[2];
-      device_t *codec_jpeg[2]; // encode YUVU into JPEG
-      device_t *codec_h264[2]; // encode YUVU into H264
+      device_t *rescallers[3];
+      device_t *codec_snapshot;
+      device_t *codec_stream;
+      device_t *codec_video;
     };
   };
 
@@ -81,12 +85,13 @@ int camera_run(camera_t *camera);
 
 link_t *camera_ensure_capture(camera_t *camera, buffer_list_t *capture);
 void camera_capture_add_output(camera_t *camera, buffer_list_t *capture, buffer_list_t *output);
-void camera_capture_set_callbacks(camera_t *camera, buffer_list_t *capture, link_callbacks_t callbacks);
+void camera_capture_add_callbacks(camera_t *camera, buffer_list_t *capture, link_callbacks_t callbacks);
 
 int camera_configure_input(camera_t *camera);
-int camera_configure_decoder(camera_t *camera, buffer_list_t *src_capture);
-int camera_configure_output_rescaler(camera_t *camera, buffer_list_t *src_capture, float high_div, float low_div);
-int camera_configure_output(camera_t *camera, buffer_list_t *src_capture, int res);
+int camera_configure_pipeline(camera_t *camera, buffer_list_t *camera_capture);
 
-int camera_configure_isp(camera_t *camera, buffer_list_t *src, float high_div, float low_div);
-int camera_configure_legacy_isp(camera_t *camera, buffer_list_t *src, float div, int res);
+buffer_list_t *camera_configure_isp(camera_t *camera, buffer_list_t *src_capture);
+buffer_list_t *camera_configure_decoder(camera_t *camera, buffer_list_t *src_capture);
+unsigned camera_rescaller_align_size(unsigned target_height);
+buffer_list_t *camera_configure_rescaller(camera_t *camera, buffer_list_t *src_capture, const char *name, unsigned target_height, unsigned formats[]);
+int camera_configure_output(camera_t *camera, const char *name, unsigned target_height, unsigned formats[], link_callbacks_t callbacks, device_t **device);

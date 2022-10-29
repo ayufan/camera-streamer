@@ -20,14 +20,6 @@ static const char *const STREAM_PART = "Content-Type: " CONTENT_TYPE "\r\n" CONT
 static const char *const STREAM_BOUNDARY = "\r\n"
                                            "--" PART_BOUNDARY "\r\n";
 
-buffer_lock_t *http_jpeg_buffer_for_res(http_worker_t *worker)
-{
-  if (strstr(worker->request_params, HTTP_LOW_RES_PARAM) && http_jpeg_lowres.buf_list)
-    return &http_jpeg_lowres;
-  else
-    return &http_jpeg;
-}
-
 int http_snapshot_buf_part(buffer_lock_t *buf_lock, buffer_t *buf, int frame, FILE *stream)
 {
   fprintf(stream, "HTTP/1.1 200 OK\r\n");
@@ -40,7 +32,7 @@ int http_snapshot_buf_part(buffer_lock_t *buf_lock, buffer_t *buf, int frame, FI
 
 void http_snapshot(http_worker_t *worker, FILE *stream)
 {
-  int n = buffer_lock_write_loop(http_jpeg_buffer_for_res(worker), 1, 0, (buffer_write_fn)http_snapshot_buf_part, stream);
+  int n = buffer_lock_write_loop(&snapshot_lock, 1, 0, (buffer_write_fn)http_snapshot_buf_part, stream);
 
   if (n <= 0) {
     http_500(stream, NULL);
@@ -68,7 +60,7 @@ int http_stream_buf_part(buffer_lock_t *buf_lock, buffer_t *buf, int frame, FILE
 
 void http_stream(http_worker_t *worker, FILE *stream)
 {
-  int n = buffer_lock_write_loop(http_jpeg_buffer_for_res(worker), 0, 0, (buffer_write_fn)http_stream_buf_part, stream);
+  int n = buffer_lock_write_loop(&stream_lock, 0, 0, (buffer_write_fn)http_stream_buf_part, stream);
 
   if (n == 0) {
     http_500(stream, NULL);

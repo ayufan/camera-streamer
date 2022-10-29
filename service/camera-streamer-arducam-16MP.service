@@ -13,10 +13,12 @@ ExecStart=/usr/local/bin/camera-streamer \
   -camera-fps=15 \
   ; use two memory buffers to optimise usage
   -camera-nbufs=2 \
-  ; the high-res is 1552x1165
-  -camera-high_res_factor=1.5 \
-  ; the low-res is 776x582
-  -camera-low_res_factor=3.0 \
+  ; the snapshot is 1438x1080
+  -camera-snapshot.height=1080 \
+  ; the video/webrtc is 958x720
+  -camera-video.height=720 \
+  ; the stream is 639x480
+  -camera-stream.height=480 \
   ; bump brightness slightly
   -camera-options=brightness=0.1 \
   ; disable auto-focus

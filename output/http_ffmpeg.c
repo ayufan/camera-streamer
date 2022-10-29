@@ -10,8 +10,6 @@
 #include "device/device.h"
 #include "util/ffmpeg/remuxer.h"
 
-buffer_lock_t *http_h264_buffer_for_res(http_worker_t *worker);
-
 static const char *const VIDEO_HEADER =
   "HTTP/1.0 200 OK\r\n"
   "Access-Control-Allow-Origin: *\r\n"
@@ -135,7 +133,7 @@ static void http_ffmpeg_video(http_worker_t *worker, FILE *stream, const char *c
 #endif
 
   int n = buffer_lock_write_loop(
-    http_h264_buffer_for_res(worker),
+    &video_lock,
     0,
     0,
     (buffer_write_fn)http_ffmpeg_video_buf_part,

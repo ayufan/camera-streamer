@@ -43,13 +43,15 @@ void camera_close(camera_t **camerap)
   for (int i = MAX_DEVICES; i-- > 0; ) {
     link_t *link = &camera->links[i];
 
-    if (link->callbacks.on_buffer) {
-      link->callbacks.on_buffer(NULL);
-      link->callbacks.on_buffer = NULL;
-    }
-    if (link->callbacks.buf_lock) {
-      buffer_lock_capture(link->callbacks.buf_lock, NULL);
-      link->callbacks.buf_lock = NULL;
+    for (int j = 0; j < link->n_callbacks; j++) {
+      if (link->callbacks[j].on_buffer) {
+        link->callbacks[j].on_buffer(NULL);
+        link->callbacks[j].on_buffer = NULL;
+      }
+      if (link->callbacks[j].buf_lock) {
+        buffer_lock_capture(link->callbacks[j].buf_lock, NULL);
+        link->callbacks[j].buf_lock = NULL;
+      }
     }
   }
 
@@ -86,10 +88,10 @@ void camera_capture_add_output(camera_t *camera, buffer_list_t *capture, buffer_
   link->sinks[nsinks] = output;
 }
 
-void camera_capture_set_callbacks(camera_t *camera, buffer_list_t *capture, link_callbacks_t callbacks)
+void camera_capture_add_callbacks(camera_t *camera, buffer_list_t *capture, link_callbacks_t callbacks)
 {
   link_t *link = camera_ensure_capture(camera, capture);
-  link->callbacks = callbacks;
+  link->callbacks[link->n_callbacks++] = callbacks;
 
   if (callbacks.buf_lock) {
     callbacks.buf_lock->buf_list = capture;
@@ -107,12 +109,10 @@ int camera_set_params(camera_t *camera)
   }
 
   // Set some defaults
-  for (int i = 0; i < 2; i++) {
-    device_set_option_list(camera->legacy_isp[i], camera->options.isp.options);
-    device_set_option_list(camera->codec_jpeg[i], camera->options.jpeg.options);
-    device_set_option_string(camera->codec_h264[i], "repeat_sequence_header", "1"); // required for force key support
-    device_set_option_list(camera->codec_h264[i], camera->options.h264.options);
-  }
+  device_set_option_list(camera->codec_snapshot, camera->options.snapshot.options);
+  device_set_option_list(camera->codec_stream, camera->options.stream.options);
+  device_set_option_string(camera->codec_video, "repeat_sequence_header", "1"); // required for force key support
+  device_set_option_list(camera->codec_video, camera->options.video.options);
   return 0;
 }
 

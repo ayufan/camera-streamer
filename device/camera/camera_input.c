@@ -32,47 +32,13 @@ static int camera_configure_input_v4l2(camera_t *camera)
     camera->camera->opts.allow_dma = false;
   }
 
-  buffer_list_t *camera_capture = device_open_buffer_list(camera->camera, true, camera->options.width, camera->options.height, camera->options.format, 0, camera->options.nbufs, true);
+  buffer_list_t *camera_capture = device_open_buffer_list(camera->camera, true,
+    camera->options.width, camera->options.height, camera->options.format, 0, camera->options.nbufs, true);
   if (!camera_capture) {
     return -1;
   }
-  camera_capture->do_timestamps = true;
 
-  if (camera->options.fps > 0) {
-    camera_capture->fmt.interval_us = 1000 * 1000 / camera->options.fps;
-  }
-
-  switch (camera_capture->fmt.format) {
-  case V4L2_PIX_FMT_YUYV:
-  case V4L2_PIX_FMT_YVYU:
-  case V4L2_PIX_FMT_VYUY:
-  case V4L2_PIX_FMT_UYVY:
-  case V4L2_PIX_FMT_YUV420:
-  case V4L2_PIX_FMT_RGB565:
-  case V4L2_PIX_FMT_RGB24:
-    if (camera->options.high_res_factor > 1) {
-      // Use ISP, as there are two resolutions
-      return camera_configure_isp(camera, camera_capture,
-        camera->options.high_res_factor, camera->options.low_res_factor);
-    } else {
-      // Use direct approach, as there's likely low frequently used low resolution
-      return camera_configure_output_rescaler(camera, camera_capture,
-        camera->options.high_res_factor, camera->options.low_res_factor);
-    }
-
-  case V4L2_PIX_FMT_MJPEG:
-  case V4L2_PIX_FMT_H264:
-    return camera_configure_decoder(camera, camera_capture);
-
-  case V4L2_PIX_FMT_SRGGB10P:
-    return camera_configure_isp(camera, camera_capture,
-      camera->options.high_res_factor, camera->options.low_res_factor);
-
-  default:
-    LOG_INFO(camera, "Unsupported camera format=%s",
-      fourcc_to_string(camera_capture->fmt.format).buf);
-    return -1;
-  }
+  return camera_configure_pipeline(camera, camera_capture);
 }
 
 static int camera_configure_input_libcamera(camera_t *camera)
@@ -89,8 +55,8 @@ static int camera_configure_input_libcamera(camera_t *camera)
   buffer_list_t *camera_capture = device_open_buffer_list(
     camera->camera,
     true,
-    camera->options.width / camera->options.high_res_factor,
-    camera->options.height / camera->options.high_res_factor,
+    camera->options.width,
+    camera->options.height,
     camera->options.format,
     0,
     camera->options.nbufs,
@@ -99,14 +65,8 @@ static int camera_configure_input_libcamera(camera_t *camera)
   if (!camera_capture) {
     return -1;
   }
-  camera_capture->do_timestamps = true;
 
-  if (camera->options.fps > 0) {
-    camera_capture->fmt.interval_us = 1000 * 1000 / camera->options.fps;
-  }
-
-  return camera_configure_output_rescaler(camera, camera_capture,
-    1.0, camera->options.low_res_factor / camera->options.high_res_factor);
+  return camera_configure_pipeline(camera, camera_capture);
 }
 
 int camera_configure_input(camera_t *camera)

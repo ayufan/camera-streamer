@@ -59,35 +59,30 @@ int v4l2_buffer_list_open(buffer_list_t *buf_list)
   v4l2_fmt.type = buf_list->v4l2->type;
 
   buffer_format_t fmt = buf_list->fmt;
-  unsigned block_size = 1;
+  unsigned block_width = 1, block_height = 1;
 
-  // JPEG is in 16x16 blocks (shrink image to fit) (but adapt to 32x32)
-  // And ISP output
-  if (strstr(buf_list->name, "JPEG")) {
-    block_size = 32;
-  } else if (buf_list->do_capture && strstr(buf_list->name, "ISP")) {
-    block_size = 32;
-  } else if (strstr(buf_list->name, "H264")) {
-    // TODO: even though H264 encoder on RPI requires 32x32
-    // it appears that it breaks encoding creating a bar at top
-    // block_size = 32;
+  if (buf_list->do_capture && strstr(buf_list->name, "RESCALLER")) {
+    block_width = 32;
+    block_height = 32;
   }
 
-  if (block_size > 1) {
+  LOG_DEBUG(buf_list, "Get current format ...");
+  ERR_IOCTL(buf_list, buf_list->v4l2->dev_fd, VIDIOC_G_FMT, &v4l2_fmt, "Can't get format");
+
+retry_resolution_set:
+
+  if (block_width > 1 || block_height > 1) {
     buffer_format_t org_fmt = buf_list->fmt;
-    fmt.width = shrink_to_block(fmt.width, block_size);
-    fmt.height = shrink_to_block(fmt.height, block_size);
+    fmt.width = shrink_to_block(fmt.width, block_width);
+    fmt.height = shrink_to_block(fmt.height, block_height);
     LOG_VERBOSE(buf_list, "Adapting size to %dx%d block: %dx%d shrunk to %dx%d",
-      block_size, block_size,
+      block_width, block_height,
       org_fmt.width, org_fmt.height, fmt.width, fmt.height);
   }
 
   if (fmt.format == V4L2_PIX_FMT_H264) {
     fmt.bytesperline = 0;
   }
-
-  LOG_DEBUG(buf_list, "Get current format ...");
-  ERR_IOCTL(buf_list, buf_list->v4l2->dev_fd, VIDIOC_G_FMT, &v4l2_fmt, "Can't set format");
 
   if (buf_list->v4l2->do_mplanes) {
     v4l2_fmt.fmt.pix_mp.colorspace = V4L2_COLORSPACE_JPEG;
@@ -131,9 +126,17 @@ int v4l2_buffer_list_open(buffer_list_t *buf_list)
 
   if (buf_list->fmt.width != fmt.width || buf_list->fmt.height != fmt.height) {
     if (fmt.bytesperline) {
-      LOG_ERROR(buf_list, "Requested resolution=%ux%u is unavailable. Got %ux%u. "
-        "Consider using the `-camera-high_res_factor=2` or `-camera-low_res_factor=3`",
+      LOG_INFO(buf_list, "Requested resolution=%ux%u is unavailable. Got %ux%u.",
         fmt.width, fmt.height, buf_list->fmt.width, buf_list->fmt.height);
+
+      if (block_height > 1) {
+        goto error;
+      }
+
+      // Try to shrink resolution
+      block_width = 32;
+      block_height = 32;
+      goto retry_resolution_set;
     } else {
       LOG_INFO(buf_list, "Requested resolution=%ux%u is unavailable. Got %ux%u. Accepted",
         fmt.width, fmt.height, buf_list->fmt.width, buf_list->fmt.height);

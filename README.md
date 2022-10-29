@@ -40,6 +40,22 @@ apt-get dist-upgrade
 reboot
 ```
 
+Ensure that your `/boot/config.txt` has enough of GPU memory (required for JPEG re-encoding):
+
+```
+# Example for IMX519
+dtoverlay=vc4-kms-v3d,cma-128
+gpu_mem=128 # preferred 160 or 256MB
+dtoverlay=imx519
+
+# Example for Arducam 64MP
+gpu_mem=128
+dtoverlay=arducam_64mp,media-controller=1
+
+# Example for USB cam
+gpu_mem=128
+```
+
 ## Compile
 
 ```bash
@@ -137,8 +153,13 @@ All streams are exposed over very simple HTTP server, providing different stream
 Camera capture and resolution exposed is controlled by threee parameters:
 
 - `-camera-width` and `-camera-height` define capture resolution
-- (ISP mode only) `-camera-high_res_factor` a default resolution exposed via HTTP (`exposed_width = camera_width / factor, exposed_height = camera_height / factor`)
-- (ISP mode only) `-camera-low_res_factor` a low-resolution exposed via HTTP when `?res=low` is added (ex. `http://<ip>:8080/snapshot`)
+- `-camera-video.height` - define height for an aspect ratio scaled resolution for `/video` and `/webrtc` (H264) output - this might require rescaller and might not always work
+- `-camera-stream.height` - define height for an aspect ratio scaled resolution for `/stream` (MJPEG) output - this might require rescaller and might not always work
+- `-camera-snapshot.height` - define height for an aspect ratio scaled resolution for `/snapshot` (JPEG) output - this might require rescaller and might not always work
+
+Any `video`, `stream` and `snapshot` might not work as this requires usually decoding, scaling, and encoding to achieve the desired resolution.
+
+This works ONLY BEST when using `libcamera`, the support for `USB` will varry and might require configuring `/boot/config.txt` to set enough of GPU memory to be able to re-encode JPEG.
 
 ## RTSP server
 
@@ -205,6 +226,7 @@ and enabled in `imx519`. Focus can be manually controlled via `i2c-tools`:
 ```shell
 # /boot/config.txt
 dtoverlay=imx519,media-controller=0
+gpu_mem=160 # at least 128
 
 # /etc/modules-load.d/modules.conf
 i2c-dev

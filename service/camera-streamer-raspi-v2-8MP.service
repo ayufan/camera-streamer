@@ -16,10 +16,12 @@ ExecStart=/usr/local/bin/camera-streamer \
   -camera-fps=30 \
   ; use two memory buffers to optimise usage
   -camera-nbufs=2 \
-  ; the high-res is 1640x1232
-  -camera-high_res_factor=2 \
-  ; the low-res is 820x616
-  -camera-low_res_factor=4 \
+  ; the snapshot is 1438x1080
+  -camera-snapshot.height=1080 \
+  ; the video/webrtc is 958x720
+  -camera-video.height=720 \
+  ; the stream is 639x480
+  -camera-stream.height=480 \
   ; bump brightness slightly
   -camera-options=brightness=0.1 \
   -rtsp-port

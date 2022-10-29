@@ -16,6 +16,36 @@ extern rtsp_options_t rtsp_options;
 
 camera_t *camera;
 
+void deprecations()
+{
+  if (camera_options.high_res_factor > 0) {
+    printf("Using deprecated `-camera-high_res_factor`. Use `-camera-snapshot.height` instead.");
+
+    if (!camera_options.snapshot.height)
+      camera_options.snapshot.height = camera_options.height / camera_options.high_res_factor;
+  }
+  if (camera_options.low_res_factor > 0) {
+    printf("Using deprecated `-camera-low_res_factor`. Use `-camera-stream.height` or `-camera-video.height` instead.");
+
+    if (!camera_options.stream.height)
+      camera_options.stream.height = camera_options.height / camera_options.low_res_factor;
+    if (!camera_options.video.height)
+      camera_options.video.height = camera_options.height / camera_options.low_res_factor;
+  }
+}
+
+void inherit()
+{
+  if (!camera_options.snapshot.height || camera_options.snapshot.height > camera_options.height)
+    camera_options.snapshot.height = camera_options.height;
+
+  if (!camera_options.video.height || camera_options.video.height > camera_options.snapshot.height)
+    camera_options.video.height = camera_options.snapshot.height;
+
+  if (!camera_options.stream.height || camera_options.stream.height > camera_options.video.height)
+    camera_options.stream.height = camera_options.video.height;
+}
+
 int main(int argc, char *argv[])
 {
   int http_fd = -1;
@@ -24,6 +54,9 @@ int main(int argc, char *argv[])
   if (parse_opts(all_options, argc, argv) < 0) {
     return -1;
   }
+
+  deprecations();
+  inherit();
 
   if (camera_options.list_options) {
     camera = camera_open(&camera_options);

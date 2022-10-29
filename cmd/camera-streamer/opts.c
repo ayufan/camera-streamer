@@ -4,6 +4,7 @@
 #include "util/opts/fourcc.h"
 #include "device/camera/camera.h"
 #include "output/rtsp/rtsp.h"
+#include "output/output.h"
 
 camera_options_t camera_options = {
   .path = "",
@@ -13,13 +14,19 @@ camera_options_t camera_options = {
   .nbufs = 3,
   .fps = 30,
   .allow_dma = true,
-  .high_res_factor = 1.0,
+  .high_res_factor = 0.0,
   .low_res_factor = 0.0,
   .auto_reconnect = 0,
   .auto_focus = true,
   .options = "",
   .list_options = false,
-  .h264 = {
+  .snapshot = {
+    .options = "compression_quality=80"
+  },
+  .stream = {
+    .options = "compression_quality=80"
+  },
+  .video = {
     .options =
       "video_bitrate_mode=0" OPTION_VALUE_LIST_SEP
       "video_bitrate=2000000" OPTION_VALUE_LIST_SEP
@@ -29,10 +36,7 @@ camera_options_t camera_options = {
       "h264_profile=4" OPTION_VALUE_LIST_SEP
       "h264_minimum_qp_value=16" OPTION_VALUE_LIST_SEP
       "h264_maximum_qp_value=32"
-  },
-  .jpeg = {
-    .options = "compression_quality=80"
-  },
+  }
 };
 
 http_server_options_t http_options = {
@@ -93,8 +97,18 @@ option_t all_options[] = {
   DEFINE_OPTION_DEFAULT(camera, hflip, bool, "1", "Do horizontal image flip (does not work with all camera)."),
 
   DEFINE_OPTION_PTR(camera, isp.options, list, "Set the ISP processing options. List all available options with `-camera-list_options`."),
-  DEFINE_OPTION_PTR(camera, jpeg.options, list, "Set the JPEG compression options. List all available options with `-camera-list_options`."),
-  DEFINE_OPTION_PTR(camera, h264.options, list, "Set the H264 encoding options. List all available options with `-camera-list_options`."),
+
+  DEFINE_OPTION_PTR(camera, snapshot.options, list, "Set the JPEG compression options. List all available options with `-camera-list_options`."),
+  DEFINE_OPTION(camera, snapshot.height, uint, "Override the snapshot height and maintain aspect ratio."),
+
+  DEFINE_OPTION_DEFAULT(camera, stream.disabled, bool, "1", "Disable stream."),
+  DEFINE_OPTION_PTR(camera, stream.options, list, "Set the JPEG compression options. List all available options with `-camera-list_options`."),
+  DEFINE_OPTION(camera, stream.height, uint, "Override the stream height and maintain aspect ratio."),
+
+  DEFINE_OPTION_DEFAULT(camera, video.disabled, bool, "1", "Disable video."),
+  DEFINE_OPTION_PTR(camera, video.options, list, "Set the H264 encoding options. List all available options with `-camera-list_options`."),
+  DEFINE_OPTION(camera, video.height, uint, "Override the video height and maintain aspect ratio."),
+
   DEFINE_OPTION_DEFAULT(camera, list_options, bool, "1", "List all available options and exit."),
 
   DEFINE_OPTION(http, port, uint, "Set the HTTP web-server port."),

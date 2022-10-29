@@ -16,14 +16,6 @@ static const char *const VIDEO_HEADER =
   "Content-Type: application/octet-stream\r\n"
   "\r\n";
 
-buffer_lock_t *http_h264_buffer_for_res(http_worker_t *worker)
-{
-  if (strstr(worker->request_params, HTTP_LOW_RES_PARAM) && http_h264_lowres.buf_list)
-    return &http_h264_lowres;
-  else
-    return &http_h264;
-}
-
 typedef struct {
   FILE *stream;
   bool wrote_header;
@@ -60,7 +52,7 @@ void http_h264_video(http_worker_t *worker, FILE *stream)
 {
   http_video_status_t status = { stream };
 
-  int n = buffer_lock_write_loop(http_h264_buffer_for_res(worker), 0, 0, (buffer_write_fn)http_video_buf_part, &status);
+  int n = buffer_lock_write_loop(&video_lock, 0, 0, (buffer_write_fn)http_video_buf_part, &status);
 
   if (status.wrote_header) {
     return;
