@@ -42,38 +42,52 @@ bool buffer_lock_needs_buffer(buffer_lock_t *buf_lock)
   return needs_buffer;
 }
 
+static void buffer_lock_clear_buffers(buffer_lock_t *buf_lock, uint64_t now)
+{
+  buffer_consumed(buf_lock->buf, buf_lock->name);
+  buf_lock->buf = NULL;
+  buf_lock->buf_time_us = now;
+}
+
+static void buffer_lock_set_buffer(buffer_lock_t *buf_lock, buffer_t *buf, uint64_t now)
+{
+  buffer_consumed(buf_lock->buf, buf_lock->name);
+  buffer_use(buf);
+  buf_lock->buf = buf;
+  buf_lock->buf_time_us = now;
+  buf_lock->counter++;
+
+  LOG_DEBUG(buf_lock, "Captured buffer %s (refs=%d), frame=%d/%d, processing_ms=%.1f, frame_ms=%.1f",
+    dev_name(buf), buf ? buf->mmap_reflinks : 0,
+    buf_lock->counter, buf_lock->dropped,
+    (now - buf->captured_time_us) / 1000.0f,
+    (now - buf_lock->buf_time_us) / 1000.0f);
+  pthread_cond_broadcast(&buf_lock->cond_wait);
+
+  for (int i = 0; buf_lock->notify_buffer[i] && i < BUFFER_LOCK_MAX_CALLBACKS; i++) {
+    buf_lock->notify_buffer[i](buf_lock, buf);
+  }
+}
+
 void buffer_lock_capture(buffer_lock_t *buf_lock, buffer_t *buf)
 {
   uint64_t now = get_monotonic_time_us(NULL, NULL);
 
   pthread_mutex_lock(&buf_lock->lock);
+
   if (!buf) {
-    buffer_consumed(buf_lock->buf, buf_lock->name);
-    buf_lock->buf = NULL;
-    buf_lock->buf_time_us = now;
-  } else if (now - buf_lock->buf_time_us < buf_lock->frame_interval_ms * 1000) {
+    buffer_lock_clear_buffers(buf_lock, now);
+  } else if (buf->flags.is_keyframe) {
+    buffer_lock_set_buffer(buf_lock, buf, now);
+  } else if (now - buf_lock->buf_time_us >= buf_lock->frame_interval_ms * 1000) {
+    buffer_lock_set_buffer(buf_lock, buf, now);
+  } else {
     buf_lock->dropped++;
 
     LOG_DEBUG(buf_lock, "Dropped buffer %s (refs=%d), frame=%d/%d, frame_ms=%.1f",
       dev_name(buf), buf ? buf->mmap_reflinks : 0,
       buf_lock->counter, buf_lock->dropped,
       (now - buf->captured_time_us) / 1000.0f);
-  } else {
-    buffer_consumed(buf_lock->buf, buf_lock->name);
-    buffer_use(buf);
-    buf_lock->buf = buf;
-    buf_lock->counter++;
-    LOG_DEBUG(buf_lock, "Captured buffer %s (refs=%d), frame=%d/%d, processing_ms=%.1f, frame_ms=%.1f",
-      dev_name(buf), buf ? buf->mmap_reflinks : 0,
-      buf_lock->counter, buf_lock->dropped,
-      (now - buf->captured_time_us) / 1000.0f,
-      (now - buf_lock->buf_time_us) / 1000.0f);
-    buf_lock->buf_time_us = now;
-    pthread_cond_broadcast(&buf_lock->cond_wait);
-
-    for (int i = 0; buf_lock->notify_buffer[i] && i < BUFFER_LOCK_MAX_CALLBACKS; i++) {
-      buf_lock->notify_buffer[i](buf_lock, buf);
-    }
   }
 
   pthread_mutex_unlock(&buf_lock->lock);
