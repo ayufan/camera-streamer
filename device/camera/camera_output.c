@@ -123,6 +123,30 @@ int camera_configure_output_rescaler(camera_t *camera, buffer_list_t *src_captur
   return 0;
 }
 
+static void decoder_debug_on_buffer(buffer_t *buf) {
+  if (!buf) {
+    return;
+  }
+
+  static int index = 0;
+
+  char path[256];
+  sprintf(path, "/tmp/decoder_capture.%d.%s", index++ % 10, fourcc_to_string(buf->buf_list->fmt.format).buf);
+
+  FILE *fp = fopen(path, "wb");
+  if (!fp) {
+    return;
+  }
+
+  fwrite(buf->start, 1, buf->used, fp);
+  fclose(fp);
+}
+
+static link_callbacks_t decoder_debug_callbacks = {
+  .name = "DECODER-DEBUG-CAPTURE",
+  .on_buffer = decoder_debug_on_buffer
+};
+
 int camera_configure_decoder(camera_t *camera, buffer_list_t *src_capture)
 {
   unsigned decode_formats[] = {
@@ -154,6 +178,10 @@ int camera_configure_decoder(camera_t *camera, buffer_list_t *src_capture)
     camera->decoder, src_capture);
   buffer_list_t *decoder_capture = device_open_buffer_list_capture(
     camera->decoder, decoder_output, 1.0, chosen_format, true);
+
+  if (getenv("CAMERA_DECODER_DEBUG")) {
+    camera_capture_set_callbacks(camera, decoder_capture, decoder_debug_callbacks);
+  }
 
   camera_capture_add_output(camera, src_capture, decoder_output);
 
