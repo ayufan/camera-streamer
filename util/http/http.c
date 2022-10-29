@@ -57,7 +57,7 @@ error:
 void *http_enum_params(http_worker_t *worker, FILE *stream, http_param_fn fn, void *opaque)
 {
   const char *params = worker->request_params;
-  if (!params) {
+  if (!params || !params[0]) {
     return NULL;
   }
 
