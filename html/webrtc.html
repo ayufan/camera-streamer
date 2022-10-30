@@ -73,7 +73,7 @@
         const urlSearchParams = new URLSearchParams(window.location.search);
         const params = Object.fromEntries(urlSearchParams.entries());
 
-        fetch('/webrtc', {
+        fetch(window.location.href, {
           body: JSON.stringify({
               type: 'request',
               res: params.res
@@ -109,7 +109,7 @@
         }).then(function(answer) {
           var offer = pc.localDescription;
 
-          return fetch('/webrtc', {
+          return fetch(window.location.href, {
             body: JSON.stringify({
                 type: offer.type,
                 id: pc.remote_pc_id,
