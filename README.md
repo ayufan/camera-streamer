@@ -82,8 +82,8 @@ This due to extra overhead has worse latency than direct decoding
 via ISP.
 
 ```bash
-./libcamera_camera.sh -help
-./libcamera_camera.sh -camera-format=YUYV
+tools/libcamera_camera.sh -help
+tools/libcamera_camera.sh -camera-format=YUYV
 ```
 
 ### High-performance mode via ISP for CSI
@@ -96,8 +96,8 @@ As such it does not implement brightness control similarly to `libcamera`.
 # This script uses dumped IMX519 parametrs that are feed into bcm2385 ISP module
 # This does not provide automatic brightness control
 # Other sensors can be supported the same way as long as ISP parameters are adapted
-./imx519_camera.sh -help
-./imx519_camera.sh -camera-format=RG10 ...
+tools/imx519_camera.sh -help
+tools/imx519_camera.sh -camera-format=RG10 ...
 ```
 
 This mode allows to provide significantly better performance for camera sensors
@@ -117,9 +117,9 @@ This script uses direct decoding or passthrough of MJPEG or H264 streams from UV
 re-encoded stream provided over web-interface.
 
 ```bash
-./usb_camera.sh -help
-./usb_camera.sh -camera-format=H264 ...
-./usb_camera.sh -camera-format=MJPEG ...
+tools/usb_camera.sh -help
+tools/usb_camera.sh -camera-format=H264 ...
+tools/usb_camera.sh -camera-format=MJPEG ...
 ```
 
 ## HTTP web server
@@ -158,7 +158,7 @@ You can view all available configuration parameters by adding `-log-verbose`
 to one of the above commands, like:
 
 ```bash
-./libcamera_camera.sh -log-verbose ...
+tools/libcamera_camera.sh -log-verbose ...
 ```
 
 Depending on control they have to be used for camera, ISP, or JPEG or H264 codec:
@@ -188,10 +188,10 @@ v4l2-ctl -d /dev/video0 --list-formats-ext
 Some of them might be specified to streamer:
 
 ```bash
-./*_camera.sh -camera-format=RG10 # Bayer 10 packet
-./*_camera.sh -camera-format=YUYV
-./*_camera.sh -camera-format=MJPEG
-./*_camera.sh -camera-format=H264 # This is unstable due to h264 key frames support
+tools/*_camera.sh -camera-format=RG10 # Bayer 10 packet
+tools/*_camera.sh -camera-format=YUYV
+tools/*_camera.sh -camera-format=MJPEG
+tools/*_camera.sh -camera-format=H264 # This is unstable due to h264 key frames support
 ```
 
 ## Camera support
@@ -223,13 +223,13 @@ Latency according to my tests is due to the way how buffers are enqueued and pro
 
 ```shell
 # libcamera
-$ ./camera_stream -camera-path=/base/soc/i2c0mux/i2c@1/imx519@1a -camera-type=libcamera -camera-format=YUYV -camera-fps=120 -camera-width=2328 -camera-height=1748 -camera-high_res_factor=1.5 -log-filter=buffer_lock
+$ ./camera_streamer -camera-path=/base/soc/i2c0mux/i2c@1/imx519@1a -camera-type=libcamera -camera-format=YUYV -camera-fps=120 -camera-width=2328 -camera-height=1748 -camera-high_res_factor=1.5 -log-filter=buffer_lock
 device/buffer_lock.c: http_jpeg: Captured buffer JPEG:capture:mplane:buf2 (refs=2), frame=63/0, processing_ms=101.1, frame_ms=33.1
 device/buffer_lock.c: http_jpeg: Captured buffer JPEG:capture:mplane:buf0 (refs=2), frame=64/0, processing_ms=99.2, frame_ms=31.9
 device/buffer_lock.c: http_jpeg: Captured buffer JPEG:capture:mplane:buf1 (refs=2), frame=65/0, processing_ms=99.6, frame_ms=34.8
 
 # direct ISP-mode
-$ ./camera_stream -camera-path=/dev/video0 -camera-format=RG10 -camera-fps=30 -camera-width=2328 -camera-height=1748 -camera-high_res_factor=1.5 -log-filter=buffer_lock
+$ ./camera_streamer -camera-path=/dev/video0 -camera-format=RG10 -camera-fps=30 -camera-width=2328 -camera-height=1748 -camera-high_res_factor=1.5 -log-filter=buffer_lock
 device/buffer_lock.c: http_jpeg: Captured buffer JPEG:capture:mplane:buf1 (refs=2), frame=32/0, processing_ms=49.7, frame_ms=33.3
 device/buffer_lock.c: http_jpeg: Captured buffer JPEG:capture:mplane:buf2 (refs=2), frame=33/0, processing_ms=49.7, frame_ms=33.3
 device/buffer_lock.c: http_jpeg: Captured buffer JPEG:capture:mplane:buf0 (refs=2), frame=34/0, processing_ms=49.7, frame_ms=33.4
@@ -239,12 +239,12 @@ device/buffer_lock.c: http_jpeg: Captured buffer JPEG:capture:mplane:buf0 (refs=
 
 ```shell
 # libcamera
-$ ./camera_stream -camera-path=/base/soc/i2c0mux/i2c@1/imx519@1a -camera-type=libcamera -camera-format=YUYV -camera-fps=10 -camera-width=2328 -camera-height=1748 -camera-high_res_factor=1.5 -log-filter=buffer_lock
+$ ./camera_streamer -camera-path=/base/soc/i2c0mux/i2c@1/imx519@1a -camera-type=libcamera -camera-format=YUYV -camera-fps=10 -camera-width=2328 -camera-height=1748 -camera-high_res_factor=1.5 -log-filter=buffer_lock
 device/buffer_lock.c: http_jpeg: Captured buffer JPEG:capture:mplane:buf2 (refs=2), frame=585/0, processing_ms=155.3, frame_ms=100.0
 device/buffer_lock.c: http_jpeg: Captured buffer JPEG:capture:mplane:buf0 (refs=2), frame=586/0, processing_ms=155.5, frame_ms=100.2
 
 # direct ISP-mode
-$ ./camera_stream -camera-path=/dev/video0 -camera-format=RG10 -camera-fps=10 -camera-width=2328 -camera-height=1748 -camera-high_res_factor=1.5 -log-filter=buffer_lock
+$ ./camera_streamer -camera-path=/dev/video0 -camera-format=RG10 -camera-fps=10 -camera-width=2328 -camera-height=1748 -camera-high_res_factor=1.5 -log-filter=buffer_lock
 device/buffer_lock.c: http_jpeg: Captured buffer JPEG:capture:mplane:buf1 (refs=2), frame=260/0, processing_ms=57.5, frame_ms=99.7
 device/buffer_lock.c: http_jpeg: Captured buffer JPEG:capture:mplane:buf2 (refs=2), frame=261/0, processing_ms=57.6, frame_ms=100.0
 device/buffer_lock.c: http_jpeg: Captured buffer JPEG:capture:mplane:buf0 (refs=2), frame=262/0, processing_ms=58.0, frame_ms=100.4
@@ -254,13 +254,13 @@ device/buffer_lock.c: http_jpeg: Captured buffer JPEG:capture:mplane:buf0 (refs=
 
 ```shell
 # libcamera
-$ ./camera_stream -camera-path=/base/soc/i2c0mux/i2c@1/imx519@1a -camera-type=libcamera -camera-format=YUYV -camera-fps=120 -camera-width=1280 -camera-height=720 -log-filter=buffer_lock
+$ ./camera_streamer -camera-path=/base/soc/i2c0mux/i2c@1/imx519@1a -camera-type=libcamera -camera-format=YUYV -camera-fps=120 -camera-width=1280 -camera-height=720 -log-filter=buffer_lock
 device/buffer_lock.c: http_jpeg: Captured buffer JPEG:capture:mplane:buf0 (refs=2), frame=139/0, processing_ms=20.1, frame_ms=7.9
 device/buffer_lock.c: http_jpeg: Captured buffer JPEG:capture:mplane:buf1 (refs=2), frame=140/0, processing_ms=20.6, frame_ms=8.8
 device/buffer_lock.c: http_jpeg: Captured buffer JPEG:capture:mplane:buf2 (refs=2), frame=141/0, processing_ms=19.8, frame_ms=8.1
 
 # direct ISP-mode
-$ ./camera_stream -camera-path=/dev/video0 -camera-format=RG10 -camera-fps=120 -camera-width=1280 -camera-height=720 -log-filter=buffer_lock
+$ ./camera_streamer -camera-path=/dev/video0 -camera-format=RG10 -camera-fps=120 -camera-width=1280 -camera-height=720 -log-filter=buffer_lock
 device/buffer_lock.c: http_jpeg: Captured buffer JPEG:capture:mplane:buf0 (refs=2), frame=157/0, processing_ms=18.5, frame_ms=8.4
 device/buffer_lock.c: http_jpeg: Captured buffer JPEG:capture:mplane:buf1 (refs=2), frame=158/0, processing_ms=18.5, frame_ms=8.3
 device/buffer_lock.c: http_jpeg: Captured buffer JPEG:capture:mplane:buf2 (refs=2), frame=159/0, processing_ms=18.5, frame_ms=8.3

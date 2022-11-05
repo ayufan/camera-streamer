@@ -1,7 +1,7 @@
 #!/bin/bash
 
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
-cd "$SCRIPT_DIR"
+cd "$SCRIPT_DIR/.."
 
 CAMERA_PATH=$(echo /dev/v4l/by-path/*.csi-video-index0)
 
