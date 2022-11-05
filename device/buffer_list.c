@@ -36,18 +36,25 @@ buffer_list_t *buffer_list_open(const char *name, int index, struct device_s *de
   buf_list->fmt.nbufs = got_bufs;
   buf_list->nbufs = got_bufs;
 
+  unsigned mem_used = 0;
+
   for (unsigned i = 0; i < buf_list->nbufs; i++) {
     char name[64];
     sprintf(name, "%s:buf%d", buf_list->name, i);
     buffer_t *buf = buffer_open(name, buf_list, i);
     if (!buf) {
-		  LOG_ERROR(buf_list, "Cannot open buffer: %u", i);
+      LOG_ERROR(buf_list, "Cannot open buffer: %u", i);
       goto error;
     }
+
+    if (buf->dma_fd >= 0) {
+      mem_used += buf->length;
+    }
+
     buf_list->bufs[i] = buf;
   }
 
-	LOG_DEBUG(buf_list, "Opened %u buffers", buf_list->nbufs);
+  LOG_VERBOSE(buf_list, "Opened %u buffers. Memory used: %.1f MiB", buf_list->nbufs, mem_used / 1024.0f / 1024.0f);
 
   return buf_list;
 
