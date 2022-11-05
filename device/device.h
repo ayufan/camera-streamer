@@ -6,6 +6,7 @@
 
 typedef struct buffer_s buffer_t;
 typedef struct buffer_list_s buffer_list_t;
+typedef struct buffer_format_s buffer_format_t;
 typedef struct device_s device_t;
 struct pollfd;
 
@@ -57,8 +58,8 @@ typedef struct device_s {
 device_t *device_open(const char *name, const char *path, device_hw_t *hw);
 void device_close(device_t *dev);
 
-buffer_list_t *device_open_buffer_list(device_t *dev, bool do_capture, unsigned width, unsigned height, unsigned format, unsigned bytesperline, int nbufs, bool do_mmap);
-buffer_list_t *device_open_buffer_list2(device_t *dev, const char *path, bool do_capture, unsigned width, unsigned height, unsigned format, unsigned bytesperline, int nbufs, bool do_mmap);
+buffer_list_t *device_open_buffer_list(device_t *dev, bool do_capture, buffer_format_t fmt, bool do_mmap);
+buffer_list_t *device_open_buffer_list2(device_t *dev, const char *path, bool do_capture, buffer_format_t fmt, bool do_mmap);
 buffer_list_t *device_open_buffer_list_output(device_t *dev, buffer_list_t *capture_list);
 buffer_list_t *device_open_buffer_list_capture(device_t *dev, const char *path, buffer_list_t *output_list, unsigned width, unsigned height, unsigned format, bool do_mmap);
 int device_consume_event(device_t *dev);

@@ -95,7 +95,7 @@ retry_resolution_set:
     v4l2_fmt.fmt.pix_mp.field = V4L2_FIELD_ANY;
     v4l2_fmt.fmt.pix_mp.num_planes = 1;
     v4l2_fmt.fmt.pix_mp.plane_fmt[0].bytesperline = fmt.bytesperline;
-    //v4l2_fmt.fmt.pix_mp.plane_fmt[0].sizeimage = bytesperline * orig_height;
+    v4l2_fmt.fmt.pix_mp.plane_fmt[0].sizeimage = fmt.sizeimage;
   } else {
     v4l2_fmt.fmt.pix.colorspace = V4L2_COLORSPACE_RAW;
     if (fmt.width)
@@ -106,7 +106,7 @@ retry_resolution_set:
       v4l2_fmt.fmt.pix.pixelformat = fmt.format;
     v4l2_fmt.fmt.pix.field = V4L2_FIELD_ANY;
     v4l2_fmt.fmt.pix.bytesperline = fmt.bytesperline;
-    //v4l2_fmt.fmt.pix.sizeimage = bytesperline * orig_height;
+    v4l2_fmt.fmt.pix.sizeimage = fmt.sizeimage;
   }
 
   LOG_DEBUG(buf_list, "Configuring format (%s)...", fourcc_to_string(fmt.format).buf);
@@ -117,11 +117,13 @@ retry_resolution_set:
     buf_list->fmt.height = v4l2_fmt.fmt.pix_mp.height;
     buf_list->fmt.format = v4l2_fmt.fmt.pix_mp.pixelformat;
     buf_list->fmt.bytesperline = v4l2_fmt.fmt.pix_mp.plane_fmt[0].bytesperline;
+    buf_list->fmt.sizeimage = v4l2_fmt.fmt.pix_mp.plane_fmt[0].sizeimage;
   } else {
     buf_list->fmt.width = v4l2_fmt.fmt.pix.width;
     buf_list->fmt.height = v4l2_fmt.fmt.pix.height;
     buf_list->fmt.format = v4l2_fmt.fmt.pix.pixelformat;
     buf_list->fmt.bytesperline = v4l2_fmt.fmt.pix.bytesperline;
+    buf_list->fmt.sizeimage = v4l2_fmt.fmt.pix.sizeimage;
   }
 
   if (buf_list->fmt.width != fmt.width || buf_list->fmt.height != fmt.height) {

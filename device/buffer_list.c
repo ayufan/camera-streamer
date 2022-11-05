@@ -25,11 +25,12 @@ buffer_list_t *buffer_list_open(const char *name, int index, struct device_s *de
 
 	LOG_INFO(
     buf_list,
-    "Using: %ux%u/%s, bytesperline=%d",
+    "Using: %ux%u/%s, bytesperline=%d, sizeimage=%.1fMiB",
     buf_list->fmt.width,
     buf_list->fmt.height,
     fourcc_to_string(buf_list->fmt.format).buf,
-    buf_list->fmt.bytesperline
+    buf_list->fmt.bytesperline,
+    buf_list->fmt.sizeimage / 1024.0f / 1024.0f
   );
 
   buf_list->bufs = calloc(got_bufs, sizeof(buffer_t*));
@@ -54,7 +55,7 @@ buffer_list_t *buffer_list_open(const char *name, int index, struct device_s *de
     buf_list->bufs[i] = buf;
   }
 
-  LOG_VERBOSE(buf_list, "Opened %u buffers. Memory used: %.1f MiB", buf_list->nbufs, mem_used / 1024.0f / 1024.0f);
+  LOG_INFO(buf_list, "Opened %u buffers. Memory used: %.1f MiB", buf_list->nbufs, mem_used / 1024.0f / 1024.0f);
 
   return buf_list;
 

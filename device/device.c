@@ -47,12 +47,12 @@ void device_close(device_t *dev) {
   free(dev);
 }
 
-buffer_list_t *device_open_buffer_list(device_t *dev, bool do_capture, unsigned width, unsigned height, unsigned format, unsigned bytesperline, int nbufs, bool do_mmap)
+buffer_list_t *device_open_buffer_list(device_t *dev, bool do_capture, buffer_format_t fmt, bool do_mmap)
 {
-  return device_open_buffer_list2(dev, NULL, do_capture, width, height, format, bytesperline, nbufs, do_mmap);
+  return device_open_buffer_list2(dev, NULL, do_capture, fmt, do_mmap);
 }
 
-buffer_list_t *device_open_buffer_list2(device_t *dev, const char *path, bool do_capture, unsigned width, unsigned height, unsigned format, unsigned bytesperline, int nbufs, bool do_mmap)
+buffer_list_t *device_open_buffer_list2(device_t *dev, const char *path, bool do_capture, buffer_format_t fmt, bool do_mmap)
 {
   char name[64];
   int index = 0;
@@ -81,14 +81,6 @@ buffer_list_t *device_open_buffer_list2(device_t *dev, const char *path, bool do
     sprintf(name, "%s:output", dev->name);
   }
 
-  buffer_format_t fmt = {
-    .width = width,
-    .height = height,
-    .format = format,
-    .bytesperline = bytesperline,
-    .nbufs = nbufs
-  };
-
   buf_list = buffer_list_open(name, index, dev, path, fmt, do_capture, do_mmap);
   if (!buf_list) {
     goto error;
@@ -114,11 +106,23 @@ buffer_list_t *device_open_buffer_list_output(device_t *dev, buffer_list_t *capt
     return NULL;
   }
 
+  buffer_format_t fmt = capture_list->fmt;
+  bool do_mmap = capture_list->dev->opts.allow_dma ? !capture_list->do_mmap : true;
+
+  // If manually allocating buffers, ensure that `sizeimage` is at least `buf->length`
+  if (do_mmap) {
+    for (int i = 0; i < capture_list->nbufs; i++) {
+      buffer_t *buf = capture_list->bufs[i];
+      if (fmt.sizeimage < buf->length)
+        fmt.sizeimage = buf->length;
+    }
+  } else {
+    fmt.sizeimage = 0;
+  }
+
   return device_open_buffer_list(dev, false,
-    capture_list->fmt.width, capture_list->fmt.height,
-    capture_list->fmt.format, capture_list->fmt.bytesperline,
-    capture_list->nbufs,
-    capture_list->dev->opts.allow_dma ? !capture_list->do_mmap : true);
+    fmt,
+    do_mmap);
 }
 
 buffer_list_t *device_open_buffer_list_capture(device_t *dev, const char *path, buffer_list_t *output_list, unsigned width, unsigned height, unsigned format, bool do_mmap)
@@ -127,9 +131,17 @@ buffer_list_t *device_open_buffer_list_capture(device_t *dev, const char *path, 
     return NULL;
   }
 
-  return device_open_buffer_list2(dev, path, true,
-    width ? width : output_list->fmt.width, height ? height : output_list->fmt.height,
-    format, 0, output_list->nbufs, do_mmap);
+  buffer_format_t fmt = output_list->fmt;
+
+  if (width)
+    fmt.width = width;
+  if (height)
+    fmt.height = height;
+  fmt.format = format;
+  fmt.bytesperline = 0;
+  fmt.sizeimage = 0;
+
+  return device_open_buffer_list2(dev, path, true, fmt, do_mmap);
 }
 
 int device_set_stream(device_t *dev, bool do_on)

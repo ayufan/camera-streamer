@@ -8,7 +8,7 @@ typedef struct device_s device_t;
 struct pollfd;
 
 typedef struct buffer_format_s {
-  unsigned width, height, format, bytesperline;
+  unsigned width, height, format, bytesperline, sizeimage;
   unsigned nbufs;
   unsigned interval_us;
 } buffer_format_t;

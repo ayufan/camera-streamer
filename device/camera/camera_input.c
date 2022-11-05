@@ -32,8 +32,14 @@ static int camera_configure_input_v4l2(camera_t *camera)
     camera->camera->opts.allow_dma = false;
   }
 
-  buffer_list_t *camera_capture = device_open_buffer_list(camera->camera, true,
-    camera->options.width, camera->options.height, camera->options.format, 0, camera->options.nbufs, true);
+  buffer_format_t fmt = {
+    .width = camera->options.width,
+    .height = camera->options.height,
+    .format = camera->options.format,
+    .nbufs = camera->options.nbufs
+  };
+
+  buffer_list_t *camera_capture = device_open_buffer_list(camera->camera, true, fmt, true);
   if (!camera_capture) {
     return -1;
   }
@@ -52,16 +58,14 @@ static int camera_configure_input_libcamera(camera_t *camera)
 
   camera->camera->opts.allow_dma = camera->options.allow_dma;
 
-  buffer_list_t *camera_capture = device_open_buffer_list(
-    camera->camera,
-    true,
-    camera->options.width,
-    camera->options.height,
-    camera->options.format,
-    0,
-    camera->options.nbufs,
-    true
-  );
+  buffer_format_t fmt = {
+    .width = camera->options.width,
+    .height = camera->options.height,
+    .format = camera->options.format,
+    .nbufs = camera->options.nbufs
+  };
+
+  buffer_list_t *camera_capture = device_open_buffer_list(camera->camera, true, fmt, true);
   if (!camera_capture) {
     return -1;
   }
