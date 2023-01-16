@@ -18,6 +18,7 @@ extern "C" {
 #ifdef USE_LIBCAMERA
 #include <optional>
 #include <memory>
+#include <regex>
 
 #include <libcamera/controls.h>
 #include <libcamera/control_ids.h>

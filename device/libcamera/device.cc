@@ -173,8 +173,30 @@ int libcamera_device_set_option(device_t *dev, const char *keyp, const char *val
       control_value.set<float>(atof(value));
       break;
 
+    case libcamera::ControlTypeRectangle: {
+      std::string rectangle_regex_format = R"(\((\d+),(?:%20|\s)*(\d+)\)\/(\d+)x(\d+))";
+      std::regex rectangle_regex(rectangle_regex_format);
+
+      std::smatch rectangle_match;
+
+      std::string value_string(value);
+      std::regex_search(value_string, rectangle_match, rectangle_regex);
+
+      if (rectangle_match.empty()) {
+        LOG_ERROR(dev, "The value `%s` cannot be interpreted as a rectangle. Format expected to be `%s`, e.g. (0, 0)/1920x1080", value_string.c_str(), rectangle_regex_format.c_str());
+      } else {
+        int xpos = stoi(rectangle_match[1]);
+        int ypos = stoi(rectangle_match[2]);
+        unsigned int width = stoul(rectangle_match[3]);
+        unsigned int height = stoul(rectangle_match[4]);
+
+        libcamera::Rectangle rectangle(xpos, ypos, width, height);
+        control_value.set<libcamera::Rectangle>(rectangle);
+      }
+
+        break;
+    }
     case libcamera::ControlTypeString:
-    case libcamera::ControlTypeRectangle:
     case libcamera::ControlTypeSize:
       break;
     }
