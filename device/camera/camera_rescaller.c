@@ -40,9 +40,15 @@ buffer_list_t *camera_try_rescaller(camera_t *camera, buffer_list_t *src_capture
 
   buffer_list_t *rescaller_output = device_open_buffer_list_output(
     device, src_capture);
+
+  buffer_format_t target_fmt = {
+    .width = target_width,
+    .height = target_height,
+    .format = target_format
+  };
+
   buffer_list_t *rescaller_capture = device_open_buffer_list_capture(
-    device, NULL, rescaller_output,
-    target_width, target_height, target_format, true);
+    device, NULL, rescaller_output, target_fmt, true);
 
   if (!rescaller_capture) {
     device_close(device);

@@ -68,8 +68,8 @@ buffer_list_t *camera_configure_decoder(camera_t *camera, buffer_list_t *src_cap
 
   buffer_list_t *decoder_output = device_open_buffer_list_output(
     camera->decoder, src_capture);
-  buffer_list_t *decoder_capture = device_open_buffer_list_capture(
-    camera->decoder, NULL, decoder_output, 0, 0, chosen_format, true);
+  buffer_list_t *decoder_capture = device_open_buffer_list_capture2(
+    camera->decoder, NULL, decoder_output, chosen_format, true);
 
   if (getenv("CAMERA_DECODER_DEBUG")) {
     camera_capture_add_callbacks(camera, decoder_capture, decoder_debug_callbacks);
