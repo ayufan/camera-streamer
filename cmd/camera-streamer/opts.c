@@ -82,45 +82,45 @@ option_value_t camera_type[] = {
 };
 
 option_t all_options[] = {
-  DEFINE_OPTION_PTR(camera, path, string, "Chooses the camera to use. If empty connect to default."),
-  DEFINE_OPTION_VALUES(camera, type, camera_type, "Select camera type."),
-  DEFINE_OPTION(camera, width, uint, "Set the camera capture width."),
-  DEFINE_OPTION(camera, height, uint, "Set the camera capture height."),
-  DEFINE_OPTION_VALUES(camera, format, camera_formats, "Set the camera capture format."),
-  DEFINE_OPTION(camera, nbufs, uint, "Set number of capture buffers. Preferred 2 or 3."),
-  DEFINE_OPTION(camera, fps, uint, "Set the desired capture framerate."),
-  DEFINE_OPTION_DEFAULT(camera, allow_dma, bool, "1", "Prefer to use DMA access to reduce memory copy."),
-  DEFINE_OPTION(camera, high_res_factor, float, "Set the desired high resolution output scale factor."),
-  DEFINE_OPTION(camera, low_res_factor, float, "Set the desired low resolution output scale factor."),
-  DEFINE_OPTION_PTR(camera, options, list, "Set the camera options. List all available options with `-camera-list_options`."),
-  DEFINE_OPTION(camera, auto_reconnect, uint, "Set the camera auto-reconnect delay in seconds."),
-  DEFINE_OPTION_DEFAULT(camera, auto_focus, bool, "1", "Do auto-focus on start-up (does not work with all camera)."),
-  DEFINE_OPTION_DEFAULT(camera, vflip, bool, "1", "Do vertical image flip (does not work with all camera)."),
-  DEFINE_OPTION_DEFAULT(camera, hflip, bool, "1", "Do horizontal image flip (does not work with all camera)."),
+  DEFINE_OPTION_PTR("camera-path", camera, path, string, "Chooses the camera to use. If empty connect to default."),
+  DEFINE_OPTION_VALUES("camera-type", camera, type, camera_type, "Select camera type."),
+  DEFINE_OPTION("camera-width", camera, width, uint, "Set the camera capture width."),
+  DEFINE_OPTION("camera-height", camera, height, uint, "Set the camera capture height."),
+  DEFINE_OPTION_VALUES("camera-format", camera, format, camera_formats, "Set the camera capture format."),
+  DEFINE_OPTION("camera-nbufs", camera, nbufs, uint, "Set number of capture buffers. Preferred 2 or 3."),
+  DEFINE_OPTION("camera-fps", camera, fps, uint, "Set the desired capture framerate."),
+  DEFINE_OPTION_DEFAULT("camera-allow-dma", camera, allow_dma, bool, "1", "Prefer to use DMA access to reduce memory copy."),
+  DEFINE_OPTION("camera-high-res-factor", camera, high_res_factor, float, "Set the desired high resolution output scale factor (DEPRECATED)."),
+  DEFINE_OPTION("camera-low-res-factor", camera, low_res_factor, float, "Set the desired low resolution output scale factor (DEPRECATED)."),
+  DEFINE_OPTION_PTR("camera-options", camera, options, list, "Set the camera options. List all available options with `-list-options`."),
+  DEFINE_OPTION_DEFAULT("camera-auto-focus", camera, auto_focus, bool, "1", "Do auto-focus on start-up (does not work with all camera)."),
+  DEFINE_OPTION_DEFAULT("camera-vflip", camera, vflip, bool, "1", "Do vertical image flip (does not work with all camera)."),
+  DEFINE_OPTION_DEFAULT("camera-hflip", camera, hflip, bool, "1", "Do horizontal image flip (does not work with all camera)."),
 
-  DEFINE_OPTION_PTR(camera, isp.options, list, "Set the ISP processing options. List all available options with `-camera-list_options`."),
+  DEFINE_OPTION("auto-reconnect", camera, auto_reconnect, uint, "Set the camera auto-reconnect delay in seconds."),
+  DEFINE_OPTION_PTR("isp-options", camera, isp.options, list, "Set the ISP processing options. List all available options with `-list-options`."),
 
-  DEFINE_OPTION_PTR(camera, snapshot.options, list, "Set the JPEG compression options. List all available options with `-camera-list_options`."),
-  DEFINE_OPTION(camera, snapshot.height, uint, "Override the snapshot height and maintain aspect ratio."),
+  DEFINE_OPTION_PTR("snapshot-options", camera, snapshot.options, list, "Set the JPEG compression options. List all available options with `-list-options`."),
+  DEFINE_OPTION("snapshot-height", camera, snapshot.height, uint, "Override the snapshot height and maintain aspect ratio."),
 
-  DEFINE_OPTION_DEFAULT(camera, stream.disabled, bool, "1", "Disable stream."),
-  DEFINE_OPTION_PTR(camera, stream.options, list, "Set the JPEG compression options. List all available options with `-camera-list_options`."),
-  DEFINE_OPTION(camera, stream.height, uint, "Override the stream height and maintain aspect ratio."),
+  DEFINE_OPTION_DEFAULT("stream-disabled", camera, stream.disabled, bool, "1", "Disable stream."),
+  DEFINE_OPTION_PTR("stream-options", camera, stream.options, list, "Set the JPEG compression options. List all available options with `-list-options`."),
+  DEFINE_OPTION("stream-height", camera, stream.height, uint, "Override the stream height and maintain aspect ratio."),
 
-  DEFINE_OPTION_DEFAULT(camera, video.disabled, bool, "1", "Disable video."),
-  DEFINE_OPTION_PTR(camera, video.options, list, "Set the H264 encoding options. List all available options with `-camera-list_options`."),
-  DEFINE_OPTION(camera, video.height, uint, "Override the video height and maintain aspect ratio."),
+  DEFINE_OPTION_DEFAULT("video-disabled", camera, video.disabled, bool, "1", "Disable video."),
+  DEFINE_OPTION_PTR("video-options", camera, video.options, list, "Set the H264 encoding options. List all available options with `-list-options`."),
+  DEFINE_OPTION("video-height", camera, video.height, uint, "Override the video height and maintain aspect ratio."),
 
-  DEFINE_OPTION_DEFAULT(camera, list_options, bool, "1", "List all available options and exit."),
+  DEFINE_OPTION_DEFAULT("list-options", camera, list_options, bool, "1", "List all available options and exit."),
 
-  DEFINE_OPTION(http, port, uint, "Set the HTTP web-server port."),
-  DEFINE_OPTION(http, maxcons, uint, "Set maximum number of concurrent HTTP connections."),
+  DEFINE_OPTION("http-port", http, port, uint, "Set the HTTP web-server port."),
+  DEFINE_OPTION("http-maxcons", http, maxcons, uint, "Set maximum number of concurrent HTTP connections."),
 
-  DEFINE_OPTION_DEFAULT(rtsp, port, uint, "8554", "Set the RTSP server port (default: 8854)."),
+  DEFINE_OPTION_DEFAULT("rtsp-port", rtsp, port, uint, "8554", "Set the RTSP server port (default: 8854)."),
 
-  DEFINE_OPTION_DEFAULT(log, debug, bool, "1", "Enable debug logging."),
-  DEFINE_OPTION_DEFAULT(log, verbose, bool, "1", "Enable verbose logging."),
-  DEFINE_OPTION_PTR(log, filter, list, "Enable debug logging from the given files. Ex.: `-log-filter=buffer.cc`"),
+  DEFINE_OPTION_DEFAULT("log-debug", log, debug, bool, "1", "Enable debug logging."),
+  DEFINE_OPTION_DEFAULT("log-verbose", log, verbose, bool, "1", "Enable verbose logging."),
+  DEFINE_OPTION_PTR("log-filter", log, filter, list, "Enable debug logging from the given files. Ex.: `-log-filter=buffer.cc`"),
 
   {}
 };

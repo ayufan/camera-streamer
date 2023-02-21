@@ -100,9 +100,21 @@ static int parse_opt(option_t *options, const char *key)
         value++; // ignore '='
         break;
       }
+
+      if (!strncmp(key, options[i].field_name, value - key)) {
+        option = &options[i];
+        value++; // ignore '='
+        break;
+      }
     } else {
       // require exact match
       if (!strcmp(key, options[i].name)) {
+        option = &options[i];
+        value = option->default_value;
+        break;
+      }
+
+      if (!strcmp(key, options[i].field_name)) {
         option = &options[i];
         value = option->default_value;
         break;

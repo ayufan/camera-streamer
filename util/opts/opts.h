@@ -9,6 +9,7 @@ typedef struct option_value_s {
 
 typedef struct options_s {
   const char *name;
+  const char *field_name;
   char *value_string;
   char *value_list;
   union {
@@ -35,41 +36,45 @@ typedef struct options_s {
 #define OPTION_FORMAT_string "%s"
 #define OPTION_FORMAT_list   "%s"
 
-#define DEFINE_OPTION(_section, _name, _type, _desc) \
+#define DEFINE_OPTION(_name, _section, _field, _type, _desc) \
   { \
-    .name = #_section "-" #_name, \
-    .value_##_type = &_section##_options._name, \
+    .name = _name ? _name : #_section "-" #_field, \
+    .field_name = #_section "-" #_field, \
+    .value_##_type = &_section##_options._field, \
     .format = OPTION_FORMAT_##_type, \
-    .size = sizeof(_section##_options._name), \
+    .size = sizeof(_section##_options._field), \
     .description = _desc, \
   }
 
-#define DEFINE_OPTION_DEFAULT(_section, _name, _type, _default_value, _desc) \
+#define DEFINE_OPTION_DEFAULT(_name, _section, _field, _type, _default_value, _desc) \
   { \
-    .name = #_section "-" #_name, \
-    .value_##_type = &_section##_options._name, \
+    .name = _name ? _name : #_section "-" #_field, \
+    .field_name = #_section "-" #_field, \
+    .value_##_type = &_section##_options._field, \
     .format = OPTION_FORMAT_##_type, \
-    .size = sizeof(_section##_options._name), \
+    .size = sizeof(_section##_options._field), \
     .default_value = _default_value, \
     .description = _desc, \
   }
 
-#define DEFINE_OPTION_VALUES(_section, _name, _value_mapping, _desc) \
+#define DEFINE_OPTION_VALUES(_name, _section, _field, _value_mapping, _desc) \
   { \
-    .name = #_section "-" #_name, \
-    .value_hex = &_section##_options._name, \
+    .name = _name ? _name : #_section "-" #_field, \
+    .field_name = #_section "-" #_field, \
+    .value_hex = &_section##_options._field, \
     .format = OPTION_FORMAT_hex, \
     .value_mapping = _value_mapping, \
-    .size = sizeof(_section##_options._name), \
+    .size = sizeof(_section##_options._field), \
     .description = _desc, \
   }
 
-#define DEFINE_OPTION_PTR(_section, _name, _type, _desc) \
+#define DEFINE_OPTION_PTR(_name, _section, _field, _type, _desc) \
   { \
-    .name = #_section "-" #_name, \
-    .value_##_type = _section##_options._name, \
+    .name = _name ? _name : #_section "-" #_field, \
+    .field_name = #_section "-" #_field, \
+    .value_##_type = _section##_options._field, \
     .format = OPTION_FORMAT_##_type, \
-    .size = sizeof(_section##_options._name), \
+    .size = sizeof(_section##_options._field), \
     .description = _desc, \
   }
 
