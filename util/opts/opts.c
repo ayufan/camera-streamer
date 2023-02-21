@@ -18,7 +18,7 @@ static void print_help(option_t *options, const char *cmd)
     option_t *option = &options[i];
     int len = 0;
 
-    len += printf("  -%s", option->name);
+    len += printf("  --%s", option->name);
     if (option->default_value) {
       len += printf("[=%s]", option->default_value);
     } else if (option->value_mapping) {
@@ -43,7 +43,9 @@ static void print_help(option_t *options, const char *cmd)
   }
   printf("\n");
 
-  printf("Configuration:\n");
+  printf("Command line:\n\n");
+
+  printf("$ %s \\\n", cmd);
   for (int i = 0; options[i].name; i++) {
     option_t *option = &options[i];
     int len = 0;
@@ -56,36 +58,31 @@ static void print_help(option_t *options, const char *cmd)
         continue;
 
       while ((token = strsep(&string, OPTION_VALUE_LIST_SEP)) != NULL) {
-        len = printf("  -%s=", option->name);
-        if (len < OPT_LENGTH) {
-          printf("%*s", OPT_LENGTH-len, " ");
-        }
-        printf("%s\n", token);
+        len = printf("  --%s=", option->name);
+        printf("%s \\\n", token);
       }
     } else if (option->value_string) {
-      len += printf("  -%s=", option->name);
-      if (len < OPT_LENGTH) {
-        printf("%*s", OPT_LENGTH-len, " ");
-      }
+      len += printf("  --%s=", option->name);
       printf(option->format, option->value_string);
-      printf("\n");
+      printf(" \\\n");
     } else {
-      len += printf("  -%s=", option->name);
-      if (len < OPT_LENGTH) {
-        printf("%*s", OPT_LENGTH-len, " ");
-      }
+      bool found = false;
+      len += printf("  --%s=", option->name);
       if (option->value_mapping) {
         for (int j = 0; option->value_mapping[j].name; j++) {
           if (option->value_mapping[j].value == *option->value_uint) {
-            printf("%s - ", option->value_mapping[j].name);
+            printf("%s", option->value_mapping[j].name);
+            found = true;
             break;
           }
         }
       }
 
-      unsigned mask = UINT_MAX >> ((sizeof(*option->value_uint) - option->size) * 8);
-      printf(option->format, *option->value_uint & mask);
-      printf("\n");
+      if (!found) {
+        unsigned mask = UINT_MAX >> ((sizeof(*option->value_uint) - option->size) * 8);
+        printf(option->format, *option->value_uint & mask);
+      }
+      printf(" \\\n");
     }
   }
   printf("\n");
