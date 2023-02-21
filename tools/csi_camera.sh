@@ -3,7 +3,7 @@
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 cd "$SCRIPT_DIR/.."
 
-CAMERA_PATH=$(echo /dev/v4l/by-path/*.csi-video-index0)
+CAMERA_PATH=( $(echo /dev/v4l/by-path/*.csi-video-index0) )
 
 if [[ "$1" == "dump" ]]; then
   shift
@@ -21,7 +21,7 @@ fi
 
 set -xeo pipefail
 make -j$(nproc)
-$GDB ./camera-streamer -camera-path=$(echo /dev/v4l/by-path/*.csi-video-index0) \
+$GDB ./camera-streamer -camera-path="${CAMERA_PATH[0]}" \
   -camera-options=vertical_blanking=728 \
   -camera-options=exposure=2444 \
   -camera-options=analogue_gain=600 \
