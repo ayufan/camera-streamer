@@ -55,6 +55,6 @@ int ioctl_retried(const char *name, int fd, int request, void *arg);
 #define ERR_IOCTL(dev, _fd, _request, _value, _msg, ...) do { \
 		int ret; \
 		if ((ret = ioctl_retried(dev_name(dev), _fd, _request, _value)) < 0) { \
-			LOG_ERROR(dev, "ioctl(ret=%d): " _msg, ret, ##__VA_ARGS__); \
+			LOG_ERROR(dev, "ioctl(ret=%d, errno=%d): " _msg, ret, errno, ##__VA_ARGS__); \
 		} \
 	} while(0)

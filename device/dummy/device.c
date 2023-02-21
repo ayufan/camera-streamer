@@ -5,6 +5,7 @@
 
 int dummy_device_open(device_t *dev)
 {
+  dev->opts.allow_dma = false;
   dev->dummy = calloc(1, sizeof(device_dummy_t));
   return 0;
 }

@@ -76,6 +76,7 @@ option_value_t camera_formats[] = {
 option_value_t camera_type[] = {
   { "v4l2", CAMERA_V4L2 },
   { "libcamera", CAMERA_LIBCAMERA },
+  { "dummy", CAMERA_DUMMY },
   {}
 };
 

@@ -77,3 +77,4 @@ void device_set_option_list(device_t *dev, const char *option_list);
 
 device_t *device_v4l2_open(const char *name, const char *path);
 device_t *device_libcamera_open(const char *name, const char *path);
+device_t *device_dummy_open(const char *name, const char *path);

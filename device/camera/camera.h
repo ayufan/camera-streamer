@@ -12,7 +12,8 @@
 
 typedef enum {
   CAMERA_V4L2 = 0,
-  CAMERA_LIBCAMERA
+  CAMERA_LIBCAMERA,
+  CAMERA_DUMMY
 } camera_type_t;
 
 typedef struct camera_output_options_s {

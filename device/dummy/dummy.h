@@ -2,6 +2,7 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+#include <unistd.h>
 
 typedef struct buffer_s buffer_t;
 typedef struct buffer_list_s buffer_list_t;
@@ -12,6 +13,9 @@ typedef struct device_dummy_s {
 } device_dummy_t;
 
 typedef struct buffer_list_dummy_s {
+  int fds[2];
+  void *data;
+  size_t length;
 } buffer_list_dummy_t;
 
 typedef struct buffer_dummy_s {
@@ -32,5 +36,4 @@ int dummy_buffer_list_pollfd(buffer_list_t *buf_list, struct pollfd *pollfd, boo
 
 int dummy_buffer_list_open(buffer_list_t *buf_list);
 void dummy_buffer_list_close(buffer_list_t *buf_list);
-int dummy_buffer_list_set_buffers(buffer_list_t *buf_list, int nbufs);
 int dummy_buffer_list_set_stream(buffer_list_t *buf_list, bool do_on);

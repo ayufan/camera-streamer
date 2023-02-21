@@ -73,6 +73,28 @@ static int camera_configure_input_libcamera(camera_t *camera)
   return camera_configure_pipeline(camera, camera_capture);
 }
 
+static int camera_configure_input_dummy(camera_t *camera)
+{
+  camera->camera = device_dummy_open(camera->name, camera->options.path);
+  if (!camera->camera) {
+    return -1;
+  }
+
+  buffer_format_t fmt = {
+    .width = camera->options.width,
+    .height = camera->options.height,
+    .format = camera->options.format,
+    .nbufs = camera->options.nbufs
+  };
+
+  buffer_list_t *camera_capture = device_open_buffer_list(camera->camera, true, fmt, true);
+  if (!camera_capture) {
+    return -1;
+  }
+
+  return camera_configure_pipeline(camera, camera_capture);
+}
+
 int camera_configure_input(camera_t *camera)
 {
   switch (camera->options.type) {
@@ -81,6 +103,9 @@ int camera_configure_input(camera_t *camera)
 
   case CAMERA_LIBCAMERA:
     return camera_configure_input_libcamera(camera);
+
+  case CAMERA_DUMMY:
+    return camera_configure_input_dummy(camera);
 
   default:
     LOG_INFO(camera, "Unsupported camera type");
