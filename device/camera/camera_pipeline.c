@@ -13,8 +13,8 @@
 
 static unsigned snapshot_formats[] =
 {
-  V4L2_PIX_FMT_MJPEG,
   V4L2_PIX_FMT_JPEG,
+  V4L2_PIX_FMT_MJPEG,
   0
 };
 

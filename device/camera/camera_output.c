@@ -12,21 +12,20 @@
 #include "output/rtsp/rtsp.h"
 #include "output/output.h"
 
-static bool camera_output_matches_capture(buffer_list_t *capture, unsigned target_height, unsigned formats[])
+static bool camera_output_matches_capture(buffer_list_t *capture, unsigned target_height, unsigned format)
 {
   if (target_height && capture->fmt.height != target_height && capture->fmt.height != camera_rescaller_align_size(target_height)) {
     return false;
   }
 
-  for (int i = 0; formats[i]; i++) {
-    if (formats[i] == capture->fmt.format)
-      return true;
+  if (format != capture->fmt.format) {
+    return false;
   }
 
-  return false;
+  return true;
 }
 
-static buffer_list_t *camera_find_capture(camera_t *camera, unsigned target_height, unsigned formats[])
+static buffer_list_t *camera_find_capture(camera_t *camera, unsigned target_height, unsigned format)
 {
   for (int i = 0; i < MAX_DEVICES; i++) {
     if (!camera->devices[i])
@@ -36,9 +35,21 @@ static buffer_list_t *camera_find_capture(camera_t *camera, unsigned target_heig
     for (int j = 0; j < device->n_capture_list; j++) {
       buffer_list_t *capture_list = device->capture_lists[j];
 
-      if (camera_output_matches_capture(capture_list, target_height, formats)) {
+      if (camera_output_matches_capture(capture_list, target_height, format)) {
         return capture_list;
       }
+    }
+  }
+
+  return NULL;
+}
+
+static buffer_list_t *camera_find_capture2(camera_t *camera, unsigned target_height, unsigned formats[])
+{
+  for (int i = 0; formats[i]; i++) {
+    buffer_list_t *capture = camera_find_capture(camera, target_height, formats[i]);
+    if (capture) {
+      return capture;
     }
   }
 
@@ -63,16 +74,16 @@ static unsigned rescalled_formats[] =
 
 int camera_configure_output(camera_t *camera, const char *name, unsigned target_height, unsigned formats[], link_callbacks_t callbacks, device_t **device)
 {
-  buffer_list_t *src_capture = camera_find_capture(camera, target_height, formats);
+  buffer_list_t *src_capture = camera_find_capture2(camera, target_height, formats);
   if (src_capture) {
     camera_capture_add_callbacks(camera, src_capture, callbacks);
     return 0;
   }
 
-  src_capture = camera_find_capture(camera, target_height, rescalled_formats);
+  src_capture = camera_find_capture2(camera, target_height, rescalled_formats);
   if (!src_capture) {
     // Try to find re-scallabe output
-    src_capture = camera_find_capture(camera, 0, rescalled_formats);
+    src_capture = camera_find_capture2(camera, 0, rescalled_formats);
     if (src_capture) {
       src_capture = camera_configure_rescaller(camera, src_capture, name, target_height, rescalled_formats);
     }
