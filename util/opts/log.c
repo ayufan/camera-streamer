@@ -97,7 +97,7 @@ int ioctl_retried(const char *name, int fd, int request, void *arg)
 	}
 
 	if (ret && retries <= 0) {
-		LOG_PERROR(NULL, "%s: ioctl(%08x) retried %u times; giving up", name, request, MAX_RETRIES);
+		LOG_PERROR(NULL, "%s: ioctl(%08x, errno=%d) retried %u times; giving up", name, request, errno, MAX_RETRIES);
 	}
 	return ret;
 }
