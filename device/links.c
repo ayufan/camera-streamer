@@ -85,6 +85,32 @@ int _build_fds(link_t *all_links, struct pollfd *fds, link_t **links, buffer_lis
   return n;
 }
 
+bool links_sink_can_enqueue(buffer_list_t *buf_list)
+{
+  int current = buffer_list_count_enqueued(buf_list);
+
+  if (buf_list->do_capture) {
+    perror("should not happen");
+  }
+
+  int capture_max = 0;
+
+  for (int i = 0; i < buf_list->dev->n_capture_list; i++) {
+    int capture_count = buffer_list_count_enqueued(buf_list->dev->capture_lists[i]);
+    if (capture_max < capture_count)
+      capture_max = capture_count;
+  }
+
+  // only enqueue on output, if there are already captures (and there's more of them)
+  if (capture_max <= current) {
+    LOG_DEBUG(buf_list, "Skipping enqueue of output (output_enqueued=%d, capture_enqueued=%d)",
+      current, capture_max);
+    return false;
+  }
+
+  return true;
+}
+
 int links_enqueue_from_source(buffer_list_t *buf_list, link_t *link)
 {
   if (!link) {
@@ -103,6 +129,9 @@ int links_enqueue_from_source(buffer_list_t *buf_list, link_t *link)
 
   for (int j = 0; link->sinks[j]; j++) {
     if (link->sinks[j]->dev->paused) {
+      continue;
+    }
+    if (!links_sink_can_enqueue(link->sinks[j])) {
       continue;
     }
     buffer_list_enqueue(link->sinks[j], buf);
