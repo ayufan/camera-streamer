@@ -8,10 +8,13 @@
 
 #define N_FDS 50
 #define QUEUE_ON_CAPTURE // seems to provide better latency
+// #define LIMIT_CAPTURE_BUFFERS
 
 int _build_fds(link_t *all_links, struct pollfd *fds, link_t **links, buffer_list_t **buf_lists, int max_n, int *max_timeout_ms)
 {
   int n = 0, nlinks = 0;
+
+  uint64_t now_us __attribute__((unused)) = get_monotonic_time_us(NULL, NULL);
 
   for (nlinks = 0; all_links[nlinks].source; nlinks++);
 
@@ -60,6 +63,8 @@ int _build_fds(link_t *all_links, struct pollfd *fds, link_t **links, buffer_lis
       int count_enqueued = buffer_list_count_enqueued(sink);
       if (!sink->dev->paused && count_enqueued < sink->nbufs) {
         paused = false;
+      } else if (count_enqueued > 0) {
+        paused = false;
       }
     }
 
@@ -69,9 +74,9 @@ int _build_fds(link_t *all_links, struct pollfd *fds, link_t **links, buffer_lis
     bool can_dequeue = count_enqueued > 0;
 
 #ifndef QUEUE_ON_CAPTURE
-    if (now_us - source->last_dequeued_us < source->fmt_interval_us) {
+    if (now_us - source->last_dequeued_us < source->fmt.interval_us) {
       can_dequeue = false;
-      *max_timeout_ms = MIN(*max_timeout_ms, (source->last_dequeued_us + source->fmt_interval_us - now_us) / 1000);
+      *max_timeout_ms = MIN(*max_timeout_ms, (source->last_dequeued_us + source->fmt.interval_us - now_us) / 1000);
     }
 #endif
 
@@ -186,7 +191,7 @@ int links_step(link_t *all_links, int timeout_now_ms, int *timeout_next_ms)
   int ret = poll(fds, n, timeout_now_ms);
   print_pollfds(fds, n);
 
-  uint64_t now_us = get_monotonic_time_us(NULL, NULL);
+  uint64_t now_us __attribute__((unused)) = get_monotonic_time_us(NULL, NULL);
 
   if (ret < 0 && errno != EINTR) {
     return errno;
@@ -250,10 +255,17 @@ int links_step(link_t *all_links, int timeout_now_ms, int *timeout_next_ms)
           buffer_list_count_enqueued(buf_list));
       }
 #else
-    // feed capture queue (two buffers)
+      // feed capture queue (two buffers)
       int count_enqueued = buffer_list_count_enqueued(buf_list);
       if (count_enqueued > 1)
-          continue;
+        continue;
+#endif
+
+#ifdef LIMIT_CAPTURE_BUFFERS
+      // Do not enqueue more buffers than enqueued by output
+      if (buf_list->dev->output_list && buffer_list_count_enqueued(buf_list) >= buffer_list_count_enqueued(buf_list->dev->output_list)) {
+        continue;
+      }
 #endif
 
       if ((buf = buffer_list_find_slot(buf_list)) != NULL) {
