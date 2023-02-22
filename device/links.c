@@ -16,19 +16,19 @@ int _build_fds(link_t *all_links, struct pollfd *fds, link_t **links, buffer_lis
 
   uint64_t now_us __attribute__((unused)) = get_monotonic_time_us(NULL, NULL);
 
-  for (nlinks = 0; all_links[nlinks].source; nlinks++);
+  for (nlinks = 0; all_links[nlinks].capture_list; nlinks++);
 
   // This traverses in reverse order as it requires to first fix outputs
   // and go back into captures
 
   for (int i = nlinks; i-- > 0; ) {
     link_t *link = &all_links[i];
-    buffer_list_t *source = link->source;
+    buffer_list_t *capture_list = link->capture_list;
 
     if (n >= max_n) {
       return -EINVAL;
     }
-    if (!source->streaming) {
+    if (!capture_list->streaming) {
       continue;
     }
 
@@ -44,8 +44,8 @@ int _build_fds(link_t *all_links, struct pollfd *fds, link_t **links, buffer_lis
       }
     }
 
-    for (int j = 0; link->sinks[j]; j++) {
-      buffer_list_t *sink = link->sinks[j];
+    for (int j = 0; link->output_lists[j]; j++) {
+      buffer_list_t *sink = link->output_lists[j];
 
       if (n >= max_n) {
         return -EINVAL;
@@ -70,20 +70,20 @@ int _build_fds(link_t *all_links, struct pollfd *fds, link_t **links, buffer_lis
       }
     }
 
-    source->dev->paused = paused;
+    capture_list->dev->paused = paused;
 
-    int count_enqueued = buffer_list_count_enqueued(source);
+    int count_enqueued = buffer_list_count_enqueued(capture_list);
     bool can_dequeue = count_enqueued > 0;
 
 #ifndef QUEUE_ON_CAPTURE
-    if (now_us - source->last_dequeued_us < source->fmt.interval_us) {
+    if (now_us - capture_list->last_dequeued_us < capture_list->fmt.interval_us) {
       can_dequeue = false;
-      *max_timeout_ms = MIN(*max_timeout_ms, (source->last_dequeued_us + source->fmt.interval_us - now_us) / 1000);
+      *max_timeout_ms = MIN(*max_timeout_ms, (capture_list->last_dequeued_us + capture_list->fmt.interval_us - now_us) / 1000);
     }
 #endif
 
-    if (buffer_list_pollfd(source, &fds[n], can_dequeue) == 0) {
-      buf_lists[n] = source;
+    if (buffer_list_pollfd(capture_list, &fds[n], can_dequeue) == 0) {
+      buf_lists[n] = capture_list;
       links[n] = link;
       n++;
     }
@@ -118,15 +118,15 @@ bool links_sink_can_enqueue(buffer_list_t *buf_list)
   return true;
 }
 
-int links_enqueue_from_source(buffer_list_t *buf_list, link_t *link)
+int links_enqueue_from_capture_list(buffer_list_t *buf_list, link_t *link)
 {
   if (!link) {
-    LOG_ERROR(buf_list, "Missing link for source");
+    LOG_ERROR(buf_list, "Missing link for capture_list");
   }
 
   buffer_t *buf = buffer_list_dequeue(buf_list);
   if (!buf) {
-    LOG_ERROR(buf_list, "No buffer dequeued from source?");
+    LOG_ERROR(buf_list, "No buffer dequeued from capture_list?");
   }
 
   for (int j = 0; j < link->n_callbacks; j++) {
@@ -136,14 +136,14 @@ int links_enqueue_from_source(buffer_list_t *buf_list, link_t *link)
     }
   }
 
-  for (int j = 0; link->sinks[j]; j++) {
-    if (link->sinks[j]->dev->paused) {
+  for (int j = 0; link->output_lists[j]; j++) {
+    if (link->output_lists[j]->dev->paused) {
       continue;
     }
-    if (!links_sink_can_enqueue(link->sinks[j])) {
+    if (!links_sink_can_enqueue(link->output_lists[j])) {
       continue;
     }
-    buffer_list_enqueue(link->sinks[j], buf);
+    buffer_list_enqueue(link->output_lists[j], buf);
   }
 
   for (int j = 0; j < link->n_callbacks; j++) {
@@ -220,7 +220,7 @@ static int links_step(link_t *all_links, int timeout_now_ms, int *timeout_next_m
       buf_list->dev->paused);
 
     if (fds[i].revents & POLLIN) {
-      if (links_enqueue_from_source(buf_list, link) < 0) {
+      if (links_enqueue_from_capture_list(buf_list, link) < 0) {
         return -1;
       }
     }
@@ -284,17 +284,17 @@ static int links_step(link_t *all_links, int timeout_now_ms, int *timeout_next_m
 
 static int links_stream(link_t *all_links, bool do_stream)
 {
-  for (int i = 0; all_links[i].source; i++) {
+  for (int i = 0; all_links[i].capture_list; i++) {
     bool streaming = true;
     link_t *link = &all_links[i];
 
-    if (buffer_list_set_stream(link->source, streaming) < 0) {
-      LOG_ERROR(link->source, "Failed to start streaming");
+    if (buffer_list_set_stream(link->capture_list, streaming) < 0) {
+      LOG_ERROR(link->capture_list, "Failed to start streaming");
     }
 
-    for (int j = 0; link->sinks[j]; j++) {
-      if (buffer_list_set_stream(link->sinks[j], streaming) < 0) {
-        LOG_ERROR(link->sinks[j], "Failed to start streaming");
+    for (int j = 0; link->output_lists[j]; j++) {
+      if (buffer_list_set_stream(link->output_lists[j], streaming) < 0) {
+        LOG_ERROR(link->output_lists[j], "Failed to start streaming");
       }
     }
   }
@@ -340,20 +340,20 @@ void links_dump(link_t *all_links)
 {
   char line[4096];
 
-  for (int n = 0; all_links[n].source; n++) {
+  for (int n = 0; all_links[n].capture_list; n++) {
     link_t *link = &all_links[n];
 
     line[0] = 0;
-    links_dump_buf_list(line, link->source);
+    links_dump_buf_list(line, link->capture_list);
     strcat(line, " => [");
-    for (int j = 0; link->sinks[j]; j++) {
+    for (int j = 0; link->output_lists[j]; j++) {
       if (j > 0)
         strcat(line, ", ");
-      links_dump_buf_list(line, link->sinks[j]);
+      links_dump_buf_list(line, link->output_lists[j]);
     }
 
     for (int j = 0; j < link->n_callbacks; j++) {
-      if (link->sinks[0] || j > 0)
+      if (link->output_lists[0] || j > 0)
         strcat(line, ", ");
       strcat(line, link->callbacks[j].name);
     }

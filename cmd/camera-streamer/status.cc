@@ -84,9 +84,9 @@ static nlohmann::json links_status_json()
     link_t *link = &camera->links[i];
 
     nlohmann::json link_json;
-    link_json["source"] = link->source->name;
-    for (int j = 0; link->sinks[j]; j++) {
-      link_json["sinks"][j] = link->sinks[j]->name;
+    link_json["source"] = link->capture_list->name;
+    for (int j = 0; link->output_lists[j]; j++) {
+      link_json["sinks"][j] = link->output_lists[j]->name;
     }
     for (int j = 0; j < link->n_callbacks; j++) {
       link_json["callbacks"][j] = link->callbacks[j].name;

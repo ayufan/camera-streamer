@@ -23,8 +23,8 @@ typedef struct link_callbacks_s {
 } link_callbacks_t;
 
 typedef struct link_s {
-  buffer_list_t *source; // capture_list
-  buffer_list_t *sinks[10];
+  buffer_list_t *capture_list;
+  buffer_list_t *output_lists[10];
   link_callbacks_t callbacks[10];
   int n_callbacks;
 } link_t;
