@@ -10,6 +10,7 @@
 
 #define N_FDS 50
 #define CAPTURE_TIMEOUT_US (1000*1000)
+#define PERIODIC_REFRESH_US (10*1000*1000)
 
 typedef struct link_pool_s
 {
@@ -51,6 +52,23 @@ static bool link_needs_buffer_by_sinks(link_t *link)
   return needs;
 }
 
+static bool link_needs_periodic_refresh(link_t *link)
+{
+  if (link->capture_list->dev->output_list) {
+    // skip m2m devices
+    return false;
+  }
+
+  uint64_t now_us = get_monotonic_time_us(NULL, NULL);
+  if ((now_us - link->capture_list->last_dequeued_us) < PERIODIC_REFRESH_US) {
+    return false;
+  }
+
+  LOG_INFO(link->capture_list, "Periodic refresh. Last dequeue happened %.1fs ago.",
+    (now_us - link->capture_list->last_dequeued_us) / 1000.0f / 1000.0f);
+  return true;
+}
+
 static int links_count(link_t *all_links)
 {
   int n = 0;
@@ -74,6 +92,10 @@ static void links_process_paused(link_t *all_links)
     }
 
     if (link_needs_buffer_by_sinks(link)) {
+      paused = false;
+    }
+
+    if (link_needs_periodic_refresh(link)) {
       paused = false;
     }
 
