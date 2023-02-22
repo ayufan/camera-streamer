@@ -45,5 +45,5 @@ make -j$(nproc)
 exec ./camera-streamer \
   --camera-type=dummy \
   --camera-path="$INPUT" \
-  --camera.snapshot-height=1080 \
+  --camera-snapshot.height=1080 \
   "$@"
