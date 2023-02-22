@@ -61,10 +61,13 @@ int libcamera_buffer_list_open(buffer_list_t *buf_list)
     return -1;
   }
 
-  buf_list->libcamera->configuration = buf_list->dev->libcamera->camera->generateConfiguration(
-    { libcamera::StreamRole::Viewfinder });
+  if (buf_list->index >= (int)buf_list->dev->libcamera->configuration->size()) {
+    LOG_INFO(buf_list, "Not enough configurations.");
+    return -1;
+  }
 
-  auto &configuration = buf_list->libcamera->configuration->at(0);
+  auto &configurations = buf_list->dev->libcamera->configuration;
+  auto &configuration = configurations->at(buf_list->index);
   configuration.size = libcamera::Size(buf_list->fmt.width, buf_list->fmt.height);
   configuration.pixelFormat = libcamera_from_fourcc(buf_list->fmt.format);
   if (buf_list->fmt.bytesperline > 0) {
@@ -73,20 +76,20 @@ int libcamera_buffer_list_open(buffer_list_t *buf_list)
   if (buf_list->fmt.nbufs > 0) {
     configuration.bufferCount = buf_list->fmt.nbufs;
   }
-  if (buf_list->libcamera->configuration->validate() == libcamera::CameraConfiguration::Invalid) {
+  if (configurations->validate() == libcamera::CameraConfiguration::Invalid) {
     LOG_ERROR(buf_list, "Camera configuration invalid");
   }
   if (buf_list->dev->libcamera->vflip) {
-    buf_list->libcamera->configuration->transform |= libcamera::Transform::VFlip;
+    configurations->transform |= libcamera::Transform::VFlip;
   }
   if (buf_list->dev->libcamera->hflip) {
-    buf_list->libcamera->configuration->transform |= libcamera::Transform::HFlip;
+    configurations->transform |= libcamera::Transform::HFlip;
   }
-  if (!!(buf_list->libcamera->configuration->transform & libcamera::Transform::Transpose)) {
+  if (!!(configurations->transform & libcamera::Transform::Transpose)) {
     LOG_ERROR(buf_list, "Transformation requiring transpose not supported");
   }
 
-  if (buf_list->dev->libcamera->camera->configure(buf_list->libcamera->configuration.get()) < 0) {
+  if (buf_list->dev->libcamera->camera->configure(configurations.get()) < 0) {
     LOG_ERROR(buf_list, "Failed to configure camera");
   }
 
@@ -96,16 +99,13 @@ int libcamera_buffer_list_open(buffer_list_t *buf_list)
   buf_list->fmt.bytesperline = configuration.stride;
   buf_list->fmt.nbufs = configuration.bufferCount;
 
-  buf_list->libcamera->allocator = std::make_shared<libcamera::FrameBufferAllocator>(
-    buf_list->dev->libcamera->camera);
+  if (buf_list->dev->libcamera->allocator->allocate(configuration.stream()) < 0) {
+    LOG_ERROR(buf_list, "Can't allocate buffers");
+  }
 
-  for (libcamera::StreamConfiguration &stream_config : *buf_list->libcamera->configuration) {
-    if (buf_list->libcamera->allocator->allocate(stream_config.stream()) < 0) {
-      LOG_ERROR(buf_list, "Can't allocate buffers");
-    }
-
-    int allocated = buf_list->libcamera->allocator->buffers(
-      stream_config.stream()).size();
+  {
+    int allocated = buf_list->dev->libcamera->allocator->buffers(
+      configuration.stream()).size();
     buf_list->fmt.nbufs = std::min<unsigned>(buf_list->fmt.nbufs, allocated);
   }
 

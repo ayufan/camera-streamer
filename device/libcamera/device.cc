@@ -101,6 +101,12 @@ int libcamera_device_open(device_t *dev)
     LOG_ERROR(dev, "Failed to acquire `%s` camera.", dev->libcamera->camera->id().c_str());
   }
 
+  dev->libcamera->configuration = dev->libcamera->camera->generateConfiguration(
+    { libcamera::StreamRole::Viewfinder });
+
+  dev->libcamera->allocator = std::make_shared<libcamera::FrameBufferAllocator>(
+    dev->libcamera->camera);
+
 	LOG_INFO(dev, "Device path=%s opened", dev->libcamera->camera->id().c_str());
   return 0;
 

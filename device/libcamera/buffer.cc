@@ -8,26 +8,29 @@ int libcamera_buffer_open(buffer_t *buf)
   buf->libcamera = new buffer_libcamera_t{};
   buf->libcamera->request = buf->buf_list->dev->libcamera->camera->createRequest(buf->index);
   if (!buf->libcamera->request) {
-    LOG_ERROR(buf, "Can't create request");
+    LOG_INFO(buf, "Can't create request");
+    return -1;
   }
 
-  for (libcamera::StreamConfiguration &stream_cfg : *buf->buf_list->libcamera->configuration) {
-    auto stream = stream_cfg.stream();
-    const std::vector<std::unique_ptr<libcamera::FrameBuffer>> &buffers =
-        buf->buf_list->libcamera->allocator->buffers(stream);
-    auto const &buffer = buffers[buf->index];
+  auto &configurations = buf->buf_list->dev->libcamera->configuration;
+  auto &configuration = configurations->at(buf->buf_list->index);
+  auto stream = configuration.stream();
+  const std::vector<std::unique_ptr<libcamera::FrameBuffer>> &buffers =
+      buf->buf_list->dev->libcamera->allocator->buffers(stream);
+  auto const &buffer = buffers[buf->index];
 
-    if (buf->libcamera->request->addBuffer(stream, buffer.get()) < 0) {
-      LOG_ERROR(buf, "Can't set buffer for request");
-    }
-    if (buf->start) {
-      LOG_ERROR(buf, "Too many streams.");
-    }
+  if (buf->libcamera->request->addBuffer(stream, buffer.get()) < 0) {
+    LOG_ERROR(buf, "Can't set buffer for request");
+  }
+  if (buf->start) {
+    LOG_ERROR(buf, "Too many streams.");
+  }
 
-    if (buffer->planes().empty()) {
-      LOG_ERROR(buf, "No planes allocated");
-    }
+  if (buffer->planes().empty()) {
+    LOG_ERROR(buf, "No planes allocated");
+  }
 
+  {
     uint64_t offset = buffer->planes()[0].offset;
     uint64_t length = 0;
     libcamera::SharedFD dma_fd = buffer->planes()[0].fd;

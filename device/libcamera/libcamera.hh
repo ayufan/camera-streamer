@@ -39,13 +39,13 @@ struct pollfd;
 typedef struct device_libcamera_s {
   std::shared_ptr<libcamera::CameraManager> camera_manager;
   std::shared_ptr<libcamera::Camera> camera;
+  std::shared_ptr<libcamera::CameraConfiguration> configuration;
+  std::shared_ptr<libcamera::FrameBufferAllocator> allocator;
   libcamera::ControlList controls;
   bool vflip, hflip;
 } device_libcamera_t;
 
 typedef struct buffer_list_libcamera_s {
-  std::shared_ptr<libcamera::CameraConfiguration> configuration;
-  std::shared_ptr<libcamera::FrameBufferAllocator> allocator;
   buffer_list_t *buf_list;
   int fds[2];
 
