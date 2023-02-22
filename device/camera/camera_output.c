@@ -12,9 +12,11 @@
 #include "output/rtsp/rtsp.h"
 #include "output/output.h"
 
+#define MATCH_ALIGN_SIZE 32
+
 static bool camera_output_matches_capture(buffer_list_t *capture, unsigned target_height, unsigned format)
 {
-  if (target_height && capture->fmt.height != target_height && capture->fmt.height != camera_rescaller_align_size(target_height)) {
+  if (target_height && (capture->fmt.height / MATCH_ALIGN_SIZE) != (target_height / MATCH_ALIGN_SIZE)) {
     return false;
   }
 
