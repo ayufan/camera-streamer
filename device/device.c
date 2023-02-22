@@ -309,3 +309,28 @@ void device_set_option_list(device_t *dev, const char *option_list)
 
   free(start);
 }
+
+int device_output_enqueued(device_t *dev)
+{
+  if (dev->output_list)
+    return buffer_list_count_enqueued(dev->output_list);
+  return 0;
+}
+
+int device_capture_enqueued(device_t *dev, int *max)
+{
+  int min_val = 100;
+  int max_val = 0;
+
+  for (int i = 0; i < dev->n_capture_list; i++) {
+    int count = buffer_list_count_enqueued(dev->capture_lists[i]);
+    min_val = MIN(min_val, count);
+    max_val = MAX(max_val, count);
+  }
+
+  min_val = MIN(min_val, max_val);
+  if (max) {
+    *max = max_val;
+  }
+  return min_val;
+}
