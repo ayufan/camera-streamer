@@ -6,7 +6,10 @@
 #include "util/opts/log.h"
 #include "util/opts/fourcc.h"
 
+#include <inttypes.h>
+
 #define N_FDS 50
+#define CAPTURE_TIMEOUT_US (1000*1000)
 
 typedef struct link_pool_s
 {
@@ -195,6 +198,13 @@ int links_enqueue_from_capture_list(buffer_list_t *capture_list, link_t *link)
   buffer_t *buf = buffer_list_dequeue(capture_list);
   if (!buf) {
     LOG_ERROR(capture_list, "No buffer dequeued from capture_list?");
+  }
+
+  uint64_t now_us = get_monotonic_time_us(NULL, NULL);
+  if ((now_us - buf->captured_time_us) > CAPTURE_TIMEOUT_US) {
+    LOG_INFO(buf, "Capture image is outdated. Skipped. Now: %" PRIu64 ", vs %" PRIu64 ".",
+      now_us, buf->captured_time_us);
+    return 0;
   }
 
   for (int j = 0; link->output_lists[j]; j++) {
