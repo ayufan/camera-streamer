@@ -1,5 +1,7 @@
 #include "fourcc.h"
 
+#include <string.h>
+
 fourcc_string fourcc_to_string(unsigned format)
 {
   fourcc_string fourcc;
@@ -17,5 +19,19 @@ fourcc_string fourcc_to_string(unsigned format)
 		*ptr++ = '\0';
 	}
   *ptr++ = 0;
+	return fourcc;
+}
+
+many_fourcc_string many_fourcc_to_string(unsigned formats[])
+{
+	many_fourcc_string fourcc = {0};
+
+	for (int i = 0; formats[i]; i++) {
+		if (fourcc.buf[0]) {
+			strcat(fourcc.buf, ", ");
+		}
+		strcat(fourcc.buf, fourcc_to_string(formats[i]).buf);
+	}
+
 	return fourcc;
 }

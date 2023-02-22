@@ -90,6 +90,7 @@ int camera_configure_output(camera_t *camera, const char *name, unsigned target_
   }
 
   if (!src_capture) {
+    LOG_INFO(camera, "Cannot find source for '%s' for one of the formats '%s'.", name, many_fourcc_to_string(formats).buf);
     return -1;
   }
 

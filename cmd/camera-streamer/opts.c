@@ -65,6 +65,7 @@ option_value_t camera_formats[] = {
   { "RG10", V4L2_PIX_FMT_SRGGB10 },
   { "GB10P", V4L2_PIX_FMT_SGRBG10P },
   { "RG10P", V4L2_PIX_FMT_SRGGB10P },
+  { "BG10P", V4L2_PIX_FMT_SBGGR10P },
   { "RGB565", V4L2_PIX_FMT_RGB565 },
   { "RGBP", V4L2_PIX_FMT_RGB565 },
   { "RGB24", V4L2_PIX_FMT_RGB24 },

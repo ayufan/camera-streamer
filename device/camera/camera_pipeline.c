@@ -54,6 +54,7 @@ int camera_configure_pipeline(camera_t *camera, buffer_list_t *capture)
     switch (capture->fmt.format) {
     case V4L2_PIX_FMT_SRGGB10P:
     case V4L2_PIX_FMT_SGRBG10P:
+    case V4L2_PIX_FMT_SBGGR10P:
     case V4L2_PIX_FMT_SRGGB10:
     case V4L2_PIX_FMT_SGRBG10:
       camera_configure_isp(camera, capture);
