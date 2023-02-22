@@ -10,9 +10,14 @@
 #include "device/buffer_list.h"
 #include "util/http/http.h"
 
+#define MAX_RESCALLER_SIZE 1920
+
 unsigned camera_rescaller_align_size(unsigned size)
 {
-  return (size + 31) / 32 * 32;
+  size = (size + 31) / 32 * 32;
+  if (size > MAX_RESCALLER_SIZE)
+    return MAX_RESCALLER_SIZE;
+  return size;
 }
 
 buffer_list_t *camera_try_rescaller(camera_t *camera, buffer_list_t *src_capture, const char *name, unsigned target_height, unsigned target_format)
