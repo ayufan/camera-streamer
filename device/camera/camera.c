@@ -69,13 +69,13 @@ void camera_close(camera_t **camerap)
 link_t *camera_ensure_capture(camera_t *camera, buffer_list_t *capture)
 {
   for (int i = 0; i < camera->nlinks; i++) {
-    if (camera->links[i].source == capture) {
+    if (camera->links[i].capture_list == capture) {
       return &camera->links[i];
     }
   }
 
   link_t *link = &camera->links[camera->nlinks++];
-  link->source = capture;
+  link->capture_list = capture;
   return link;
 }
 
@@ -84,8 +84,8 @@ void camera_capture_add_output(camera_t *camera, buffer_list_t *capture, buffer_
   link_t *link = camera_ensure_capture(camera, capture);
 
   int nsinks;
-  for (nsinks = 0; link->sinks[nsinks]; nsinks++);
-  link->sinks[nsinks] = output;
+  for (nsinks = 0; link->output_lists[nsinks]; nsinks++);
+  link->output_lists[nsinks] = output;
 }
 
 void camera_capture_add_callbacks(camera_t *camera, buffer_list_t *capture, link_callbacks_t callbacks)
