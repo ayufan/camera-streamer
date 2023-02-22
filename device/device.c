@@ -258,7 +258,7 @@ int device_set_rotation(device_t *dev, bool vflip, bool hflip)
 int device_set_option_string(device_t *dev, const char *key, const char *value)
 {
   if (!dev) {
-    return -1;
+    return 0;
   }
 
   return dev->hw->device_set_option(dev, key, value);

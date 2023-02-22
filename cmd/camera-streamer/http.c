@@ -13,42 +13,48 @@ extern unsigned char html_webrtc_html[];
 extern unsigned int html_webrtc_html_len;
 extern camera_t *camera;
 
-void *camera_http_set_option(http_worker_t *worker, FILE *stream, const char *key, const char *value, void *headersp)
+static void http_once(FILE *stream, void (*fn)(FILE *stream, const char *data), void *headersp)
 {
   bool *headers = headersp;
 
+  if (!*headers) {
+    fn(stream, "");
+    *headers = true;
+  }
+}
+
+void *camera_http_set_option(http_worker_t *worker, FILE *stream, const char *key, const char *value, void *headersp)
+{
   if (!camera) {
-    if (!*headers) {
-      http_500(stream, "");
-      *headers = true;
-    }
+    http_once(stream, http_500, headersp);
     fprintf(stream, "No camera attached.\r\n");
     return NULL;
   }
 
-  bool set = false;
+  bool found = false;
 
   for (int i = 0; i < MAX_DEVICES; i++) {
-    if (device_set_option_string(camera->devices[i], key, value) == 0) {
-      set = true;
-      break;
+    device_t *dev = camera->devices[i];
+    if (!dev) {
+      continue;
     }
+
+    int ret = device_set_option_string(dev, key, value);
+    if (ret > 0) {
+      http_once(stream, http_200, headersp);
+      fprintf(stream, "%s: The '%s' was set to '%s'.\r\n", dev->name, key, value);
+    } else if (ret < 0) {
+      http_once(stream, http_500, headersp);
+      fprintf(stream, "%s: Cannot set '%s' to '%s'.\r\n", dev->name, key, value);
+    }
+    found = true;
   }
 
-  if (set) {
-    if (!*headers) {
-      http_200(stream, "");
-      *headers = true;
-    }
-    fprintf(stream, "The '%s' was set to '%s'.\r\n", key, value);
-  } else {
-    if (!*headers) {
-      http_500(stream, "");
-      *headers = true;
-    }
-    fprintf(stream, "Cannot set '%s' to '%s'.\r\n", key, value);
-  }
+  if (found)
+    return NULL;
 
+  http_once(stream, http_404, headersp);
+  fprintf(stream, "The '%s' was set not found.\r\n", key);
   return NULL;
 }
 
@@ -56,7 +62,9 @@ void camera_http_option(http_worker_t *worker, FILE *stream)
 {
   bool headers = false;
   http_enum_params(worker, stream, camera_http_set_option, &headers);
-  if (!headers) {
+  if (headers) {
+    fprintf(stream, "---\r\n");
+  } else {
     http_404(stream, "");
     fprintf(stream, "No options passed.\r\n");
   }

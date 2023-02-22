@@ -173,9 +173,43 @@ int libcamera_device_set_option(device_t *dev, const char *keyp, const char *val
       control_value.set<float>(atof(value));
       break;
 
-    case libcamera::ControlTypeString:
     case libcamera::ControlTypeRectangle:
+      static const char *RECTANGLE_PATTERNS[] = {
+        "(%d,%d)/%ux%u",
+        "%d,%d,%u,%u",
+        NULL
+      };
+
+      for (int i = 0; RECTANGLE_PATTERNS[i]; i++) {
+        libcamera::Rectangle rectangle;
+      
+        if (4 == sscanf(value, RECTANGLE_PATTERNS[i],
+          &rectangle.x, &rectangle.y,
+          &rectangle.width, &rectangle.height)) {
+          control_value.set(rectangle);
+          break;
+        }
+      }
+      break;
+
     case libcamera::ControlTypeSize:
+      static const char *SIZE_PATTERNS[] = {
+        "%ux%u",
+        "%u,%u",
+        NULL
+      };
+
+      for (int i = 0; SIZE_PATTERNS[i]; i++) {
+        libcamera::Size size;
+
+        if (2 == sscanf(value, SIZE_PATTERNS[i], &size.width, &size.height)) {
+          control_value.set(size);
+          break;
+        }
+      }
+      break;
+  
+    case libcamera::ControlTypeString:
       break;
     }
 
@@ -187,8 +221,10 @@ int libcamera_device_set_option(device_t *dev, const char *keyp, const char *val
       control_key.c_str(), control_id->id(), control_id->type(),
       control_value.toString().c_str());
     dev->libcamera->controls.set(control_id->id(), control_value);
-    return 0;
+    return 1;
   }
+
+  return 0;
 
 error:
   return -1;
