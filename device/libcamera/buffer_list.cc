@@ -41,11 +41,6 @@ int libcamera_buffer_list_open(buffer_list_t *buf_list)
     return -1;
   }
 
-  if (buf_list->index > 0) {
-    LOG_INFO(buf_list, "Only single capture device is supported.");
-    return -1;
-  }
-
   if (!buf_list->do_mmap) {
     LOG_INFO(buf_list, "Only mmap buffers are supported.");
     return -1;
@@ -69,7 +64,9 @@ int libcamera_buffer_list_open(buffer_list_t *buf_list)
   auto &configurations = buf_list->dev->libcamera->configuration;
   auto &configuration = configurations->at(buf_list->index);
   configuration.size = libcamera::Size(buf_list->fmt.width, buf_list->fmt.height);
-  configuration.pixelFormat = libcamera_from_fourcc(buf_list->fmt.format);
+  if (buf_list->fmt.format) {
+    configuration.pixelFormat = libcamera_from_fourcc(buf_list->fmt.format);
+  }
   if (buf_list->fmt.bytesperline > 0) {
     configuration.stride = buf_list->fmt.bytesperline;
   }

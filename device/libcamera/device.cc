@@ -102,7 +102,7 @@ int libcamera_device_open(device_t *dev)
   }
 
   dev->libcamera->configuration = dev->libcamera->camera->generateConfiguration(
-    { libcamera::StreamRole::Viewfinder });
+    { libcamera::StreamRole::Raw, libcamera::StreamRole::StillCapture });
 
   dev->libcamera->allocator = std::make_shared<libcamera::FrameBufferAllocator>(
     dev->libcamera->camera);

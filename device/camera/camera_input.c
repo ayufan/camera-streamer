@@ -58,14 +58,38 @@ static int camera_configure_input_libcamera(camera_t *camera)
 
   camera->camera->opts.allow_dma = camera->options.allow_dma;
 
-  buffer_format_t fmt = {
+  buffer_format_t raw_fmt = {
     .width = camera->options.width,
     .height = camera->options.height,
+    .nbufs = camera->options.nbufs
+  };
+
+  buffer_list_t *raw_capture = device_open_buffer_list(camera->camera, true, raw_fmt, true);
+  if (!raw_capture) {
+    return -1;
+  }
+
+  unsigned target_height = camera->options.height;
+
+  if (!camera->options.snapshot.disabled)
+    target_height = camera->options.snapshot.height;
+  else if (!camera->options.stream.disabled)
+    target_height = camera->options.stream.height;
+  else if (!camera->options.video.disabled)
+    target_height = camera->options.video.height;
+
+  target_height = camera_rescaller_align_size(target_height);
+  unsigned target_width = target_height * camera->options.width / camera->options.height;
+  target_width = camera_rescaller_align_size(target_width);
+
+  buffer_format_t capture_fmt = {
+    .width = target_width,
+    .height = target_height,
     .format = camera->options.format,
     .nbufs = camera->options.nbufs
   };
 
-  buffer_list_t *camera_capture = device_open_buffer_list(camera->camera, true, fmt, true);
+  buffer_list_t *camera_capture = device_open_buffer_list(camera->camera, true, capture_fmt, true);
   if (!camera_capture) {
     return -1;
   }

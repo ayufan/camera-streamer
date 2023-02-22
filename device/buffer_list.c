@@ -19,7 +19,7 @@ buffer_list_t *buffer_list_open(const char *name, int index, struct device_s *de
   buf_list->index = index;
 
   int got_bufs = dev->hw->buffer_list_open(buf_list);
-  if (got_bufs <= 0) {
+  if (got_bufs < 0) {
     goto error;
   }
 
