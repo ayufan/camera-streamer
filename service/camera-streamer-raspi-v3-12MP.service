@@ -22,6 +22,9 @@ ExecStart=/usr/local/bin/camera-streamer \
   -camera-video.height=720 \
   ; the stream is 853x480
   -camera-stream.height=480 \
+  ; enable continuous autofocus
+  -camera-options=AfMode=2 \
+  -camera-options=AfRange=2 \
   -rtsp-port
 
 DynamicUser=yes
