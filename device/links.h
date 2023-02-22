@@ -12,13 +12,11 @@ typedef struct link_s link_t;
 
 typedef void (*link_on_buffer)(buffer_t *buf);
 typedef bool (*link_check_streaming)();
-typedef bool (*link_validate_buffer)(struct link_s *link, buffer_t *buf);
 
 typedef struct link_callbacks_s {
   const char *name;
   link_on_buffer on_buffer;
   link_check_streaming check_streaming;
-  link_validate_buffer validate_buffer;
   buffer_lock_t *buf_lock;
 } link_callbacks_t;
 
