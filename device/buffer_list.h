@@ -26,6 +26,8 @@ typedef struct buffer_stats_s {
   int frames, dropped;
 } buffer_stats_t;
 
+#define MAX_BUFFER_QUEUE 1
+
 typedef struct buffer_list_s {
   char *name;
   char *path;
@@ -43,6 +45,9 @@ typedef struct buffer_list_s {
     struct buffer_list_libcamera_s *libcamera;
   };
 
+  buffer_t *queued_bufs[MAX_BUFFER_QUEUE];
+  int n_queued_bufs;
+
   uint64_t last_enqueued_us, last_dequeued_us;
   int last_capture_time_us, last_in_queue_time_us;
   bool streaming;
@@ -59,3 +64,5 @@ buffer_t *buffer_list_find_slot(buffer_list_t *buf_list);
 buffer_t *buffer_list_dequeue(buffer_list_t *buf_list);
 int buffer_list_count_enqueued(buffer_list_t *buf_list);
 int buffer_list_enqueue(buffer_list_t *buf_list, buffer_t *dma_buf);
+bool buffer_list_push_to_queue(buffer_list_t *buf_list, buffer_t *dma_buf);
+buffer_t *buffer_list_pop_from_queue(buffer_list_t *buf_list);

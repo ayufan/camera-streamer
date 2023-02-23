@@ -210,3 +210,30 @@ int buffer_list_pollfd(buffer_list_t *buf_list, struct pollfd *pollfd, bool can_
 {
   return buf_list->dev->hw->buffer_list_pollfd(buf_list, pollfd, can_dequeue);
 }
+
+bool buffer_list_push_to_queue(buffer_list_t *buf_list, buffer_t *dma_buf)
+{
+  if (buf_list->dev->paused)
+    return true;
+  if (buf_list->n_queued_bufs >= MAX_BUFFER_QUEUE)
+    return false;
+
+  buffer_use(dma_buf);
+  buf_list->queued_bufs[buf_list->n_queued_bufs++] = dma_buf;
+  return true;
+}
+
+buffer_t *buffer_list_pop_from_queue(buffer_list_t *buf_list)
+{
+  if (buf_list->n_queued_bufs <= 0)
+    return NULL;
+
+  buffer_t *buf = buf_list->queued_bufs[0];
+  buf_list->n_queued_bufs--;
+
+  for (int i = 0; i < buf_list->n_queued_bufs; i++) {
+    buf_list->queued_bufs[i] = buf_list->queued_bufs[i+1];
+  }
+
+  return buf;
+}

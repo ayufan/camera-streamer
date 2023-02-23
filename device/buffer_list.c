@@ -99,6 +99,14 @@ int buffer_list_set_stream(buffer_list_t *buf_list, bool do_on)
   }
   buf_list->streaming = do_on;
 
+  if (!do_on) {
+    ARRAY_FOREACH(buffer_t*, queued_buf, buf_list->queued_bufs, buf_list->n_queued_bufs) {
+      buffer_consumed(*queued_buf, "stream stop");
+      *queued_buf = NULL;
+    }
+    buf_list->n_queued_bufs = 0;
+  }
+
   int enqueued = buffer_list_count_enqueued(buf_list);
   LOG_INFO(buf_list, "Streaming %s... Was %d of %d enqueud", do_on ? "started" : "stopped", enqueued, buf_list->nbufs);
   return 0;
