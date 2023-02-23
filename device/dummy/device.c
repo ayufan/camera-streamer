@@ -15,11 +15,6 @@ void dummy_device_close(device_t *dev)
   free(dev->dummy);
 }
 
-int dummy_device_set_decoder_start(device_t *dev, bool do_on)
-{
-  return -1;
-}
-
 int dummy_device_video_force_key(device_t *dev)
 {
   return -1;

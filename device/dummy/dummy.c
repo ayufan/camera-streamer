@@ -5,7 +5,6 @@
 device_hw_t dummy_device_hw = {
   .device_open = dummy_device_open,
   .device_close = dummy_device_close,
-  .device_set_decoder_start = dummy_device_set_decoder_start,
   .device_video_force_key = dummy_device_video_force_key,
   .device_set_fps = dummy_device_set_fps,
   .device_set_option = dummy_device_set_option,

@@ -36,7 +36,6 @@ typedef struct buffer_v4l2_s {
 
 int v4l2_device_open(device_t *dev);
 void v4l2_device_close(device_t *dev);
-int v4l2_device_set_decoder_start(device_t *dev, bool do_on);
 int v4l2_device_video_force_key(device_t *dev);
 void v4l2_device_dump_options(device_t *dev, FILE *stream);
 int v4l2_device_set_fps(device_t *dev, int desired_fps);

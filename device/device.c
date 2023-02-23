@@ -179,46 +179,6 @@ int device_set_stream(device_t *dev, bool do_on)
   return 0;
 }
 
-int device_consume_event(device_t *dev)
-{
-  // TODO: support events
-
-#if 0
-	struct v4l2_event event;
-
-  if (!dev) {
-    return -1;
-  }
-
-	LOG_DEBUG(dev, "Consuming V4L2 event ...");
-  ERR_IOCTL(dev, dev->v4l2->dev_fd, VIDIOC_DQEVENT, &event, "Got some V4L2 device event, but where is it?");
-
-  switch (event.type) {
-    case V4L2_EVENT_SOURCE_CHANGE:
-      LOG_INFO(dev, "Got V4L2_EVENT_SOURCE_CHANGE: source changed");
-      return -1;
-    case V4L2_EVENT_EOS:
-      LOG_INFO(dev, "Got V4L2_EVENT_EOS: end of stream (ignored)");
-      return 0;
-  }
-
-  return 0;
-
-error:
-#endif
-
-  return -1;
-}
-
-int device_set_decoder_start(device_t *dev, bool do_on)
-{
-  if (!dev || dev->hw->device_set_decoder_start(dev, do_on) < 0)
-    return -1;
-
-  dev->decoder_started = do_on;
-  return 0;
-}
-
 int device_video_force_key(device_t *dev)
 {
   if (!dev || dev->hw->device_video_force_key(dev) < 0)

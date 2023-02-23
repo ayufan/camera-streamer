@@ -13,7 +13,6 @@ struct pollfd;
 typedef struct device_hw_s {
   int (*device_open)(device_t *dev);
   void (*device_close)(device_t *dev);
-  int (*device_set_decoder_start)(device_t *dev, bool do_on);
   int (*device_video_force_key)(device_t *dev);
   void (*device_dump_options)(device_t *dev, FILE *stream);
   int (*device_set_fps)(device_t *dev, int desired_fps);
@@ -63,10 +62,8 @@ buffer_list_t *device_open_buffer_list2(device_t *dev, const char *path, bool do
 buffer_list_t *device_open_buffer_list_output(device_t *dev, buffer_list_t *capture_list);
 buffer_list_t *device_open_buffer_list_capture(device_t *dev, const char *path, buffer_list_t *output_list, buffer_format_t fmt, bool do_mmap);
 buffer_list_t *device_open_buffer_list_capture2(device_t *dev, const char *path, buffer_list_t *output_list, unsigned choosen_format, bool do_mmap);
-int device_consume_event(device_t *dev);
 
 int device_set_stream(device_t *dev, bool do_on);
-int device_set_decoder_start(device_t *dev, bool do_on);
 int device_video_force_key(device_t *dev);
 
 void device_dump_options(device_t *dev, FILE *stream);

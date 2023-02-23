@@ -4,7 +4,6 @@
 device_hw_t v4l2_device_hw = {
   .device_open = v4l2_device_open,
   .device_close = v4l2_device_close,
-  .device_set_decoder_start = v4l2_device_set_decoder_start,
   .device_video_force_key = v4l2_device_video_force_key,
   .device_dump_options = v4l2_device_dump_options,
   .device_set_fps = v4l2_device_set_fps,

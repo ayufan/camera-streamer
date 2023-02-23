@@ -49,21 +49,6 @@ void v4l2_device_close(device_t *dev)
   dev->v4l2 = NULL;
 }
 
-int v4l2_device_set_decoder_start(device_t *dev, bool do_on)
-{
-  struct v4l2_decoder_cmd cmd = {0};
-
-  cmd.cmd = do_on ? V4L2_DEC_CMD_START : V4L2_DEC_CMD_STOP;
-
-  LOG_DEBUG(dev, "Setting decoder state %s...", do_on ? "Start" : "Stop");
-  ERR_IOCTL(dev, dev->v4l2->dev_fd, VIDIOC_DECODER_CMD, &cmd, "Cannot set decoder state");
-
-  return 0;
-
-error:
-  return -1;
-}
-
 int v4l2_device_video_force_key(device_t *dev)
 {
   struct v4l2_control ctl = {0};

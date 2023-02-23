@@ -23,7 +23,6 @@ typedef struct buffer_dummy_s {
 
 int dummy_device_open(device_t *dev);
 void dummy_device_close(device_t *dev);
-int dummy_device_set_decoder_start(device_t *dev, bool do_on);
 int dummy_device_video_force_key(device_t *dev);
 int dummy_device_set_fps(device_t *dev, int desired_fps);
 int dummy_device_set_option(device_t *dev, const char *key, const char *value);
