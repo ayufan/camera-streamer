@@ -86,21 +86,18 @@ uint64_t get_monotonic_time_us(struct timespec *ts, struct timeval *tv)
 
 int ioctl_retried(const char *name, int fd, int request, void *arg)
 {
-#define MAX_RETRIES 4
+#define MAX_RETRIES 10
+#define RETRY_INTERVAL_US 1000
 
-	int retries = 4;
-	int ret = -1;
-
-	while (retries-- > 0) {
-		ret = ioctl(fd, request, arg);
+	for (int try = 0; try <= MAX_RETRIES; try++) {
+		int ret = ioctl(fd, request, arg);
 		if (errno != EINTR && errno != EAGAIN && errno != ETIMEDOUT)
-			break;
+			return ret;
+		usleep(RETRY_INTERVAL_US);
 	}
 
-	if (ret && retries <= 0) {
-		LOG_PERROR(NULL, "%s: ioctl(%08x, errno=%d) retried %u times; giving up", name, request, errno, MAX_RETRIES);
-	}
-	return ret;
+	LOG_INFO(NULL, "%s: ioctl(%08x, errno=%d) retried %u times", name, request, errno, MAX_RETRIES);
+	return -1;
 }
 
 char *trim(char *s)
