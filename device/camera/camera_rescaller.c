@@ -11,26 +11,27 @@
 #include "util/http/http.h"
 
 #define MAX_RESCALLER_SIZE 1920
+#define RESCALLER_BLOCK_SIZE 32
 
-static unsigned camera_rescaller_align_size(unsigned size)
+static unsigned camera_rescaller_align_size(unsigned size, unsigned align_size)
 {
-  return (size + 31) / 32 * 32;
+  return (size + align_size - 1) / align_size * align_size;
 }
 
 static void camera_get_scaled_resolution2(unsigned in_width, unsigned in_height, unsigned proposed_height, unsigned *target_width, unsigned *target_height)
 {
   proposed_height = MIN(proposed_height, in_height);
 
-  *target_height = camera_rescaller_align_size(proposed_height);
+  *target_height = camera_rescaller_align_size(proposed_height, RESCALLER_BLOCK_SIZE);
   *target_height = MIN(*target_height, MAX_RESCALLER_SIZE);
 
   // maintain aspect ratio on target width
-  *target_width = camera_rescaller_align_size(*target_height * in_width / in_height);
+  *target_width = camera_rescaller_align_size(*target_height * in_width / in_height, RESCALLER_BLOCK_SIZE);
 
   // if width is larger then rescaller, try to maintain scale down height
   if (*target_width > MAX_RESCALLER_SIZE) {
     *target_width = MAX_RESCALLER_SIZE;
-    *target_height = camera_rescaller_align_size(*target_width * in_height / in_width);
+    *target_height = camera_rescaller_align_size(*target_width * in_height / in_width, RESCALLER_BLOCK_SIZE);
   }
 }
 
@@ -100,7 +101,7 @@ buffer_list_t *camera_configure_rescaller(camera_t *camera, buffer_list_t *src_c
     return NULL;
   }
 
-  buffer_list_t *rescaller_capture = NULL; // camera_try_rescaller(camera, src_capture, name, target_height, src_capture->fmt.format);
+  buffer_list_t *rescaller_capture = camera_try_rescaller(camera, src_capture, name, target_height, src_capture->fmt.format);
 
   for (int i = 0; !rescaller_capture && formats[i]; i++) {
     rescaller_capture = camera_try_rescaller(camera, src_capture, name, target_height, formats[i]);

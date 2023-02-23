@@ -18,12 +18,12 @@ static unsigned decoder_formats[] =
   V4L2_PIX_FMT_YUYV,
 
   // medium quality
-  V4L2_PIX_FMT_YUV420,
   V4L2_PIX_FMT_NV12,
+  V4L2_PIX_FMT_YUV420,
 
   // low quality
-  V4L2_PIX_FMT_YVU420,
   V4L2_PIX_FMT_NV21,
+  V4L2_PIX_FMT_YVU420,
   0
 };
 

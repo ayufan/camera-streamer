@@ -61,11 +61,6 @@ int v4l2_buffer_list_open(buffer_list_t *buf_list)
   buffer_format_t fmt = buf_list->fmt;
   unsigned block_width = 1, block_height = 1;
 
-  if (buf_list->do_capture && strstr(buf_list->name, "RESCALLER")) {
-    block_width = 32;
-    block_height = 32;
-  }
-
   LOG_DEBUG(buf_list, "Get current format ...");
   ERR_IOCTL(buf_list, buf_list->v4l2->dev_fd, VIDIOC_G_FMT, &v4l2_fmt, "Can't get format");
 
