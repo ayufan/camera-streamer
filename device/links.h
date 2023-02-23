@@ -29,7 +29,5 @@ typedef struct link_s {
   int n_callbacks;
 } link_t;
 
-int links_init(link_t *all_links);
-int links_step(link_t *all_links, int timeout_now_ms, int *timeout_next_ms);
 int links_loop(link_t *all_links, bool *running);
 void links_dump(link_t *all_links);

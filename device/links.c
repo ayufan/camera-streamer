@@ -174,7 +174,7 @@ error:
   return -1;
 }
 
-void print_pollfds(struct pollfd *fds, int n)
+static void print_pollfds(struct pollfd *fds, int n)
 {
   if (!getenv("DEBUG_FDS")) {
     return;
@@ -186,7 +186,7 @@ void print_pollfds(struct pollfd *fds, int n)
   printf("pollfds = %d\n", n);
 }
 
-int links_step(link_t *all_links, int timeout_now_ms, int *timeout_next_ms)
+static int links_step(link_t *all_links, int timeout_now_ms, int *timeout_next_ms)
 {
   struct pollfd fds[N_FDS] = {0};
   link_t *links[N_FDS];
@@ -282,7 +282,7 @@ int links_step(link_t *all_links, int timeout_now_ms, int *timeout_next_ms)
   return 0;
 }
 
-int links_stream(link_t *all_links, bool do_stream)
+static int links_stream(link_t *all_links, bool do_stream)
 {
   for (int i = 0; all_links[i].source; i++) {
     bool streaming = true;
