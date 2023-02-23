@@ -47,10 +47,6 @@ int camera_configure_pipeline(camera_t *camera, buffer_list_t *capture)
   if (capture) {
     capture->do_timestamps = true;
 
-    if (camera->options.fps > 0) {
-      capture->fmt.interval_us = 1000 * 1000 / camera->options.fps;
-    }
-
     switch (capture->fmt.format) {
     case V4L2_PIX_FMT_SRGGB10P:
     case V4L2_PIX_FMT_SGRBG10P:

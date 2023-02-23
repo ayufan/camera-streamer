@@ -107,6 +107,9 @@ buffer_list_t *device_open_buffer_list_output(device_t *dev, buffer_list_t *capt
   }
 
   buffer_format_t fmt = capture_list->fmt;
+
+  fmt.interval_us = 0;
+
   bool do_mmap = capture_list->dev->opts.allow_dma ? !capture_list->do_mmap : true;
 
   // If manually allocating buffers, ensure that `sizeimage` is at least `buf->length`
@@ -137,8 +140,6 @@ buffer_list_t *device_open_buffer_list_capture(device_t *dev, const char *path, 
     fmt.height = output_list->fmt.height;
   if (!fmt.nbufs)
     fmt.nbufs = output_list->fmt.nbufs;
-  if (!fmt.interval_us)
-    fmt.interval_us = output_list->fmt.interval_us;
 
   return device_open_buffer_list2(dev, path, true, fmt, do_mmap);
 }
@@ -235,8 +236,25 @@ void device_dump_options(device_t *dev, FILE *stream)
 
 int device_set_fps(device_t *dev, int desired_fps)
 {
-  if (!dev || dev->hw->device_set_fps(dev, desired_fps) < 0)
+  if (!dev)
     return -1;
+
+  unsigned interval_us = 0;
+
+  if (desired_fps > 0) {
+    interval_us = 1000 * 1000 / desired_fps;
+  }
+
+  // try to use HW fps setting
+  if (dev->hw->device_set_fps && dev->hw->device_set_fps(dev, desired_fps) >= 0) {
+    interval_us = 0;
+  }
+
+  LOG_INFO(dev, "Setting frame interval_us=%d for FPS=%d", interval_us, desired_fps);
+
+  for (int i = 0; i < dev->n_capture_list; i++) {
+    dev->capture_lists[i]->fmt.interval_us = interval_us;
+  }
 
   return 0;
 }
