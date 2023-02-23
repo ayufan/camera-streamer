@@ -172,6 +172,8 @@ buffer_t *buffer_list_dequeue(buffer_list_t *buf_list)
   }
 
   buf_list->last_dequeued_us = get_monotonic_time_us(NULL, NULL);
+  buf_list->last_capture_time_us = buf_list->last_dequeued_us - buf->captured_time_us;
+  buf_list->last_in_queue_time_us = buf_list->last_dequeued_us - buf->enqueue_time_us;
 
   if (buf->mmap_reflinks > 0) {
     LOG_PERROR(buf, "Buffer appears to be enqueued? (links=%d)", buf->mmap_reflinks);
@@ -184,7 +186,7 @@ buffer_t *buffer_list_dequeue(buffer_list_t *buf_list)
     buf->index,
     buf->length,
     buf->used,
-    buf_list->frames,
+    buf_list->stats.frames,
     buf->dma_source ? buf->dma_source->name : NULL);
 
   if (buf->dma_source) {
@@ -197,7 +199,7 @@ buffer_t *buffer_list_dequeue(buffer_list_t *buf_list)
     buffer_update_h264_key_frame(buf);
   }
 
-  buf_list->frames++;
+  buf_list->stats.frames++;
   return buf;
 
 error:

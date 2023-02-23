@@ -26,6 +26,7 @@
 typedef struct log_options_s {
   bool debug;
   bool verbose;
+	unsigned stats;
   char filter[256];
 } log_options_t;
 

@@ -22,6 +22,10 @@ typedef struct buffer_format_s {
   buffer_type_t type;
 } buffer_format_t;
 
+typedef struct buffer_stats_s {
+  int frames, dropped;
+} buffer_stats_t;
+
 typedef struct buffer_list_s {
   char *name;
   char *path;
@@ -40,8 +44,9 @@ typedef struct buffer_list_s {
   };
 
   uint64_t last_enqueued_us, last_dequeued_us;
+  int last_capture_time_us, last_in_queue_time_us;
   bool streaming;
-  int frames;
+  buffer_stats_t stats, stats_last;
 } buffer_list_t;
 
 buffer_list_t *buffer_list_open(const char *name, int index, struct device_s *dev, const char *path, buffer_format_t fmt, bool do_capture, bool do_mmap);

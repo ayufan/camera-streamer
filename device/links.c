@@ -155,14 +155,21 @@ int links_enqueue_from_capture_list(buffer_list_t *buf_list, link_t *link)
     }
   }
 
+  bool dropped = false;
+
   for (int j = 0; link->output_lists[j]; j++) {
     if (link->output_lists[j]->dev->paused) {
       continue;
     }
-    if (!links_sink_can_enqueue(link->output_lists[j])) {
-      continue;
+    if (links_sink_can_enqueue(link->output_lists[j])) {
+      buffer_list_enqueue(link->output_lists[j], buf);
+    } else {
+      dropped = true;
     }
-    buffer_list_enqueue(link->output_lists[j], buf);
+  }
+
+  if (dropped) {
+    buf_list->stats.dropped++;
   }
 
   for (int j = 0; j < link->n_callbacks; j++) {
@@ -227,7 +234,8 @@ static int links_step(link_t *all_links, int timeout_now_ms, int *timeout_next_m
     buffer_list_t *buf_list = pool.buf_lists[i];
     link_t *link = pool.links[i];
 
-    LOG_DEBUG(buf_list, "pool event=%s%s%s%s%s%08x streaming=%d enqueued=%d/%d paused=%d",
+    LOG_DEBUG(buf_list, "pool event=%08x revent=%s%s%s%s%s%08x streaming=%d enqueued=%d/%d paused=%d",
+      pool.fds[i].events,
       !pool.fds[i].revents ? "NONE/" : "",
       pool.fds[i].revents & POLLIN ? "IN/" : "",
       pool.fds[i].revents & POLLOUT ? "OUT/" : "",
@@ -325,6 +333,50 @@ error:
   return -1;
 }
 
+static void links_refresh_stats(link_t *all_links, uint64_t *last_refresh_us)
+{
+  uint64_t now_us = get_monotonic_time_us(NULL, NULL);
+
+  if (now_us - *last_refresh_us < 1000*1000)
+    return;
+
+  *last_refresh_us = now_us;
+
+  if (log_options.stats) {
+    printf("Statistics:");
+
+    for (int i = 0; all_links[i].capture_list; i++) {
+      buffer_list_t *capture_list = all_links[i].capture_list;
+      buffer_stats_t *now = &capture_list->stats;
+      buffer_stats_t *prev = &capture_list->stats_last;
+
+      printf(" [%8s %2d FPS/%2d D/%3dms/%3dms/%c/O%d:C%d]",
+        capture_list->dev->name,
+        (now->frames - prev->frames) / log_options.stats,
+        (now->dropped - prev->dropped) / log_options.stats,
+        capture_list->last_capture_time_us > 0 ? capture_list->last_capture_time_us / 1000 : -1,
+        capture_list->last_in_queue_time_us > 0 ? capture_list->last_in_queue_time_us / 1000 : -1,
+        capture_list->streaming ? (capture_list->dev->paused ? 'P' : 'S') : 'X',
+        capture_list->dev->output_list ? buffer_list_count_enqueued(capture_list->dev->output_list) : 0,
+        buffer_list_count_enqueued(capture_list)
+      );
+    }
+
+    printf("\n");
+    fflush(stdout);
+  }
+
+  for (int i = 0; all_links[i].capture_list; i++) {
+    buffer_list_t *capture_list = all_links[i].capture_list;
+    capture_list->stats_last = capture_list->stats;
+
+    if (now_us - capture_list->last_dequeued_us > 1000) {
+      capture_list->last_capture_time_us = 0;
+      capture_list->last_in_queue_time_us = 0;
+    }
+  }
+}
+
 int links_loop(link_t *all_links, bool *running)
 {
   *running = true;
@@ -334,19 +386,19 @@ int links_loop(link_t *all_links, bool *running)
   }
 
   int timeout_ms = LINKS_LOOP_INTERVAL;
+  uint64_t last_refresh_us = get_monotonic_time_us(NULL, NULL);
+  int ret = 0;
 
-  while(*running) {
+  while(*running && ret == 0) {
     int timeout_now_ms = timeout_ms;
     timeout_ms = LINKS_LOOP_INTERVAL;
 
-    if (links_step(all_links, timeout_now_ms, &timeout_ms) < 0) {
-      links_stream(all_links, false);
-      return -1;
-    }
+    ret = links_step(all_links, timeout_now_ms, &timeout_ms);
+    links_refresh_stats(all_links, &last_refresh_us);
   }
 
   links_stream(all_links, false);
-  return 0;
+  return ret;
 }
 
 static void links_dump_buf_list(char *output, buffer_list_t *buf_list)

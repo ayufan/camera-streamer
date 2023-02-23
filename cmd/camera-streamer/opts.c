@@ -124,6 +124,7 @@ option_t all_options[] = {
 
   DEFINE_OPTION_DEFAULT(log, debug, bool, "1", "Enable debug logging."),
   DEFINE_OPTION_DEFAULT(log, verbose, bool, "1", "Enable verbose logging."),
+  DEFINE_OPTION_DEFAULT(log, stats, uint, "1", "Print statistics every duration."),
   DEFINE_OPTION_PTR(log, filter, list, "Enable debug logging from the given files. Ex.: `-log-filter=buffer.cc`"),
 
   {}
