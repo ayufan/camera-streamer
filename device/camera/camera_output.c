@@ -16,7 +16,7 @@
 
 static bool camera_output_matches_capture(buffer_list_t *capture, unsigned target_height, unsigned format)
 {
-  if (target_height && (capture->fmt.height / MATCH_ALIGN_SIZE) != (target_height / MATCH_ALIGN_SIZE)) {
+  if (target_height && abs(capture->fmt.height - target_height) > MATCH_ALIGN_SIZE) {
     return false;
   }
 
