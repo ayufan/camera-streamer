@@ -12,12 +12,41 @@
 
 #define MAX_RESCALLER_SIZE 1920
 
-unsigned camera_rescaller_align_size(unsigned size)
+static unsigned camera_rescaller_align_size(unsigned size)
 {
-  size = (size + 31) / 32 * 32;
-  if (size > MAX_RESCALLER_SIZE)
-    return MAX_RESCALLER_SIZE;
-  return size;
+  return (size + 31) / 32 * 32;
+}
+
+static void camera_get_scaled_resolution2(unsigned in_width, unsigned in_height, unsigned proposed_height, unsigned *target_width, unsigned *target_height)
+{
+  proposed_height = MIN(proposed_height, in_height);
+
+  *target_height = camera_rescaller_align_size(proposed_height);
+  *target_height = MIN(*target_height, MAX_RESCALLER_SIZE);
+
+  // maintain aspect ratio on target width
+  *target_width = camera_rescaller_align_size(*target_height * in_width / in_height);
+
+  // if width is larger then rescaller, try to maintain scale down height
+  if (*target_width > MAX_RESCALLER_SIZE) {
+    *target_width = MAX_RESCALLER_SIZE;
+    *target_height = camera_rescaller_align_size(*target_width * in_height / in_width);
+  }
+}
+
+bool camera_get_scaled_resolution(camera_t *camera, camera_output_options_t *options, buffer_format_t *format)
+{
+  if (options->disabled)
+    return false;
+
+  camera_get_scaled_resolution2(
+    camera->options.width,
+    camera->options.height,
+    options->height,
+    &format->width,
+    &format->height
+  );
+  return true;
 }
 
 buffer_list_t *camera_try_rescaller(camera_t *camera, buffer_list_t *src_capture, const char *name, unsigned target_height, unsigned target_format)
@@ -29,14 +58,9 @@ buffer_list_t *camera_try_rescaller(camera_t *camera, buffer_list_t *src_capture
   }
 
   if (target_height > src_capture->fmt.height) {
-    LOG_INFO(src_capture, "Upscaling from %dp to %dp does not make sense.",
-      src_capture->fmt.height, target_height);
-    return NULL;
+    LOG_INFO(src_capture, "Upscaling from %dp to %dp does not make sense. Lowering to %dp.",
+      src_capture->fmt.height, target_height, src_capture->fmt.height);
   }
-
-  target_height = camera_rescaller_align_size(target_height);
-  unsigned target_width = target_height * src_capture->fmt.width / src_capture->fmt.height;
-  target_width = camera_rescaller_align_size(target_width);
 
   char name2[256];
   sprintf(name2, "RESCALLER:%s", name);
@@ -47,10 +71,14 @@ buffer_list_t *camera_try_rescaller(camera_t *camera, buffer_list_t *src_capture
     device, src_capture);
 
   buffer_format_t target_fmt = {
-    .width = target_width,
-    .height = target_height,
     .format = target_format
   };
+
+  camera_get_scaled_resolution2(
+    src_capture->fmt.width, src_capture->fmt.height,
+    target_height,
+    &target_fmt.width, &target_fmt.height
+  );
 
   buffer_list_t *rescaller_capture = device_open_buffer_list_capture(
     device, NULL, rescaller_output, target_fmt, true);

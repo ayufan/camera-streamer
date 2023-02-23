@@ -70,26 +70,21 @@ static int camera_configure_input_libcamera(camera_t *camera)
     return -1;
   }
 
-  unsigned target_height = camera->options.height;
-
-  if (!camera->options.snapshot.disabled)
-    target_height = camera->options.snapshot.height;
-  else if (!camera->options.stream.disabled)
-    target_height = camera->options.stream.height;
-  else if (!camera->options.video.disabled)
-    target_height = camera->options.video.height;
-
-  target_height = camera_rescaller_align_size(target_height);
-  unsigned target_width = target_height * camera->options.width / camera->options.height;
-  target_width = camera_rescaller_align_size(target_width);
-
   buffer_format_t capture_fmt = {
-    .width = target_width,
-    .height = target_height,
+    .width = camera->options.width,
+    .height = camera->options.height,
     .format = camera->options.format,
     .nbufs = camera->options.nbufs,
     .type = BUFFER_TYPE_IMAGE
   };
+
+  bool found = false;
+
+  found = camera_get_scaled_resolution(camera, &camera->options.snapshot, &capture_fmt);
+  if (!found)
+    found = camera_get_scaled_resolution(camera, &camera->options.stream, &capture_fmt);
+  if (!found)
+    found = camera_get_scaled_resolution(camera, &camera->options.video, &capture_fmt);
 
   buffer_list_t *camera_capture = device_open_buffer_list(camera->camera, true, capture_fmt, true);
   if (!camera_capture) {

@@ -93,6 +93,6 @@ int camera_configure_pipeline(camera_t *camera, buffer_list_t *camera_capture);
 
 buffer_list_t *camera_configure_isp(camera_t *camera, buffer_list_t *src_capture);
 buffer_list_t *camera_configure_decoder(camera_t *camera, buffer_list_t *src_capture);
-unsigned camera_rescaller_align_size(unsigned target_height);
 buffer_list_t *camera_configure_rescaller(camera_t *camera, buffer_list_t *src_capture, const char *name, unsigned target_height, unsigned formats[]);
 int camera_configure_output(camera_t *camera, const char *name, unsigned target_height, unsigned formats[], link_callbacks_t callbacks, device_t **device);
+bool camera_get_scaled_resolution(camera_t *camera, camera_output_options_t *options, buffer_format_t *format);
