@@ -61,7 +61,8 @@ static int camera_configure_input_libcamera(camera_t *camera)
   buffer_format_t raw_fmt = {
     .width = camera->options.width,
     .height = camera->options.height,
-    .nbufs = camera->options.nbufs
+    .nbufs = camera->options.nbufs,
+    .type = BUFFER_TYPE_RAW
   };
 
   buffer_list_t *raw_capture = device_open_buffer_list(camera->camera, true, raw_fmt, true);
@@ -86,7 +87,8 @@ static int camera_configure_input_libcamera(camera_t *camera)
     .width = target_width,
     .height = target_height,
     .format = camera->options.format,
-    .nbufs = camera->options.nbufs
+    .nbufs = camera->options.nbufs,
+    .type = BUFFER_TYPE_IMAGE
   };
 
   buffer_list_t *camera_capture = device_open_buffer_list(camera->camera, true, capture_fmt, true);

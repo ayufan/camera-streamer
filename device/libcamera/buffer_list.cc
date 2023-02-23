@@ -56,12 +56,35 @@ int libcamera_buffer_list_open(buffer_list_t *buf_list)
     return -1;
   }
 
-  if (buf_list->index >= (int)buf_list->dev->libcamera->configuration->size()) {
+  auto &configurations = buf_list->dev->libcamera->configuration;
+
+  // add new configuration based on a buffer
+  {
+    libcamera::StreamRole role = libcamera::StreamRole::StillCapture;
+
+    switch(buf_list->fmt.type) {
+    case BUFFER_TYPE_RAW:
+      role = libcamera::StreamRole::Raw;
+      break;
+
+    case BUFFER_TYPE_VIDEO:
+      role = libcamera::StreamRole::VideoRecording;
+      break;
+
+    default:
+      role = libcamera::StreamRole::StillCapture;
+      break;
+    }
+
+    auto newConfigurations = buf_list->dev->libcamera->camera->generateConfiguration({ role });
+    configurations->addConfiguration(newConfigurations->at(0));
+  }
+
+  if (buf_list->index >= (int)configurations->size()) {
     LOG_INFO(buf_list, "Not enough configurations.");
     return -1;
   }
 
-  auto &configurations = buf_list->dev->libcamera->configuration;
   auto &configuration = configurations->at(buf_list->index);
   configuration.size = libcamera::Size(buf_list->fmt.width, buf_list->fmt.height);
   if (buf_list->fmt.format) {

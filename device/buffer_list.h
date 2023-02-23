@@ -7,10 +7,19 @@ typedef struct buffer_s buffer_t;
 typedef struct device_s device_t;
 struct pollfd;
 
+typedef enum {
+  BUFFER_TYPE_DEFAULT = 0,
+
+  BUFFER_TYPE_RAW = 1,
+  BUFFER_TYPE_IMAGE = 2,
+  BUFFER_TYPE_VIDEO = 3
+} buffer_type_t;
+
 typedef struct buffer_format_s {
   unsigned width, height, format, bytesperline, sizeimage;
   unsigned nbufs;
   unsigned interval_us;
+  buffer_type_t type;
 } buffer_format_t;
 
 typedef struct buffer_list_s {
