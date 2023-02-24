@@ -90,6 +90,20 @@ int libcamera_device_open(device_t *dev)
     dev->libcamera->camera = dev->libcamera->camera_manager->cameras().front();
   } else {
     dev->libcamera->camera = dev->libcamera->camera_manager->get(dev->path);
+
+    // Do partial match of camera
+    if (!dev->libcamera->camera) {
+      for (auto& camera : dev->libcamera->camera_manager->cameras()) {
+        if (!strstr(camera->id().c_str(), dev->path))
+          continue;
+
+        if (dev->libcamera->camera) {
+          libcamera_print_cameras(dev);
+          LOG_ERROR(dev, "Many cameras matching found.");
+        }
+        dev->libcamera->camera = camera;
+      }
+    }
   }
 
   if (!dev->libcamera->camera) {
