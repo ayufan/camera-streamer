@@ -151,6 +151,13 @@ static int links_enqueue_from_capture_list(buffer_list_t *capture_list, link_t *
     LOG_ERROR(capture_list, "No buffer dequeued from capture_list?");
   }
 
+  if (buf->flags.is_last) {
+    LOG_INFO(buf, "Received last buffer. Restarting streaming...");
+    buffer_list_set_stream(capture_list, false);
+    buffer_list_set_stream(capture_list, true);
+    return 0;
+  }
+
   uint64_t now_us = get_monotonic_time_us(NULL, NULL);
   if ((now_us - buf->captured_time_us) > CAPTURE_TIMEOUT_US) {
     LOG_INFO(buf, "Capture image is outdated. Skipped. Now: %" PRIu64 ", vs %" PRIu64 ".",

@@ -181,6 +181,24 @@ int v4l2_buffer_list_set_stream(buffer_list_t *buf_list, bool do_on)
 	enum v4l2_buf_type type = buf_list->v4l2->type;
   ERR_IOCTL(buf_list, buf_list->v4l2->dev_fd, do_on ? VIDIOC_STREAMON : VIDIOC_STREAMOFF, &type, "Cannot set streaming state");
 
+  if (!do_on) {
+    // forcefully dequeue all buffers
+    for (int i = 0; i < buf_list->nbufs; i++) {
+      buffer_t *buf = buf_list->bufs[i];
+      if (!buf->enqueued)
+        continue;
+
+      if (buf->dma_source) {
+        buf->dma_source->used = 0;
+        buffer_consumed(buf->dma_source, "stream-off");
+        buf->dma_source = NULL;
+      }
+
+      buf->enqueued = false;
+      buf->mmap_reflinks = 1;
+    }
+  }
+
   return 0;
 error:
   return -1;
