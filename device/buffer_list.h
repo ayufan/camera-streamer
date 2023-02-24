@@ -26,7 +26,7 @@ typedef struct buffer_stats_s {
   int frames, dropped;
 } buffer_stats_t;
 
-#define MAX_BUFFER_QUEUE 1
+#define MAX_BUFFER_QUEUE 4
 
 typedef struct buffer_list_s {
   char *name;
@@ -64,5 +64,6 @@ buffer_t *buffer_list_find_slot(buffer_list_t *buf_list);
 buffer_t *buffer_list_dequeue(buffer_list_t *buf_list);
 int buffer_list_count_enqueued(buffer_list_t *buf_list);
 int buffer_list_enqueue(buffer_list_t *buf_list, buffer_t *dma_buf);
-bool buffer_list_push_to_queue(buffer_list_t *buf_list, buffer_t *dma_buf);
+void buffer_list_clear_queue(buffer_list_t *buf_list);
+bool buffer_list_push_to_queue(buffer_list_t *buf_list, buffer_t *dma_buf, int max_bufs);
 buffer_t *buffer_list_pop_from_queue(buffer_list_t *buf_list);

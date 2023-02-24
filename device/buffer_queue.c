@@ -197,6 +197,9 @@ buffer_t *buffer_list_dequeue(buffer_list_t *buf_list)
 
   if (buf_list->fmt.format == V4L2_PIX_FMT_H264) {
     buffer_update_h264_key_frame(buf);
+    buf->flags.is_keyed = true;
+  } else {
+    buf->flags.is_keyed = false;
   }
 
   buf_list->stats.frames++;
@@ -211,11 +214,22 @@ int buffer_list_pollfd(buffer_list_t *buf_list, struct pollfd *pollfd, bool can_
   return buf_list->dev->hw->buffer_list_pollfd(buf_list, pollfd, can_dequeue);
 }
 
-bool buffer_list_push_to_queue(buffer_list_t *buf_list, buffer_t *dma_buf)
+void buffer_list_clear_queue(buffer_list_t *buf_list)
 {
+  ARRAY_FOREACH(buffer_t*, queued_buf, buf_list->queued_bufs, buf_list->n_queued_bufs) {
+    buffer_consumed(*queued_buf, "clear queue");
+    *queued_buf = NULL;
+  }
+  buf_list->n_queued_bufs = 0;
+}
+
+bool buffer_list_push_to_queue(buffer_list_t *buf_list, buffer_t *dma_buf, int max_bufs)
+{
+  max_bufs = MIN(max_bufs ? max_bufs : MAX_BUFFER_QUEUE, MAX_BUFFER_QUEUE);
+
   if (buf_list->dev->paused)
     return true;
-  if (buf_list->n_queued_bufs >= MAX_BUFFER_QUEUE)
+  if (buf_list->n_queued_bufs >= max_bufs)
     return false;
 
   buffer_use(dma_buf);

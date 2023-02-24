@@ -19,6 +19,7 @@ typedef struct buffer_s {
   int dma_fd;
 
   struct {
+    bool is_keyed : 1;
     bool is_keyframe : 1;
     bool is_last : 1;
   } flags;
