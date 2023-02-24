@@ -32,6 +32,7 @@ typedef struct camera_options_s {
   float low_res_factor;
   bool auto_focus;
   unsigned auto_reconnect;
+  bool force_active;
   union {
     bool vflip;
     unsigned vflip_align;

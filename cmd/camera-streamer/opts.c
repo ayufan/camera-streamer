@@ -99,6 +99,7 @@ option_t all_options[] = {
   DEFINE_OPTION_PTR(camera, options, list, "Set the camera options. List all available options with `-camera-list_options`."),
   DEFINE_OPTION(camera, auto_reconnect, uint, "Set the camera auto-reconnect delay in seconds."),
   DEFINE_OPTION_DEFAULT(camera, auto_focus, bool, "1", "Do auto-focus on start-up (does not work with all camera)."),
+  DEFINE_OPTION_DEFAULT(camera, force_active, bool, "1", "Force camera to be always active."),
   DEFINE_OPTION_DEFAULT(camera, vflip, bool, "1", "Do vertical image flip (does not work with all camera)."),
   DEFINE_OPTION_DEFAULT(camera, hflip, bool, "1", "Do horizontal image flip (does not work with all camera)."),
 

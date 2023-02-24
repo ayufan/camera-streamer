@@ -30,5 +30,5 @@ typedef struct link_s {
   int n_callbacks;
 } link_t;
 
-int links_loop(link_t *all_links, bool *running);
+int links_loop(link_t *all_links, bool force_active, bool *running);
 void links_dump(link_t *all_links);

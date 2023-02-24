@@ -117,5 +117,5 @@ int camera_set_params(camera_t *camera)
 int camera_run(camera_t *camera)
 {
   bool running = false;
-  return links_loop(camera->links, &running);
+  return links_loop(camera->links, camera->options.force_active, &running);
 }

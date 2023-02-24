@@ -58,7 +58,7 @@ static int links_count(link_t *all_links)
   return n;
 }
 
-static void links_process_paused(link_t *all_links)
+static void links_process_paused(link_t *all_links, bool force_active)
 {
   // This traverses in reverse order as it requires to first fix outputs
   // and go back into captures
@@ -68,6 +68,10 @@ static void links_process_paused(link_t *all_links)
     buffer_list_t *capture_list = link->capture_list;
 
     bool paused = true;
+
+    if (force_active) {
+      paused = false;
+    }
 
     if (link_needs_buffer_by_callbacks(link)) {
       paused = false;
@@ -280,7 +284,7 @@ static void print_pollfds(struct pollfd *fds, int n)
   printf("pollfds = %d\n", n);
 }
 
-static int links_step(link_t *all_links, int timeout_now_ms, int *timeout_next_ms)
+static int links_step(link_t *all_links, bool force_active, int timeout_now_ms, int *timeout_next_ms)
 {
   link_pool_t pool = {
     .fds = {{0}},
@@ -289,7 +293,7 @@ static int links_step(link_t *all_links, int timeout_now_ms, int *timeout_next_m
     .output_lists = {0}
   };
 
-  links_process_paused(all_links);
+  links_process_paused(all_links, force_active);
   links_process_capture_buffers(all_links, timeout_next_ms);
 
   int n = links_build_fds(all_links, &pool);
@@ -413,7 +417,7 @@ static void links_refresh_stats(link_t *all_links, uint64_t *last_refresh_us)
   }
 }
 
-int links_loop(link_t *all_links, bool *running)
+int links_loop(link_t *all_links, bool force_active, bool *running)
 {
   *running = true;
 
@@ -429,7 +433,7 @@ int links_loop(link_t *all_links, bool *running)
     int timeout_now_ms = timeout_ms;
     timeout_ms = LINKS_LOOP_INTERVAL;
 
-    ret = links_step(all_links, timeout_now_ms, &timeout_ms);
+    ret = links_step(all_links, force_active, timeout_now_ms, &timeout_ms);
     links_refresh_stats(all_links, &last_refresh_us);
   }
 
