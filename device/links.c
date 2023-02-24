@@ -148,13 +148,6 @@ static int links_enqueue_from_capture_list(buffer_list_t *capture_list, link_t *
     LOG_ERROR(capture_list, "No buffer dequeued from capture_list?");
   }
 
-  for (int j = 0; j < link->n_callbacks; j++) {
-    if (link->callbacks[j].validate_buffer && !link->callbacks[j].validate_buffer(link, buf)) {
-      LOG_DEBUG(capture_list, "Buffer rejected by validation");
-      return 0;
-    }
-  }
-
   bool dropped = false;
 
   for (int j = 0; link->output_lists[j]; j++) {
