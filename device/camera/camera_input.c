@@ -80,11 +80,11 @@ static int camera_configure_input_libcamera(camera_t *camera)
 
   bool found = false;
 
-  found = camera_get_scaled_resolution(camera, &camera->options.snapshot, &capture_fmt);
+  found = camera_get_scaled_resolution(capture_fmt, &camera->options.snapshot, &capture_fmt);
   if (!found)
-    found = camera_get_scaled_resolution(camera, &camera->options.stream, &capture_fmt);
+    found = camera_get_scaled_resolution(capture_fmt, &camera->options.stream, &capture_fmt);
   if (!found)
-    found = camera_get_scaled_resolution(camera, &camera->options.video, &capture_fmt);
+    found = camera_get_scaled_resolution(capture_fmt, &camera->options.video, &capture_fmt);
 
   buffer_list_t *camera_capture = device_open_buffer_list(camera->camera, true, capture_fmt, true);
   if (!camera_capture) {

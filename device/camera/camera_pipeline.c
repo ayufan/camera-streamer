@@ -42,39 +42,22 @@ static link_callbacks_t video_callbacks =
   .buf_lock = &video_lock
 };
 
-int camera_configure_pipeline(camera_t *camera, buffer_list_t *capture)
+int camera_configure_pipeline(camera_t *camera, buffer_list_t *camera_capture)
 {
-  if (capture) {
-    capture->do_timestamps = true;
+  camera_capture->do_timestamps = true;
 
-    switch (capture->fmt.format) {
-    case V4L2_PIX_FMT_SRGGB10P:
-    case V4L2_PIX_FMT_SGRBG10P:
-    case V4L2_PIX_FMT_SBGGR10P:
-    case V4L2_PIX_FMT_SRGGB10:
-    case V4L2_PIX_FMT_SGRBG10:
-      camera_configure_isp(camera, capture);
-      break;
-
-    case V4L2_PIX_FMT_MJPEG:
-    case V4L2_PIX_FMT_H264:
-      camera_configure_decoder(camera, capture);
-      break;
-    }
-  }
-
-  if (!camera->options.snapshot.disabled && camera_configure_output(
-    camera, "SNAPSHOT", camera->options.snapshot.height, snapshot_formats, snapshot_callbacks, &camera->codec_snapshot) < 0) {
+  if (camera_configure_output(camera, camera_capture, "SNAPSHOT", &camera->options.snapshot,
+    snapshot_formats, snapshot_callbacks, &camera->codec_snapshot) < 0) {
     return -1;
   }
 
-  if (!camera->options.stream.disabled && camera_configure_output(
-    camera, "STREAM", camera->options.stream.height, snapshot_formats, stream_callbacks, &camera->codec_stream) < 0) {
+  if (camera_configure_output(camera, camera_capture, "STREAM", &camera->options.stream,
+    snapshot_formats, stream_callbacks, &camera->codec_stream) < 0) {
     return -1;
   }
 
-  if (!camera->options.video.disabled && camera_configure_output(
-    camera, "VIDEO", camera->options.video.height, video_formats, video_callbacks, &camera->codec_video) < 0) {
+  if (camera_configure_output(camera, camera_capture, "VIDEO", &camera->options.video,
+    video_formats, video_callbacks, &camera->codec_video) < 0) {
     return -1;
   }
 

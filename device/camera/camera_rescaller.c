@@ -18,7 +18,7 @@ static unsigned camera_rescaller_align_size(unsigned size, unsigned align_size)
   return (size + align_size - 1) / align_size * align_size;
 }
 
-static void camera_get_scaled_resolution2(unsigned in_width, unsigned in_height, unsigned proposed_height, unsigned *target_width, unsigned *target_height)
+void camera_get_scaled_resolution2(unsigned in_width, unsigned in_height, unsigned proposed_height, unsigned *target_width, unsigned *target_height)
 {
   proposed_height = MIN(proposed_height, in_height);
 
@@ -35,19 +35,19 @@ static void camera_get_scaled_resolution2(unsigned in_width, unsigned in_height,
   }
 }
 
-bool camera_get_scaled_resolution(camera_t *camera, camera_output_options_t *options, buffer_format_t *format)
+bool camera_get_scaled_resolution(buffer_format_t capture_format, camera_output_options_t *options, buffer_format_t *format)
 {
   if (options->disabled)
     return false;
 
   camera_get_scaled_resolution2(
-    camera->options.width,
-    camera->options.height,
+    capture_format.width,
+    capture_format.height,
     options->height,
     &format->width,
     &format->height
   );
-  return true;
+  return format->height > 0;
 }
 
 buffer_list_t *camera_try_rescaller(camera_t *camera, buffer_list_t *src_capture, const char *name, unsigned target_height, unsigned target_format)

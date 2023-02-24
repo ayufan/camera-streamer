@@ -74,20 +74,58 @@ static unsigned rescalled_formats[] =
   0
 };
 
-int camera_configure_output(camera_t *camera, const char *name, unsigned target_height, unsigned formats[], link_callbacks_t callbacks, device_t **device)
+int camera_configure_output(camera_t *camera, buffer_list_t *camera_capture, const char *name, camera_output_options_t *options, unsigned formats[], link_callbacks_t callbacks, device_t **device)
 {
-  buffer_list_t *src_capture = camera_find_capture2(camera, target_height, formats);
+  buffer_format_t selected_format = {0};
+
+  if (!camera_get_scaled_resolution(camera_capture->fmt, options, &selected_format)) {
+    return 0;
+  }
+
+  // find an existing format
+  buffer_list_t *src_capture = camera_find_capture2(camera, selected_format.height, formats);
   if (src_capture) {
     camera_capture_add_callbacks(camera, src_capture, callbacks);
     return 0;
   }
 
-  src_capture = camera_find_capture2(camera, target_height, rescalled_formats);
+  // Try to find exact output
+  src_capture = camera_find_capture2(camera, selected_format.height, rescalled_formats);
+
+  // Try to re-scale output
   if (!src_capture) {
-    // Try to find re-scallabe output
-    src_capture = camera_find_capture2(camera, 0, rescalled_formats);
-    if (src_capture) {
-      src_capture = camera_configure_rescaller(camera, src_capture, name, target_height, rescalled_formats);
+    buffer_list_t *other_capture = camera_find_capture2(camera, 0, rescalled_formats);
+
+    if (other_capture) {
+      src_capture = camera_configure_rescaller(camera, other_capture, name, selected_format.height, rescalled_formats);
+    }
+  }
+
+  // Try to decode output
+  if (!src_capture) {
+    buffer_list_t *decoded_capture = NULL;
+
+    switch (camera_capture->fmt.format) {
+    case V4L2_PIX_FMT_SRGGB10P:
+    case V4L2_PIX_FMT_SGRBG10P:
+    case V4L2_PIX_FMT_SBGGR10P:
+    case V4L2_PIX_FMT_SRGGB10:
+    case V4L2_PIX_FMT_SGRBG10:
+      decoded_capture = camera_configure_isp(camera, camera_capture);
+      break;
+
+    case V4L2_PIX_FMT_MJPEG:
+    case V4L2_PIX_FMT_H264:
+      decoded_capture = camera_configure_decoder(camera, camera_capture);
+      break;
+    }
+
+    // Now, do we have exact match
+    src_capture = camera_find_capture2(camera, selected_format.height, rescalled_formats);
+
+    // Otherwise rescalle decoded output
+    if (!src_capture && decoded_capture) {
+      src_capture = camera_configure_rescaller(camera, decoded_capture, name, selected_format.height, rescalled_formats);
     }
   }
 
