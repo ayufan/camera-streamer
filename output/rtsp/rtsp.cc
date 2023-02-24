@@ -70,20 +70,15 @@ public:
       return; // we're not ready for the data yet
     }
 
-    if (buf->flags.is_keyframe) {
-      fHadKeyFrame = true;
-    }
-
-    if (!fRequestedKeyFrame) {
-      if (!fHadKeyFrame) {
-        printf("device_video_force_key: %p\n", this);
-        device_video_force_key(buf->buf_list->dev);
-      }
-
-      fRequestedKeyFrame = true;
+    if (!fHadKeyFrame) {
+      fHadKeyFrame = buf->flags.is_keyframe;
     }
 
     if (!fHadKeyFrame) {
+      if (!fRequestedKeyFrame) {
+        device_video_force_key(buf->buf_list->dev);
+        fRequestedKeyFrame = true;
+      }
       return;
     }
 
