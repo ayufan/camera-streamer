@@ -34,7 +34,7 @@ bool buffer_lock_needs_buffer(buffer_lock_t *buf_lock)
   if (buf_lock->refs > 0) {
     needs_buffer = true;
   }
-  for (int i = 0; !needs_buffer && buf_lock->notify_buffer[i] && i < BUFFER_LOCK_MAX_CALLBACKS; i++) {
+  for (int i = 0; !needs_buffer && buf_lock->check_streaming[i] && i < BUFFER_LOCK_MAX_CALLBACKS; i++) {
     needs_buffer = buf_lock->check_streaming[i](buf_lock);
   }
   pthread_mutex_unlock(&buf_lock->lock);
