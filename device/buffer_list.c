@@ -86,7 +86,7 @@ void buffer_list_close(buffer_list_t *buf_list)
 
 int buffer_list_set_stream(buffer_list_t *buf_list, bool do_on)
 {
-  if (!buf_list) {
+  if (!buf_list || !buf_list->dev->hw->buffer_list_set_stream) {
     return -1;
   }
 

@@ -181,10 +181,10 @@ int device_set_stream(device_t *dev, bool do_on)
 
 int device_video_force_key(device_t *dev)
 {
-  if (!dev || dev->hw->device_video_force_key(dev) < 0)
-    return -1;
+  if (dev && dev->hw->device_video_force_key)
+    return dev->hw->device_video_force_key(dev);
 
-  return 0;
+  return -1;
 }
 
 void device_dump_options(device_t *dev, FILE *stream)
@@ -235,11 +235,11 @@ int device_set_rotation(device_t *dev, bool vflip, bool hflip)
 
 int device_set_option_string(device_t *dev, const char *key, const char *value)
 {
-  if (!dev) {
-    return 0;
+  if (dev && dev->hw->device_set_option) {
+    return dev->hw->device_set_option(dev, key, value);
   }
 
-  return dev->hw->device_set_option(dev, key, value);
+  return -1;
 }
 
 void device_set_option_list(device_t *dev, const char *option_list)
