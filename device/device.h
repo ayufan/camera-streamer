@@ -51,7 +51,6 @@ typedef struct device_s {
   };
 
   bool paused;
-  bool decoder_started;
 } device_t;
 
 device_t *device_open(const char *name, const char *path, device_hw_t *hw);
