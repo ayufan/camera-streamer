@@ -11,6 +11,9 @@
 #define CAPTURE_TIMEOUT_US (1000*1000)
 #define N_FDS 50
 
+#define MAX_CAPTURED_ON_CAMERA 2
+#define MAX_CAPTURED_ON_M2M 2
+
 typedef struct link_pool_s
 {
   struct pollfd fds[N_FDS];
@@ -119,10 +122,20 @@ static bool links_enqueue_capture_buffers(buffer_list_t *capture_list, int *time
 
   // no output, just give back capture_buf
   if (!output_list) {
+    // limit amount of buffers enqueued by camera
+    if (buffer_list_count_enqueued(capture_list) >= MAX_CAPTURED_ON_CAMERA) {
+      return false;
+    }
+    
     buffer_consumed(capture_buf, "enqueued");
     if (capture_list->fmt.interval_us > 0)
       return false;
     return true;
+  }
+
+  // limit amount of buffers enqueued by m2m
+  if (buffer_list_count_enqueued(output_list) >= MAX_CAPTURED_ON_M2M) {
+    return false;
   }
 
   // try to find matching output slot, ignore if not present
