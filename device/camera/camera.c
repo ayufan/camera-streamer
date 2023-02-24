@@ -82,16 +82,14 @@ link_t *camera_ensure_capture(camera_t *camera, buffer_list_t *capture)
 void camera_capture_add_output(camera_t *camera, buffer_list_t *capture, buffer_list_t *output)
 {
   link_t *link = camera_ensure_capture(camera, capture);
-
-  int nsinks;
-  for (nsinks = 0; link->output_lists[nsinks]; nsinks++);
-  link->output_lists[nsinks] = output;
+  ARRAY_APPEND(link->output_lists, link->n_output_lists, output);
 }
 
 void camera_capture_add_callbacks(camera_t *camera, buffer_list_t *capture, link_callbacks_t callbacks)
 {
   link_t *link = camera_ensure_capture(camera, capture);
-  link->callbacks[link->n_callbacks++] = callbacks;
+  if (!ARRAY_APPEND(link->callbacks, link->n_callbacks, callbacks))
+    return;
 
   if (callbacks.buf_lock) {
     callbacks.buf_lock->buf_list = capture;

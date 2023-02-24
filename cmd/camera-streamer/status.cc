@@ -85,7 +85,7 @@ static nlohmann::json links_status_json()
 
     nlohmann::json link_json;
     link_json["source"] = link->capture_list->name;
-    for (int j = 0; link->output_lists[j]; j++) {
+    for (int j = 0; j < link->n_output_lists; j++) {
       link_json["sinks"][j] = link->output_lists[j]->name;
     }
     for (int j = 0; j < link->n_callbacks; j++) {

@@ -60,3 +60,8 @@ int ioctl_retried(const char *name, int fd, int request, void *arg);
 			LOG_ERROR(dev, "ioctl(ret=%d, errno=%d): " _msg, ret, errno, ##__VA_ARGS__); \
 		} \
 	} while(0)
+
+#define ARRAY_SIZE(arr) (sizeof(arr) / sizeof((arr)[0]))
+#define ARRAY_APPEND(arr, n_arr, item) ((n_arr) < ARRAY_SIZE(arr) ? ((arr[n_arr++] = item), true) : false)
+#define ARRAY_FOREACH(type, key, arr, n_arr) \
+	for (type *key = &arr[0]; key < &arr[n_arr]; key++)

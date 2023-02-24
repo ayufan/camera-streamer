@@ -63,7 +63,7 @@ static int links_build_fds(link_t *all_links, link_pool_t *link_pool)
       paused = false;
     }
 
-    for (int j = 0; link->output_lists[j]; j++) {
+    for (int j = 0; j < link->n_output_lists; j++) {
       buffer_list_t *sink = link->output_lists[j];
 
       if (n >= N_FDS) {
@@ -150,7 +150,7 @@ static int links_enqueue_from_capture_list(buffer_list_t *capture_list, link_t *
 
   bool dropped = false;
 
-  for (int j = 0; link->output_lists[j]; j++) {
+  for (int j = 0; j < link->n_output_lists; j++) {
     if (link->output_lists[j]->dev->paused) {
       continue;
     }
@@ -314,7 +314,7 @@ static int links_stream(link_t *all_links, bool do_stream)
       LOG_ERROR(link->capture_list, "Failed to start streaming");
     }
 
-    for (int j = 0; link->output_lists[j]; j++) {
+    for (int j = 0; j < link->n_output_lists; j++) {
       if (buffer_list_set_stream(link->output_lists[j], streaming) < 0) {
         LOG_ERROR(link->output_lists[j], "Failed to start streaming");
       }
@@ -412,7 +412,7 @@ void links_dump(link_t *all_links)
     line[0] = 0;
     links_dump_buf_list(line, link->capture_list);
     strcat(line, " => [");
-    for (int j = 0; link->output_lists[j]; j++) {
+    for (int j = 0; j < link->n_output_lists; j++) {
       if (j > 0)
         strcat(line, ", ");
       links_dump_buf_list(line, link->output_lists[j]);

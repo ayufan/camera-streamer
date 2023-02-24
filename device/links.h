@@ -4,6 +4,8 @@
 #include <stdbool.h>
 
 #define LINKS_LOOP_INTERVAL 100
+#define MAX_OUTPUT_LISTS 10
+#define MAX_CALLBACKS 10
 
 typedef struct buffer_s buffer_t;
 typedef struct buffer_list_s buffer_list_t;
@@ -22,8 +24,9 @@ typedef struct link_callbacks_s {
 
 typedef struct link_s {
   buffer_list_t *capture_list;
-  buffer_list_t *output_lists[10];
-  link_callbacks_t callbacks[10];
+  buffer_list_t *output_lists[MAX_OUTPUT_LISTS];
+  int n_output_lists;
+  link_callbacks_t callbacks[MAX_CALLBACKS];
   int n_callbacks;
 } link_t;
 
