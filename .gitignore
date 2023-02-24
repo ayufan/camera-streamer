@@ -5,5 +5,5 @@ tmp/
 *.js.c
 /camera-streamer
 /test_*
-.vscode/settings.json
+.vscode/
 /Procfile*
