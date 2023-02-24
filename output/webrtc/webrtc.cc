@@ -107,19 +107,20 @@ public:
 
   void pushFrame(buffer_t *buf)
   {
-    auto self = this;
-
     if (!video || !video->track) {
       return;
     }
 
     if (!had_key_frame) {
-      if (!buf->flags.is_keyframe) {
+      had_key_frame = buf->flags.is_keyframe;
+    }
+
+    if (!had_key_frame) {
+      if (!requested_key_frame) {
         device_video_force_key(buf->buf_list->dev);
-        LOG_VERBOSE(self, "Skipping as key frame was not yet sent.");
-        return;
+        requested_key_frame = true;
       }
-      had_key_frame = true;
+      return;
     }
 
     rtc::binary data((std::byte*)buf->start, (std::byte*)buf->start + buf->used);
@@ -135,6 +136,7 @@ public:
   std::mutex lock;
   std::condition_variable wait_for_complete;
   bool had_key_frame;
+  bool requested_key_frame;
 };
 
 std::shared_ptr<Client> findClient(std::string id)
