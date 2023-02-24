@@ -111,25 +111,25 @@ static int links_build_fds(link_t *all_links, link_pool_t *link_pool)
   return n;
 }
 
-bool links_sink_can_enqueue(buffer_list_t *buf_list)
+static bool links_output_list_can_enqueue(buffer_list_t *output_list)
 {
-  int current = buffer_list_count_enqueued(buf_list);
+  int current = buffer_list_count_enqueued(output_list);
 
-  if (buf_list->do_capture) {
+  if (output_list->do_capture) {
     perror("should not happen");
   }
 
   int capture_max = 0;
 
-  for (int i = 0; i < buf_list->dev->n_capture_list; i++) {
-    int capture_count = buffer_list_count_enqueued(buf_list->dev->capture_lists[i]);
+  for (int i = 0; i < output_list->dev->n_capture_list; i++) {
+    int capture_count = buffer_list_count_enqueued(output_list->dev->capture_lists[i]);
     if (capture_max < capture_count)
       capture_max = capture_count;
   }
 
   // only enqueue on output, if there are already captures (and there's more of them)
   if (capture_max <= current) {
-    LOG_DEBUG(buf_list, "Skipping enqueue of output (output_enqueued=%d, capture_enqueued=%d)",
+    LOG_DEBUG(output_list, "Skipping enqueue of output (output_enqueued=%d, capture_enqueued=%d)",
       current, capture_max);
     return false;
   }
@@ -137,20 +137,20 @@ bool links_sink_can_enqueue(buffer_list_t *buf_list)
   return true;
 }
 
-int links_enqueue_from_capture_list(buffer_list_t *buf_list, link_t *link)
+static int links_enqueue_from_capture_list(buffer_list_t *capture_list, link_t *link)
 {
   if (!link) {
-    LOG_ERROR(buf_list, "Missing link for capture_list");
+    LOG_ERROR(capture_list, "Missing link for capture_list");
   }
 
-  buffer_t *buf = buffer_list_dequeue(buf_list);
+  buffer_t *buf = buffer_list_dequeue(capture_list);
   if (!buf) {
-    LOG_ERROR(buf_list, "No buffer dequeued from capture_list?");
+    LOG_ERROR(capture_list, "No buffer dequeued from capture_list?");
   }
 
   for (int j = 0; j < link->n_callbacks; j++) {
     if (link->callbacks[j].validate_buffer && !link->callbacks[j].validate_buffer(link, buf)) {
-      LOG_DEBUG(buf_list, "Buffer rejected by validation");
+      LOG_DEBUG(capture_list, "Buffer rejected by validation");
       return 0;
     }
   }
@@ -161,7 +161,7 @@ int links_enqueue_from_capture_list(buffer_list_t *buf_list, link_t *link)
     if (link->output_lists[j]->dev->paused) {
       continue;
     }
-    if (links_sink_can_enqueue(link->output_lists[j])) {
+    if (links_output_list_can_enqueue(link->output_lists[j])) {
       buffer_list_enqueue(link->output_lists[j], buf);
     } else {
       dropped = true;
@@ -169,7 +169,7 @@ int links_enqueue_from_capture_list(buffer_list_t *buf_list, link_t *link)
   }
 
   if (dropped) {
-    buf_list->stats.dropped++;
+    capture_list->stats.dropped++;
   }
 
   for (int j = 0; j < link->n_callbacks; j++) {
@@ -188,8 +188,9 @@ error:
   return -1;
 }
 
-int links_dequeue_from_sink(buffer_list_t *buf_list) {
-  buffer_t *buf = buffer_list_dequeue(buf_list);
+static int links_dequeue_from_output_list(buffer_list_t *output_list)
+{
+  buffer_t *buf = buffer_list_dequeue(output_list);
   if (!buf) {
     LOG_ERROR(buf, "No buffer dequeued from sink?");
   }
@@ -255,7 +256,7 @@ static int links_step(link_t *all_links, int timeout_now_ms, int *timeout_next_m
 
     // Dequeue buffers that were processed
     if (pool.fds[i].revents & POLLOUT) {
-      if (links_dequeue_from_sink(buf_list) < 0) {
+      if (links_dequeue_from_output_list(buf_list) < 0) {
         return -1;
       }
     }
