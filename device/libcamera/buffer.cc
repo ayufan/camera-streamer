@@ -143,6 +143,15 @@ int libcamera_buffer_list_dequeue(buffer_list_t *buf_list, buffer_t **bufp)
 
   *bufp = buf_list->bufs[index];
 
+  std::optional<int64_t> sensor_timestamp((*bufp)->libcamera->request->metadata().
+    get<int64_t>(libcamera::controls::SensorTimestamp));
+  uint64_t sensor_timestamp_us = sensor_timestamp.value_or(0) / 1000;
+  uint64_t boot_time_us = get_time_us(CLOCK_BOOTTIME, NULL, NULL, 0);
+
+  uint64_t now_us = get_monotonic_time_us(NULL, NULL);
+
+  (*bufp)->captured_time_us = now_us - (boot_time_us - sensor_timestamp_us);
+
   if (index == 0) {
     libcamera_buffer_dump_metadata(*bufp);
   }
