@@ -91,6 +91,8 @@ int ioctl_retried(const char *name, int fd, int request, void *arg)
 
 	for (int try = 0; try <= MAX_RETRIES; try++) {
 		int ret = ioctl(fd, request, arg);
+		if (ret >= 0)
+			return ret;
 		if (errno != EINTR && errno != EAGAIN && errno != ETIMEDOUT)
 			return ret;
 		usleep(RETRY_INTERVAL_US);
