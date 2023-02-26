@@ -181,3 +181,35 @@ int v4l2_buffer_list_pollfd(buffer_list_t *buf_list, struct pollfd *pollfd, bool
   pollfd->revents = 0;
   return 0;
 }
+
+void v4l2_buffer_list_check_buffer(buffer_t *buf)
+{
+  struct v4l2_buffer v4l2_buf = {0};
+  struct v4l2_plane v4l2_plane = {0};
+
+  v4l2_buf.type = buf->buf_list->v4l2->type;
+  v4l2_buf.index = buf->index;
+  v4l2_buf.flags = 0;
+
+  if (buf->buf_list->v4l2->do_mplanes) {
+    v4l2_buf.length = 1;
+    v4l2_buf.m.planes = &v4l2_plane;
+    v4l2_plane.data_offset = 0;
+  }
+
+  ERR_IOCTL(buf, buf->buf_list->v4l2->dev_fd, VIDIOC_QUERYBUF, &v4l2_buf, "Can't query buffer");
+
+  LOG_INFO(buf, "Buffer queried. Queued=%d/%d",
+    (v4l2_buf.flags & V4L2_BUF_FLAG_QUEUED) != 0,
+    buf->enqueued
+  );
+
+error:;
+}
+
+void v4l2_buffer_list_check_buffers(buffer_list_t *buf_list)
+{
+  ARRAY_FOREACH(buffer_t*, buf, buf_list->bufs, buf_list->nbufs) {
+    v4l2_buffer_list_check_buffer(*buf);
+  }
+}

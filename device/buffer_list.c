@@ -99,7 +99,9 @@ int buffer_list_set_stream(buffer_list_t *buf_list, bool do_on)
   }
   buf_list->streaming = do_on;
 
-  if (!do_on) {
+  if (do_on) {
+    buf_list->last_enqueued_us = get_monotonic_time_us(NULL, NULL);
+  } else {
     buffer_list_clear_queue(buf_list);
   }
 

@@ -9,6 +9,7 @@
 #include <inttypes.h>
 
 #define CAPTURE_TIMEOUT_US (1000*1000)
+#define STALE_TIMEOUT_US (1000*1000*1000)
 #define N_FDS 50
 
 #define MAX_QUEUED_ON_KEYED MAX_BUFFER_QUEUE
@@ -93,13 +94,18 @@ static void links_process_paused(link_t *all_links, bool force_active)
 static bool links_enqueue_capture_buffers(buffer_list_t *capture_list, int *timeout_next_ms)
 {
   buffer_t *capture_buf = NULL;
+  uint64_t now_us = get_monotonic_time_us(NULL, NULL);
+
+  if (now_us - capture_list->last_enqueued_us > STALE_TIMEOUT_US && capture_list->dev->output_list == NULL) {
+    LOG_INFO(capture_list, "Stale detected. Restarting streaming...");
+    buffer_list_set_stream(capture_list, false);
+    buffer_list_set_stream(capture_list, true);
+  }
 
   // skip if all enqueued
   capture_buf = buffer_list_find_slot(capture_list);
   if (capture_buf == NULL)
     return false;
-
-  uint64_t now_us = get_monotonic_time_us(NULL, NULL);
 
   // skip if trying to enqueue to fast
   if (capture_list->fmt.interval_us > 0 && now_us - capture_list->last_enqueued_us < capture_list->fmt.interval_us) {
