@@ -3,6 +3,9 @@ SRC := $(wildcard **/*.c **/*/*.c **/*.cc **/*/*.cc)
 HEADERS := $(wildcard **/*.h **/*/*.h **/*.hh **/*/*.hh)
 HTML := $(wildcard html/*.js html/*.html)
 
+GIT_VERSION ?= $(shell git describe --tags)
+GIT_REVISION ?= $(shell git rev-parse --short HEAD)
+
 CFLAGS := -Werror -Wall -g -I$(CURDIR) -D_GNU_SOURCE
 LDLIBS := -lpthread -lstdc++
 
@@ -45,16 +48,25 @@ LDLIBS += -L$(LIBDATACHANNEL_PATH)/build/deps/usrsctp/usrsctplib -lusrsctp
 LDLIBS += -L$(LIBDATACHANNEL_PATH)/build/deps/libsrtp -lsrtp2
 LDLIBS += -L$(LIBDATACHANNEL_PATH)/build/deps/libjuice -ljuice-static
 LDLIBS += -lcrypto -lssl
-
-camera-streamer: $(LIBDATACHANNEL_PATH)/build/libdatachannel-static.a
 endif
 
 HTML_SRC = $(addsuffix .c,$(HTML))
 OBJS = $(patsubst %.cc,%.o,$(patsubst %.c,%.o,$(SRC) $(HTML_SRC)))
 
+all: version
+	+make $(TARGET)
+
 .SUFFIXES:
 
-all: $(TARGET)
+ifeq (1,$(USE_LIBDATACHANNEL))
+camera-streamer: $(LIBDATACHANNEL_PATH)/build/libdatachannel-static.a
+endif
+
+.PHONY: version
+version:
+	echo "#define GIT_VERSION \"$(GIT_VERSION)\"\n#define GIT_REVISION \"$(GIT_REVISION)\"" > version.h.tmp; \
+		diff -u version.h version.h.tmp || mv version.h.tmp version.h; \
+		rm -f version.h.tmp
 
 %: cmd/% $(filter-out third_party/%, $(OBJS))
 	$(CCACHE) $(CXX) $(CFLAGS) -o $@ $(filter-out cmd/%, $^) $(filter $</%, $^) $(LDLIBS)

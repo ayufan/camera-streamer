@@ -1,4 +1,5 @@
 #include "opts.h"
+#include "version.h"
 #include "util/opts/log.h"
 
 #include <stddef.h>
@@ -6,6 +7,11 @@
 #include <limits.h>
 
 #define OPT_LENGTH 30
+
+static void print_version(const char *cmd)
+{
+  printf("%s (%s)\n", GIT_VERSION, GIT_REVISION);
+}
 
 static void print_help(option_t *options, const char *cmd)
 {
@@ -88,7 +94,7 @@ static void print_help(option_t *options, const char *cmd)
   printf("\n");
 }
 
-static int parse_opt(option_t *options, const char *key)
+static int parse_opt(option_t *options, const char *key, int dash)
 {
   option_t *option = NULL;
   const char *value = strchr(key, '=');
@@ -108,6 +114,12 @@ static int parse_opt(option_t *options, const char *key)
         break;
       }
     }
+  }
+
+  if (dash == 2 && strlen(key) == 1) {
+    LOG_INFO(NULL, "Usage of '--%s' is deprecated change to '-%s'.", key, key);
+  } else if (dash == 1 && strlen(key) > 1) {
+    LOG_INFO(NULL, "Usage of '-%s' is deprecated change to '--%s'.", key, key);
   }
 
   LOG_DEBUG(NULL, "Parsing '%s'. Got value='%s', and option='%s'", key, value, option ? option->name : NULL);
@@ -152,18 +164,26 @@ int parse_opts(option_t *options, int argc, char *argv[])
 
     if (key[0] == '-') {
       key++;
-      if (key[0] == '-')
+      if (key[0] == '-') {
         key++;
+      }
     } else {
       LOG_ERROR(NULL, "The '%s' is not option (should start with - or --).", key);
     }
 
     if (!strcmp(key, "help")) {
       print_help(options, argv[0]);
+      exit(-1);
       return -1;
     }
 
-    int ret = parse_opt(options, key);
+    if (!strcmp(key, "version")) {
+      print_version(argv[0]);
+      exit(0);
+      return 0;
+    }
+
+    int ret = parse_opt(options, key, key - argv[arg]);
     if (ret <= 0) {
       LOG_ERROR(NULL, "Parsing '%s' returned '%d'.", argv[arg], ret);
     }

@@ -4,6 +4,7 @@
 #include "device/camera/camera.h"
 #include "output/rtsp/rtsp.h"
 #include "output/webrtc/webrtc.h"
+#include "version.h"
 
 #include <signal.h>
 #include <unistd.h>
@@ -55,6 +56,8 @@ int main(int argc, char *argv[])
   if (parse_opts(all_options, argc, argv) < 0) {
     return -1;
   }
+
+  printf("%s Version: %s (%s)\n", argv[0], GIT_VERSION, GIT_REVISION);
 
   deprecations();
   inherit();
