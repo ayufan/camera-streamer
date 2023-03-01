@@ -92,8 +92,9 @@ public:
 
     memcpy(fTo, buf->start, fFrameSize);
 
-    // Tell our client that we have new data:
-    afterGetting(this); // we're preceded by a net read; no infinite recursion
+    // Tell our client that we have new data
+    nextTask() = envir().taskScheduler().scheduleDelayedTask(
+      0, (TaskFunc*)FramedSource::afterGetting, this);
   }
 
   Boolean fHaveStartedReading;
