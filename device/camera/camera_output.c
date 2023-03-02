@@ -74,11 +74,18 @@ static unsigned rescalled_formats[] =
   0
 };
 
+#define OUTPUT_RESCALLER_SIZE 32
+
 int camera_configure_output(camera_t *camera, buffer_list_t *camera_capture, const char *name, camera_output_options_t *options, unsigned formats[], link_callbacks_t callbacks, device_t **device)
 {
   buffer_format_t selected_format = {0};
+  buffer_format_t rescalled_format = {0};
 
-  if (!camera_get_scaled_resolution(camera_capture->fmt, options, &selected_format)) {
+  if (!camera_get_scaled_resolution(camera_capture->fmt, options, &selected_format, 1)) {
+    return 0;
+  }
+
+  if (!camera_get_scaled_resolution(camera_capture->fmt, options, &rescalled_format, RESCALLER_BLOCK_SIZE)) {
     return 0;
   }
 
@@ -89,15 +96,15 @@ int camera_configure_output(camera_t *camera, buffer_list_t *camera_capture, con
     return 0;
   }
 
-  // Try to find exact output
-  src_capture = camera_find_capture2(camera, selected_format.height, rescalled_formats);
+  // Try to find exact capture
+  src_capture = camera_find_capture2(camera, rescalled_format.height, rescalled_formats);
 
-  // Try to re-scale output
+  // Try to re-scale capture
   if (!src_capture) {
     buffer_list_t *other_capture = camera_find_capture2(camera, 0, rescalled_formats);
 
     if (other_capture) {
-      src_capture = camera_configure_rescaller(camera, other_capture, name, selected_format.height, rescalled_formats);
+      src_capture = camera_configure_rescaller(camera, other_capture, name, rescalled_format.height, rescalled_formats);
     }
   }
 
@@ -122,6 +129,10 @@ int camera_configure_output(camera_t *camera, buffer_list_t *camera_capture, con
 
     // Now, do we have exact match
     src_capture = camera_find_capture2(camera, selected_format.height, rescalled_formats);
+
+    if (!src_capture) {
+      src_capture = camera_find_capture2(camera, rescalled_format.height, rescalled_formats);
+    }
 
     // Otherwise rescalle decoded output
     if (!src_capture && decoded_capture) {

@@ -10,32 +10,34 @@
 #include "device/buffer_list.h"
 #include "util/http/http.h"
 
-#define MAX_RESCALLER_SIZE 1920
-#define RESCALLER_BLOCK_SIZE 32
-
-static unsigned camera_rescaller_align_size(unsigned size, unsigned align_size)
+static unsigned camera_rescaller_align_size(unsigned size, int align_size)
 {
-  return (size + align_size - 1) / align_size * align_size;
+  if (align_size > 0)
+    return (size + align_size - 1) / align_size * align_size;
+  else if (align_size < 0)
+    return size / -align_size * -align_size;
+  else
+    return size;
 }
 
-void camera_get_scaled_resolution2(unsigned in_width, unsigned in_height, unsigned proposed_height, unsigned *target_width, unsigned *target_height)
+void camera_get_scaled_resolution2(unsigned in_width, unsigned in_height, unsigned proposed_height, unsigned *target_width, unsigned *target_height, int align_size)
 {
   proposed_height = MIN(proposed_height, in_height);
 
-  *target_height = camera_rescaller_align_size(proposed_height, RESCALLER_BLOCK_SIZE);
+  *target_height = camera_rescaller_align_size(proposed_height, align_size);
   *target_height = MIN(*target_height, MAX_RESCALLER_SIZE);
 
   // maintain aspect ratio on target width
-  *target_width = camera_rescaller_align_size(*target_height * in_width / in_height, RESCALLER_BLOCK_SIZE);
+  *target_width = camera_rescaller_align_size(*target_height * in_width / in_height, align_size);
 
   // if width is larger then rescaller, try to maintain scale down height
   if (*target_width > MAX_RESCALLER_SIZE) {
     *target_width = MAX_RESCALLER_SIZE;
-    *target_height = camera_rescaller_align_size(*target_width * in_height / in_width, RESCALLER_BLOCK_SIZE);
+    *target_height = camera_rescaller_align_size(*target_width * in_height / in_width, align_size);
   }
 }
 
-bool camera_get_scaled_resolution(buffer_format_t capture_format, camera_output_options_t *options, buffer_format_t *format)
+bool camera_get_scaled_resolution(buffer_format_t capture_format, camera_output_options_t *options, buffer_format_t *format, int align_size)
 {
   if (options->disabled)
     return false;
@@ -45,7 +47,8 @@ bool camera_get_scaled_resolution(buffer_format_t capture_format, camera_output_
     capture_format.height,
     options->height,
     &format->width,
-    &format->height
+    &format->height,
+    align_size
   );
   return format->height > 0;
 }
@@ -78,7 +81,8 @@ buffer_list_t *camera_try_rescaller(camera_t *camera, buffer_list_t *src_capture
   camera_get_scaled_resolution2(
     src_capture->fmt.width, src_capture->fmt.height,
     target_height,
-    &target_fmt.width, &target_fmt.height
+    &target_fmt.width, &target_fmt.height,
+    RESCALLER_BLOCK_SIZE
   );
 
   buffer_list_t *rescaller_capture = device_open_buffer_list_capture(

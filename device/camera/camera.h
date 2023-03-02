@@ -10,6 +10,9 @@
 #define CAMERA_DEVICE_CAMERA 0
 #define CAMERA_OPTIONS_LENGTH 4096
 
+#define MAX_RESCALLER_SIZE 1920
+#define RESCALLER_BLOCK_SIZE 32
+
 typedef enum {
   CAMERA_V4L2 = 0,
   CAMERA_LIBCAMERA,
@@ -96,4 +99,4 @@ buffer_list_t *camera_configure_isp(camera_t *camera, buffer_list_t *src_capture
 buffer_list_t *camera_configure_decoder(camera_t *camera, buffer_list_t *src_capture);
 buffer_list_t *camera_configure_rescaller(camera_t *camera, buffer_list_t *src_capture, const char *name, unsigned target_height, unsigned formats[]);
 int camera_configure_output(camera_t *camera, buffer_list_t *camera_capture, const char *name, camera_output_options_t *options, unsigned formats[], link_callbacks_t callbacks, device_t **device);
-bool camera_get_scaled_resolution(buffer_format_t capture_format, camera_output_options_t *options, buffer_format_t *format);
+bool camera_get_scaled_resolution(buffer_format_t capture_format, camera_output_options_t *options, buffer_format_t *format, int align_size);
