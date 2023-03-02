@@ -26,7 +26,7 @@ void fake_camera_sensor(struct media_v2_topology *topology)
   }
 
   char source[256];
-  sprintf(source, fake_camera);
+  strcpy(source, fake_camera);
 
   char *target = strstr(source, "=");
   if (!target) {

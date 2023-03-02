@@ -56,7 +56,7 @@ buffer_list_t *device_open_buffer_list2(device_t *dev, const char *path, bool do
 {
   char name[64];
   int index = 0;
-  buffer_list_t *buf_list;
+  buffer_list_t *buf_list = NULL;
 
   if (!dev) {
     return NULL;
