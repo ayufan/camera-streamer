@@ -52,6 +52,7 @@ log_options_t log_options = {
 
 rtsp_options_t rtsp_options = {
   .port = 0,
+  .allow_truncated = false
 };
 
 webrtc_options_t webrtc_options = {

@@ -2,6 +2,7 @@
 
 typedef struct rtsp_options_s {
   bool running;
+  bool allow_truncated;
   uint port;
   int clients;
   int frames;
