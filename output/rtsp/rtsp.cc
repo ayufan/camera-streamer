@@ -15,6 +15,15 @@ extern "C" {
 
 #ifdef USE_RTSP
 
+#include <string>
+#include <memory>
+#include <optional>
+#include <mutex>
+#include <condition_variable>
+#include <atomic>
+#include <chrono>
+#include <set>
+
 #include <BasicUsageEnvironment.hh>
 #include <RTSPServerSupportingHTTPStreaming.hh>
 #include <OnDemandServerMediaSubsession.hh>
@@ -22,8 +31,8 @@ extern "C" {
 #include <H264VideoRTPSink.hh>
 
 static pthread_t rtsp_thread;
-static pthread_mutex_t rtsp_lock = PTHREAD_RECURSIVE_MUTEX_INITIALIZER_NP;
-static class DynamicH264Stream *rtsp_streams;
+static std::set<class DynamicH264Stream *> rtsp_streams;
+static std::recursive_mutex rtsp_streams_lock;
 static rtsp_options_t *rtsp_options;
 
 static const char *stream_name = "stream.h264";
@@ -38,32 +47,18 @@ public:
 
   void doGetNextFrame()
   {
-    pthread_mutex_lock(&rtsp_lock);
+    std::unique_lock lk(rtsp_streams_lock);
     if (!fHaveStartedReading) {
-      pNextStream = rtsp_streams;
-      rtsp_streams = this;
+      rtsp_streams.insert(this);
       fHaveStartedReading = True;
     }
-    pthread_mutex_unlock(&rtsp_lock);
   }
 
   void doStopGettingFrames()
   {
-    pthread_mutex_lock(&rtsp_lock);
-    if (fHaveStartedReading) {
-      DynamicH264Stream **streamp = &rtsp_streams;
-      while (*streamp) {
-        if (*streamp == this) {
-          *streamp = pNextStream;
-          pNextStream = NULL;
-          break;
-        }
-        streamp = &(*streamp)->pNextStream;
-      }
-      fHaveStartedReading = False;
-    }
-    fFrameWaiting = False;
-    pthread_mutex_unlock(&rtsp_lock);
+    std::unique_lock lk(rtsp_streams_lock);
+    rtsp_streams.erase(this);
+    fHaveStartedReading = false;
   }
 
   void receiveData(buffer_t *buf)
@@ -200,16 +195,13 @@ protected: // redefined virtual functions
 
 static void rtsp_frame_finish()
 {
-  pthread_mutex_lock(&rtsp_lock);
-  int clients = 0;
-  for (DynamicH264Stream *stream = rtsp_streams; stream; stream = stream->pNextStream) {
+  std::unique_lock lk(rtsp_streams_lock);
+  for (auto *stream : rtsp_streams) {
     stream->doFinishFrameGet();
-    clients++;
   }
   if (rtsp_options) {
-    rtsp_options->clients = clients;
+    rtsp_options->clients = rtsp_streams.size();
   }
-  pthread_mutex_unlock(&rtsp_lock);
 }
 
 static void *rtsp_server_thread(void *opaque)
@@ -226,23 +218,16 @@ static void *rtsp_server_thread(void *opaque)
 
 static bool rtsp_h264_needs_buffer(buffer_lock_t *buf_lock)
 {
-  bool needsBuffer = false;
-
-  pthread_mutex_lock(&rtsp_lock);
-  for (DynamicH264Stream *stream = rtsp_streams; stream; stream = stream->pNextStream) {
-    needsBuffer = true;
-  }
-  pthread_mutex_unlock(&rtsp_lock);
-  return needsBuffer;
+  std::unique_lock lk(rtsp_streams_lock);
+  return rtsp_streams.size() > 0;
 }
 
 static void rtsp_h264_capture(buffer_lock_t *buf_lock, buffer_t *buf)
 {
-  pthread_mutex_lock(&rtsp_lock);
-  for (DynamicH264Stream *stream = rtsp_streams; stream; stream = stream->pNextStream) {
+  std::unique_lock lk(rtsp_streams_lock);
+  for (auto *stream : rtsp_streams) {
     stream->receiveData(buf);
   }
-  pthread_mutex_unlock(&rtsp_lock);
 }
 
 extern "C" int rtsp_server(rtsp_options_t *options)
