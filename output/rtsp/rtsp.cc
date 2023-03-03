@@ -24,6 +24,7 @@ extern "C" {
 static pthread_t rtsp_thread;
 static pthread_mutex_t rtsp_lock = PTHREAD_RECURSIVE_MUTEX_INITIALIZER_NP;
 static class DynamicH264Stream *rtsp_streams;
+static rtsp_options_t *rtsp_options;
 
 static const char *stream_name = "stream.h264";
 
@@ -31,7 +32,7 @@ class DynamicH264Stream : public FramedSource
 {
 public:
   DynamicH264Stream(UsageEnvironment& env)
-    : FramedSource(env), fHaveStartedReading(False)
+    : FramedSource(env), fHaveStartedReading(False), fFrameWaiting(False)
   {
   }
 
@@ -61,12 +62,16 @@ public:
       }
       fHaveStartedReading = False;
     }
+    fFrameWaiting = False;
     pthread_mutex_unlock(&rtsp_lock);
   }
 
   void receiveData(buffer_t *buf)
   {
-    if (!isCurrentlyAwaitingData()) {
+    if (!isCurrentlyAwaitingData() || fFrameWaiting) {
+      if (rtsp_options) {
+        rtsp_options->dropped++;
+      }
       return; // we're not ready for the data yet
     }
 
@@ -79,27 +84,42 @@ public:
         device_video_force_key(buf->buf_list->dev);
         fRequestedKeyFrame = true;
       }
+      if (rtsp_options) {
+        rtsp_options->dropped++;
+      }
       return;
     }
+
+    rtsp_options->frames++;
 
     if (buf->used > fMaxSize) {
       fNumTruncatedBytes = buf->used - fMaxSize;
       fFrameSize = fMaxSize;
+      if (rtsp_options) {
+        rtsp_options->truncated++;
+      }
     } else {
       fNumTruncatedBytes = 0;
       fFrameSize = buf->used;
     }
 
     memcpy(fTo, buf->start, fFrameSize);
+    fFrameWaiting = true;
+  }
 
-    // Tell our client that we have new data
-    nextTask() = envir().taskScheduler().scheduleDelayedTask(
-      0, (TaskFunc*)FramedSource::afterGetting, this);
+  void doFinishFrameGet()
+  {
+    if (fFrameWaiting) {
+      // Tell our client that we have new data
+      fFrameWaiting = false;
+      afterGetting(this);
+    }
   }
 
   Boolean fHaveStartedReading;
   Boolean fHadKeyFrame;
   Boolean fRequestedKeyFrame;
+  Boolean fFrameWaiting;
 
   DynamicH264Stream *pNextStream;
 };
@@ -178,10 +198,29 @@ protected: // redefined virtual functions
   }
 };
 
+static void rtsp_frame_finish()
+{
+  pthread_mutex_lock(&rtsp_lock);
+  int clients = 0;
+  for (DynamicH264Stream *stream = rtsp_streams; stream; stream = stream->pNextStream) {
+    stream->doFinishFrameGet();
+    clients++;
+  }
+  if (rtsp_options) {
+    rtsp_options->clients = clients;
+  }
+  pthread_mutex_unlock(&rtsp_lock);
+}
+
 static void *rtsp_server_thread(void *opaque)
 {
   UsageEnvironment* env = (UsageEnvironment*)opaque;
-  env->taskScheduler().doEventLoop(); // does not return
+  BasicTaskScheduler0* taskScheduler = (BasicTaskScheduler*)&env->taskScheduler();
+
+  while(true) {
+    rtsp_frame_finish();
+    taskScheduler->SingleStep(0);
+  }
   return NULL;
 }
 
@@ -208,6 +247,8 @@ static void rtsp_h264_capture(buffer_lock_t *buf_lock, buffer_t *buf)
 
 extern "C" int rtsp_server(rtsp_options_t *options)
 {
+  rtsp_options = options;
+
   // Begin by setting up our usage environment:
   TaskScheduler* scheduler = BasicTaskScheduler::createNew();
   UsageEnvironment* env = BasicUsageEnvironment::createNew(*scheduler);

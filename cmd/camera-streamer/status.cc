@@ -135,5 +135,12 @@ extern "C" void camera_status_json(http_worker_t *worker, FILE *stream)
   message["endpoints"]["stream"] = get_url(stream_lock.buf_list != NULL, "stream", "http", worker->host, http_options.port, "/stream");
   message["endpoints"]["snapshot"] = get_url(snapshot_lock.buf_list != NULL, "snapshot", "http", worker->host, http_options.port, "/stream");
 
+  if (rtsp_options.running) {
+    message["endpoints"]["rtsp"]["clients"] = rtsp_options.clients;
+    message["endpoints"]["rtsp"]["truncated"] = rtsp_options.truncated;
+    message["endpoints"]["rtsp"]["frames"] = rtsp_options.frames;
+    message["endpoints"]["rtsp"]["dropped"] = rtsp_options.dropped;
+  }
+
   http_write_response(stream, "200 OK", "application/json", message.dump().c_str(), 0);
 }
