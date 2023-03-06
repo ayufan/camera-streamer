@@ -1,11 +1,24 @@
 #!/bin/bash
 
-set -x
+exec 2>&1
 
-v4l2-ctl --list-devices
+( set -x ; echo "$(cat /sys/firmware/devicetree/base/model | tr -d '\0')" )
+
+( set -x ; uname -a )
+
+( set -x ; v4l2-ctl --list-devices )
 
 for device in /dev/video*; do
-  v4l2-ctl -d "$device" -L
-  v4l2-ctl -d "$device" --list-formats-out
-  v4l2-ctl -d "$device" --list-formats-ext
+  echo "===================================="
+  echo "DEVICE: $device"
+  echo "===================================="
+  (
+    set -x
+    v4l2-ctl -d "$device" --info \
+    --list-formats-ext --list-fields \
+    --list-formats-out --list-fields-out
+  ) | while IFS= read -r LINE; do
+    printf "%s | %s\n" "$device" "$LINE"
+  done
+  echo
 done
