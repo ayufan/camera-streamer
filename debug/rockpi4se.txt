@@ -1,0 +1,282 @@
+pi@rockpi-4b:~/camera-streamer$ ./tools/dump_cameras.sh
+++ cat /sys/firmware/devicetree/base/model
+++ tr -d '\0'
++ echo 'Radxa ROCK Pi 4B'
+Radxa ROCK Pi 4B
++ uname -a
+Linux rockpi-4b 5.15.93-rockchip64 #23.02.2 SMP PREEMPT Fri Feb 17 23:48:36 UTC 2023 aarch64 GNU/Linux
++ v4l2-ctl --list-devices
+rockchip,rk3399-vpu-enc (platform: hantro-vpu):
+	/dev/video3
+	/dev/video4
+	/dev/media1
+
+rockchip-rga (platform:rga):
+	/dev/video0
+
+rkvdec (platform:rkvdec):
+	/dev/video2
+	/dev/media0
+
+rockchip-iep (platform:rockchip-iep):
+	/dev/video1
+
+====================================
+DEVICE: /dev/video0
+====================================
++ v4l2-ctl -d /dev/video0 --info --list-formats-ext --list-fields --list-formats-out --list-fields-out
+/dev/video0 | Driver Info:
+/dev/video0 | 	Driver name      : rockchip-rga
+/dev/video0 | 	Card type        : rockchip-rga
+/dev/video0 | 	Bus info         : platform:rga
+/dev/video0 | 	Driver version   : 5.15.93
+/dev/video0 | 	Capabilities     : 0x84208000
+/dev/video0 | 		Video Memory-to-Memory
+/dev/video0 | 		Streaming
+/dev/video0 | 		Extended Pix Format
+/dev/video0 | 		Device Capabilities
+/dev/video0 | 	Device Caps      : 0x04208000
+/dev/video0 | 		Video Memory-to-Memory
+/dev/video0 | 		Streaming
+/dev/video0 | 		Extended Pix Format
+/dev/video0 | ioctl: VIDIOC_ENUM_FMT
+/dev/video0 | 	Type: Video Capture
+/dev/video0 |
+/dev/video0 | 	[0]: 'BA24' (32-bit ARGB 8-8-8-8)
+/dev/video0 | 	[1]: 'BX24' (32-bit XRGB 8-8-8-8)
+/dev/video0 | 	[2]: 'AR24' (32-bit BGRA 8-8-8-8)
+/dev/video0 | 	[3]: 'XR24' (32-bit BGRX 8-8-8-8)
+/dev/video0 | 	[4]: 'RGB3' (24-bit RGB 8-8-8)
+/dev/video0 | 	[5]: 'BGR3' (24-bit BGR 8-8-8)
+/dev/video0 | 	[6]: 'AR12' (16-bit ARGB 4-4-4-4)
+/dev/video0 | 	[7]: 'AR15' (16-bit ARGB 1-5-5-5)
+/dev/video0 | 	[8]: 'RGBP' (16-bit RGB 5-6-5)
+/dev/video0 | 	[9]: 'NV21' (Y/CrCb 4:2:0)
+/dev/video0 | 	[10]: 'NV61' (Y/CrCb 4:2:2)
+/dev/video0 | 	[11]: 'NV12' (Y/CbCr 4:2:0)
+/dev/video0 | 	[12]: 'NV16' (Y/CbCr 4:2:2)
+/dev/video0 | 	[13]: 'YU12' (Planar YUV 4:2:0)
+/dev/video0 | 	[14]: '422P' (Planar YUV 4:2:2)
+/dev/video0 | 	[15]: 'YV12' (Planar YVU 4:2:0)
+/dev/video0 | Supported Video Fields:
+/dev/video0 | 	None
+/dev/video0 | ioctl: VIDIOC_ENUM_FMT
+/dev/video0 | 	Type: Video Output
+/dev/video0 |
+/dev/video0 | 	[0]: 'BA24' (32-bit ARGB 8-8-8-8)
+/dev/video0 | 	[1]: 'BX24' (32-bit XRGB 8-8-8-8)
+/dev/video0 | 	[2]: 'AR24' (32-bit BGRA 8-8-8-8)
+/dev/video0 | 	[3]: 'XR24' (32-bit BGRX 8-8-8-8)
+/dev/video0 | 	[4]: 'RGB3' (24-bit RGB 8-8-8)
+/dev/video0 | 	[5]: 'BGR3' (24-bit BGR 8-8-8)
+/dev/video0 | 	[6]: 'AR12' (16-bit ARGB 4-4-4-4)
+/dev/video0 | 	[7]: 'AR15' (16-bit ARGB 1-5-5-5)
+/dev/video0 | 	[8]: 'RGBP' (16-bit RGB 5-6-5)
+/dev/video0 | 	[9]: 'NV21' (Y/CrCb 4:2:0)
+/dev/video0 | 	[10]: 'NV61' (Y/CrCb 4:2:2)
+/dev/video0 | 	[11]: 'NV12' (Y/CbCr 4:2:0)
+/dev/video0 | 	[12]: 'NV16' (Y/CbCr 4:2:2)
+/dev/video0 | 	[13]: 'YU12' (Planar YUV 4:2:0)
+/dev/video0 | 	[14]: '422P' (Planar YUV 4:2:2)
+/dev/video0 | 	[15]: 'YV12' (Planar YVU 4:2:0)
+/dev/video0 | Supported Video Output Fields:
+/dev/video0 | 	None
+
+====================================
+DEVICE: /dev/video1
+====================================
++ v4l2-ctl -d /dev/video1 --info --list-formats-ext --list-fields --list-formats-out --list-fields-out
+/dev/video1 | Driver Info:
+/dev/video1 | 	Driver name      : rockchip-iep
+/dev/video1 | 	Card type        : rockchip-iep
+/dev/video1 | 	Bus info         : platform:rockchip-iep
+/dev/video1 | 	Driver version   : 5.15.93
+/dev/video1 | 	Capabilities     : 0x84208000
+/dev/video1 | 		Video Memory-to-Memory
+/dev/video1 | 		Streaming
+/dev/video1 | 		Extended Pix Format
+/dev/video1 | 		Device Capabilities
+/dev/video1 | 	Device Caps      : 0x04208000
+/dev/video1 | 		Video Memory-to-Memory
+/dev/video1 | 		Streaming
+/dev/video1 | 		Extended Pix Format
+/dev/video1 | ioctl: VIDIOC_ENUM_FMT
+/dev/video1 | 	Type: Video Capture
+/dev/video1 |
+/dev/video1 | 	[0]: 'NV12' (Y/CbCr 4:2:0)
+/dev/video1 | 		Size: Stepwise 320x240 - 1920x1088 with step 16/16
+/dev/video1 | 	[1]: 'NV21' (Y/CrCb 4:2:0)
+/dev/video1 | 		Size: Stepwise 320x240 - 1920x1088 with step 16/16
+/dev/video1 | 	[2]: 'NV16' (Y/CbCr 4:2:2)
+/dev/video1 | 		Size: Stepwise 320x240 - 1920x1088 with step 16/16
+/dev/video1 | 	[3]: 'NV61' (Y/CrCb 4:2:2)
+/dev/video1 | 		Size: Stepwise 320x240 - 1920x1088 with step 16/16
+/dev/video1 | 	[4]: 'YU12' (Planar YUV 4:2:0)
+/dev/video1 | 		Size: Stepwise 320x240 - 1920x1088 with step 16/16
+/dev/video1 | 	[5]: '422P' (Planar YUV 4:2:2)
+/dev/video1 | 		Size: Stepwise 320x240 - 1920x1088 with step 16/16
+/dev/video1 | Supported Video Fields:
+/dev/video1 | 	None
+/dev/video1 | ioctl: VIDIOC_ENUM_FMT
+/dev/video1 | 	Type: Video Output
+/dev/video1 |
+/dev/video1 | 	[0]: 'NV12' (Y/CbCr 4:2:0)
+/dev/video1 | 	[1]: 'NV21' (Y/CrCb 4:2:0)
+/dev/video1 | 	[2]: 'NV16' (Y/CbCr 4:2:2)
+/dev/video1 | 	[3]: 'NV61' (Y/CrCb 4:2:2)
+/dev/video1 | 	[4]: 'YU12' (Planar YUV 4:2:0)
+/dev/video1 | 	[5]: '422P' (Planar YUV 4:2:2)
+/dev/video1 | Supported Video Output Fields:
+/dev/video1 | 	Interlaced
+/dev/video1 | 	Interlaced Top-Bottom
+/dev/video1 | 	Interlaced Bottom-Top
+
+====================================
+DEVICE: /dev/video2
+====================================
++ v4l2-ctl -d /dev/video2 --info --list-formats-ext --list-fields --list-formats-out --list-fields-out
+/dev/video2 | Driver Info:
+/dev/video2 | 	Driver name      : rkvdec
+/dev/video2 | 	Card type        : rkvdec
+/dev/video2 | 	Bus info         : platform:rkvdec
+/dev/video2 | 	Driver version   : 5.15.93
+/dev/video2 | 	Capabilities     : 0x84204000
+/dev/video2 | 		Video Memory-to-Memory Multiplanar
+/dev/video2 | 		Streaming
+/dev/video2 | 		Extended Pix Format
+/dev/video2 | 		Device Capabilities
+/dev/video2 | 	Device Caps      : 0x04204000
+/dev/video2 | 		Video Memory-to-Memory Multiplanar
+/dev/video2 | 		Streaming
+/dev/video2 | 		Extended Pix Format
+/dev/video2 | Media Driver Info:
+/dev/video2 | 	Driver name      : rkvdec
+/dev/video2 | 	Model            : rkvdec
+/dev/video2 | 	Serial           :
+/dev/video2 | 	Bus info         : platform:rkvdec
+/dev/video2 | 	Media version    : 5.15.93
+/dev/video2 | 	Hardware revision: 0x00000000 (0)
+/dev/video2 | 	Driver version   : 5.15.93
+/dev/video2 | Interface Info:
+/dev/video2 | 	ID               : 0x0300000c
+/dev/video2 | 	Type             : V4L Video
+/dev/video2 | Entity Info:
+/dev/video2 | 	ID               : 0x00000001 (1)
+/dev/video2 | 	Name             : rkvdec-source
+/dev/video2 | 	Function         : V4L2 I/O
+/dev/video2 | 	Pad 0x01000002   : 0: Source
+/dev/video2 | 	  Link 0x02000008: to remote pad 0x1000004 of entity 'rkvdec-proc': Data, Enabled, Immutable
+/dev/video2 | ioctl: VIDIOC_ENUM_FMT
+/dev/video2 | 	Type: Video Capture Multiplanar
+/dev/video2 |
+/dev/video2 | 	[0]: 'NV12' (Y/CbCr 4:2:0)
+/dev/video2 | Supported Video Fields:
+/dev/video2 | 	None
+/dev/video2 | ioctl: VIDIOC_ENUM_FMT
+/dev/video2 | 	Type: Video Output Multiplanar
+/dev/video2 |
+/dev/video2 | 	[0]: 'S264' (H.264 Parsed Slice Data, compressed)
+/dev/video2 | Supported Video Output Fields:
+/dev/video2 | 	None
+
+====================================
+DEVICE: /dev/video3
+====================================
++ v4l2-ctl -d /dev/video3 --info --list-formats-ext --list-fields --list-formats-out --list-fields-out
+/dev/video3 | Driver Info:
+/dev/video3 | 	Driver name      : hantro-vpu
+/dev/video3 | 	Card type        : rockchip,rk3399-vpu-enc
+/dev/video3 | 	Bus info         : platform: hantro-vpu
+/dev/video3 | 	Driver version   : 5.15.93
+/dev/video3 | 	Capabilities     : 0x84204000
+/dev/video3 | 		Video Memory-to-Memory Multiplanar
+/dev/video3 | 		Streaming
+/dev/video3 | 		Extended Pix Format
+/dev/video3 | 		Device Capabilities
+/dev/video3 | 	Device Caps      : 0x04204000
+/dev/video3 | 		Video Memory-to-Memory Multiplanar
+/dev/video3 | 		Streaming
+/dev/video3 | 		Extended Pix Format
+/dev/video3 | Media Driver Info:
+/dev/video3 | 	Driver name      : hantro-vpu
+/dev/video3 | 	Model            : hantro-vpu
+/dev/video3 | 	Serial           :
+/dev/video3 | 	Bus info         : platform: hantro-vpu
+/dev/video3 | 	Media version    : 5.15.93
+/dev/video3 | 	Hardware revision: 0x00000000 (0)
+/dev/video3 | 	Driver version   : 5.15.93
+/dev/video3 | Interface Info:
+/dev/video3 | 	ID               : 0x0300000c
+/dev/video3 | 	Type             : V4L Video
+/dev/video3 | Entity Info:
+/dev/video3 | 	ID               : 0x00000001 (1)
+/dev/video3 | 	Name             : rockchip,rk3399-vpu-enc-source
+/dev/video3 | 	Function         : V4L2 I/O
+/dev/video3 | 	Pad 0x01000002   : 0: Source
+/dev/video3 | 	  Link 0x02000008: to remote pad 0x1000004 of entity 'rockchip,rk3399-vpu-enc-proc': Data, Enabled, Immutable
+/dev/video3 | ioctl: VIDIOC_ENUM_FMT
+/dev/video3 | 	Type: Video Capture Multiplanar
+/dev/video3 |
+/dev/video3 | 	[0]: 'JPEG' (JFIF JPEG, compressed)
+/dev/video3 | 		Size: Stepwise 96x32 - 8192x8192 with step 16/16
+/dev/video3 | Supported Video Fields:
+/dev/video3 | 	None
+/dev/video3 | ioctl: VIDIOC_ENUM_FMT
+/dev/video3 | 	Type: Video Output Multiplanar
+/dev/video3 |
+/dev/video3 | 	[0]: 'YM12' (Planar YUV 4:2:0 (N-C))
+/dev/video3 | 	[1]: 'NM12' (Y/CbCr 4:2:0 (N-C))
+/dev/video3 | 	[2]: 'YUYV' (YUYV 4:2:2)
+/dev/video3 | 	[3]: 'UYVY' (UYVY 4:2:2)
+/dev/video3 | Supported Video Output Fields:
+/dev/video3 | 	None
+
+====================================
+DEVICE: /dev/video4
+====================================
++ v4l2-ctl -d /dev/video4 --info --list-formats-ext --list-fields --list-formats-out --list-fields-out
+/dev/video4 | Driver Info:
+/dev/video4 | 	Driver name      : hantro-vpu
+/dev/video4 | 	Card type        : rockchip,rk3399-vpu-dec
+/dev/video4 | 	Bus info         : platform: hantro-vpu
+/dev/video4 | 	Driver version   : 5.15.93
+/dev/video4 | 	Capabilities     : 0x84204000
+/dev/video4 | 		Video Memory-to-Memory Multiplanar
+/dev/video4 | 		Streaming
+/dev/video4 | 		Extended Pix Format
+/dev/video4 | 		Device Capabilities
+/dev/video4 | 	Device Caps      : 0x04204000
+/dev/video4 | 		Video Memory-to-Memory Multiplanar
+/dev/video4 | 		Streaming
+/dev/video4 | 		Extended Pix Format
+/dev/video4 | Media Driver Info:
+/dev/video4 | 	Driver name      : hantro-vpu
+/dev/video4 | 	Model            : hantro-vpu
+/dev/video4 | 	Serial           :
+/dev/video4 | 	Bus info         : platform: hantro-vpu
+/dev/video4 | 	Media version    : 5.15.93
+/dev/video4 | 	Hardware revision: 0x00000000 (0)
+/dev/video4 | 	Driver version   : 5.15.93
+/dev/video4 | Interface Info:
+/dev/video4 | 	ID               : 0x0300001a
+/dev/video4 | 	Type             : V4L Video
+/dev/video4 | Entity Info:
+/dev/video4 | 	ID               : 0x0000000f (15)
+/dev/video4 | 	Name             : rockchip,rk3399-vpu-dec-source
+/dev/video4 | 	Function         : V4L2 I/O
+/dev/video4 | 	Pad 0x01000010   : 0: Source
+/dev/video4 | 	  Link 0x02000016: to remote pad 0x1000012 of entity 'rockchip,rk3399-vpu-dec-proc': Data, Enabled, Immutable
+/dev/video4 | ioctl: VIDIOC_ENUM_FMT
+/dev/video4 | 	Type: Video Capture Multiplanar
+/dev/video4 |
+/dev/video4 | 	[0]: 'NV12' (Y/CbCr 4:2:0)
+/dev/video4 | Supported Video Fields:
+/dev/video4 | 	None
+/dev/video4 | ioctl: VIDIOC_ENUM_FMT
+/dev/video4 | 	Type: Video Output Multiplanar
+/dev/video4 |
+/dev/video4 | 	[0]: 'S264' (H.264 Parsed Slice Data, compressed)
+/dev/video4 | 	[1]: 'MG2S' (MPEG-2 Parsed Slice Data, compressed)
+/dev/video4 | 	[2]: 'VP8F' (VP8 Frame, compressed)
+/dev/video4 | Supported Video Output Fields:
+/dev/video4 | 	None
