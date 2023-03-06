@@ -1,0 +1,1366 @@
+++ cat /sys/firmware/devicetree/base/model
+++ tr -d '\0'
++ echo 'Raspberry Pi 4 Model B Rev 1.1'
+Raspberry Pi 4 Model B Rev 1.1
++ uname -a
+Linux mainsailos 5.15.84-v7l+ #1613 SMP Thu Jan 5 12:01:26 GMT 2023 armv7l GNU/Linux
++ v4l2-ctl --list-devices
+bcm2835-codec-decode (platform:bcm2835-codec):
+	/dev/video10
+	/dev/video11
+	/dev/video12
+	/dev/video18
+	/dev/video31
+	/dev/media3
+
+bcm2835-isp (platform:bcm2835-isp):
+	/dev/video13
+	/dev/video14
+	/dev/video15
+	/dev/video16
+	/dev/video20
+	/dev/video21
+	/dev/video22
+	/dev/video23
+	/dev/media1
+	/dev/media2
+
+unicam (platform:fe801000.csi):
+	/dev/video0
+	/dev/video1
+	/dev/media4
+
+rpivid (platform:rpivid):
+	/dev/video19
+	/dev/media0
+
+Webcam: Webcam (usb-0000:01:00.0-1.1):
+	/dev/video2
+	/dev/video3
+	/dev/media5
+
+====================================
+DEVICE: /dev/video0
+====================================
++ v4l2-ctl -d /dev/video0 --info --list-formats-ext --list-fields --list-formats-out --list-fields-out
+/dev/video0 | Driver Info:
+/dev/video0 | 	Driver name      : unicam
+/dev/video0 | 	Card type        : unicam
+/dev/video0 | 	Bus info         : platform:fe801000.csi
+/dev/video0 | 	Driver version   : 5.15.84
+/dev/video0 | 	Capabilities     : 0xa5a00001
+/dev/video0 | 		Video Capture
+/dev/video0 | 		Metadata Capture
+/dev/video0 | 		Read/Write
+/dev/video0 | 		Streaming
+/dev/video0 | 		Extended Pix Format
+/dev/video0 | 		Device Capabilities
+/dev/video0 | 	Device Caps      : 0x25200001
+/dev/video0 | 		Video Capture
+/dev/video0 | 		Read/Write
+/dev/video0 | 		Streaming
+/dev/video0 | 		Extended Pix Format
+/dev/video0 | Media Driver Info:
+/dev/video0 | 	Driver name      : unicam
+/dev/video0 | 	Model            : unicam
+/dev/video0 | 	Serial           : 
+/dev/video0 | 	Bus info         : platform:fe801000.csi
+/dev/video0 | 	Media version    : 5.15.84
+/dev/video0 | 	Hardware revision: 0x00000000 (0)
+/dev/video0 | 	Driver version   : 5.15.84
+/dev/video0 | Interface Info:
+/dev/video0 | 	ID               : 0x03000006
+/dev/video0 | 	Type             : V4L Video
+/dev/video0 | Entity Info:
+/dev/video0 | 	ID               : 0x00000004 (4)
+/dev/video0 | 	Name             : unicam-image
+/dev/video0 | 	Function         : V4L2 I/O
+/dev/video0 | 	Flags         : default
+/dev/video0 | 	Pad 0x01000005   : 0: Sink
+/dev/video0 | 	  Link 0x02000008: from remote pad 0x1000002 of entity 'imx519 10-001a': Data, Enabled, Immutable
+/dev/video0 | ioctl: VIDIOC_ENUM_FMT
+/dev/video0 | 	Type: Video Capture
+/dev/video0 | 
+/dev/video0 | 	[0]: 'YUYV' (YUYV 4:2:2)
+/dev/video0 | 		Size: Stepwise 16x16 - 16376x16376 with step 1/1
+/dev/video0 | 	[1]: 'UYVY' (UYVY 4:2:2)
+/dev/video0 | 		Size: Stepwise 16x16 - 16376x16376 with step 1/1
+/dev/video0 | 	[2]: 'YVYU' (YVYU 4:2:2)
+/dev/video0 | 		Size: Stepwise 16x16 - 16376x16376 with step 1/1
+/dev/video0 | 	[3]: 'VYUY' (VYUY 4:2:2)
+/dev/video0 | 		Size: Stepwise 16x16 - 16376x16376 with step 1/1
+/dev/video0 | 	[4]: 'RGBP' (16-bit RGB 5-6-5)
+/dev/video0 | 		Size: Stepwise 16x16 - 16376x16376 with step 1/1
+/dev/video0 | 	[5]: 'RGBR' (16-bit RGB 5-6-5 BE)
+/dev/video0 | 		Size: Stepwise 16x16 - 16376x16376 with step 1/1
+/dev/video0 | 	[6]: 'RGBO' (16-bit A/XRGB 1-5-5-5)
+/dev/video0 | 		Size: Stepwise 16x16 - 16376x16376 with step 1/1
+/dev/video0 | 	[7]: 'RGBQ' (16-bit A/XRGB 1-5-5-5 BE)
+/dev/video0 | 		Size: Stepwise 16x16 - 16376x16376 with step 1/1
+/dev/video0 | 	[8]: 'RGB3' (24-bit RGB 8-8-8)
+/dev/video0 | 		Size: Stepwise 16x16 - 16376x16376 with step 1/1
+/dev/video0 | 	[9]: 'BGR3' (24-bit BGR 8-8-8)
+/dev/video0 | 		Size: Stepwise 16x16 - 16376x16376 with step 1/1
+/dev/video0 | 	[10]: 'RGB4' (32-bit A/XRGB 8-8-8-8)
+/dev/video0 | 		Size: Stepwise 16x16 - 16376x16376 with step 1/1
+/dev/video0 | 	[11]: 'BA81' (8-bit Bayer BGBG/GRGR)
+/dev/video0 | 		Size: Stepwise 16x16 - 16376x16376 with step 1/1
+/dev/video0 | 	[12]: 'GBRG' (8-bit Bayer GBGB/RGRG)
+/dev/video0 | 		Size: Stepwise 16x16 - 16376x16376 with step 1/1
+/dev/video0 | 	[13]: 'GRBG' (8-bit Bayer GRGR/BGBG)
+/dev/video0 | 		Size: Stepwise 16x16 - 16376x16376 with step 1/1
+/dev/video0 | 	[14]: 'RGGB' (8-bit Bayer RGRG/GBGB)
+/dev/video0 | 		Size: Stepwise 16x16 - 16376x16376 with step 1/1
+/dev/video0 | 	[15]: 'pBAA' (10-bit Bayer BGBG/GRGR Packed)
+/dev/video0 | 		Size: Stepwise 16x16 - 16376x16376 with step 1/1
+/dev/video0 | 	[16]: 'BG10' (10-bit Bayer BGBG/GRGR)
+/dev/video0 | 		Size: Stepwise 16x16 - 16376x16376 with step 1/1
+/dev/video0 | 	[17]: 'pGAA' (10-bit Bayer GBGB/RGRG Packed)
+/dev/video0 | 		Size: Stepwise 16x16 - 16376x16376 with step 1/1
+/dev/video0 | 	[18]: 'GB10' (10-bit Bayer GBGB/RGRG)
+/dev/video0 | 		Size: Stepwise 16x16 - 16376x16376 with step 1/1
+/dev/video0 | 	[19]: 'pgAA' (10-bit Bayer GRGR/BGBG Packed)
+/dev/video0 | 		Size: Stepwise 16x16 - 16376x16376 with step 1/1
+/dev/video0 | 	[20]: 'BA10' (10-bit Bayer GRGR/BGBG)
+/dev/video0 | 		Size: Stepwise 16x16 - 16376x16376 with step 1/1
+/dev/video0 | 	[21]: 'pRAA' (10-bit Bayer RGRG/GBGB Packed)
+/dev/video0 | 		Size: Stepwise 16x16 - 16376x16376 with step 1/1
+/dev/video0 | 	[22]: 'RG10' (10-bit Bayer RGRG/GBGB)
+/dev/video0 | 		Size: Stepwise 16x16 - 16376x16376 with step 1/1
+/dev/video0 | 	[23]: 'pBCC' (12-bit Bayer BGBG/GRGR Packed)
+/dev/video0 | 		Size: Stepwise 16x16 - 16376x16376 with step 1/1
+/dev/video0 | 	[24]: 'BG12' (12-bit Bayer BGBG/GRGR)
+/dev/video0 | 		Size: Stepwise 16x16 - 16376x16376 with step 1/1
+/dev/video0 | 	[25]: 'pGCC' (12-bit Bayer GBGB/RGRG Packed)
+/dev/video0 | 		Size: Stepwise 16x16 - 16376x16376 with step 1/1
+/dev/video0 | 	[26]: 'GB12' (12-bit Bayer GBGB/RGRG)
+/dev/video0 | 		Size: Stepwise 16x16 - 16376x16376 with step 1/1
+/dev/video0 | 	[27]: 'pgCC' (12-bit Bayer GRGR/BGBG Packed)
+/dev/video0 | 		Size: Stepwise 16x16 - 16376x16376 with step 1/1
+/dev/video0 | 	[28]: 'BA12' (12-bit Bayer GRGR/BGBG)
+/dev/video0 | 		Size: Stepwise 16x16 - 16376x16376 with step 1/1
+/dev/video0 | 	[29]: 'pRCC' (12-bit Bayer RGRG/GBGB Packed)
+/dev/video0 | 		Size: Stepwise 16x16 - 16376x16376 with step 1/1
+/dev/video0 | 	[30]: 'RG12' (12-bit Bayer RGRG/GBGB)
+/dev/video0 | 		Size: Stepwise 16x16 - 16376x16376 with step 1/1
+/dev/video0 | 	[31]: 'pBEE' (14-bit Bayer BGBG/GRGR Packed)
+/dev/video0 | 		Size: Stepwise 16x16 - 16376x16376 with step 1/1
+/dev/video0 | 	[32]: 'BG14' (14-bit Bayer BGBG/GRGR)
+/dev/video0 | 		Size: Stepwise 16x16 - 16376x16376 with step 1/1
+/dev/video0 | 	[33]: 'pGEE' (14-bit Bayer GBGB/RGRG Packed)
+/dev/video0 | 		Size: Stepwise 16x16 - 16376x16376 with step 1/1
+/dev/video0 | 	[34]: 'GB14' (14-bit Bayer GBGB/RGRG)
+/dev/video0 | 		Size: Stepwise 16x16 - 16376x16376 with step 1/1
+/dev/video0 | 	[35]: 'pgEE' (14-bit Bayer GRGR/BGBG Packed)
+/dev/video0 | 		Size: Stepwise 16x16 - 16376x16376 with step 1/1
+/dev/video0 | 	[36]: 'GR14' (14-bit Bayer GRGR/BGBG)
+/dev/video0 | 		Size: Stepwise 16x16 - 16376x16376 with step 1/1
+/dev/video0 | 	[37]: 'pREE' (14-bit Bayer RGRG/GBGB Packed)
+/dev/video0 | 		Size: Stepwise 16x16 - 16376x16376 with step 1/1
+/dev/video0 | 	[38]: 'RG14' (14-bit Bayer RGRG/GBGB)
+/dev/video0 | 		Size: Stepwise 16x16 - 16376x16376 with step 1/1
+/dev/video0 | 	[39]: 'GREY' (8-bit Greyscale)
+/dev/video0 | 		Size: Stepwise 16x16 - 16376x16376 with step 1/1
+/dev/video0 | 	[40]: 'Y10P' (10-bit Greyscale (MIPI Packed))
+/dev/video0 | 		Size: Stepwise 16x16 - 16376x16376 with step 1/1
+/dev/video0 | 	[41]: 'Y10 ' (10-bit Greyscale)
+/dev/video0 | 		Size: Stepwise 16x16 - 16376x16376 with step 1/1
+/dev/video0 | 	[42]: 'Y12P' (12-bit Greyscale (MIPI Packed))
+/dev/video0 | 		Size: Stepwise 16x16 - 16376x16376 with step 1/1
+/dev/video0 | 	[43]: 'Y12 ' (12-bit Greyscale)
+/dev/video0 | 		Size: Stepwise 16x16 - 16376x16376 with step 1/1
+/dev/video0 | 	[44]: 'Y14P' (14-bit Greyscale (MIPI Packed))
+/dev/video0 | 		Size: Stepwise 16x16 - 16376x16376 with step 1/1
+/dev/video0 | 	[45]: 'Y14 ' (14-bit Greyscale)
+/dev/video0 | 		Size: Stepwise 16x16 - 16376x16376 with step 1/1
+/dev/video0 | Supported Video Fields:
+/dev/video0 | 	None
+/dev/video0 | 	Top
+/dev/video0 | 	Bottom
+/dev/video0 | 	Interlaced
+/dev/video0 | 	Sequential Top-Bottom
+/dev/video0 | 	Sequential Bottom-Top
+/dev/video0 | 	Alternating
+/dev/video0 | 	Interlaced Top-Bottom
+/dev/video0 | 	Interlaced Bottom-Top
+/dev/video0 | ioctl: VIDIOC_ENUM_FMT
+/dev/video0 | 	Type: Video Output
+/dev/video0 | 
+
+====================================
+DEVICE: /dev/video1
+====================================
++ v4l2-ctl -d /dev/video1 --info --list-formats-ext --list-fields --list-formats-out --list-fields-out
+/dev/video1 | Driver Info:
+/dev/video1 | 	Driver name      : unicam
+/dev/video1 | 	Card type        : unicam
+/dev/video1 | 	Bus info         : platform:fe801000.csi
+/dev/video1 | 	Driver version   : 5.15.84
+/dev/video1 | 	Capabilities     : 0xa5a00001
+/dev/video1 | 		Video Capture
+/dev/video1 | 		Metadata Capture
+/dev/video1 | 		Read/Write
+/dev/video1 | 		Streaming
+/dev/video1 | 		Extended Pix Format
+/dev/video1 | 		Device Capabilities
+/dev/video1 | 	Device Caps      : 0x25a00000
+/dev/video1 | 		Metadata Capture
+/dev/video1 | 		Read/Write
+/dev/video1 | 		Streaming
+/dev/video1 | 		Extended Pix Format
+/dev/video1 | Media Driver Info:
+/dev/video1 | 	Driver name      : unicam
+/dev/video1 | 	Model            : unicam
+/dev/video1 | 	Serial           : 
+/dev/video1 | 	Bus info         : platform:fe801000.csi
+/dev/video1 | 	Media version    : 5.15.84
+/dev/video1 | 	Hardware revision: 0x00000000 (0)
+/dev/video1 | 	Driver version   : 5.15.84
+/dev/video1 | Interface Info:
+/dev/video1 | 	ID               : 0x0300000c
+/dev/video1 | 	Type             : V4L Video
+/dev/video1 | Entity Info:
+/dev/video1 | 	ID               : 0x0000000a (10)
+/dev/video1 | 	Name             : unicam-embedded
+/dev/video1 | 	Function         : V4L2 I/O
+/dev/video1 | 	Pad 0x0100000b   : 0: Sink
+/dev/video1 | 	  Link 0x0200000e: from remote pad 0x1000003 of entity 'imx519 10-001a': Data, Enabled, Immutable
+/dev/video1 | ioctl: VIDIOC_ENUM_FMT
+/dev/video1 | 	Type: Video Capture
+/dev/video1 | 
+/dev/video1 | ioctl: VIDIOC_ENUM_FMT
+/dev/video1 | 	Type: Video Output
+/dev/video1 | 
+
+====================================
+DEVICE: /dev/video10
+====================================
++ v4l2-ctl -d /dev/video10 --info --list-formats-ext --list-fields --list-formats-out --list-fields-out
+/dev/video10 | Driver Info:
+/dev/video10 | 	Driver name      : bcm2835-codec
+/dev/video10 | 	Card type        : bcm2835-codec-decode
+/dev/video10 | 	Bus info         : platform:bcm2835-codec
+/dev/video10 | 	Driver version   : 5.15.84
+/dev/video10 | 	Capabilities     : 0x84204000
+/dev/video10 | 		Video Memory-to-Memory Multiplanar
+/dev/video10 | 		Streaming
+/dev/video10 | 		Extended Pix Format
+/dev/video10 | 		Device Capabilities
+/dev/video10 | 	Device Caps      : 0x04204000
+/dev/video10 | 		Video Memory-to-Memory Multiplanar
+/dev/video10 | 		Streaming
+/dev/video10 | 		Extended Pix Format
+/dev/video10 | Media Driver Info:
+/dev/video10 | 	Driver name      : bcm2835-codec
+/dev/video10 | 	Model            : bcm2835-codec
+/dev/video10 | 	Serial           : 0000
+/dev/video10 | 	Bus info         : platform:bcm2835-codec
+/dev/video10 | 	Media version    : 5.15.84
+/dev/video10 | 	Hardware revision: 0x00000001 (1)
+/dev/video10 | 	Driver version   : 5.15.84
+/dev/video10 | Interface Info:
+/dev/video10 | 	ID               : 0x0300000c
+/dev/video10 | 	Type             : V4L Video
+/dev/video10 | Entity Info:
+/dev/video10 | 	ID               : 0x00000001 (1)
+/dev/video10 | 	Name             : bcm2835-codec-decode-source
+/dev/video10 | 	Function         : V4L2 I/O
+/dev/video10 | 	Pad 0x01000002   : 0: Source
+/dev/video10 | 	  Link 0x02000008: to remote pad 0x1000004 of entity 'bcm2835-codec-decode-proc': Data, Enabled, Immutable
+/dev/video10 | ioctl: VIDIOC_ENUM_FMT
+/dev/video10 | 	Type: Video Capture Multiplanar
+/dev/video10 | 
+/dev/video10 | 	[0]: 'YU12' (Planar YUV 4:2:0)
+/dev/video10 | 		Size: Stepwise 32x32 - 1920x1920 with step 2/2
+/dev/video10 | 	[1]: 'YV12' (Planar YVU 4:2:0)
+/dev/video10 | 		Size: Stepwise 32x32 - 1920x1920 with step 2/2
+/dev/video10 | 	[2]: 'NV12' (Y/CbCr 4:2:0)
+/dev/video10 | 		Size: Stepwise 32x32 - 1920x1920 with step 2/2
+/dev/video10 | 	[3]: 'NV21' (Y/CrCb 4:2:0)
+/dev/video10 | 		Size: Stepwise 32x32 - 1920x1920 with step 2/2
+/dev/video10 | 	[4]: 'NC12' (Y/CbCr 4:2:0 (128b cols))
+/dev/video10 | 		Size: Stepwise 32x32 - 1920x1920 with step 2/2
+/dev/video10 | 	[5]: 'RGBP' (16-bit RGB 5-6-5)
+/dev/video10 | 		Size: Stepwise 32x32 - 1920x1920 with step 2/2
+/dev/video10 | Supported Video Fields:
+/dev/video10 | 	None
+/dev/video10 | 	Interlaced
+/dev/video10 | 	Interlaced Top-Bottom
+/dev/video10 | 	Interlaced Bottom-Top
+/dev/video10 | ioctl: VIDIOC_ENUM_FMT
+/dev/video10 | 	Type: Video Output Multiplanar
+/dev/video10 | 
+/dev/video10 | 	[0]: 'H264' (H.264, compressed)
+/dev/video10 | 	[1]: 'MJPG' (Motion-JPEG, compressed)
+/dev/video10 | Supported Video Output Fields:
+/dev/video10 | 	None
+/dev/video10 | 	Interlaced
+/dev/video10 | 	Interlaced Top-Bottom
+/dev/video10 | 	Interlaced Bottom-Top
+
+====================================
+DEVICE: /dev/video11
+====================================
++ v4l2-ctl -d /dev/video11 --info --list-formats-ext --list-fields --list-formats-out --list-fields-out
+/dev/video11 | Driver Info:
+/dev/video11 | 	Driver name      : bcm2835-codec
+/dev/video11 | 	Card type        : bcm2835-codec-encode
+/dev/video11 | 	Bus info         : platform:bcm2835-codec
+/dev/video11 | 	Driver version   : 5.15.84
+/dev/video11 | 	Capabilities     : 0x84204000
+/dev/video11 | 		Video Memory-to-Memory Multiplanar
+/dev/video11 | 		Streaming
+/dev/video11 | 		Extended Pix Format
+/dev/video11 | 		Device Capabilities
+/dev/video11 | 	Device Caps      : 0x04204000
+/dev/video11 | 		Video Memory-to-Memory Multiplanar
+/dev/video11 | 		Streaming
+/dev/video11 | 		Extended Pix Format
+/dev/video11 | Media Driver Info:
+/dev/video11 | 	Driver name      : bcm2835-codec
+/dev/video11 | 	Model            : bcm2835-codec
+/dev/video11 | 	Serial           : 0000
+/dev/video11 | 	Bus info         : platform:bcm2835-codec
+/dev/video11 | 	Media version    : 5.15.84
+/dev/video11 | 	Hardware revision: 0x00000001 (1)
+/dev/video11 | 	Driver version   : 5.15.84
+/dev/video11 | Interface Info:
+/dev/video11 | 	ID               : 0x0300001a
+/dev/video11 | 	Type             : V4L Video
+/dev/video11 | Entity Info:
+/dev/video11 | 	ID               : 0x0000000f (15)
+/dev/video11 | 	Name             : bcm2835-codec-encode-source
+/dev/video11 | 	Function         : V4L2 I/O
+/dev/video11 | 	Pad 0x01000010   : 0: Source
+/dev/video11 | 	  Link 0x02000016: to remote pad 0x1000012 of entity 'bcm2835-codec-encode-proc': Data, Enabled, Immutable
+/dev/video11 | ioctl: VIDIOC_ENUM_FMT
+/dev/video11 | 	Type: Video Capture Multiplanar
+/dev/video11 | 
+/dev/video11 | 	[0]: 'H264' (H.264, compressed)
+/dev/video11 | 		Size: Stepwise 32x32 - 1920x1920 with step 2/2
+/dev/video11 | 	[1]: 'MJPG' (Motion-JPEG, compressed)
+/dev/video11 | 		Size: Stepwise 32x32 - 1920x1920 with step 2/2
+/dev/video11 | Supported Video Fields:
+/dev/video11 | 	None
+/dev/video11 | ioctl: VIDIOC_ENUM_FMT
+/dev/video11 | 	Type: Video Output Multiplanar
+/dev/video11 | 
+/dev/video11 | 	[0]: 'YU12' (Planar YUV 4:2:0)
+/dev/video11 | 	[1]: 'YV12' (Planar YVU 4:2:0)
+/dev/video11 | 	[2]: 'NV12' (Y/CbCr 4:2:0)
+/dev/video11 | 	[3]: 'NV21' (Y/CrCb 4:2:0)
+/dev/video11 | 	[4]: 'RGBP' (16-bit RGB 5-6-5)
+/dev/video11 | 	[5]: 'RGB3' (24-bit RGB 8-8-8)
+/dev/video11 | 	[6]: 'BGR3' (24-bit BGR 8-8-8)
+/dev/video11 | 	[7]: 'AB24' (32-bit RGBA 8-8-8-8)
+/dev/video11 | 	[8]: 'BGR4' (32-bit BGRA/X 8-8-8-8)
+/dev/video11 | 	[9]: 'YUYV' (YUYV 4:2:2)
+/dev/video11 | 	[10]: 'YVYU' (YVYU 4:2:2)
+/dev/video11 | 	[11]: 'UYVY' (UYVY 4:2:2)
+/dev/video11 | 	[12]: 'VYUY' (VYUY 4:2:2)
+/dev/video11 | 	[13]: 'NC12' (Y/CbCr 4:2:0 (128b cols))
+/dev/video11 | Supported Video Output Fields:
+/dev/video11 | 	None
+
+====================================
+DEVICE: /dev/video12
+====================================
++ v4l2-ctl -d /dev/video12 --info --list-formats-ext --list-fields --list-formats-out --list-fields-out
+/dev/video12 | Driver Info:
+/dev/video12 | 	Driver name      : bcm2835-codec
+/dev/video12 | 	Card type        : bcm2835-codec-isp
+/dev/video12 | 	Bus info         : platform:bcm2835-codec
+/dev/video12 | 	Driver version   : 5.15.84
+/dev/video12 | 	Capabilities     : 0x84204000
+/dev/video12 | 		Video Memory-to-Memory Multiplanar
+/dev/video12 | 		Streaming
+/dev/video12 | 		Extended Pix Format
+/dev/video12 | 		Device Capabilities
+/dev/video12 | 	Device Caps      : 0x04204000
+/dev/video12 | 		Video Memory-to-Memory Multiplanar
+/dev/video12 | 		Streaming
+/dev/video12 | 		Extended Pix Format
+/dev/video12 | Media Driver Info:
+/dev/video12 | 	Driver name      : bcm2835-codec
+/dev/video12 | 	Model            : bcm2835-codec
+/dev/video12 | 	Serial           : 0000
+/dev/video12 | 	Bus info         : platform:bcm2835-codec
+/dev/video12 | 	Media version    : 5.15.84
+/dev/video12 | 	Hardware revision: 0x00000001 (1)
+/dev/video12 | 	Driver version   : 5.15.84
+/dev/video12 | Interface Info:
+/dev/video12 | 	ID               : 0x03000028
+/dev/video12 | 	Type             : V4L Video
+/dev/video12 | Entity Info:
+/dev/video12 | 	ID               : 0x0000001d (29)
+/dev/video12 | 	Name             : bcm2835-codec-isp-source
+/dev/video12 | 	Function         : V4L2 I/O
+/dev/video12 | 	Pad 0x0100001e   : 0: Source
+/dev/video12 | 	  Link 0x02000024: to remote pad 0x1000020 of entity 'bcm2835-codec-isp-proc': Data, Enabled, Immutable
+/dev/video12 | ioctl: VIDIOC_ENUM_FMT
+/dev/video12 | 	Type: Video Capture Multiplanar
+/dev/video12 | 
+/dev/video12 | 	[0]: 'YUYV' (YUYV 4:2:2)
+/dev/video12 | 		Size: Stepwise 32x32 - 16384x16384 with step 2/2
+/dev/video12 | 	[1]: 'YVYU' (YVYU 4:2:2)
+/dev/video12 | 		Size: Stepwise 32x32 - 16384x16384 with step 2/2
+/dev/video12 | 	[2]: 'VYUY' (VYUY 4:2:2)
+/dev/video12 | 		Size: Stepwise 32x32 - 16384x16384 with step 2/2
+/dev/video12 | 	[3]: 'UYVY' (UYVY 4:2:2)
+/dev/video12 | 		Size: Stepwise 32x32 - 16384x16384 with step 2/2
+/dev/video12 | 	[4]: 'YU12' (Planar YUV 4:2:0)
+/dev/video12 | 		Size: Stepwise 32x32 - 16384x16384 with step 2/2
+/dev/video12 | 	[5]: 'YV12' (Planar YVU 4:2:0)
+/dev/video12 | 		Size: Stepwise 32x32 - 16384x16384 with step 2/2
+/dev/video12 | 	[6]: 'RGB3' (24-bit RGB 8-8-8)
+/dev/video12 | 		Size: Stepwise 32x32 - 16384x16384 with step 2/2
+/dev/video12 | 	[7]: 'BGR3' (24-bit BGR 8-8-8)
+/dev/video12 | 		Size: Stepwise 32x32 - 16384x16384 with step 2/2
+/dev/video12 | 	[8]: 'AB24' (32-bit RGBA 8-8-8-8)
+/dev/video12 | 		Size: Stepwise 32x32 - 16384x16384 with step 2/2
+/dev/video12 | 	[9]: 'BGR4' (32-bit BGRA/X 8-8-8-8)
+/dev/video12 | 		Size: Stepwise 32x32 - 16384x16384 with step 2/2
+/dev/video12 | 	[10]: 'RGBP' (16-bit RGB 5-6-5)
+/dev/video12 | 		Size: Stepwise 32x32 - 16384x16384 with step 2/2
+/dev/video12 | 	[11]: 'NC12' (Y/CbCr 4:2:0 (128b cols))
+/dev/video12 | 		Size: Stepwise 32x32 - 16384x16384 with step 2/2
+/dev/video12 | 	[12]: 'NV12' (Y/CbCr 4:2:0)
+/dev/video12 | 		Size: Stepwise 32x32 - 16384x16384 with step 2/2
+/dev/video12 | 	[13]: 'NV21' (Y/CrCb 4:2:0)
+/dev/video12 | 		Size: Stepwise 32x32 - 16384x16384 with step 2/2
+/dev/video12 | Supported Video Fields:
+/dev/video12 | 	None
+/dev/video12 | ioctl: VIDIOC_ENUM_FMT
+/dev/video12 | 	Type: Video Output Multiplanar
+/dev/video12 | 
+/dev/video12 | 	[0]: 'BA81' (8-bit Bayer BGBG/GRGR)
+/dev/video12 | 	[1]: 'RGGB' (8-bit Bayer RGRG/GBGB)
+/dev/video12 | 	[2]: 'GBRG' (8-bit Bayer GBGB/RGRG)
+/dev/video12 | 	[3]: 'GRBG' (8-bit Bayer GRGR/BGBG)
+/dev/video12 | 	[4]: 'pBAA' (10-bit Bayer BGBG/GRGR Packed)
+/dev/video12 | 	[5]: 'pRAA' (10-bit Bayer RGRG/GBGB Packed)
+/dev/video12 | 	[6]: 'pGAA' (10-bit Bayer GBGB/RGRG Packed)
+/dev/video12 | 	[7]: 'pgAA' (10-bit Bayer GRGR/BGBG Packed)
+/dev/video12 | 	[8]: 'pBCC' (12-bit Bayer BGBG/GRGR Packed)
+/dev/video12 | 	[9]: 'pRCC' (12-bit Bayer RGRG/GBGB Packed)
+/dev/video12 | 	[10]: 'pGCC' (12-bit Bayer GBGB/RGRG Packed)
+/dev/video12 | 	[11]: 'pgCC' (12-bit Bayer GRGR/BGBG Packed)
+/dev/video12 | 	[12]: 'pBEE' (14-bit Bayer BGBG/GRGR Packed)
+/dev/video12 | 	[13]: 'pREE' (14-bit Bayer RGRG/GBGB Packed)
+/dev/video12 | 	[14]: 'pGEE' (14-bit Bayer GBGB/RGRG Packed)
+/dev/video12 | 	[15]: 'pgEE' (14-bit Bayer GRGR/BGBG Packed)
+/dev/video12 | 	[16]: 'BYR2' (16-bit Bayer BGBG/GRGR)
+/dev/video12 | 	[17]: 'RG16' (16-bit Bayer RGRG/GBGB)
+/dev/video12 | 	[18]: 'GB16' (16-bit Bayer GBGB/RGRG)
+/dev/video12 | 	[19]: 'GR16' (16-bit Bayer GRGR/BGBG)
+/dev/video12 | 	[20]: 'GREY' (8-bit Greyscale)
+/dev/video12 | 	[21]: 'Y10P' (10-bit Greyscale (MIPI Packed))
+/dev/video12 | 	[22]: 'Y12P' (12-bit Greyscale (MIPI Packed))
+/dev/video12 | 	[23]: 'Y14P' (14-bit Greyscale (MIPI Packed))
+/dev/video12 | 	[24]: 'Y16 ' (16-bit Greyscale)
+/dev/video12 | 	[25]: 'YUYV' (YUYV 4:2:2)
+/dev/video12 | 	[26]: 'YVYU' (YVYU 4:2:2)
+/dev/video12 | 	[27]: 'VYUY' (VYUY 4:2:2)
+/dev/video12 | 	[28]: 'UYVY' (UYVY 4:2:2)
+/dev/video12 | 	[29]: 'YU12' (Planar YUV 4:2:0)
+/dev/video12 | 	[30]: 'YV12' (Planar YVU 4:2:0)
+/dev/video12 | 	[31]: 'RGB3' (24-bit RGB 8-8-8)
+/dev/video12 | 	[32]: 'BGR3' (24-bit BGR 8-8-8)
+/dev/video12 | 	[33]: 'AB24' (32-bit RGBA 8-8-8-8)
+/dev/video12 | 	[34]: 'BGR4' (32-bit BGRA/X 8-8-8-8)
+/dev/video12 | 	[35]: 'RGBP' (16-bit RGB 5-6-5)
+/dev/video12 | 	[36]: 'NC12' (Y/CbCr 4:2:0 (128b cols))
+/dev/video12 | 	[37]: 'NV12' (Y/CbCr 4:2:0)
+/dev/video12 | 	[38]: 'NV21' (Y/CrCb 4:2:0)
+/dev/video12 | 	[39]: 'BG10' (10-bit Bayer BGBG/GRGR)
+/dev/video12 | 	[40]: 'RG10' (10-bit Bayer RGRG/GBGB)
+/dev/video12 | 	[41]: 'GB10' (10-bit Bayer GBGB/RGRG)
+/dev/video12 | 	[42]: 'BA10' (10-bit Bayer GRGR/BGBG)
+/dev/video12 | 	[43]: 'BG12' (12-bit Bayer BGBG/GRGR)
+/dev/video12 | 	[44]: 'RG12' (12-bit Bayer RGRG/GBGB)
+/dev/video12 | 	[45]: 'GB12' (12-bit Bayer GBGB/RGRG)
+/dev/video12 | 	[46]: 'BA12' (12-bit Bayer GRGR/BGBG)
+/dev/video12 | 	[47]: 'BG14' (14-bit Bayer BGBG/GRGR)
+/dev/video12 | 	[48]: 'RG14' (14-bit Bayer RGRG/GBGB)
+/dev/video12 | 	[49]: 'GB14' (14-bit Bayer GBGB/RGRG)
+/dev/video12 | 	[50]: 'GR14' (14-bit Bayer GRGR/BGBG)
+/dev/video12 | 	[51]: 'Y10 ' (10-bit Greyscale)
+/dev/video12 | 	[52]: 'Y12 ' (12-bit Greyscale)
+/dev/video12 | 	[53]: 'Y14 ' (14-bit Greyscale)
+/dev/video12 | Supported Video Output Fields:
+/dev/video12 | 	None
+
+====================================
+DEVICE: /dev/video13
+====================================
++ v4l2-ctl -d /dev/video13 --info --list-formats-ext --list-fields --list-formats-out --list-fields-out
+/dev/video13 | Driver Info:
+/dev/video13 | 	Driver name      : bcm2835-isp
+/dev/video13 | 	Card type        : bcm2835-isp
+/dev/video13 | 	Bus info         : platform:bcm2835-isp
+/dev/video13 | 	Driver version   : 5.15.84
+/dev/video13 | 	Capabilities     : 0x84200002
+/dev/video13 | 		Video Output
+/dev/video13 | 		Streaming
+/dev/video13 | 		Extended Pix Format
+/dev/video13 | 		Device Capabilities
+/dev/video13 | 	Device Caps      : 0x04200002
+/dev/video13 | 		Video Output
+/dev/video13 | 		Streaming
+/dev/video13 | 		Extended Pix Format
+/dev/video13 | Media Driver Info:
+/dev/video13 | 	Driver name      : bcm2835-isp
+/dev/video13 | 	Model            : bcm2835-isp
+/dev/video13 | 	Serial           : 
+/dev/video13 | 	Bus info         : platform:bcm2835-isp
+/dev/video13 | 	Media version    : 5.15.84
+/dev/video13 | 	Hardware revision: 0x00000000 (0)
+/dev/video13 | 	Driver version   : 5.15.84
+/dev/video13 | Interface Info:
+/dev/video13 | 	ID               : 0x03000008
+/dev/video13 | 	Type             : V4L Video
+/dev/video13 | Entity Info:
+/dev/video13 | 	ID               : 0x00000006 (6)
+/dev/video13 | 	Name             : bcm2835-isp0-output0
+/dev/video13 | 	Function         : V4L2 I/O
+/dev/video13 | 	Pad 0x01000007   : 0: Source
+/dev/video13 | 	  Link 0x0200000a: to remote pad 0x1000002 of entity 'bcm2835_isp0': Data, Enabled, Immutable
+/dev/video13 | ioctl: VIDIOC_ENUM_FMT
+/dev/video13 | 	Type: Video Capture
+/dev/video13 | 
+/dev/video13 | ioctl: VIDIOC_ENUM_FMT
+/dev/video13 | 	Type: Video Output
+/dev/video13 | 
+/dev/video13 | 	[0]: 'BA81' (8-bit Bayer BGBG/GRGR)
+/dev/video13 | 	[1]: 'RGGB' (8-bit Bayer RGRG/GBGB)
+/dev/video13 | 	[2]: 'GBRG' (8-bit Bayer GBGB/RGRG)
+/dev/video13 | 	[3]: 'GRBG' (8-bit Bayer GRGR/BGBG)
+/dev/video13 | 	[4]: 'pBAA' (10-bit Bayer BGBG/GRGR Packed)
+/dev/video13 | 	[5]: 'pRAA' (10-bit Bayer RGRG/GBGB Packed)
+/dev/video13 | 	[6]: 'pGAA' (10-bit Bayer GBGB/RGRG Packed)
+/dev/video13 | 	[7]: 'pgAA' (10-bit Bayer GRGR/BGBG Packed)
+/dev/video13 | 	[8]: 'pBCC' (12-bit Bayer BGBG/GRGR Packed)
+/dev/video13 | 	[9]: 'pRCC' (12-bit Bayer RGRG/GBGB Packed)
+/dev/video13 | 	[10]: 'pGCC' (12-bit Bayer GBGB/RGRG Packed)
+/dev/video13 | 	[11]: 'pgCC' (12-bit Bayer GRGR/BGBG Packed)
+/dev/video13 | 	[12]: 'pBEE' (14-bit Bayer BGBG/GRGR Packed)
+/dev/video13 | 	[13]: 'pREE' (14-bit Bayer RGRG/GBGB Packed)
+/dev/video13 | 	[14]: 'pGEE' (14-bit Bayer GBGB/RGRG Packed)
+/dev/video13 | 	[15]: 'pgEE' (14-bit Bayer GRGR/BGBG Packed)
+/dev/video13 | 	[16]: 'BYR2' (16-bit Bayer BGBG/GRGR)
+/dev/video13 | 	[17]: 'RG16' (16-bit Bayer RGRG/GBGB)
+/dev/video13 | 	[18]: 'GB16' (16-bit Bayer GBGB/RGRG)
+/dev/video13 | 	[19]: 'GR16' (16-bit Bayer GRGR/BGBG)
+/dev/video13 | 	[20]: 'GREY' (8-bit Greyscale)
+/dev/video13 | 	[21]: 'Y10P' (10-bit Greyscale (MIPI Packed))
+/dev/video13 | 	[22]: 'Y12P' (12-bit Greyscale (MIPI Packed))
+/dev/video13 | 	[23]: 'Y14P' (14-bit Greyscale (MIPI Packed))
+/dev/video13 | 	[24]: 'Y16 ' (16-bit Greyscale)
+/dev/video13 | 	[25]: 'YUYV' (YUYV 4:2:2)
+/dev/video13 | 	[26]: 'YVYU' (YVYU 4:2:2)
+/dev/video13 | 	[27]: 'VYUY' (VYUY 4:2:2)
+/dev/video13 | 	[28]: 'UYVY' (UYVY 4:2:2)
+/dev/video13 | 	[29]: 'YU12' (Planar YUV 4:2:0)
+/dev/video13 | 	[30]: 'YV12' (Planar YVU 4:2:0)
+/dev/video13 | 	[31]: 'RGB3' (24-bit RGB 8-8-8)
+/dev/video13 | 	[32]: 'BGR3' (24-bit BGR 8-8-8)
+/dev/video13 | 	[33]: 'XB24' (32-bit RGBX 8-8-8-8)
+/dev/video13 | 	[34]: 'XR24' (32-bit BGRX 8-8-8-8)
+/dev/video13 | 	[35]: 'RGBP' (16-bit RGB 5-6-5)
+/dev/video13 | 	[36]: 'NV12' (Y/CbCr 4:2:0)
+/dev/video13 | 	[37]: 'NV21' (Y/CrCb 4:2:0)
+/dev/video13 | 	[38]: 'BG10' (10-bit Bayer BGBG/GRGR)
+/dev/video13 | 	[39]: 'RG10' (10-bit Bayer RGRG/GBGB)
+/dev/video13 | 	[40]: 'GB10' (10-bit Bayer GBGB/RGRG)
+/dev/video13 | 	[41]: 'BA10' (10-bit Bayer GRGR/BGBG)
+/dev/video13 | 	[42]: 'BG12' (12-bit Bayer BGBG/GRGR)
+/dev/video13 | 	[43]: 'RG12' (12-bit Bayer RGRG/GBGB)
+/dev/video13 | 	[44]: 'GB12' (12-bit Bayer GBGB/RGRG)
+/dev/video13 | 	[45]: 'BA12' (12-bit Bayer GRGR/BGBG)
+/dev/video13 | 	[46]: 'BG14' (14-bit Bayer BGBG/GRGR)
+/dev/video13 | 	[47]: 'RG14' (14-bit Bayer RGRG/GBGB)
+/dev/video13 | 	[48]: 'GB14' (14-bit Bayer GBGB/RGRG)
+/dev/video13 | 	[49]: 'GR14' (14-bit Bayer GRGR/BGBG)
+/dev/video13 | 	[50]: 'Y10 ' (10-bit Greyscale)
+/dev/video13 | 	[51]: 'Y12 ' (12-bit Greyscale)
+/dev/video13 | 	[52]: 'Y14 ' (14-bit Greyscale)
+/dev/video13 | Supported Video Output Fields:
+/dev/video13 | 	None
+
+====================================
+DEVICE: /dev/video14
+====================================
++ v4l2-ctl -d /dev/video14 --info --list-formats-ext --list-fields --list-formats-out --list-fields-out
+/dev/video14 | Driver Info:
+/dev/video14 | 	Driver name      : bcm2835-isp
+/dev/video14 | 	Card type        : bcm2835-isp
+/dev/video14 | 	Bus info         : platform:bcm2835-isp
+/dev/video14 | 	Driver version   : 5.15.84
+/dev/video14 | 	Capabilities     : 0x84200001
+/dev/video14 | 		Video Capture
+/dev/video14 | 		Streaming
+/dev/video14 | 		Extended Pix Format
+/dev/video14 | 		Device Capabilities
+/dev/video14 | 	Device Caps      : 0x04200001
+/dev/video14 | 		Video Capture
+/dev/video14 | 		Streaming
+/dev/video14 | 		Extended Pix Format
+/dev/video14 | Media Driver Info:
+/dev/video14 | 	Driver name      : bcm2835-isp
+/dev/video14 | 	Model            : bcm2835-isp
+/dev/video14 | 	Serial           : 
+/dev/video14 | 	Bus info         : platform:bcm2835-isp
+/dev/video14 | 	Media version    : 5.15.84
+/dev/video14 | 	Hardware revision: 0x00000000 (0)
+/dev/video14 | 	Driver version   : 5.15.84
+/dev/video14 | Interface Info:
+/dev/video14 | 	ID               : 0x0300000e
+/dev/video14 | 	Type             : V4L Video
+/dev/video14 | Entity Info:
+/dev/video14 | 	ID               : 0x0000000c (12)
+/dev/video14 | 	Name             : bcm2835-isp0-capture1
+/dev/video14 | 	Function         : V4L2 I/O
+/dev/video14 | 	Pad 0x0100000d   : 0: Sink
+/dev/video14 | 	  Link 0x02000010: from remote pad 0x1000003 of entity 'bcm2835_isp0': Data, Enabled, Immutable
+/dev/video14 | ioctl: VIDIOC_ENUM_FMT
+/dev/video14 | 	Type: Video Capture
+/dev/video14 | 
+/dev/video14 | 	[0]: 'YUYV' (YUYV 4:2:2)
+/dev/video14 | 		Size: Stepwise 64x64 - 16384x16384 with step 2/2
+/dev/video14 | 	[1]: 'YVYU' (YVYU 4:2:2)
+/dev/video14 | 		Size: Stepwise 64x64 - 16384x16384 with step 2/2
+/dev/video14 | 	[2]: 'VYUY' (VYUY 4:2:2)
+/dev/video14 | 		Size: Stepwise 64x64 - 16384x16384 with step 2/2
+/dev/video14 | 	[3]: 'UYVY' (UYVY 4:2:2)
+/dev/video14 | 		Size: Stepwise 64x64 - 16384x16384 with step 2/2
+/dev/video14 | 	[4]: 'YU12' (Planar YUV 4:2:0)
+/dev/video14 | 		Size: Stepwise 64x64 - 16384x16384 with step 2/2
+/dev/video14 | 	[5]: 'YV12' (Planar YVU 4:2:0)
+/dev/video14 | 		Size: Stepwise 64x64 - 16384x16384 with step 2/2
+/dev/video14 | 	[6]: 'RGB3' (24-bit RGB 8-8-8)
+/dev/video14 | 		Size: Stepwise 64x64 - 16384x16384 with step 1/1
+/dev/video14 | 	[7]: 'BGR3' (24-bit BGR 8-8-8)
+/dev/video14 | 		Size: Stepwise 64x64 - 16384x16384 with step 1/1
+/dev/video14 | 	[8]: 'XB24' (32-bit RGBX 8-8-8-8)
+/dev/video14 | 		Size: Stepwise 64x64 - 16384x16384 with step 1/1
+/dev/video14 | 	[9]: 'XR24' (32-bit BGRX 8-8-8-8)
+/dev/video14 | 		Size: Stepwise 64x64 - 16384x16384 with step 1/1
+/dev/video14 | 	[10]: 'RGBP' (16-bit RGB 5-6-5)
+/dev/video14 | 		Size: Stepwise 64x64 - 16384x16384 with step 1/1
+/dev/video14 | 	[11]: 'NV12' (Y/CbCr 4:2:0)
+/dev/video14 | 		Size: Stepwise 64x64 - 16384x16384 with step 2/2
+/dev/video14 | 	[12]: 'NV21' (Y/CrCb 4:2:0)
+/dev/video14 | 		Size: Stepwise 64x64 - 16384x16384 with step 2/2
+/dev/video14 | Supported Video Fields:
+/dev/video14 | 	None
+/dev/video14 | ioctl: VIDIOC_ENUM_FMT
+/dev/video14 | 	Type: Video Output
+/dev/video14 | 
+
+====================================
+DEVICE: /dev/video15
+====================================
++ v4l2-ctl -d /dev/video15 --info --list-formats-ext --list-fields --list-formats-out --list-fields-out
+/dev/video15 | Driver Info:
+/dev/video15 | 	Driver name      : bcm2835-isp
+/dev/video15 | 	Card type        : bcm2835-isp
+/dev/video15 | 	Bus info         : platform:bcm2835-isp
+/dev/video15 | 	Driver version   : 5.15.84
+/dev/video15 | 	Capabilities     : 0x84200001
+/dev/video15 | 		Video Capture
+/dev/video15 | 		Streaming
+/dev/video15 | 		Extended Pix Format
+/dev/video15 | 		Device Capabilities
+/dev/video15 | 	Device Caps      : 0x04200001
+/dev/video15 | 		Video Capture
+/dev/video15 | 		Streaming
+/dev/video15 | 		Extended Pix Format
+/dev/video15 | Media Driver Info:
+/dev/video15 | 	Driver name      : bcm2835-isp
+/dev/video15 | 	Model            : bcm2835-isp
+/dev/video15 | 	Serial           : 
+/dev/video15 | 	Bus info         : platform:bcm2835-isp
+/dev/video15 | 	Media version    : 5.15.84
+/dev/video15 | 	Hardware revision: 0x00000000 (0)
+/dev/video15 | 	Driver version   : 5.15.84
+/dev/video15 | Interface Info:
+/dev/video15 | 	ID               : 0x03000014
+/dev/video15 | 	Type             : V4L Video
+/dev/video15 | Entity Info:
+/dev/video15 | 	ID               : 0x00000012 (18)
+/dev/video15 | 	Name             : bcm2835-isp0-capture2
+/dev/video15 | 	Function         : V4L2 I/O
+/dev/video15 | 	Pad 0x01000013   : 0: Sink
+/dev/video15 | 	  Link 0x02000016: from remote pad 0x1000004 of entity 'bcm2835_isp0': Data, Enabled, Immutable
+/dev/video15 | ioctl: VIDIOC_ENUM_FMT
+/dev/video15 | 	Type: Video Capture
+/dev/video15 | 
+/dev/video15 | 	[0]: 'YUYV' (YUYV 4:2:2)
+/dev/video15 | 		Size: Stepwise 64x64 - 16384x16384 with step 2/2
+/dev/video15 | 	[1]: 'YVYU' (YVYU 4:2:2)
+/dev/video15 | 		Size: Stepwise 64x64 - 16384x16384 with step 2/2
+/dev/video15 | 	[2]: 'VYUY' (VYUY 4:2:2)
+/dev/video15 | 		Size: Stepwise 64x64 - 16384x16384 with step 2/2
+/dev/video15 | 	[3]: 'UYVY' (UYVY 4:2:2)
+/dev/video15 | 		Size: Stepwise 64x64 - 16384x16384 with step 2/2
+/dev/video15 | 	[4]: 'YU12' (Planar YUV 4:2:0)
+/dev/video15 | 		Size: Stepwise 64x64 - 16384x16384 with step 2/2
+/dev/video15 | 	[5]: 'YV12' (Planar YVU 4:2:0)
+/dev/video15 | 		Size: Stepwise 64x64 - 16384x16384 with step 2/2
+/dev/video15 | 	[6]: 'NV12' (Y/CbCr 4:2:0)
+/dev/video15 | 		Size: Stepwise 64x64 - 16384x16384 with step 2/2
+/dev/video15 | 	[7]: 'NV21' (Y/CrCb 4:2:0)
+/dev/video15 | 		Size: Stepwise 64x64 - 16384x16384 with step 2/2
+/dev/video15 | Supported Video Fields:
+/dev/video15 | 	None
+/dev/video15 | ioctl: VIDIOC_ENUM_FMT
+/dev/video15 | 	Type: Video Output
+/dev/video15 | 
+
+====================================
+DEVICE: /dev/video16
+====================================
++ v4l2-ctl -d /dev/video16 --info --list-formats-ext --list-fields --list-formats-out --list-fields-out
+/dev/video16 | Driver Info:
+/dev/video16 | 	Driver name      : bcm2835-isp
+/dev/video16 | 	Card type        : bcm2835-isp
+/dev/video16 | 	Bus info         : platform:bcm2835-isp
+/dev/video16 | 	Driver version   : 5.15.84
+/dev/video16 | 	Capabilities     : 0x84a00000
+/dev/video16 | 		Metadata Capture
+/dev/video16 | 		Streaming
+/dev/video16 | 		Extended Pix Format
+/dev/video16 | 		Device Capabilities
+/dev/video16 | 	Device Caps      : 0x04a00000
+/dev/video16 | 		Metadata Capture
+/dev/video16 | 		Streaming
+/dev/video16 | 		Extended Pix Format
+/dev/video16 | Media Driver Info:
+/dev/video16 | 	Driver name      : bcm2835-isp
+/dev/video16 | 	Model            : bcm2835-isp
+/dev/video16 | 	Serial           : 
+/dev/video16 | 	Bus info         : platform:bcm2835-isp
+/dev/video16 | 	Media version    : 5.15.84
+/dev/video16 | 	Hardware revision: 0x00000000 (0)
+/dev/video16 | 	Driver version   : 5.15.84
+/dev/video16 | Interface Info:
+/dev/video16 | 	ID               : 0x0300001a
+/dev/video16 | 	Type             : V4L Video
+/dev/video16 | Entity Info:
+/dev/video16 | 	ID               : 0x00000018 (24)
+/dev/video16 | 	Name             : bcm2835-isp0-capture3
+/dev/video16 | 	Function         : V4L2 I/O
+/dev/video16 | 	Pad 0x01000019   : 0: Sink
+/dev/video16 | 	  Link 0x0200001c: from remote pad 0x1000005 of entity 'bcm2835_isp0': Data, Enabled, Immutable
+/dev/video16 | ioctl: VIDIOC_ENUM_FMT
+/dev/video16 | 	Type: Video Capture
+/dev/video16 | 
+/dev/video16 | ioctl: VIDIOC_ENUM_FMT
+/dev/video16 | 	Type: Video Output
+/dev/video16 | 
+
+====================================
+DEVICE: /dev/video18
+====================================
++ v4l2-ctl -d /dev/video18 --info --list-formats-ext --list-fields --list-formats-out --list-fields-out
+/dev/video18 | Driver Info:
+/dev/video18 | 	Driver name      : bcm2835-codec
+/dev/video18 | 	Card type        : bcm2835-codec-image_fx
+/dev/video18 | 	Bus info         : platform:bcm2835-codec
+/dev/video18 | 	Driver version   : 5.15.84
+/dev/video18 | 	Capabilities     : 0x84204000
+/dev/video18 | 		Video Memory-to-Memory Multiplanar
+/dev/video18 | 		Streaming
+/dev/video18 | 		Extended Pix Format
+/dev/video18 | 		Device Capabilities
+/dev/video18 | 	Device Caps      : 0x04204000
+/dev/video18 | 		Video Memory-to-Memory Multiplanar
+/dev/video18 | 		Streaming
+/dev/video18 | 		Extended Pix Format
+/dev/video18 | Media Driver Info:
+/dev/video18 | 	Driver name      : bcm2835-codec
+/dev/video18 | 	Model            : bcm2835-codec
+/dev/video18 | 	Serial           : 0000
+/dev/video18 | 	Bus info         : platform:bcm2835-codec
+/dev/video18 | 	Media version    : 5.15.84
+/dev/video18 | 	Hardware revision: 0x00000001 (1)
+/dev/video18 | 	Driver version   : 5.15.84
+/dev/video18 | Interface Info:
+/dev/video18 | 	ID               : 0x03000036
+/dev/video18 | 	Type             : V4L Video
+/dev/video18 | Entity Info:
+/dev/video18 | 	ID               : 0x0000002b (43)
+/dev/video18 | 	Name             : bcm2835-codec-image_fx-source
+/dev/video18 | 	Function         : V4L2 I/O
+/dev/video18 | 	Pad 0x0100002c   : 0: Source
+/dev/video18 | 	  Link 0x02000032: to remote pad 0x100002e of entity 'bcm2835-codec-image_fx-proc': Data, Enabled, Immutable
+/dev/video18 | ioctl: VIDIOC_ENUM_FMT
+/dev/video18 | 	Type: Video Capture Multiplanar
+/dev/video18 | 
+/dev/video18 | 	[0]: 'YU12' (Planar YUV 4:2:0)
+/dev/video18 | 		Size: Stepwise 32x32 - 1920x1920 with step 2/2
+/dev/video18 | 	[1]: 'NC12' (Y/CbCr 4:2:0 (128b cols))
+/dev/video18 | 		Size: Stepwise 32x32 - 1920x1920 with step 2/2
+/dev/video18 | 	[2]: 'AB24' (32-bit RGBA 8-8-8-8)
+/dev/video18 | 		Size: Stepwise 32x32 - 1920x1920 with step 2/2
+/dev/video18 | 	[3]: 'RGBP' (16-bit RGB 5-6-5)
+/dev/video18 | 		Size: Stepwise 32x32 - 1920x1920 with step 2/2
+/dev/video18 | Supported Video Fields:
+/dev/video18 | 	None
+/dev/video18 | 	Interlaced
+/dev/video18 | 	Interlaced Top-Bottom
+/dev/video18 | 	Interlaced Bottom-Top
+/dev/video18 | ioctl: VIDIOC_ENUM_FMT
+/dev/video18 | 	Type: Video Output Multiplanar
+/dev/video18 | 
+/dev/video18 | 	[0]: 'YU12' (Planar YUV 4:2:0)
+/dev/video18 | 	[1]: 'NC12' (Y/CbCr 4:2:0 (128b cols))
+/dev/video18 | 	[2]: 'AB24' (32-bit RGBA 8-8-8-8)
+/dev/video18 | 	[3]: 'RGBP' (16-bit RGB 5-6-5)
+/dev/video18 | Supported Video Output Fields:
+/dev/video18 | 	None
+/dev/video18 | 	Interlaced
+/dev/video18 | 	Interlaced Top-Bottom
+/dev/video18 | 	Interlaced Bottom-Top
+
+====================================
+DEVICE: /dev/video19
+====================================
++ v4l2-ctl -d /dev/video19 --info --list-formats-ext --list-fields --list-formats-out --list-fields-out
+/dev/video19 | Driver Info:
+/dev/video19 | 	Driver name      : rpivid
+/dev/video19 | 	Card type        : rpivid
+/dev/video19 | 	Bus info         : platform:rpivid
+/dev/video19 | 	Driver version   : 5.15.84
+/dev/video19 | 	Capabilities     : 0x84204000
+/dev/video19 | 		Video Memory-to-Memory Multiplanar
+/dev/video19 | 		Streaming
+/dev/video19 | 		Extended Pix Format
+/dev/video19 | 		Device Capabilities
+/dev/video19 | 	Device Caps      : 0x04204000
+/dev/video19 | 		Video Memory-to-Memory Multiplanar
+/dev/video19 | 		Streaming
+/dev/video19 | 		Extended Pix Format
+/dev/video19 | Media Driver Info:
+/dev/video19 | 	Driver name      : rpivid
+/dev/video19 | 	Model            : rpivid
+/dev/video19 | 	Serial           : 
+/dev/video19 | 	Bus info         : platform:rpivid
+/dev/video19 | 	Media version    : 5.15.84
+/dev/video19 | 	Hardware revision: 0x00000000 (0)
+/dev/video19 | 	Driver version   : 5.15.84
+/dev/video19 | Interface Info:
+/dev/video19 | 	ID               : 0x0300000c
+/dev/video19 | 	Type             : V4L Video
+/dev/video19 | Entity Info:
+/dev/video19 | 	ID               : 0x00000001 (1)
+/dev/video19 | 	Name             : rpivid-source
+/dev/video19 | 	Function         : V4L2 I/O
+/dev/video19 | 	Pad 0x01000002   : 0: Source
+/dev/video19 | 	  Link 0x02000008: to remote pad 0x1000004 of entity 'rpivid-proc': Data, Enabled, Immutable
+/dev/video19 | ioctl: VIDIOC_ENUM_FMT
+/dev/video19 | 	Type: Video Capture Multiplanar
+/dev/video19 | 
+/dev/video19 | 	[0]: 'NC12' (Y/CbCr 4:2:0 (128b cols))
+/dev/video19 | 	[1]: 'NC30' (10-bit Y/CbCr 4:2:0 (128b cols))
+/dev/video19 | Supported Video Fields:
+/dev/video19 | 	None
+/dev/video19 | ioctl: VIDIOC_ENUM_FMT
+/dev/video19 | 	Type: Video Output Multiplanar
+/dev/video19 | 
+/dev/video19 | 	[0]: 'S265' (HEVC Parsed Slice Data, compressed)
+/dev/video19 | Supported Video Output Fields:
+/dev/video19 | 	None
+
+====================================
+DEVICE: /dev/video2
+====================================
++ v4l2-ctl -d /dev/video2 --info --list-formats-ext --list-fields --list-formats-out --list-fields-out
+/dev/video2 | Driver Info:
+/dev/video2 | 	Driver name      : uvcvideo
+/dev/video2 | 	Card type        : Webcam: Webcam
+/dev/video2 | 	Bus info         : usb-0000:01:00.0-1.1
+/dev/video2 | 	Driver version   : 5.15.84
+/dev/video2 | 	Capabilities     : 0x84a00001
+/dev/video2 | 		Video Capture
+/dev/video2 | 		Metadata Capture
+/dev/video2 | 		Streaming
+/dev/video2 | 		Extended Pix Format
+/dev/video2 | 		Device Capabilities
+/dev/video2 | 	Device Caps      : 0x04200001
+/dev/video2 | 		Video Capture
+/dev/video2 | 		Streaming
+/dev/video2 | 		Extended Pix Format
+/dev/video2 | Media Driver Info:
+/dev/video2 | 	Driver name      : uvcvideo
+/dev/video2 | 	Model            : Webcam: Webcam
+/dev/video2 | 	Serial           : YG_U700_D.2021.0104.1403
+/dev/video2 | 	Bus info         : usb-0000:01:00.0-1.1
+/dev/video2 | 	Media version    : 5.15.84
+/dev/video2 | 	Hardware revision: 0x00000010 (16)
+/dev/video2 | 	Driver version   : 5.15.84
+/dev/video2 | Interface Info:
+/dev/video2 | 	ID               : 0x03000002
+/dev/video2 | 	Type             : V4L Video
+/dev/video2 | Entity Info:
+/dev/video2 | 	ID               : 0x00000001 (1)
+/dev/video2 | 	Name             : Webcam: Webcam
+/dev/video2 | 	Function         : V4L2 I/O
+/dev/video2 | 	Flags         : default
+/dev/video2 | 	Pad 0x01000007   : 0: Sink
+/dev/video2 | 	  Link 0x02000010: from remote pad 0x100000a of entity 'Extension 3': Data, Enabled, Immutable
+/dev/video2 | ioctl: VIDIOC_ENUM_FMT
+/dev/video2 | 	Type: Video Capture
+/dev/video2 | 
+/dev/video2 | 	[0]: 'MJPG' (Motion-JPEG, compressed)
+/dev/video2 | 		Size: Discrete 320x240
+/dev/video2 | 			Interval: Discrete 0.033s (30.000 fps)
+/dev/video2 | 			Interval: Discrete 0.040s (25.000 fps)
+/dev/video2 | 		Size: Discrete 480x272
+/dev/video2 | 			Interval: Discrete 0.033s (30.000 fps)
+/dev/video2 | 			Interval: Discrete 0.040s (25.000 fps)
+/dev/video2 | 		Size: Discrete 640x360
+/dev/video2 | 			Interval: Discrete 0.033s (30.000 fps)
+/dev/video2 | 			Interval: Discrete 0.040s (25.000 fps)
+/dev/video2 | 		Size: Discrete 640x480
+/dev/video2 | 			Interval: Discrete 0.033s (30.000 fps)
+/dev/video2 | 			Interval: Discrete 0.040s (25.000 fps)
+/dev/video2 | 		Size: Discrete 800x600
+/dev/video2 | 			Interval: Discrete 0.033s (30.000 fps)
+/dev/video2 | 			Interval: Discrete 0.040s (25.000 fps)
+/dev/video2 | 		Size: Discrete 1024x576
+/dev/video2 | 			Interval: Discrete 0.033s (30.000 fps)
+/dev/video2 | 			Interval: Discrete 0.040s (25.000 fps)
+/dev/video2 | 		Size: Discrete 1280x720
+/dev/video2 | 			Interval: Discrete 0.033s (30.000 fps)
+/dev/video2 | 			Interval: Discrete 0.040s (25.000 fps)
+/dev/video2 | 		Size: Discrete 1440x1080
+/dev/video2 | 			Interval: Discrete 0.033s (30.000 fps)
+/dev/video2 | 			Interval: Discrete 0.040s (25.000 fps)
+/dev/video2 | 		Size: Discrete 1920x1080
+/dev/video2 | 			Interval: Discrete 0.033s (30.000 fps)
+/dev/video2 | 			Interval: Discrete 0.040s (25.000 fps)
+/dev/video2 | 		Size: Discrete 2560x1440
+/dev/video2 | 			Interval: Discrete 0.040s (25.000 fps)
+/dev/video2 | 	[1]: 'H264' (H.264, compressed)
+/dev/video2 | 		Size: Discrete 320x240
+/dev/video2 | 			Interval: Discrete 0.033s (30.000 fps)
+/dev/video2 | 			Interval: Discrete 0.040s (25.000 fps)
+/dev/video2 | 			Interval: Discrete 0.033s (30.000 fps)
+/dev/video2 | 			Interval: Discrete 0.040s (25.000 fps)
+/dev/video2 | 		Size: Discrete 480x272
+/dev/video2 | 			Interval: Discrete 0.033s (30.000 fps)
+/dev/video2 | 			Interval: Discrete 0.040s (25.000 fps)
+/dev/video2 | 			Interval: Discrete 0.033s (30.000 fps)
+/dev/video2 | 			Interval: Discrete 0.040s (25.000 fps)
+/dev/video2 | 		Size: Discrete 640x360
+/dev/video2 | 			Interval: Discrete 0.033s (30.000 fps)
+/dev/video2 | 			Interval: Discrete 0.040s (25.000 fps)
+/dev/video2 | 			Interval: Discrete 0.033s (30.000 fps)
+/dev/video2 | 			Interval: Discrete 0.040s (25.000 fps)
+/dev/video2 | 		Size: Discrete 640x480
+/dev/video2 | 			Interval: Discrete 0.033s (30.000 fps)
+/dev/video2 | 			Interval: Discrete 0.040s (25.000 fps)
+/dev/video2 | 			Interval: Discrete 0.033s (30.000 fps)
+/dev/video2 | 			Interval: Discrete 0.040s (25.000 fps)
+/dev/video2 | 		Size: Discrete 800x600
+/dev/video2 | 			Interval: Discrete 0.033s (30.000 fps)
+/dev/video2 | 			Interval: Discrete 0.040s (25.000 fps)
+/dev/video2 | 			Interval: Discrete 0.033s (30.000 fps)
+/dev/video2 | 			Interval: Discrete 0.040s (25.000 fps)
+/dev/video2 | 		Size: Discrete 1024x576
+/dev/video2 | 			Interval: Discrete 0.033s (30.000 fps)
+/dev/video2 | 			Interval: Discrete 0.040s (25.000 fps)
+/dev/video2 | 		Size: Discrete 1280x720
+/dev/video2 | 			Interval: Discrete 0.033s (30.000 fps)
+/dev/video2 | 			Interval: Discrete 0.040s (25.000 fps)
+/dev/video2 | 		Size: Discrete 1440x1080
+/dev/video2 | 			Interval: Discrete 0.033s (30.000 fps)
+/dev/video2 | 			Interval: Discrete 0.040s (25.000 fps)
+/dev/video2 | 		Size: Discrete 1920x1080
+/dev/video2 | 			Interval: Discrete 0.033s (30.000 fps)
+/dev/video2 | 			Interval: Discrete 0.040s (25.000 fps)
+/dev/video2 | 		Size: Discrete 2560x1440
+/dev/video2 | 			Interval: Discrete 0.040s (25.000 fps)
+/dev/video2 | 		Size: Discrete 320x240
+/dev/video2 | 			Interval: Discrete 0.033s (30.000 fps)
+/dev/video2 | 			Interval: Discrete 0.040s (25.000 fps)
+/dev/video2 | 			Interval: Discrete 0.033s (30.000 fps)
+/dev/video2 | 			Interval: Discrete 0.040s (25.000 fps)
+/dev/video2 | 		Size: Discrete 480x272
+/dev/video2 | 			Interval: Discrete 0.033s (30.000 fps)
+/dev/video2 | 			Interval: Discrete 0.040s (25.000 fps)
+/dev/video2 | 			Interval: Discrete 0.033s (30.000 fps)
+/dev/video2 | 			Interval: Discrete 0.040s (25.000 fps)
+/dev/video2 | 		Size: Discrete 640x360
+/dev/video2 | 			Interval: Discrete 0.033s (30.000 fps)
+/dev/video2 | 			Interval: Discrete 0.040s (25.000 fps)
+/dev/video2 | 			Interval: Discrete 0.033s (30.000 fps)
+/dev/video2 | 			Interval: Discrete 0.040s (25.000 fps)
+/dev/video2 | 		Size: Discrete 640x480
+/dev/video2 | 			Interval: Discrete 0.033s (30.000 fps)
+/dev/video2 | 			Interval: Discrete 0.040s (25.000 fps)
+/dev/video2 | 			Interval: Discrete 0.033s (30.000 fps)
+/dev/video2 | 			Interval: Discrete 0.040s (25.000 fps)
+/dev/video2 | 		Size: Discrete 800x600
+/dev/video2 | 			Interval: Discrete 0.033s (30.000 fps)
+/dev/video2 | 			Interval: Discrete 0.040s (25.000 fps)
+/dev/video2 | 			Interval: Discrete 0.033s (30.000 fps)
+/dev/video2 | 			Interval: Discrete 0.040s (25.000 fps)
+/dev/video2 | 	[2]: 'YUYV' (YUYV 4:2:2)
+/dev/video2 | 		Size: Discrete 320x240
+/dev/video2 | 			Interval: Discrete 0.033s (30.000 fps)
+/dev/video2 | 		Size: Discrete 480x272
+/dev/video2 | 			Interval: Discrete 0.033s (30.000 fps)
+/dev/video2 | 		Size: Discrete 640x360
+/dev/video2 | 			Interval: Discrete 0.033s (30.000 fps)
+/dev/video2 | 		Size: Discrete 640x480
+/dev/video2 | 			Interval: Discrete 0.033s (30.000 fps)
+/dev/video2 | 		Size: Discrete 800x600
+/dev/video2 | 			Interval: Discrete 0.067s (15.000 fps)
+/dev/video2 | 		Size: Discrete 1024x576
+/dev/video2 | 			Interval: Discrete 0.100s (10.000 fps)
+/dev/video2 | 		Size: Discrete 1280x720
+/dev/video2 | 			Interval: Discrete 0.100s (10.000 fps)
+/dev/video2 | Supported Video Fields:
+/dev/video2 | 	None
+/dev/video2 | ioctl: VIDIOC_ENUM_FMT
+/dev/video2 | 	Type: Video Output
+/dev/video2 | 
+
+====================================
+DEVICE: /dev/video20
+====================================
++ v4l2-ctl -d /dev/video20 --info --list-formats-ext --list-fields --list-formats-out --list-fields-out
+FAIL: could not find device 81:5 in topology
+/dev/video20 | Driver Info:
+/dev/video20 | 	Driver name      : bcm2835-isp
+/dev/video20 | 	Card type        : bcm2835-isp
+/dev/video20 | 	Bus info         : platform:bcm2835-isp
+/dev/video20 | 	Driver version   : 5.15.84
+/dev/video20 | 	Capabilities     : 0x84200002
+/dev/video20 | 		Video Output
+/dev/video20 | 		Streaming
+/dev/video20 | 		Extended Pix Format
+/dev/video20 | 		Device Capabilities
+/dev/video20 | 	Device Caps      : 0x04200002
+/dev/video20 | 		Video Output
+/dev/video20 | 		Streaming
+/dev/video20 | 		Extended Pix Format
+/dev/video20 | Media Driver Info:
+/dev/video20 | 	Driver name      : bcm2835-isp
+/dev/video20 | 	Model            : bcm2835-isp
+/dev/video20 | 	Serial           : 
+/dev/video20 | 	Bus info         : platform:bcm2835-isp
+/dev/video20 | 	Media version    : 5.15.84
+/dev/video20 | 	Hardware revision: 0x00000000 (0)
+/dev/video20 | 	Driver version   : 5.15.84
+/dev/video20 | ioctl: VIDIOC_ENUM_FMT
+/dev/video20 | 	Type: Video Capture
+/dev/video20 | 
+/dev/video20 | ioctl: VIDIOC_ENUM_FMT
+/dev/video20 | 	Type: Video Output
+/dev/video20 | 
+/dev/video20 | 	[0]: 'BA81' (8-bit Bayer BGBG/GRGR)
+/dev/video20 | 	[1]: 'RGGB' (8-bit Bayer RGRG/GBGB)
+/dev/video20 | 	[2]: 'GBRG' (8-bit Bayer GBGB/RGRG)
+/dev/video20 | 	[3]: 'GRBG' (8-bit Bayer GRGR/BGBG)
+/dev/video20 | 	[4]: 'pBAA' (10-bit Bayer BGBG/GRGR Packed)
+/dev/video20 | 	[5]: 'pRAA' (10-bit Bayer RGRG/GBGB Packed)
+/dev/video20 | 	[6]: 'pGAA' (10-bit Bayer GBGB/RGRG Packed)
+/dev/video20 | 	[7]: 'pgAA' (10-bit Bayer GRGR/BGBG Packed)
+/dev/video20 | 	[8]: 'pBCC' (12-bit Bayer BGBG/GRGR Packed)
+/dev/video20 | 	[9]: 'pRCC' (12-bit Bayer RGRG/GBGB Packed)
+/dev/video20 | 	[10]: 'pGCC' (12-bit Bayer GBGB/RGRG Packed)
+/dev/video20 | 	[11]: 'pgCC' (12-bit Bayer GRGR/BGBG Packed)
+/dev/video20 | 	[12]: 'pBEE' (14-bit Bayer BGBG/GRGR Packed)
+/dev/video20 | 	[13]: 'pREE' (14-bit Bayer RGRG/GBGB Packed)
+/dev/video20 | 	[14]: 'pGEE' (14-bit Bayer GBGB/RGRG Packed)
+/dev/video20 | 	[15]: 'pgEE' (14-bit Bayer GRGR/BGBG Packed)
+/dev/video20 | 	[16]: 'BYR2' (16-bit Bayer BGBG/GRGR)
+/dev/video20 | 	[17]: 'RG16' (16-bit Bayer RGRG/GBGB)
+/dev/video20 | 	[18]: 'GB16' (16-bit Bayer GBGB/RGRG)
+/dev/video20 | 	[19]: 'GR16' (16-bit Bayer GRGR/BGBG)
+/dev/video20 | 	[20]: 'GREY' (8-bit Greyscale)
+/dev/video20 | 	[21]: 'Y10P' (10-bit Greyscale (MIPI Packed))
+/dev/video20 | 	[22]: 'Y12P' (12-bit Greyscale (MIPI Packed))
+/dev/video20 | 	[23]: 'Y14P' (14-bit Greyscale (MIPI Packed))
+/dev/video20 | 	[24]: 'Y16 ' (16-bit Greyscale)
+/dev/video20 | 	[25]: 'YUYV' (YUYV 4:2:2)
+/dev/video20 | 	[26]: 'YVYU' (YVYU 4:2:2)
+/dev/video20 | 	[27]: 'VYUY' (VYUY 4:2:2)
+/dev/video20 | 	[28]: 'UYVY' (UYVY 4:2:2)
+/dev/video20 | 	[29]: 'YU12' (Planar YUV 4:2:0)
+/dev/video20 | 	[30]: 'YV12' (Planar YVU 4:2:0)
+/dev/video20 | 	[31]: 'RGB3' (24-bit RGB 8-8-8)
+/dev/video20 | 	[32]: 'BGR3' (24-bit BGR 8-8-8)
+/dev/video20 | 	[33]: 'XB24' (32-bit RGBX 8-8-8-8)
+/dev/video20 | 	[34]: 'XR24' (32-bit BGRX 8-8-8-8)
+/dev/video20 | 	[35]: 'RGBP' (16-bit RGB 5-6-5)
+/dev/video20 | 	[36]: 'NV12' (Y/CbCr 4:2:0)
+/dev/video20 | 	[37]: 'NV21' (Y/CrCb 4:2:0)
+/dev/video20 | 	[38]: 'BG10' (10-bit Bayer BGBG/GRGR)
+/dev/video20 | 	[39]: 'RG10' (10-bit Bayer RGRG/GBGB)
+/dev/video20 | 	[40]: 'GB10' (10-bit Bayer GBGB/RGRG)
+/dev/video20 | 	[41]: 'BA10' (10-bit Bayer GRGR/BGBG)
+/dev/video20 | 	[42]: 'BG12' (12-bit Bayer BGBG/GRGR)
+/dev/video20 | 	[43]: 'RG12' (12-bit Bayer RGRG/GBGB)
+/dev/video20 | 	[44]: 'GB12' (12-bit Bayer GBGB/RGRG)
+/dev/video20 | 	[45]: 'BA12' (12-bit Bayer GRGR/BGBG)
+/dev/video20 | 	[46]: 'BG14' (14-bit Bayer BGBG/GRGR)
+/dev/video20 | 	[47]: 'RG14' (14-bit Bayer RGRG/GBGB)
+/dev/video20 | 	[48]: 'GB14' (14-bit Bayer GBGB/RGRG)
+/dev/video20 | 	[49]: 'GR14' (14-bit Bayer GRGR/BGBG)
+/dev/video20 | 	[50]: 'Y10 ' (10-bit Greyscale)
+/dev/video20 | 	[51]: 'Y12 ' (12-bit Greyscale)
+/dev/video20 | 	[52]: 'Y14 ' (14-bit Greyscale)
+/dev/video20 | Supported Video Output Fields:
+/dev/video20 | 	None
+
+====================================
+DEVICE: /dev/video21
+====================================
++ v4l2-ctl -d /dev/video21 --info --list-formats-ext --list-fields --list-formats-out --list-fields-out
+FAIL: could not find device 81:6 in topology
+/dev/video21 | Driver Info:
+/dev/video21 | 	Driver name      : bcm2835-isp
+/dev/video21 | 	Card type        : bcm2835-isp
+/dev/video21 | 	Bus info         : platform:bcm2835-isp
+/dev/video21 | 	Driver version   : 5.15.84
+/dev/video21 | 	Capabilities     : 0x84200001
+/dev/video21 | 		Video Capture
+/dev/video21 | 		Streaming
+/dev/video21 | 		Extended Pix Format
+/dev/video21 | 		Device Capabilities
+/dev/video21 | 	Device Caps      : 0x04200001
+/dev/video21 | 		Video Capture
+/dev/video21 | 		Streaming
+/dev/video21 | 		Extended Pix Format
+/dev/video21 | Media Driver Info:
+/dev/video21 | 	Driver name      : bcm2835-isp
+/dev/video21 | 	Model            : bcm2835-isp
+/dev/video21 | 	Serial           : 
+/dev/video21 | 	Bus info         : platform:bcm2835-isp
+/dev/video21 | 	Media version    : 5.15.84
+/dev/video21 | 	Hardware revision: 0x00000000 (0)
+/dev/video21 | 	Driver version   : 5.15.84
+/dev/video21 | ioctl: VIDIOC_ENUM_FMT
+/dev/video21 | 	Type: Video Capture
+/dev/video21 | 
+/dev/video21 | 	[0]: 'YUYV' (YUYV 4:2:2)
+/dev/video21 | 		Size: Stepwise 64x64 - 16384x16384 with step 2/2
+/dev/video21 | 	[1]: 'YVYU' (YVYU 4:2:2)
+/dev/video21 | 		Size: Stepwise 64x64 - 16384x16384 with step 2/2
+/dev/video21 | 	[2]: 'VYUY' (VYUY 4:2:2)
+/dev/video21 | 		Size: Stepwise 64x64 - 16384x16384 with step 2/2
+/dev/video21 | 	[3]: 'UYVY' (UYVY 4:2:2)
+/dev/video21 | 		Size: Stepwise 64x64 - 16384x16384 with step 2/2
+/dev/video21 | 	[4]: 'YU12' (Planar YUV 4:2:0)
+/dev/video21 | 		Size: Stepwise 64x64 - 16384x16384 with step 2/2
+/dev/video21 | 	[5]: 'YV12' (Planar YVU 4:2:0)
+/dev/video21 | 		Size: Stepwise 64x64 - 16384x16384 with step 2/2
+/dev/video21 | 	[6]: 'RGB3' (24-bit RGB 8-8-8)
+/dev/video21 | 		Size: Stepwise 64x64 - 16384x16384 with step 1/1
+/dev/video21 | 	[7]: 'BGR3' (24-bit BGR 8-8-8)
+/dev/video21 | 		Size: Stepwise 64x64 - 16384x16384 with step 1/1
+/dev/video21 | 	[8]: 'XB24' (32-bit RGBX 8-8-8-8)
+/dev/video21 | 		Size: Stepwise 64x64 - 16384x16384 with step 1/1
+/dev/video21 | 	[9]: 'XR24' (32-bit BGRX 8-8-8-8)
+/dev/video21 | 		Size: Stepwise 64x64 - 16384x16384 with step 1/1
+/dev/video21 | 	[10]: 'RGBP' (16-bit RGB 5-6-5)
+/dev/video21 | 		Size: Stepwise 64x64 - 16384x16384 with step 1/1
+/dev/video21 | 	[11]: 'NV12' (Y/CbCr 4:2:0)
+/dev/video21 | 		Size: Stepwise 64x64 - 16384x16384 with step 2/2
+/dev/video21 | 	[12]: 'NV21' (Y/CrCb 4:2:0)
+/dev/video21 | 		Size: Stepwise 64x64 - 16384x16384 with step 2/2
+/dev/video21 | Supported Video Fields:
+/dev/video21 | 	None
+/dev/video21 | ioctl: VIDIOC_ENUM_FMT
+/dev/video21 | 	Type: Video Output
+/dev/video21 | 
+
+====================================
+DEVICE: /dev/video22
+====================================
++ v4l2-ctl -d /dev/video22 --info --list-formats-ext --list-fields --list-formats-out --list-fields-out
+FAIL: could not find device 81:7 in topology
+/dev/video22 | Driver Info:
+/dev/video22 | 	Driver name      : bcm2835-isp
+/dev/video22 | 	Card type        : bcm2835-isp
+/dev/video22 | 	Bus info         : platform:bcm2835-isp
+/dev/video22 | 	Driver version   : 5.15.84
+/dev/video22 | 	Capabilities     : 0x84200001
+/dev/video22 | 		Video Capture
+/dev/video22 | 		Streaming
+/dev/video22 | 		Extended Pix Format
+/dev/video22 | 		Device Capabilities
+/dev/video22 | 	Device Caps      : 0x04200001
+/dev/video22 | 		Video Capture
+/dev/video22 | 		Streaming
+/dev/video22 | 		Extended Pix Format
+/dev/video22 | Media Driver Info:
+/dev/video22 | 	Driver name      : bcm2835-isp
+/dev/video22 | 	Model            : bcm2835-isp
+/dev/video22 | 	Serial           : 
+/dev/video22 | 	Bus info         : platform:bcm2835-isp
+/dev/video22 | 	Media version    : 5.15.84
+/dev/video22 | 	Hardware revision: 0x00000000 (0)
+/dev/video22 | 	Driver version   : 5.15.84
+/dev/video22 | ioctl: VIDIOC_ENUM_FMT
+/dev/video22 | 	Type: Video Capture
+/dev/video22 | 
+/dev/video22 | 	[0]: 'YUYV' (YUYV 4:2:2)
+/dev/video22 | 		Size: Stepwise 64x64 - 16384x16384 with step 2/2
+/dev/video22 | 	[1]: 'YVYU' (YVYU 4:2:2)
+/dev/video22 | 		Size: Stepwise 64x64 - 16384x16384 with step 2/2
+/dev/video22 | 	[2]: 'VYUY' (VYUY 4:2:2)
+/dev/video22 | 		Size: Stepwise 64x64 - 16384x16384 with step 2/2
+/dev/video22 | 	[3]: 'UYVY' (UYVY 4:2:2)
+/dev/video22 | 		Size: Stepwise 64x64 - 16384x16384 with step 2/2
+/dev/video22 | 	[4]: 'YU12' (Planar YUV 4:2:0)
+/dev/video22 | 		Size: Stepwise 64x64 - 16384x16384 with step 2/2
+/dev/video22 | 	[5]: 'YV12' (Planar YVU 4:2:0)
+/dev/video22 | 		Size: Stepwise 64x64 - 16384x16384 with step 2/2
+/dev/video22 | 	[6]: 'NV12' (Y/CbCr 4:2:0)
+/dev/video22 | 		Size: Stepwise 64x64 - 16384x16384 with step 2/2
+/dev/video22 | 	[7]: 'NV21' (Y/CrCb 4:2:0)
+/dev/video22 | 		Size: Stepwise 64x64 - 16384x16384 with step 2/2
+/dev/video22 | Supported Video Fields:
+/dev/video22 | 	None
+/dev/video22 | ioctl: VIDIOC_ENUM_FMT
+/dev/video22 | 	Type: Video Output
+/dev/video22 | 
+
+====================================
+DEVICE: /dev/video23
+====================================
++ v4l2-ctl -d /dev/video23 --info --list-formats-ext --list-fields --list-formats-out --list-fields-out
+FAIL: could not find device 81:8 in topology
+/dev/video23 | Driver Info:
+/dev/video23 | 	Driver name      : bcm2835-isp
+/dev/video23 | 	Card type        : bcm2835-isp
+/dev/video23 | 	Bus info         : platform:bcm2835-isp
+/dev/video23 | 	Driver version   : 5.15.84
+/dev/video23 | 	Capabilities     : 0x84a00000
+/dev/video23 | 		Metadata Capture
+/dev/video23 | 		Streaming
+/dev/video23 | 		Extended Pix Format
+/dev/video23 | 		Device Capabilities
+/dev/video23 | 	Device Caps      : 0x04a00000
+/dev/video23 | 		Metadata Capture
+/dev/video23 | 		Streaming
+/dev/video23 | 		Extended Pix Format
+/dev/video23 | Media Driver Info:
+/dev/video23 | 	Driver name      : bcm2835-isp
+/dev/video23 | 	Model            : bcm2835-isp
+/dev/video23 | 	Serial           : 
+/dev/video23 | 	Bus info         : platform:bcm2835-isp
+/dev/video23 | 	Media version    : 5.15.84
+/dev/video23 | 	Hardware revision: 0x00000000 (0)
+/dev/video23 | 	Driver version   : 5.15.84
+/dev/video23 | ioctl: VIDIOC_ENUM_FMT
+/dev/video23 | 	Type: Video Capture
+/dev/video23 | 
+/dev/video23 | ioctl: VIDIOC_ENUM_FMT
+/dev/video23 | 	Type: Video Output
+/dev/video23 | 
+
+====================================
+DEVICE: /dev/video3
+====================================
++ v4l2-ctl -d /dev/video3 --info --list-formats-ext --list-fields --list-formats-out --list-fields-out
+/dev/video3 | Driver Info:
+/dev/video3 | 	Driver name      : uvcvideo
+/dev/video3 | 	Card type        : Webcam: Webcam
+/dev/video3 | 	Bus info         : usb-0000:01:00.0-1.1
+/dev/video3 | 	Driver version   : 5.15.84
+/dev/video3 | 	Capabilities     : 0x84a00001
+/dev/video3 | 		Video Capture
+/dev/video3 | 		Metadata Capture
+/dev/video3 | 		Streaming
+/dev/video3 | 		Extended Pix Format
+/dev/video3 | 		Device Capabilities
+/dev/video3 | 	Device Caps      : 0x04a00000
+/dev/video3 | 		Metadata Capture
+/dev/video3 | 		Streaming
+/dev/video3 | 		Extended Pix Format
+/dev/video3 | Media Driver Info:
+/dev/video3 | 	Driver name      : uvcvideo
+/dev/video3 | 	Model            : Webcam: Webcam
+/dev/video3 | 	Serial           : YG_U700_D.2021.0104.1403
+/dev/video3 | 	Bus info         : usb-0000:01:00.0-1.1
+/dev/video3 | 	Media version    : 5.15.84
+/dev/video3 | 	Hardware revision: 0x00000010 (16)
+/dev/video3 | 	Driver version   : 5.15.84
+/dev/video3 | Interface Info:
+/dev/video3 | 	ID               : 0x03000005
+/dev/video3 | 	Type             : V4L Video
+/dev/video3 | Entity Info:
+/dev/video3 | 	ID               : 0x00000004 (4)
+/dev/video3 | 	Name             : Webcam: Webcam
+/dev/video3 | 	Function         : V4L2 I/O
+/dev/video3 | ioctl: VIDIOC_ENUM_FMT
+/dev/video3 | 	Type: Video Capture
+/dev/video3 | 
+/dev/video3 | ioctl: VIDIOC_ENUM_FMT
+/dev/video3 | 	Type: Video Output
+/dev/video3 | 
+
+====================================
+DEVICE: /dev/video31
+====================================
++ v4l2-ctl -d /dev/video31 --info --list-formats-ext --list-fields --list-formats-out --list-fields-out
+/dev/video31 | Driver Info:
+/dev/video31 | 	Driver name      : bcm2835-codec
+/dev/video31 | 	Card type        : bcm2835-codec-encode_image
+/dev/video31 | 	Bus info         : platform:bcm2835-codec
+/dev/video31 | 	Driver version   : 5.15.84
+/dev/video31 | 	Capabilities     : 0x84204000
+/dev/video31 | 		Video Memory-to-Memory Multiplanar
+/dev/video31 | 		Streaming
+/dev/video31 | 		Extended Pix Format
+/dev/video31 | 		Device Capabilities
+/dev/video31 | 	Device Caps      : 0x04204000
+/dev/video31 | 		Video Memory-to-Memory Multiplanar
+/dev/video31 | 		Streaming
+/dev/video31 | 		Extended Pix Format
+/dev/video31 | Media Driver Info:
+/dev/video31 | 	Driver name      : bcm2835-codec
+/dev/video31 | 	Model            : bcm2835-codec
+/dev/video31 | 	Serial           : 0000
+/dev/video31 | 	Bus info         : platform:bcm2835-codec
+/dev/video31 | 	Media version    : 5.15.84
+/dev/video31 | 	Hardware revision: 0x00000001 (1)
+/dev/video31 | 	Driver version   : 5.15.84
+/dev/video31 | Interface Info:
+/dev/video31 | 	ID               : 0x03000044
+/dev/video31 | 	Type             : V4L Video
+/dev/video31 | Entity Info:
+/dev/video31 | 	ID               : 0x00000039 (57)
+/dev/video31 | 	Name             : bcm2835-codec-encode_image-source
+/dev/video31 | 	Function         : V4L2 I/O
+/dev/video31 | 	Pad 0x0100003a   : 0: Source
+/dev/video31 | 	  Link 0x02000040: to remote pad 0x100003c of entity 'bcm2835-codec-encode_image-proc': Data, Enabled, Immutable
+/dev/video31 | ioctl: VIDIOC_ENUM_FMT
+/dev/video31 | 	Type: Video Capture Multiplanar
+/dev/video31 | 
+/dev/video31 | 	[0]: 'JPEG' (JFIF JPEG, compressed)
+/dev/video31 | 		Size: Stepwise 32x32 - 1920x1920 with step 2/2
+/dev/video31 | Supported Video Fields:
+/dev/video31 | 	None
+/dev/video31 | ioctl: VIDIOC_ENUM_FMT
+/dev/video31 | 	Type: Video Output Multiplanar
+/dev/video31 | 
+/dev/video31 | 	[0]: 'RGBP' (16-bit RGB 5-6-5)
+/dev/video31 | 	[1]: 'RGB3' (24-bit RGB 8-8-8)
+/dev/video31 | 	[2]: 'BGR3' (24-bit BGR 8-8-8)
+/dev/video31 | 	[3]: 'AB24' (32-bit RGBA 8-8-8-8)
+/dev/video31 | 	[4]: 'BGR4' (32-bit BGRA/X 8-8-8-8)
+/dev/video31 | 	[5]: 'YU12' (Planar YUV 4:2:0)
+/dev/video31 | 	[6]: 'YUYV' (YUYV 4:2:2)
+/dev/video31 | 	[7]: 'YVYU' (YVYU 4:2:2)
+/dev/video31 | 	[8]: 'VYUY' (VYUY 4:2:2)
+/dev/video31 | 	[9]: 'UYVY' (UYVY 4:2:2)
+/dev/video31 | Supported Video Output Fields:
+/dev/video31 | 	None
+
