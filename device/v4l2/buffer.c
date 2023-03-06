@@ -119,13 +119,7 @@ int v4l2_buffer_enqueue(buffer_t *buf, const char *who)
   v4l2_buf.timestamp.tv_sec = buf->captured_time_us / (1000LL * 1000LL);
   v4l2_buf.timestamp.tv_usec = buf->captured_time_us % (1000LL * 1000LL);
 
-  ERR_IOCTL(
-    buf, buf->buf_list->v4l2->dev_fd, VIDIOC_QBUF, &v4l2_buf,
-    "Can't queue buffer (type=%d, index=%d, keyframe=%d, mmap=%d, mplanes=%d, bytesused=%d, dmafd=%d).",
-    buf->buf_list->v4l2->type, buf->index, buf->flags.is_keyframe,
-    buf->buf_list->do_mmap, buf->buf_list->v4l2->do_mplanes, v4l2_buf.bytesused,
-    buf->dma_source ? buf->dma_source->dma_fd : -1
-  );
+  ERR_IOCTL(buf, buf->buf_list->v4l2->dev_fd, VIDIOC_QBUF, &v4l2_buf, "Can't queue buffer.");
 
   return 0;
 
