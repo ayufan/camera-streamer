@@ -151,6 +151,15 @@ int libcamera_buffer_list_dequeue(buffer_list_t *buf_list, buffer_t **bufp)
   uint64_t now_us = get_monotonic_time_us(NULL, NULL);
 
   (*bufp)->captured_time_us = now_us - (boot_time_us - sensor_timestamp_us);
+  (*bufp)->used = 0;
+
+  for (auto &bufferMap : (*bufp)->libcamera->request->buffers()) {
+    auto frameBuffer = bufferMap.second;
+
+    for (auto const &plane : frameBuffer->metadata().planes()) {
+      (*bufp)->used += plane.bytesused;
+    }
+  }
 
   if (index == 0) {
     libcamera_buffer_dump_metadata(*bufp);
