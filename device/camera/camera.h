@@ -94,6 +94,7 @@ void camera_capture_add_callbacks(camera_t *camera, buffer_list_t *capture, link
 
 int camera_configure_input(camera_t *camera);
 int camera_configure_pipeline(camera_t *camera, buffer_list_t *camera_capture);
+void camera_debug_capture(camera_t *camera, buffer_list_t *capture);
 
 buffer_list_t *camera_configure_isp(camera_t *camera, buffer_list_t *src_capture);
 buffer_list_t *camera_configure_decoder(camera_t *camera, buffer_list_t *src_capture);

@@ -164,5 +164,6 @@ int camera_configure_output(camera_t *camera, buffer_list_t *camera_capture, con
 
   camera_capture_add_output(camera, src_capture, output);
   camera_capture_add_callbacks(camera, capture, callbacks);
+  camera_debug_capture(camera, capture);
   return 0;
 }

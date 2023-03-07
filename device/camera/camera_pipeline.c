@@ -46,6 +46,8 @@ int camera_configure_pipeline(camera_t *camera, buffer_list_t *camera_capture)
 {
   camera_capture->do_timestamps = true;
 
+  camera_debug_capture(camera, camera_capture);
+
   if (camera_configure_output(camera, camera_capture, "SNAPSHOT", &camera->options.snapshot,
     snapshot_formats, snapshot_callbacks, &camera->codec_snapshot) < 0) {
     return -1;

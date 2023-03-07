@@ -12,8 +12,6 @@
 #include "output/rtsp/rtsp.h"
 #include "output/output.h"
 
-#include <sys/stat.h>
-
 static unsigned decoder_formats[] =
 {
   // best quality
@@ -27,31 +25,6 @@ static unsigned decoder_formats[] =
   V4L2_PIX_FMT_NV21,
   V4L2_PIX_FMT_YVU420,
   0
-};
-
-static void decoder_debug_on_buffer(buffer_t *buf)
-{
-  if (!buf) {
-    return;
-  }
-
-  static int index = 0;
-
-  char path[256];
-  sprintf(path, "%s/decoder_capture.%d.%s", getenv("CAMERA_DECODER_DEBUG"), index++ % 10, fourcc_to_string(buf->buf_list->fmt.format).buf);
-
-  FILE *fp = fopen(path, "wb");
-  if (!fp) {
-    return;
-  }
-
-  fwrite(buf->start, 1, buf->used, fp);
-  fclose(fp);
-}
-
-static link_callbacks_t decoder_debug_callbacks = {
-  .name = "DECODER-DEBUG-CAPTURE",
-  .on_buffer = decoder_debug_on_buffer
 };
 
 buffer_list_t *camera_configure_decoder(camera_t *camera, buffer_list_t *src_capture)
@@ -73,12 +46,7 @@ buffer_list_t *camera_configure_decoder(camera_t *camera, buffer_list_t *src_cap
   buffer_list_t *decoder_capture = device_open_buffer_list_capture2(
     camera->decoder, NULL, decoder_output, chosen_format, true);
 
-  if (getenv("CAMERA_DECODER_DEBUG")) {
-    mkdir(getenv("CAMERA_DECODER_DEBUG"), 0755);
-    camera_capture_add_callbacks(camera, src_capture, decoder_debug_callbacks);
-    camera_capture_add_callbacks(camera, decoder_capture, decoder_debug_callbacks);
-  }
-
+  camera_debug_capture(camera, decoder_capture);
   camera_capture_add_output(camera, src_capture, decoder_output);
 
   return decoder_capture;
