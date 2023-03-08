@@ -15,11 +15,11 @@ INPUT=$(realpath "$1")
 shift
 
 case "$INPUT" in
-  *.jpeg)
+  *.jpeg|*.JPEG)
     set -- --camera-format=JPEG --camera-width=1920 --camera-height=1080 "$@"
     ;;
 
-  *.yuv420)
+  *.yuv420|*.YU12)
     set -- --camera-format=YUV420 --camera-width=1920 --camera-height=1080 "$@"
     ;;
 
