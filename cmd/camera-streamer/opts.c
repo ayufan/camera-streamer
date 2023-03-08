@@ -63,6 +63,8 @@ option_value_t camera_formats[] = {
   { "YUYV", V4L2_PIX_FMT_YUYV },
   { "YUV420", V4L2_PIX_FMT_YUV420 },
   { "YUYV", V4L2_PIX_FMT_YUYV },
+  { "NV12", V4L2_PIX_FMT_NV12 },
+  { "NV21", V4L2_PIX_FMT_NV21 },
   { "MJPG", V4L2_PIX_FMT_MJPEG },
   { "MJPEG", V4L2_PIX_FMT_MJPEG },
   { "JPEG", V4L2_PIX_FMT_MJPEG },
