@@ -47,21 +47,21 @@ public:
 
   void doGetNextFrame()
   {
-    {
-      std::unique_lock streams_lock(rtsp_streams_lock);
-      if (!fHaveStartedReading) {
-        rtsp_streams.insert(this);
-        fHaveStartedReading = True;
-      }
+    if (!fHaveStartedReading) {
+      std::unique_lock lk(rtsp_streams_lock);
+      rtsp_streams.insert(this);
+      fHaveStartedReading = True;
     }
 
-    send_buffer();
+    if (send_buffer()) {
+      afterGetting(this);
+    }
   }
 
   void doStopGettingFrames()
   {
-    {
-      std::unique_lock streams_lock(rtsp_streams_lock);
+    if (fHaveStartedReading) {
+      std::unique_lock lk(rtsp_streams_lock);
       rtsp_streams.erase(this);
       fHaveStartedReading = false;
     }
@@ -144,8 +144,6 @@ public:
       rtsp_options->truncated++;
       set_buffer(NULL);
     }
-
-    afterGetting(this);
     return true;
   }
 
@@ -236,7 +234,9 @@ static void rtsp_frame_finish()
 {
   std::unique_lock lk(rtsp_streams_lock);
   for (auto *stream : rtsp_streams) {
-    stream->send_buffer();
+    if (stream->send_buffer()) {
+      stream->afterGetting(stream);
+    }
   }
   if (rtsp_options) {
     rtsp_options->clients = rtsp_streams.size();
