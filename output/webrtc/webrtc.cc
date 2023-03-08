@@ -129,14 +129,14 @@ public:
   }
 
 public:
-  char *name;
+  char *name = NULL;
   std::string id;
   std::shared_ptr<rtc::PeerConnection> pc;
   std::shared_ptr<ClientTrackData> video;
   std::mutex lock;
   std::condition_variable wait_for_complete;
-  bool had_key_frame;
-  bool requested_key_frame;
+  bool had_key_frame = false;
+  bool requested_key_frame = false;
 };
 
 std::shared_ptr<Client> findClient(std::string id)
