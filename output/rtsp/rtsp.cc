@@ -41,16 +41,21 @@ class DynamicH264Stream : public FramedSource
 {
 public:
   DynamicH264Stream(UsageEnvironment& env)
-    : FramedSource(env), fHaveStartedReading(False), locked_buf(NULL), locked_buf_offset(0)
+    : FramedSource(env)
   {
+    had_key_frame = false;
+    running = false;
+    requested_key_frame = false;
+    locked_buf = NULL;
+    locked_buf_offset = 0;
   }
 
   void doGetNextFrame()
   {
-    if (!fHaveStartedReading) {
+    if (!running) {
       std::unique_lock lk(rtsp_streams_lock);
       rtsp_streams.insert(this);
-      fHaveStartedReading = True;
+      running = True;
     }
 
     if (send_buffer()) {
@@ -60,10 +65,10 @@ public:
 
   void doStopGettingFrames()
   {
-    if (fHaveStartedReading) {
+    if (running) {
       std::unique_lock lk(rtsp_streams_lock);
       rtsp_streams.erase(this);
-      fHaveStartedReading = false;
+      running = false;
     }
 
     set_buffer(NULL);
@@ -73,7 +78,7 @@ public:
   {
     std::unique_lock lk(lock);
 
-    if (!fHaveStartedReading) {
+    if (!running) {
       return;
     }
 
@@ -84,14 +89,14 @@ public:
       return;
     }
 
-    if (!fHadKeyFrame) {
-      fHadKeyFrame = buf->flags.is_keyframe;
+    if (!had_key_frame) {
+      had_key_frame = buf->flags.is_keyframe;
     }
 
-    if (!fHadKeyFrame) {
-      if (!fRequestedKeyFrame) {
+    if (!had_key_frame) {
+      if (!requested_key_frame) {
         device_video_force_key(buf->buf_list->dev);
-        fRequestedKeyFrame = true;
+        requested_key_frame = true;
       }
       if (rtsp_options) {
         rtsp_options->dropped++;
@@ -147,9 +152,9 @@ public:
     return true;
   }
 
-  Boolean fHaveStartedReading;
-  Boolean fHadKeyFrame;
-  Boolean fRequestedKeyFrame;
+  Boolean running;
+  Boolean had_key_frame;
+  Boolean requested_key_frame;
 
   std::recursive_mutex lock;
   buffer_t *locked_buf;
