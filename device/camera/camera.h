@@ -25,9 +25,14 @@ typedef struct camera_output_options_s {
   char options[CAMERA_OPTIONS_LENGTH];
 } camera_output_options_t;
 
+typedef struct camera_crop_s {
+  float left, top, right, bottom;
+} camera_crop_t;
+
 typedef struct camera_options_s {
   char path[256];
   unsigned width, height, format;
+  camera_crop_t crop;
   unsigned nbufs, fps;
   camera_type_t type;
   bool allow_dma;
@@ -93,11 +98,14 @@ void camera_capture_add_output(camera_t *camera, buffer_list_t *capture, buffer_
 void camera_capture_add_callbacks(camera_t *camera, buffer_list_t *capture, link_callbacks_t callbacks);
 
 int camera_configure_input(camera_t *camera);
-int camera_configure_pipeline(camera_t *camera, buffer_list_t *camera_capture);
+int camera_configure_pipeline(camera_t *camera, buffer_list_t *camera_capture, camera_crop_t *crop);
 void camera_debug_capture(camera_t *camera, buffer_list_t *capture);
+
+bool camera_uses_crop(camera_crop_t *crop);
+int camera_configure_crop(device_t *dev, buffer_format_t fmt, camera_crop_t *crop);
 
 buffer_list_t *camera_configure_isp(camera_t *camera, buffer_list_t *src_capture);
 buffer_list_t *camera_configure_decoder(camera_t *camera, buffer_list_t *src_capture);
 buffer_list_t *camera_configure_rescaller(camera_t *camera, buffer_list_t *src_capture, const char *name, unsigned target_height, unsigned formats[]);
-int camera_configure_output(camera_t *camera, buffer_list_t *camera_capture, const char *name, camera_output_options_t *options, unsigned formats[], link_callbacks_t callbacks, device_t **device);
+int camera_configure_output(camera_t *camera, buffer_list_t *camera_capture, const char *name, camera_crop_t *crop, camera_output_options_t *options, unsigned formats[], link_callbacks_t callbacks, device_t **device);
 bool camera_get_scaled_resolution(buffer_format_t capture_format, camera_output_options_t *options, buffer_format_t *format, int align_size);
