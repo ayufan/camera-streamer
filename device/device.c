@@ -241,6 +241,18 @@ int device_set_rotation(device_t *dev, bool vflip, bool hflip)
   return hret ? hret : vret;
 }
 
+int device_set_target_crop(device_t *dev, const buffer_rect_t *rect)
+{
+  if (!dev || !rect)
+    return -1;
+
+  if (dev->hw->device_set_target_crop) {
+    return dev->hw->device_set_target_crop(dev, rect);
+  }
+
+  return -1;
+}
+
 int device_set_option_string(device_t *dev, const char *key, const char *value)
 {
   if (dev && dev->hw->device_set_option) {

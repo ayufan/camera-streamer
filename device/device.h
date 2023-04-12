@@ -7,6 +7,7 @@
 typedef struct buffer_s buffer_t;
 typedef struct buffer_list_s buffer_list_t;
 typedef struct buffer_format_s buffer_format_t;
+typedef struct buffer_rect_s buffer_rect_t;
 typedef struct device_option_s device_option_t;
 typedef struct device_s device_t;
 struct pollfd;
@@ -22,6 +23,7 @@ typedef struct device_hw_s {
   int (*device_set_fps)(device_t *dev, int desired_fps);
   int (*device_set_rotation)(device_t *dev, bool vflip, bool hflip);
   int (*device_set_option)(device_t *dev, const char *key, const char *value);
+  int (*device_set_target_crop)(device_t *dev, const buffer_rect_t *rect);
 
   int (*buffer_open)(buffer_t *buf);
   void (*buffer_close)(buffer_t *buf);
@@ -111,6 +113,7 @@ void device_dump_options(device_t *dev, FILE *stream);
 int device_dump_options2(device_t *dev, device_option_fn fn, void *opaque);
 int device_set_fps(device_t *dev, int desired_fps);
 int device_set_rotation(device_t *dev, bool vflip, bool hflip);
+int device_set_target_crop(device_t *dev, const buffer_rect_t *rect);
 int device_set_option_string(device_t *dev, const char *option, const char *value);
 void device_set_option_list(device_t *dev, const char *option_list);
 

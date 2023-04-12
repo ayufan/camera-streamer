@@ -10,6 +10,7 @@
 - device: show stddev estimates to measure frame pacing
 - webrtc: allow to specify ice-servers on command line
 - webrtc: accept `ice_servers` provided in `POST /webrtc`
+- device: support `--camera-crop.left/right/top/bottom` in a %
 
 ## Variants
 
