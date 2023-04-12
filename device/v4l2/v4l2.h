@@ -9,6 +9,7 @@
 
 typedef struct buffer_s buffer_t;
 typedef struct buffer_list_s buffer_list_t;
+typedef struct buffer_rect_s buffer_rect_t;
 typedef struct device_s device_t;
 struct pollfd;
 
@@ -40,6 +41,7 @@ int v4l2_device_video_force_key(device_t *dev);
 void v4l2_device_dump_options(device_t *dev, FILE *stream);
 int v4l2_device_set_fps(device_t *dev, int desired_fps);
 int v4l2_device_set_option(device_t *dev, const char *key, const char *value);
+int v4l2_device_set_target_crop(device_t *dev, const buffer_rect_t *rect);
 
 int v4l2_buffer_open(buffer_t *buf);
 void v4l2_buffer_close(buffer_t *buf);

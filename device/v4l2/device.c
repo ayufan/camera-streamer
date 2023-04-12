@@ -1,4 +1,5 @@
 #include "v4l2.h"
+#include "device/buffer_list.h"
 #include "device/device.h"
 #include "util/opts/log.h"
 
@@ -76,6 +77,33 @@ int v4l2_device_set_fps(device_t *dev, int desired_fps)
   LOG_DEBUG(dev, "Configuring FPS ...");
   ERR_IOCTL(dev, dev->v4l2->dev_fd, VIDIOC_S_PARM, &setfps, "Can't set FPS");
   return 0;
+error:
+  return -1;
+}
+
+int v4l2_device_set_target_crop(device_t *dev, const buffer_rect_t *rect)
+{
+  if (!dev->v4l2)
+    return -1;
+
+  struct v4l2_rect v4l2_rect = {
+    .left = rect->x,
+    .top = rect->y,
+    .width = rect->width,
+    .height = rect->height
+  };
+
+	struct v4l2_selection v4l2_sel = {
+    .type = V4L2_BUF_TYPE_VIDEO_OUTPUT,
+    .target = V4L2_SEL_TGT_CROP,
+    .flags = 0,
+    .r = v4l2_rect
+  };
+
+  ERR_IOCTL(dev, dev->v4l2->dev_fd, VIDIOC_S_SELECTION, &v4l2_sel, "Can't set target crop selection");
+
+  return 0;
+
 error:
   return -1;
 }
