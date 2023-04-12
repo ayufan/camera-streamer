@@ -37,6 +37,9 @@ static buffer_list_t *camera_find_capture(camera_t *camera, unsigned target_heig
     for (int j = 0; j < device->n_capture_list; j++) {
       buffer_list_t *capture_list = device->capture_lists[j];
 
+      if (capture_list->do_not_find)
+        continue;
+
       if (camera_output_matches_capture(capture_list, target_height, format)) {
         return capture_list;
       }
@@ -76,7 +79,7 @@ static unsigned rescalled_formats[] =
 
 #define OUTPUT_RESCALLER_SIZE 32
 
-int camera_configure_output(camera_t *camera, buffer_list_t *camera_capture, const char *name, camera_output_options_t *options, unsigned formats[], link_callbacks_t callbacks, device_t **device)
+int camera_configure_output(camera_t *camera, buffer_list_t *camera_capture, const char *name, camera_crop_t *crop, camera_output_options_t *options, unsigned formats[], link_callbacks_t callbacks, device_t **device)
 {
   buffer_format_t selected_format = {0};
   buffer_format_t rescalled_format = {0};
@@ -157,6 +160,11 @@ int camera_configure_output(camera_t *camera, buffer_list_t *camera_capture, con
 
   buffer_list_t *output = device_open_buffer_list_output(*device, src_capture);
   buffer_list_t *capture = device_open_buffer_list_capture2(*device, NULL, output, chosen_format, true);
+
+  if (camera_configure_crop(*device, src_capture->fmt, crop) < 0) {
+    LOG_INFO(camera, "Cannot configure CROP");
+    return -1;
+  }
 
   if (!capture) {
     return -1;

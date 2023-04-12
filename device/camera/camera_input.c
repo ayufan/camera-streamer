@@ -44,7 +44,14 @@ static int camera_configure_input_v4l2(camera_t *camera)
     return -1;
   }
 
-  return camera_configure_pipeline(camera, camera_capture);
+  camera_crop_t *crop = NULL;
+
+  if (camera_uses_crop(&camera->options.crop)) {
+    camera_capture->do_not_find = true;
+    crop = &camera->options.crop;
+  }
+
+  return camera_configure_pipeline(camera, camera_capture, crop);
 }
 
 static int camera_configure_input_libcamera(camera_t *camera)
@@ -98,7 +105,14 @@ static int camera_configure_input_libcamera(camera_t *camera)
     return -1;
   }
 
-  return camera_configure_pipeline(camera, camera_capture);
+  camera_crop_t *crop = NULL;
+
+  if (camera_uses_crop(&camera->options.crop)) {
+    camera_capture->do_not_find = true;
+    crop = &camera->options.crop;
+  }
+
+  return camera_configure_pipeline(camera, camera_capture, crop);
 }
 
 static int camera_configure_input_dummy(camera_t *camera)
@@ -120,7 +134,14 @@ static int camera_configure_input_dummy(camera_t *camera)
     return -1;
   }
 
-  return camera_configure_pipeline(camera, camera_capture);
+  camera_crop_t *crop = NULL;
+
+  if (camera_uses_crop(&camera->options.crop)) {
+    camera_capture->do_not_find = true;
+    crop = &camera->options.crop;
+  }
+
+  return camera_configure_pipeline(camera, camera_capture, crop);
 }
 
 int camera_configure_input(camera_t *camera)

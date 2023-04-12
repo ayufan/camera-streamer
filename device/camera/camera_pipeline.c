@@ -42,23 +42,23 @@ static link_callbacks_t video_callbacks =
   .buf_lock = &video_lock
 };
 
-int camera_configure_pipeline(camera_t *camera, buffer_list_t *camera_capture)
+int camera_configure_pipeline(camera_t *camera, buffer_list_t *camera_capture, camera_crop_t *crop)
 {
   camera_capture->do_timestamps = true;
 
   camera_debug_capture(camera, camera_capture);
 
-  if (camera_configure_output(camera, camera_capture, "SNAPSHOT", &camera->options.snapshot,
+  if (camera_configure_output(camera, camera_capture, "SNAPSHOT", crop, &camera->options.snapshot,
     snapshot_formats, snapshot_callbacks, &camera->codec_snapshot) < 0) {
     return -1;
   }
 
-  if (camera_configure_output(camera, camera_capture, "STREAM", &camera->options.stream,
+  if (camera_configure_output(camera, camera_capture, "STREAM", crop, &camera->options.stream,
     snapshot_formats, stream_callbacks, &camera->codec_stream) < 0) {
     return -1;
   }
 
-  if (camera_configure_output(camera, camera_capture, "VIDEO", &camera->options.video,
+  if (camera_configure_output(camera, camera_capture, "VIDEO", crop, &camera->options.video,
     video_formats, video_callbacks, &camera->codec_video) < 0) {
     return -1;
   }
