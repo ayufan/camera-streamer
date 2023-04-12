@@ -9,6 +9,7 @@ device_hw_t v4l2_device_hw = {
   .device_dump_options2 = v4l2_device_dump_options2,
   .device_set_fps = v4l2_device_set_fps,
   .device_set_option = v4l2_device_set_option,
+  .device_set_target_crop = v4l2_device_set_target_crop,
 
   .buffer_open = v4l2_buffer_open,
   .buffer_close = v4l2_buffer_close,

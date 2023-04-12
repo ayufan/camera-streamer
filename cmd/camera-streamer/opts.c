@@ -112,6 +112,11 @@ option_t all_options[] = {
   DEFINE_OPTION_DEFAULT(camera, vflip, bool, "1", "Do vertical image flip (does not work with all camera)."),
   DEFINE_OPTION_DEFAULT(camera, hflip, bool, "1", "Do horizontal image flip (does not work with all camera)."),
 
+  DEFINE_OPTION(camera, crop.left, float, "Set the image crop."),
+  DEFINE_OPTION(camera, crop.top, float, "Set the image crop."),
+  DEFINE_OPTION(camera, crop.right, float, "Set the image crop."),
+  DEFINE_OPTION(camera, crop.bottom, float, "Set the image crop."),
+
   DEFINE_OPTION_PTR(camera, isp.options, list, "Set the ISP processing options. List all available options with `-camera-list_options`."),
 
   DEFINE_OPTION_PTR(camera, snapshot.options, list, "Set the JPEG compression options. List all available options with `-camera-list_options`."),

@@ -22,6 +22,10 @@ typedef struct buffer_format_s {
   buffer_type_t type;
 } buffer_format_t;
 
+typedef struct buffer_rect_s {
+  unsigned x, y, width, height;
+} buffer_rect_t;
+
 typedef struct buffer_stats_s {
   int frames, dropped;
 
@@ -42,7 +46,7 @@ typedef struct buffer_list_s {
   int index;
 
   buffer_format_t fmt;
-  bool do_mmap, do_capture, do_timestamps;
+  bool do_mmap, do_capture, do_timestamps, do_not_find;
 
   union {
     struct buffer_list_v4l2_s *v4l2;
