@@ -62,3 +62,4 @@ void http_400(FILE *stream, const char *data);
 void http_404(FILE *stream, const char *data);
 void http_500(FILE *stream, const char *data);
 void *http_enum_params(http_worker_t *worker, FILE *stream, http_param_fn fn, void *opaque);
+const char *http_get_param(http_worker_t *worker, const char *key);
