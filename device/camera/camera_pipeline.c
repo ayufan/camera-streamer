@@ -42,11 +42,24 @@ static link_callbacks_t video_callbacks =
   .buf_lock = &video_lock
 };
 
+void jpeg_exif_orientation_set(int orientation);
+void jpeg_exif_orientation_on_buffer(buffer_t *buf);
+void h264_display_sei_on_buffer(buffer_t *buf);
+void h264_display_sei_set(int orientation);
+
 int camera_configure_pipeline(camera_t *camera, buffer_list_t *camera_capture, camera_crop_t *crop)
 {
   camera_capture->do_timestamps = true;
 
   camera_debug_capture(camera, camera_capture);
+
+  if (camera->options.exif_orientation) {
+    jpeg_exif_orientation_set(camera->options.exif_orientation);
+    snapshot_callbacks.on_buffer = jpeg_exif_orientation_on_buffer;
+  
+    h264_display_sei_set(camera->options.exif_orientation);
+    video_callbacks.on_buffer = h264_display_sei_on_buffer;
+  }
 
   if (camera_configure_output(camera, camera_capture, "SNAPSHOT", crop, &camera->options.snapshot,
     snapshot_formats, snapshot_callbacks, &camera->codec_snapshot) < 0) {

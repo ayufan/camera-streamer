@@ -49,6 +49,7 @@ typedef struct camera_options_s {
     bool hflip;
     unsigned hflip_align;
   };
+  unsigned exif_orientation;
 
   char options[CAMERA_OPTIONS_LENGTH];
   bool list_options;

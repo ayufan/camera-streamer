@@ -88,6 +88,19 @@ option_value_t camera_type[] = {
   {}
 };
 
+option_value_t exif_orientation[] = {
+  { "disabled", 0 },
+  { "default", 1 },
+  { "flip_h", 2 },
+  { "flip_hv", 3 },
+  { "flip_v", 4 },
+  { "flip_270", 5 },
+  { "90", 6 },
+  { "flip_90", 7 },
+  { "270", 8 },
+  {}
+};
+
 option_t all_options[] = {
   DEFINE_OPTION_PTR(camera, path, string, "Chooses the camera to use. If empty connect to default."),
   DEFINE_OPTION_VALUES(camera, type, camera_type, "Select camera type."),
@@ -110,6 +123,8 @@ option_t all_options[] = {
   DEFINE_OPTION(camera, crop.top, float, "Set the image crop."),
   DEFINE_OPTION(camera, crop.right, float, "Set the image crop."),
   DEFINE_OPTION(camera, crop.bottom, float, "Set the image crop."),
+
+  DEFINE_OPTION_VALUES(camera, exif_orientation, exif_orientation, "Set image orientation using EXIF (experimental)."),
 
   DEFINE_OPTION_PTR(camera, isp.options, list, "Set the ISP processing options. List all available options with `-camera-list_options`."),
 
