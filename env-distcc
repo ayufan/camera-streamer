@@ -1,0 +1,2 @@
+export DISTCC_HOSTS="rocknas.home/2"
+export CCACHE="ccache distcc"
