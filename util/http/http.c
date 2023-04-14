@@ -19,14 +19,14 @@
 #define HEADER_USER_AGENT "User-Agent:"
 #define HEADER_HOST "Host:"
 
-static int http_listen(int port, int maxcons)
+static int http_listen(char *addr, int port, int maxcons)
 {
   struct sockaddr_in server = {0};
   int listenfd = -1;
 
   // getaddrinfo for host
   server.sin_family = AF_INET;
-  server.sin_addr.s_addr = INADDR_ANY;
+  inet_aton(addr, &server.sin_addr);
   server.sin_port = htons(port);
 
   listenfd = socket(AF_INET, SOCK_STREAM, 0);
@@ -227,7 +227,7 @@ error:
 
 int http_server(http_server_options_t *options, http_method_t *methods)
 {
-  int listen_fd = http_listen(options->port, options->maxcons);
+  int listen_fd = http_listen(options->addr, options->port, options->maxcons);
   if (listen_fd < 0) {
     return -1;
   }
