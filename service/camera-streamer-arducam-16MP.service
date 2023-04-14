@@ -23,6 +23,8 @@ ExecStart=/usr/local/bin/camera-streamer \
   -camera-options=brightness=0.1 \
   ; disable auto-focus
   -camera-auto_focus=1 \
+  --http-listen=0.0.0.0 \
+  --http-port=8080 \
   -rtsp-port
 
 DynamicUser=yes

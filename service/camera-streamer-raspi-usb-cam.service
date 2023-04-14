@@ -17,6 +17,8 @@ ExecStart=/usr/local/bin/camera-streamer \
   -camera-video.height=720 \
   ; the stream is 853x480
   -camera-stream.height=480 \
+  --http-listen=0.0.0.0 \
+  --http-port=8080 \
   -rtsp-port
 
 DynamicUser=yes

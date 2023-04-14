@@ -11,6 +11,8 @@ ExecStart=/usr/local/bin/camera-streamer \
   -camera-fps=30 \
   ; use two memory buffers to optimise usage
   -camera-nbufs=3 \
+  --http-listen=0.0.0.0 \
+  --http-port=8080 \
   ; disable video streaming (WebRTC, RTSP, H264)
   ; on non-supported platforms
   -camera-video.disabled

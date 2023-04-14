@@ -22,6 +22,7 @@ fi
 set -xeo pipefail
 make -j$(nproc)
 $GDB ./camera-streamer -camera-path="${CAMERA_PATH[0]}" \
+  --http-listen=0.0.0.0 \
   -camera-options=vertical_blanking=728 \
   -camera-options=exposure=2444 \
   -camera-options=analogue_gain=600 \

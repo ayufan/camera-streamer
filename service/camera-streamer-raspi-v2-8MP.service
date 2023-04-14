@@ -24,6 +24,8 @@ ExecStart=/usr/local/bin/camera-streamer \
   -camera-stream.height=480 \
   ; bump brightness slightly
   -camera-options=brightness=0.1 \
+  --http-listen=0.0.0.0 \
+  --http-port=8080 \
   -rtsp-port
 
 DynamicUser=yes

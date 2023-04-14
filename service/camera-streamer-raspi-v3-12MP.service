@@ -25,6 +25,8 @@ ExecStart=/usr/local/bin/camera-streamer \
   ; enable continuous autofocus
   -camera-options=AfMode=2 \
   -camera-options=AfRange=2 \
+  --http-listen=0.0.0.0 \
+  --http-port=8080 \
   -rtsp-port
 
 DynamicUser=yes
