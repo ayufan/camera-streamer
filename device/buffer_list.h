@@ -56,6 +56,8 @@ typedef struct buffer_list_s {
 
 buffer_list_t *buffer_list_open(const char *name, int index, struct device_s *dev, const char *path, buffer_format_t fmt, bool do_capture, bool do_mmap);
 void buffer_list_close(buffer_list_t *buf_list);
+int buffer_list_alloc_buffers(buffer_list_t *buf_list);
+void buffer_list_free_buffers(buffer_list_t *buf_list);
 
 int buffer_list_set_stream(buffer_list_t *buf_list, bool do_on);
 

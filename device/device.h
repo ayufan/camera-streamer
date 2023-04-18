@@ -27,6 +27,8 @@ typedef struct device_hw_s {
 
   int (*buffer_list_open)(buffer_list_t *buf_list);
   void (*buffer_list_close)(buffer_list_t *buf_list);
+  int (*buffer_list_alloc_buffers)(buffer_list_t *buf_list);
+  void (*buffer_list_free_buffers)(buffer_list_t *buf_list);
   int (*buffer_list_set_stream)(buffer_list_t *buf_list, bool do_on);
 } device_hw_t;
 

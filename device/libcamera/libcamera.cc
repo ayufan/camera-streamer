@@ -17,6 +17,8 @@ device_hw_t libcamera_device_hw = {
   .buffer_list_pollfd = libcamera_buffer_list_pollfd,
   .buffer_list_open = libcamera_buffer_list_open,
   .buffer_list_close = libcamera_buffer_list_close,
+  .buffer_list_alloc_buffers = libcamera_buffer_list_alloc_buffers,
+  .buffer_list_free_buffers = libcamera_buffer_list_free_buffers,
   .buffer_list_set_stream = libcamera_buffer_list_set_stream
 };
 

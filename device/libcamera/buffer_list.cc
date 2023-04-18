@@ -117,7 +117,16 @@ int libcamera_buffer_list_open(buffer_list_t *buf_list)
   buf_list->fmt.height = configuration.size.height;
   buf_list->fmt.format = libcamera_to_fourcc(configuration.pixelFormat);
   buf_list->fmt.bytesperline = configuration.stride;
-  buf_list->fmt.nbufs = configuration.bufferCount;
+  return 0;
+
+error:
+  return -1;
+}
+
+int libcamera_buffer_list_alloc_buffers(buffer_list_t *buf_list)
+{
+  auto &configurations = buf_list->dev->libcamera->configuration;
+  auto &configuration = configurations->at(buf_list->index);
 
   if (buf_list->dev->libcamera->allocator->allocate(configuration.stream()) < 0) {
     LOG_ERROR(buf_list, "Can't allocate buffers");
@@ -126,13 +135,18 @@ int libcamera_buffer_list_open(buffer_list_t *buf_list)
   {
     int allocated = buf_list->dev->libcamera->allocator->buffers(
       configuration.stream()).size();
-    buf_list->fmt.nbufs = std::min<unsigned>(buf_list->fmt.nbufs, allocated);
+    return std::min<int>(buf_list->fmt.nbufs, allocated);
   }
-
-  return buf_list->fmt.nbufs;
 
 error:
   return -1;
+}
+
+void libcamera_buffer_list_free_buffers(buffer_list_t *buf_list)
+{
+  auto &configurations = buf_list->dev->libcamera->configuration;
+  auto &configuration = configurations->at(buf_list->index);
+  buf_list->dev->libcamera->allocator->free(configuration.stream());
 }
 
 void libcamera_buffer_list_close(buffer_list_t *buf_list)
