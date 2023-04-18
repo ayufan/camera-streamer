@@ -24,7 +24,8 @@ for device in /dev/video*; do
     set -x
     v4l2-ctl -d "$device" --info \
     --list-formats-ext --list-fields \
-    --list-formats-out --list-fields-out
+    --list-formats-out --list-fields-out \
+    --list-ctrls
   ) | prefix "$device"
   echo
 done
