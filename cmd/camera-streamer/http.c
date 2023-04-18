@@ -103,7 +103,7 @@ http_method_t http_methods[] = {
   { "GET",  "/webrtc", http_content, "text/html", html_webrtc_html, 0, &html_webrtc_html_len },
   { "POST", "/webrtc", http_webrtc_offer },
   { "GET",  "/option", camera_http_option },
-  { "GET",  "/status.json", camera_status_json },
+  { "GET",  "/status", camera_status_json },
   { "GET",  "/", http_content, "text/html", html_index_html, 0, &html_index_html_len },
   { "OPTIONS", "*/", http_cors_options },
   { }
