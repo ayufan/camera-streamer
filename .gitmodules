@@ -2,3 +2,6 @@
 	path = third_party/libdatachannel
 	url = https://github.com/paullouisageneau/libdatachannel.git
 	ignore = dirty
+[submodule "third_party/magic_enum"]
+	path = third_party/magic_enum
+	url = https://github.com/Neargye/magic_enum.git
