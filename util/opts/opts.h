@@ -73,4 +73,7 @@ typedef struct options_s {
     .description = _desc, \
   }
 
+const char *opt_value_to_string(const option_value_t *values, int value, const char *def);
+int opt_string_to_value(const option_value_t *values, const char *name, int def);
+
 int parse_opts(option_t *options, int argc, char *argv[]);

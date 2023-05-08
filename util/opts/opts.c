@@ -8,6 +8,26 @@
 
 #define OPT_LENGTH 30
 
+const char *opt_value_to_string(const option_value_t *values, int value, const char *def)
+{
+  for (int i = 0; values[i].name; i++) {
+    if (values[i].value == value) {
+      return values[i].name;
+    }
+  }
+  return def;
+}
+
+int opt_string_to_value(const option_value_t *values, const char *name, int def)
+{
+  for (int i = 0; values[i].name; i++) {
+    if (!strcmp(values[i].name, name)) {
+      return values[i].value;
+    }
+  }
+  return def;
+}
+
 static void print_version(const char *cmd)
 {
   printf("%s (%s)\n", GIT_VERSION, GIT_REVISION);
@@ -75,12 +95,10 @@ static void print_help(option_t *options, const char *cmd)
       bool found = false;
       len += printf("  --%s=", option->name);
       if (option->value_mapping) {
-        for (int j = 0; option->value_mapping[j].name; j++) {
-          if (option->value_mapping[j].value == *option->value_uint) {
-            printf("%s", option->value_mapping[j].name);
-            found = true;
-            break;
-          }
+        const char *name = opt_value_to_string(option->value_mapping, *option->value_uint, NULL);
+        if (name) {
+          len += printf("%s", name);
+          found = true;
         }
       }
 
@@ -141,11 +159,10 @@ static int parse_opt(option_t *options, const char *key, int dash)
   } else if (option->value_string) {
     ret = sscanf(value, option->format, option->value_string);
   } else if (option->value_mapping) {
-    for (int j = 0; option->value_mapping[j].name; j++) {
-      if (!strcmp(option->value_mapping[j].name, value)) {
-        *option->value_uint = option->value_mapping[j].value;
-        return 1;
-      }
+    int ret = opt_string_to_value(option->value_mapping, value, -1);
+    if (ret != -1) {
+      *option->value_uint = ret;
+      return 1;
     }
 
     ret = sscanf(value, option->format, option->value);
