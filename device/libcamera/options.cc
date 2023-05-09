@@ -150,6 +150,136 @@ void libcamera_device_dump_options(device_t *dev, FILE *stream)
   fprintf(stream, "\n");
 }
 
+static int libcamera_device_dump_control_option(device_option_fn fn, void *opaque, const libcamera::ControlId &control_id, const libcamera::ControlInfo *control_info, const libcamera::ControlValue *control_value, bool read_only)
+{
+  device_option_t opt = {
+    .control_id = control_id.id()
+  };
+  opt.flags.read_only = read_only;
+  strcpy(opt.name, control_id.name().c_str());
+
+  if (control_info) {
+    strcpy(opt.description, control_info->toString().c_str());
+  }
+
+  if (control_value) {
+    strcpy(opt.value, control_value->toString().c_str());
+  }
+
+  switch (control_id.type()) {
+  case libcamera::ControlTypeNone:
+    break;
+
+  case libcamera::ControlTypeBool:
+    opt.type = device_option_type_bool;
+    break;
+
+  case libcamera::ControlTypeByte:
+    opt.type = device_option_type_u8;
+    break;
+
+  case libcamera::ControlTypeInteger32:
+    opt.type = device_option_type_integer;
+    break;
+
+  case libcamera::ControlTypeInteger64:
+    opt.type = device_option_type_integer64;
+    break;
+
+  case libcamera::ControlTypeFloat:
+    opt.type = device_option_type_float;
+    break;
+
+  case libcamera::ControlTypeRectangle:
+    opt.type = device_option_type_float;
+    opt.elems = 4;
+    break;
+
+  case libcamera::ControlTypeSize:
+    opt.type = device_option_type_float;
+    opt.elems = 2;
+    break;
+
+  case libcamera::ControlTypeString:
+    opt.type = device_option_type_string;
+    break;
+  }
+
+  auto named_values = libcamera_find_control_ids(control_id.id());
+
+  if (named_values != NULL) {
+    for (const auto & named_value : *named_values) {
+      if (opt.menu_items >= MAX_DEVICE_OPTION_MENU) {
+        opt.flags.invalid = true;
+        break;
+      }
+
+      device_option_menu_t *opt_menu = &opt.menu[opt.menu_items++];
+      opt_menu->id = named_value.first;
+      strcpy(opt_menu->name, named_value.second.c_str());
+    }
+  } else if (control_info) {
+    for (size_t i = 0; i < control_info->values().size(); i++) {
+      if (opt.menu_items >= MAX_DEVICE_OPTION_MENU) {
+        opt.flags.invalid = true;
+        break;
+      }
+
+      device_option_menu_t *opt_menu = &opt.menu[opt.menu_items++];
+      opt_menu->id = control_info->values()[i].get<int>();
+      strcpy(opt_menu->name, control_info->values()[i].toString().c_str());
+    }
+  }
+
+  if (opt.type) {
+    int ret = fn(&opt, opaque);
+    if (ret < 0)
+      return ret;
+  }
+
+  return 0;
+}
+
+int libcamera_device_dump_options2(device_t *dev, device_option_fn fn, void *opaque)
+{
+  auto &properties = dev->libcamera->camera->properties();
+  auto idMap = properties.idMap();
+
+  int n = 0;
+
+  for (auto const &control : properties) {
+    if (!control.first)
+      continue;
+
+    auto control_id = control.first;
+    auto control_value = control.second;
+    std::string control_id_name = "";
+
+    if (auto control_id_info = idMap ? idMap->at(control_id) : NULL) {
+      int ret = libcamera_device_dump_control_option(fn, opaque, *control_id_info, NULL, &control_value, true);
+      if (ret < 0)
+        return ret;
+
+      n++;
+    }
+  }
+
+  for (auto const &control : libcamera_control_list(dev)) {
+    if (!control.first)
+      continue;
+
+    auto control_id = control.first;
+    auto control_info = control.second;
+
+    int ret = libcamera_device_dump_control_option(fn, opaque, *control_id, &control_info, NULL, false);
+    if (ret < 0)
+      return ret;
+    n++;
+  }
+
+  return n;
+}
+
 static libcamera::Rectangle libcamera_parse_rectangle(const char *value)
 {
   static const char *RECTANGLE_PATTERNS[] =

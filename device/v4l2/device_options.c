@@ -210,3 +210,102 @@ void v4l2_device_dump_options(device_t *dev, FILE *stream)
   }
   fprintf(stream, "\n");
 }
+
+int v4l2_device_dump_options2(device_t *dev, device_option_fn fn, void *opaque)
+{
+  int n = 0;
+
+  for (int i = 0; i < dev->v4l2->ncontrols; i++) {
+    device_v4l2_control_t *control = &dev->v4l2->controls[i];
+
+    device_option_t opt = {
+      .control_id = control->control.id,
+      .elems = control->control.elems,
+    };
+    strcpy(opt.name, control->control.name);
+
+    switch(control->control.type) {
+    case V4L2_CTRL_TYPE_U8:
+      opt.type = device_option_type_u8;
+      sprintf(opt.description, "[%lld..%lld]", control->control.minimum, control->control.maximum);
+      break;
+
+    case V4L2_CTRL_TYPE_U16:
+      opt.type = device_option_type_u16;
+      sprintf(opt.description, "[%lld..%lld]", control->control.minimum, control->control.maximum);
+      break;
+
+    case V4L2_CTRL_TYPE_U32:
+      opt.type = device_option_type_u32;
+      sprintf(opt.description, "[%lld..%lld]", control->control.minimum, control->control.maximum);
+      break;
+
+    case V4L2_CTRL_TYPE_BOOLEAN:
+      opt.type = device_option_type_bool;
+      sprintf(opt.description, "[%lld..%lld]", control->control.minimum, control->control.maximum);
+      break;
+
+    case V4L2_CTRL_TYPE_INTEGER:
+      opt.type = device_option_type_integer;
+      sprintf(opt.description, "[%lld..%lld]", control->control.minimum, control->control.maximum);
+      break;
+
+    case V4L2_CTRL_TYPE_INTEGER64:
+      opt.type = device_option_type_integer64;
+      sprintf(opt.description, "[%lld..%lld]", control->control.minimum, control->control.maximum);
+      break;
+
+    case V4L2_CTRL_TYPE_BUTTON:
+      opt.type = device_option_type_bool;
+      sprintf(opt.description, "button");
+      break;
+
+    case V4L2_CTRL_TYPE_MENU:
+    case V4L2_CTRL_TYPE_INTEGER_MENU:
+      opt.type = device_option_type_integer;
+      sprintf(opt.description, "[%lld..%lld]\n", control->control.minimum, control->control.maximum);
+
+      for (int j = control->control.minimum; j <= control->control.maximum; j++) {
+        struct v4l2_querymenu menu = {
+          .id = control->control.id,
+          .index = j
+        };
+
+        if (0 != ioctl(control->fd, VIDIOC_QUERYMENU, &menu))
+          continue;
+
+        if (opt.menu_items >= MAX_DEVICE_OPTION_MENU) {
+          opt.flags.invalid = true;
+          break;
+        }
+
+        device_option_menu_t *opt_menu = &opt.menu[opt.menu_items++];
+        opt_menu->id = j;
+
+        if (control->control.type == V4L2_CTRL_TYPE_MENU) {
+          sprintf(opt_menu->name, "%s", menu.name);
+        } else {
+          sprintf(opt_menu->name, "%lld", menu.value);
+        }
+      }
+      break;
+
+    case V4L2_CTRL_TYPE_STRING:
+      opt.type = device_option_type_string;
+      break;
+
+    default:
+      opt.flags.invalid = true; // unsupported
+      break;
+    }
+
+    if (opt.type) {
+      int ret = fn(&opt, opaque);
+      if (ret < 0)
+        return ret;
+      n++;
+    }
+  }
+
+  return n;
+}

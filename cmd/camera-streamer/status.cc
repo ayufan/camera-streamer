@@ -17,6 +17,7 @@ extern webrtc_options_t webrtc_options;
 };
 
 #include <nlohmann/json.hpp>
+#include "third_party/magic_enum/include/magic_enum.hpp"
 
 static nlohmann::json serialize_buf_list(buffer_list_t *buf_list)
 {
@@ -53,6 +54,38 @@ static nlohmann::json serialize_buf_lock(buffer_lock_t *buf_lock)
   return output;
 }
 
+static const char *strip_prefix(const char *str, const char *prefix)
+{
+  if (strstr(str, prefix) == str) {
+    return str + strlen(prefix);
+  }
+  return str;
+}
+
+static int device_options_callback(device_option_t *option, void *opaque)
+{
+  nlohmann::json &device = *(nlohmann::json*)opaque;
+  nlohmann::json &node = option->flags.read_only ?
+    device["properties"][option->name] :
+    device["options"][option->name];
+
+  node["type"] = strip_prefix(
+    std::string(magic_enum::enum_name(option->type)).c_str(),
+    "device_option_type_");
+
+  if (option->elems > 0)
+    node["elems"] = option->elems;
+  if (option->description[0])
+    node["description"] = option->description;
+  if (option->value[0])
+    node["value"] = option->value;
+
+  for (int i = 0; i < option->menu_items; i++) {
+    node["menu"][option->menu[i].id] = option->menu[i].name;
+  }
+  return 0;
+}
+
 static nlohmann::json devices_status_json()
 {
   nlohmann::json devices;
@@ -70,6 +103,8 @@ static nlohmann::json devices_status_json()
     for (int j = 0; j < device->n_capture_list; j++) {
       device_json["captures"][j] = serialize_buf_list(device->capture_lists[j]);
     }
+
+    device_dump_options2(device, device_options_callback, &device_json);
     devices += device_json;
   }
 

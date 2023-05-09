@@ -194,6 +194,14 @@ void device_dump_options(device_t *dev, FILE *stream)
   }
 }
 
+int device_dump_options2(device_t *dev, device_option_fn fn, void *opaque)
+{
+  if (dev && dev->hw->device_dump_options) {
+    return dev->hw->device_dump_options2(dev, fn, opaque);
+  }
+  return -1;
+}
+
 int device_set_fps(device_t *dev, int desired_fps)
 {
   if (!dev)
