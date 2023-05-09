@@ -81,7 +81,9 @@ static int device_options_callback(device_option_t *option, void *opaque)
     node["value"] = option->value;
 
   for (int i = 0; i < option->menu_items; i++) {
-    node["menu"][option->menu[i].id] = option->menu[i].name;
+    char buf[64];
+    sprintf(buf, "%d", option->menu[i].id);
+    node["menu"][buf] = option->menu[i].name;
   }
   return 0;
 }
