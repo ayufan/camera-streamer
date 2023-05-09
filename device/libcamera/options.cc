@@ -156,14 +156,14 @@ static int libcamera_device_dump_control_option(device_option_fn fn, void *opaqu
     .control_id = control_id.id()
   };
   opt.flags.read_only = read_only;
-  snprintf(opt.name, sizeof(opt.name), "%s", control_id.name().c_str());
+  strcpy(opt.name, control_id.name().c_str());
 
   if (control_info) {
-    snprintf(opt.description, sizeof(opt.description), "%s", control_info->toString().c_str());
+    strcpy(opt.description, control_info->toString().c_str());
   }
 
   if (control_value) {
-    snprintf(opt.value, sizeof(opt.value), "%s", control_value->toString().c_str());
+    strcpy(opt.value, control_value->toString().c_str());
   }
 
   switch (control_id.type()) {
@@ -216,7 +216,7 @@ static int libcamera_device_dump_control_option(device_option_fn fn, void *opaqu
 
       device_option_menu_t *opt_menu = &opt.menu[opt.menu_items++];
       opt_menu->id = named_value.first;
-      snprintf(opt_menu->name, sizeof(opt_menu->name), "%s", named_value.second.c_str());
+      strcpy(opt_menu->name, named_value.second.c_str());
     }
   } else if (control_info) {
     for (size_t i = 0; i < control_info->values().size(); i++) {
@@ -227,7 +227,7 @@ static int libcamera_device_dump_control_option(device_option_fn fn, void *opaqu
 
       device_option_menu_t *opt_menu = &opt.menu[opt.menu_items++];
       opt_menu->id = control_info->values()[i].get<int>();
-      snprintf(opt_menu->name, sizeof(opt_menu->name), "%s", control_info->values()[i].toString().c_str());
+      strcpy(opt_menu->name, control_info->values()[i].toString().c_str());
     }
   }
 
@@ -270,23 +270,8 @@ int libcamera_device_dump_options2(device_t *dev, device_option_fn fn, void *opa
 
     auto control_id = control.first;
     auto control_info = control.second;
-    const libcamera::ControlValue *control_value = NULL;
 
-    for (auto const &stream : dev->libcamera->camera->streams()) {
-      for (auto const &buffer : dev->libcamera->allocator->buffers(stream)) {
-        auto request = buffer->request();
-        if (!request)
-          continue;
-        
-        auto & value = request->controls().get(control_id->id());
-        if (!value.isNone()) {
-          control_value = &value;
-          break;
-        }
-      }
-    }
-
-    int ret = libcamera_device_dump_control_option(fn, opaque, *control_id, &control_info, control_value, false);
+    int ret = libcamera_device_dump_control_option(fn, opaque, *control_id, &control_info, NULL, false);
     if (ret < 0)
       return ret;
     n++;
