@@ -93,8 +93,8 @@ typedef struct device_option_s {
   device_option_menu_t menu[MAX_DEVICE_OPTION_MENU];
   int menu_items;
 
-  char description[256];
   char value[256];
+  char description[256];
 } device_option_t;
 
 device_t *device_open(const char *name, const char *path, device_hw_t *hw);
