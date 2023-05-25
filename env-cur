@@ -1,3 +1,0 @@
-export USE_LIBDATACHANNEL=0
-export USE_RTSP=0
-
