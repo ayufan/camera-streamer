@@ -1,0 +1,37 @@
+Source: camera-streamer
+Section: unknown
+Priority: optional
+Maintainer: Kamil Trzciński <cs@ayufan.eu>
+Build-Depends:
+  debhelper,
+  libavformat-dev,
+  libavutil-dev,
+  libavcodec-dev,
+  libcamera-dev <raspi>,
+  liblivemedia-dev <raspi>,
+  v4l-utils,
+  pkg-config,
+  xxd,
+  build-essential,
+  cmake,
+  libssl-dev
+Standards-Version: 4.5.1
+Homepage: https://github.com/ayufan/camera-streamer
+Vcs-Browser: https://github.com/ayufan/camera-streamer
+Vcs-Git: https://github.com/ayufan/camera-streamer.git
+Rules-Requires-Root: no
+
+Package: camera-streamer-raspi
+Provides: camera-streamer
+Build-Profiles: <raspi>
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: camera-streamer with CSI and USB camera,
+  RTSP, WebRTC, and H264 support
+
+Package: camera-streamer-generic
+Provides: camera-streamer
+Build-Profiles: <!raspi>
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: camera-streamer with USB camera support

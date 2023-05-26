@@ -1,0 +1,5 @@
+camera-streamer usr/bin/
+service/*.service /usr/share/camera-streamer/examples/
+tools/dump_cameras.sh /usr/share/camera-streamer/
+tools/rpi_measure.sh /usr/share/camera-streamer/
+tools/rpi_mem_usage.sh /usr/share/camera-streamer/

@@ -5,11 +5,12 @@ FROM ${DOCKER_ARCH}debian:${DEBIAN_VERSION} as build_env
 # Default packages
 RUN apt-get -y update && apt-get -y install gnupg2 build-essential xxd cmake ccache git-core pkg-config \
   libavformat-dev libavutil-dev libavcodec-dev libssl-dev v4l-utils
+RUN apt-get -y install debhelper
 
 # Add RPI packages
 ARG DEBIAN_VERSION
-ARG BUILD_TYPE="non-rpi"
-RUN [ "$BUILD_TYPE" != "rpi" ] || \
+ARG BUILD_TYPE="generic"
+RUN [ "$BUILD_TYPE" != "raspi" ] || \
   ( \
     echo "deb http://archive.raspberrypi.org/debian/ $DEBIAN_VERSION main" > /etc/apt/sources.list.d/raspi.list && \
     apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 82B129927FA3303E && \
@@ -17,12 +18,21 @@ RUN [ "$BUILD_TYPE" != "rpi" ] || \
     apt-get -y install libcamera-dev liblivemedia-dev \
   )
 
-FROM scratch as build
-COPY --from=build_env / .
-
+FROM build_env as build
 ADD / /src
 WORKDIR /src
 RUN git clean -ffdx
 RUN git submodule update --init --recursive --recommend-shallow
 RUN git submodule foreach --recursive git clean -ffdx
-RUN make -j$(nproc)
+
+FROM build as deb_make
+ARG GIT_VERSION
+ARG BUILD_TYPE="generic"
+ENV DEB_BUILD_PROFILES="$BUILD_TYPE"
+
+RUN apt-get build-dep -y $PWD
+RUN . /etc/os-release && \
+  export RELEASE_SUFFIX="$VERSION_CODENAME" && \
+  dpkg-buildpackage -us -uc -b
+
+RUN mkdir -p /deb && mv ../*.deb /deb/

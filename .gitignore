@@ -8,3 +8,10 @@ tmp/
 .vscode/
 /Procfile*
 /version.h
+
+/debian/.debhelper
+/debian/debhelper-build-stamp
+/debian/*.substvars
+/debian/files
+/debian/*.log
+/debian/camera-streamer*/
