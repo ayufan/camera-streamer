@@ -15,6 +15,7 @@ endif
 
 LIBDATACHANNEL_PATH ?= third_party/libdatachannel
 
+USE_HW_H264 ?= 1
 USE_FFMPEG ?= $(shell pkg-config libavutil libavformat libavcodec && echo 1)
 USE_LIBCAMERA ?= $(shell pkg-config libcamera && echo 1)
 USE_RTSP ?= $(shell pkg-config live555 && echo 1)
@@ -22,6 +23,10 @@ USE_LIBDATACHANNEL ?= $(shell [ -e $(LIBDATACHANNEL_PATH)/CMakeLists.txt ] && ec
 
 ifeq (1,$(DEBUG))
 CFLAGS += -g
+endif
+
+ifeq (1,$(USE_HW_H264))
+CFLAGS += -DUSE_HW_H264
 endif
 
 ifeq (1,$(USE_FFMPEG))
@@ -72,7 +77,7 @@ version:
 	$(CCACHE) $(CXX) $(CFLAGS) -o $@ $(filter-out cmd/%, $^) $(filter $</%, $^) $(LDLIBS)
 
 install: $(TARGET)
-	install $(TARGET) /usr/local/bin/
+	install $(TARGET) $(DESTDIR)/usr/local/bin/
 
 clean:
 	rm -f .depend $(OBJS) $(OBJS:.o=.d) $(HTML_SRC) $(TARGET)

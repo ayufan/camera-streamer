@@ -1,0 +1,61 @@
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    strategy:
+      matrix:
+        debian_version: [bullseye]
+        docker_arch: [amd64, arm32v7, arm64v8]
+        build_type: [generic, raspi]
+        exclude:
+          - docker_arch: amd64
+            build_type: raspi
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+        submodules: recursive
+    - name: Set GIT_VERSION
+      shell: bash
+      run: |
+        majorVer=$(cat VERSION)
+        lastVer=$(git tag --sort version:refname --list "v$majorVer.*" | tail -n1)
+        if [[ -n "$lastVer" ]]; then
+          newVer=(${lastVer//./ })
+          newVer[-1]="$((${newVer[-1]}+1))"
+          nextVer="${newVer[*]}"
+          nextVer="${nextVer// /.}"
+        else
+          nextVer="$majorVer.0"
+        fi
+        echo "MajorVer=$majorVer LastVer=$lastVer NextVer=$nextVer"
+        echo "GIT_VERSION=$nextVer" >> $GITHUB_ENV
+    - name: Set up QEMU
+      uses: docker/setup-qemu-action@v2
+    - name: Build Dockerfile
+      run: docker build --target deb_make --tag deb_make --file .github/ci/Dockerfile --build-arg GIT_VERSION --build-arg DOCKER_ARCH --build-arg DEBIAN_VERSION --build-arg BUILD_TYPE .
+      env:
+        DEBIAN_VERSION: ${{ matrix.debian_version }}
+        DOCKER_ARCH: ${{ matrix.docker_arch }}/
+        BUILD_TYPE: ${{ matrix.build_type }}
+    - name: Create container
+      run: docker create --name deb_make deb_make
+    - name: Copy files
+      run: 'docker cp deb_make:/deb/. deb/'
+    - name: 'Release debian files'
+      uses: ncipollo/release-action@v1
+      with:
+        tag: ${{ env.GIT_VERSION }}
+        artifacts: "deb/*.deb"
+        allowUpdates: true
+        omitBodyDuringUpdate: true
+        omitNameDuringUpdate: true
+        updateOnlyUnreleased: true
+        prerelease: true
+        generateReleaseNotes: true
+        bodyFile: RELEASE.md

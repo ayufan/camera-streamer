@@ -28,6 +28,11 @@ camera_options_t camera_options = {
     .options = "compression_quality=80"
   },
   .video = {
+#ifdef USE_HW_H264
+    .disabled = 0,
+#else // USE_HW_H264
+    .disabled = 1,
+#endif
     .options =
       "video_bitrate_mode=0" OPTION_VALUE_LIST_SEP
       "video_bitrate=2000000" OPTION_VALUE_LIST_SEP

@@ -1,0 +1,44 @@
+on:
+  push:
+    paths-ignore:
+      - '.github/workflows/build_test.yaml'
+      - 'RELEASE.md'
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        debian_version: [buster, bullseye]
+        docker_arch: [amd64, arm32v7, arm64v8]
+        build_type: [generic, raspi]
+        exclude:
+          - docker_arch: amd64
+            build_type: raspi
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+        submodules: recursive
+    - name: Set GIT_VERSION
+      run: echo "GIT_VERSION=$(git describe --tags)" >> $GITHUB_ENV
+    - name: Set up QEMU
+      uses: docker/setup-qemu-action@v2
+    - name: Build Dockerfile
+      run: docker build --target deb_make --tag deb_make --file .github/ci/Dockerfile --build-arg GIT_VERSION --build-arg DOCKER_ARCH --build-arg DEBIAN_VERSION --build-arg BUILD_TYPE .
+      env:
+        DEBIAN_VERSION: ${{ matrix.debian_version }}
+        DOCKER_ARCH: ${{ matrix.docker_arch }}/
+        BUILD_TYPE: ${{ matrix.build_type }}
+    - name: Create container
+      run: docker create --name deb_make deb_make
+    - name: Copy files
+      run: docker cp deb_make:/deb/. deb/
+    - name: 'Upload debian files'
+      uses: actions/upload-artifact@v3
+      with:
+        name: ${{ matrix.debian_version }}-${{ matrix.docker_arch }}-${{ matrix.build_type }}.zip
+        path: deb/
+        retention-days: 14

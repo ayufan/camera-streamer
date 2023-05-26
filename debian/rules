@@ -1,0 +1,62 @@
+#!/usr/bin/make -f
+# See debhelper(7) (uncomment to enable)
+# output every command that modifies files on the build system.
+#export DH_VERBOSE = 1
+
+
+# see FEATURE AREAS in dpkg-buildflags(1)
+#export DEB_BUILD_MAINT_OPTIONS = hardening=+all
+
+# see ENVIRONMENT in dpkg-buildflags(1)
+# package maintainers to append CFLAGS
+#export DEB_CFLAGS_MAINT_APPEND  = -Wall -pedantic
+# package maintainers to append LDFLAGS
+#export DEB_LDFLAGS_MAINT_APPEND = -Wl,--as-needed
+
+export USE_FFMPEG ?= 1
+#export GIT_VERSION ?= $(shell git describe --tags)
+export DEB_VERSION ?= $(GIT_VERSION:v%=%)$(addprefix ~,$(RELEASE_SUFFIX))
+
+ifneq ($(filter raspi,$(DEB_BUILD_PROFILES)),)
+export USE_HW_H264 = 1
+export USE_LIBDATACHANNEL = 1
+export USE_LIBCAMERA = 1
+export USE_RTSP = 1
+else ifneq ($(filter generic,$(DEB_BUILD_PROFILES)),)
+export USE_HW_H264 = 0
+export USE_LIBCAMERA = 0
+else
+$(error Use DEB_BUILD_PROFILES=raspi or DEB_BUILD_PROFILES=generic)
+endif
+
+%:
+	dh $@
+
+.PHONY: override_dh_auto_install
+override_dh_auto_install:
+
+.PHONY: override_dh_gencontrol
+override_dh_gencontrol:
+	dh_gencontrol -- $(addprefix -v,$(DEB_VERSION))
+
+.PHONY: override_dh_strip
+override_dh_strip:
+	dh_strip --keep-debug
+
+.PHONY: override_dh_shlibdeps
+override_dh_shlibdeps:
+	dh_shlibdeps
+
+	# Make libcamera0 to be exact
+	sed -i "s/libcamera0 (>=[^)]*)/libcamera0 (= $$(dpkg -s libcamera0 | grep Version | cut -d" " -f2))/g" debian/camera-streamer*.substvars
+
+.PHONY: override_dh_install
+override_dh_install:
+	dh_install
+	sed -i "s|/usr/local/bin/camera-streamer|/usr/bin/camera-streamer|g" debian/camera-streamer*/usr/share/camera-streamer/examples/*.service
+
+# dh_make generated override targets
+# This is example for Cmake (See https://bugs.debian.org/641051 )
+#override_dh_auto_configure:
+#	dh_auto_configure -- \
+#	-DCMAKE_LIBRARY_PATH=$(DEB_HOST_MULTIARCH)

@@ -14,13 +14,14 @@ docker_arch=""
 [[ -n "$2" ]] && docker_arch="$2/" && docker_image="${docker_image}_${2}"
 
 PWD=$(pwd)
-ROOT=$(cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd)
+ROOT=$(cd -- "$( dirname -- "${BASH_SOURCE[0]}" )/../.." &> /dev/null && pwd)
 
 set -xeo pipefail
 
 docker build -t "$docker_image" \
   --build-arg "DOCKER_ARCH=$docker_arch" \
   --build-arg "DEBIAN_VERSION=$debian_version" \
-  --target build_env - < Dockerfile
+  --build-arg BUILD_TYPE \
+  --target build_env - < .github/ci/Dockerfile
 
 exec docker run --rm -it -u "$UID" -v "$ROOT:$ROOT" -w "$ROOT" "$docker_image"
