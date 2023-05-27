@@ -1,0 +1,30 @@
+[Unit]
+Description=camera-streamer web camera for USB camera on Generic platform
+After=network.target
+ConditionPathExistsGlob=/dev/v4l/by-id/usb-*-video-index0
+
+[Service]
+ExecStart=/usr/local/bin/camera-streamer \
+  -camera-path=/dev/video0 \
+  -camera-format=JPEG \
+  -camera-width=1920 -camera-height=1080 \
+  -camera-fps=30 \
+  ; use two memory buffers to optimise usage
+  -camera-nbufs=3 \
+  ; disable video streaming (WebRTC, RTSP, H264)
+  ; on non-supported platforms
+  -camera-video.disabled
+
+DynamicUser=yes
+SupplementaryGroups=video i2c
+Restart=always
+RestartSec=10
+Nice=10
+IOSchedulingClass=idle
+IOSchedulingPriority=7
+CPUWeight=20
+AllowedCPUs=1-2
+MemoryMax=250M
+
+[Install]
+WantedBy=multi-user.target

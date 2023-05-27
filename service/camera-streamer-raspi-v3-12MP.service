@@ -3,7 +3,7 @@
 ; https://www.raspberrypi.com/products/camera-module-3/
 ;
 [Unit]
-Description=camera-streamer web camera
+Description=camera-streamer web camera for Pi Camera Module 3 12MP on Raspberry PI
 After=network.target
 ConditionPathExists=/sys/bus/i2c/drivers/imx708/10-001a/video4linux
 

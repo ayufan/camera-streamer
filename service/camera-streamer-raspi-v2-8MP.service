@@ -3,7 +3,7 @@
 ; https://www.raspberrypi.com/products/camera-module-v2/
 ;
 [Unit]
-Description=camera-streamer web camera
+Description=camera-streamer web camera for Pi Camera v2.1 8MP on Raspberry PI
 After=network.target
 ConditionPathExists=/sys/bus/i2c/drivers/imx219/10-0010/video4linux
 
