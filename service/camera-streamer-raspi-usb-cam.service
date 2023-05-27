@@ -1,5 +1,5 @@
 [Unit]
-Description=camera-streamer web camera
+Description=camera-streamer web camera for USB camera on Raspberry PI
 After=network.target
 ConditionPathExistsGlob=/dev/v4l/by-id/usb-*-video-index0
 
@@ -10,7 +10,7 @@ ExecStart=/usr/local/bin/camera-streamer \
   -camera-width=1920 -camera-height=1080 \
   -camera-fps=30 \
   ; use two memory buffers to optimise usage
-  -camera-nbufs=2 \
+  -camera-nbufs=3 \
   ; the high-res is 1920x1080
   -camera-snapshot.height=1080 \
   ; the video/webrtc is 1280x720
