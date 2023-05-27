@@ -16,6 +16,8 @@ jobs:
         exclude:
           - docker_arch: amd64
             build_type: raspi
+          - debian_version: buster
+            build_type: raspi
     steps:
     - name: Checkout
       uses: actions/checkout@v3
