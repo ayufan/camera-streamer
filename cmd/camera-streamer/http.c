@@ -1,19 +1,17 @@
 #include "util/http/http.h"
-#include "util/opts/opts.h"
-#include "util/opts/log.h"
-#include "util/opts/fourcc.h"
 #include "output/webrtc/webrtc.h"
 #include "device/camera/camera.h"
 #include "output/output.h"
-#include "output/rtsp/rtsp.h"
 
 extern unsigned char html_index_html[];
 extern unsigned int html_index_html_len;
 extern unsigned char html_webrtc_html[];
 extern unsigned int html_webrtc_html_len;
+extern unsigned char html_control_html[];
+extern unsigned int html_control_html_len;
 extern camera_t *camera;
 
-void camera_status_json(http_worker_t *worker, FILE *stream);
+extern void camera_status_json(http_worker_t *worker, FILE *stream);
 
 static void http_once(FILE *stream, void (*fn)(FILE *stream, const char *data), void *headersp)
 {
@@ -25,12 +23,16 @@ static void http_once(FILE *stream, void (*fn)(FILE *stream, const char *data), 
   }
 }
 
-void *camera_http_set_option(http_worker_t *worker, FILE *stream, const char *key, const char *value, void *headersp)
+static void camera_post_option(http_worker_t *worker, FILE *stream)
 {
-  if (!camera) {
-    http_once(stream, http_500, headersp);
-    fprintf(stream, "No camera attached.\r\n");
-    return NULL;
+  char *device_name = http_get_param(worker, "device");
+  char *key = http_get_param(worker, "key");
+  char *value = http_get_param(worker, "value");
+
+  if (!key || !value) {
+    http_400(stream, "");
+    fprintf(stream, "No key or value passed.\r\n");
+    goto cleanup;
   }
 
   bool found = false;
@@ -41,46 +43,33 @@ void *camera_http_set_option(http_worker_t *worker, FILE *stream, const char *ke
       continue;
     }
 
+    if (device_name && strcmp(dev->name, device_name)) {
+      continue;
+    }
+
     int ret = device_set_option_string(dev, key, value);
     if (ret > 0) {
-      http_once(stream, http_200, headersp);
+      http_once(stream, http_200, &found);
       fprintf(stream, "%s: The '%s' was set to '%s'.\r\n", dev->name, key, value);
     } else if (ret < 0) {
-      http_once(stream, http_500, headersp);
+      http_once(stream, http_500, &found);
       fprintf(stream, "%s: Cannot set '%s' to '%s'.\r\n", dev->name, key, value);
     }
-    found = true;
   }
 
-  if (found)
-    return NULL;
+  if (!found) {
+    http_once(stream, http_404, &found);
+    fprintf(stream, "The option was not found for device='%s', key='%s', value='%s'.\r\n",
+      device_name, key, value);
+  }
 
-  http_once(stream, http_404, headersp);
-  fprintf(stream, "The '%s' was set not found.\r\n", key);
-  return NULL;
+cleanup:
+  free(device_name);
+  free(key);
+  free(value);
 }
 
-void camera_http_option(http_worker_t *worker, FILE *stream)
-{
-  bool headers = false;
-  http_enum_params(worker, stream, camera_http_set_option, &headers);
-  if (headers) {
-    fprintf(stream, "---\r\n");
-  } else {
-    http_404(stream, "");
-    fprintf(stream, "No options passed.\r\n");
-  }
-
-  fprintf(stream, "\r\nSet: /option?name=value\r\n\r\n");
-
-  if (camera) {
-    for (int i = 0; i < MAX_DEVICES; i++) {
-      device_dump_options(camera->devices[i], stream);
-    }
-  }
-}
-
-void http_cors_options(http_worker_t *worker, FILE *stream)
+static void http_cors_options(http_worker_t *worker, FILE *stream)
 {
   fprintf(stream, "HTTP/1.1 204 No Data\r\n");
   fprintf(stream, "Access-Control-Allow-Origin: *\r\n");
@@ -102,7 +91,9 @@ http_method_t http_methods[] = {
   { "GET",  "/video.mp4", http_mp4_video },
   { "GET",  "/webrtc", http_content, "text/html", html_webrtc_html, 0, &html_webrtc_html_len },
   { "POST", "/webrtc", http_webrtc_offer },
-  { "GET",  "/option", camera_http_option },
+  { "GET",  "/control", http_content, "text/html", html_control_html, 0, &html_control_html_len },
+  { "GET",  "/option", camera_post_option },
+  { "POST", "/option", camera_post_option },
   { "GET",  "/status", camera_status_json },
   { "GET",  "/", http_content, "text/html", html_index_html, 0, &html_index_html_len },
   { "OPTIONS", "*/", http_cors_options },

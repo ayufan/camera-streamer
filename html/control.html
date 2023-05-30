@@ -1,0 +1,819 @@
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Camera Streamer Web Control</title>
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <style>
+      body {
+        font-family: Arial,Helvetica,sans-serif;
+        background: #181818;
+        color: #EFEFEF;
+        font-size: 16px
+      }
+
+      a {
+        color: #EFEFEF;
+        text-decoration: underline
+      }
+
+      h2 {
+        font-size: 18px
+      }
+
+      section.main {
+        display: flex
+      }
+
+      #menu,section.main {
+        flex-direction: column
+      }
+
+      #menu {
+        display: none;
+        flex-wrap: nowrap;
+        color: #EFEFEF;
+        width: 380px;
+        background: #363636;
+        padding: 8px;
+        border-radius: 4px;
+        margin-top: -6px;
+        margin-right: 10px;
+      }
+
+      /*     #content {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: stretch
+      }
+      */
+      figure {
+        padding: 0px;
+        margin: 0;
+        margin-block-start: 0;
+        margin-block-end: 0;
+        margin-inline-start: 0;
+        margin-inline-end: 0
+      }
+
+      figure img {
+        display: block;
+        max-width: 100%;
+        width: auto;
+        height: auto;
+        border-radius: 4px;
+      }
+
+      figure video {
+        display: block;
+        max-width: 100%;
+        width: auto;
+        height: auto;
+        border-radius: 4px;
+      }
+
+      section#buttons {
+        display: flex;
+        flex-wrap: nowrap;
+        justify-content: space-between
+      }
+
+      #logo {
+        margin-bottom: 10px;
+      }
+
+      #nav-toggle {
+        cursor: pointer;
+        display: block;
+        margin: 3px;
+        line-height: 28px;
+      }
+
+      #nav-toggle-cb {
+        outline: 0;
+        opacity: 0;
+        width: 0;
+        height: 0
+      }
+
+      #nav-toggle-cb:checked+#menu {
+        display: flex
+      }
+
+      #quality {
+          transform: rotateY(180deg);
+      }
+
+      .input-group {
+        display: flex;
+        flex-wrap: nowrap;
+        line-height: 22px;
+        margin: 5px 0
+      }
+
+      .input-group>label {
+        display: inline-block;
+        padding-right: 10px;
+        min-width: 47%
+      }
+
+      .input-group input,.input-group select {
+        flex-grow: 1
+      }
+
+      .input-group>a {
+        word-break: break-all
+      }
+
+      .range-max,.range-min {
+        display: inline-block;
+        padding: 0 5px
+      }
+
+      button {
+        display: block;
+        margin: 3px;
+        padding: 0 8px;
+        border: 0;
+        line-height: 28px;
+        cursor: pointer;
+        color: #fff;
+        background: #ff3034;
+        border-radius: 5px;
+        font-size: 16px;
+        outline: 0
+      }
+
+      button:hover {
+        background: #ff494d
+      }
+
+      button:active {
+        background: #f21c21
+      }
+
+      button.disabled {
+        cursor: default;
+        background: #a0a0a0
+      }
+
+      input[type=range] {
+        -webkit-appearance: none;
+        width: 0;
+        height: 22px;
+        background: #363636;
+        cursor: pointer;
+        margin: 0
+      }
+
+      input[type=range]:focus {
+        outline: 0
+      }
+
+      input[type=range]::-webkit-slider-runnable-track {
+        width: 100%;
+        height: 2px;
+        cursor: pointer;
+        background: #EFEFEF;
+        border-radius: 0;
+        border: 0 solid #EFEFEF
+      }
+
+      input[type=range]::-webkit-slider-thumb {
+        border: 1px solid rgba(0,0,30,0);
+        height: 22px;
+        width: 22px;
+        border-radius: 50px;
+        background: #ff3034;
+        cursor: pointer;
+        -webkit-appearance: none;
+        margin-top: -11.5px
+      }
+
+      input[type=range]:focus::-webkit-slider-runnable-track {
+        background: #EFEFEF
+      }
+
+      input[type=range]::-moz-range-track {
+        width: 100%;
+        height: 2px;
+        cursor: pointer;
+        background: #EFEFEF;
+        border-radius: 0;
+        border: 0 solid #EFEFEF
+      }
+
+      input[type=range]::-moz-range-thumb {
+        border: 1px solid rgba(0,0,30,0);
+        height: 22px;
+        width: 22px;
+        border-radius: 50px;
+        background: #ff3034;
+        cursor: pointer
+      }
+
+      input[type=range]::-ms-track {
+        width: 100%;
+        height: 2px;
+        cursor: pointer;
+        background: 0 0;
+        border-color: transparent;
+        color: transparent
+      }
+
+      input[type=range]::-ms-fill-lower {
+        background: #EFEFEF;
+        border: 0 solid #EFEFEF;
+        border-radius: 0
+      }
+
+      input[type=range]::-ms-fill-upper {
+        background: #EFEFEF;
+        border: 0 solid #EFEFEF;
+        border-radius: 0
+      }
+
+      input[type=range]::-ms-thumb {
+        border: 1px solid rgba(0,0,30,0);
+        height: 22px;
+        width: 22px;
+        border-radius: 50px;
+        background: #ff3034;
+        cursor: pointer;
+        height: 2px
+      }
+
+      input[type=range]:focus::-ms-fill-lower {
+        background: #EFEFEF
+      }
+
+      input[type=range]:focus::-ms-fill-upper {
+        background: #363636
+      }
+
+      input[type=text] {
+        border: 1px solid #363636;
+        font-size: 14px;
+        height: 20px;
+        margin: 1px;
+        outline: 0;
+        border-radius: 5px
+      }
+
+      .switch {
+        display: block;
+        position: relative;
+        line-height: 22px;
+        font-size: 16px;
+        height: 22px
+      }
+
+      .switch input {
+        outline: 0;
+        opacity: 0;
+        width: 0;
+        height: 0
+      }
+
+      .slider {
+        width: 50px;
+        height: 22px;
+        border-radius: 22px;
+        cursor: pointer;
+        background-color: grey
+      }
+
+      .slider,.slider:before {
+        display: inline-block;
+        transition: .4s
+      }
+
+      .slider:before {
+        position: relative;
+        content: "";
+        border-radius: 50%;
+        height: 16px;
+        width: 16px;
+        left: 4px;
+        top: 3px;
+        background-color: #fff
+      }
+
+      input:checked+.slider {
+        background-color: #ff3034
+      }
+
+      input:checked+.slider:before {
+        -webkit-transform: translateX(26px);
+        transform: translateX(26px)
+      }
+
+      select {
+        border: 1px solid #363636;
+        font-size: 14px;
+        height: 22px;
+        outline: 0;
+        border-radius: 5px
+      }
+
+      .image-container {
+        position: fixed;
+        min-width: 160px;
+        margin-right: 16px;
+        transform-origin: top left;
+      }
+
+      .close {
+        position: absolute;
+        z-index: 99;
+        background: #ff3034;
+        width: 16px;
+        height: 16px;
+        border-radius: 100px;
+        color: #fff;
+        text-align: center;
+        line-height: 18px;
+        cursor: pointer
+      }
+
+      .close-rot-none {
+        left: 5px;
+        top: 5px;
+      }
+
+      .close-rot-left {
+        right: 5px;
+        top: 5px;
+      }
+
+      .close-rot-right {
+        left: 5px;
+        bottom: 5px;
+      }
+
+      .hidden {
+        display: none
+      }
+
+      .inline-button {
+        line-height: 20px;
+        margin: 2px;
+        padding: 1px 4px 2px 4px;
+      }
+
+      .loader {
+        border: 0.5em solid #f3f3f3; /* Light grey */
+        border-top: 0.5em solid #000000; /* white */
+        border-radius: 50%;
+        width: 1em;
+        height: 1em;
+        -webkit-animation: spin 2s linear infinite; /* Safari */
+        animation: spin 2s linear infinite;
+      }
+
+      @-webkit-keyframes spin {   /* Safari */
+        0% { -webkit-transform: rotate(0deg); }
+        100% { -webkit-transform: rotate(360deg); }
+      }
+
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+
+      @media (min-width: 800px) and (orientation:landscape) {
+        #content {
+          display:flex;
+          flex-wrap: nowrap;
+          align-items: stretch
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <section class="main">
+      <div id="logo">
+        <label for="nav-toggle-cb" id="nav-toggle" style="float:left;">&#9776;&nbsp;&nbsp;Settings&nbsp;&nbsp;&nbsp;&nbsp;</label>
+        <button id="get-still" style="float:left;" disabled>Get Still</button>
+        <button id="mjpeg-stream" style="float:left;" disabled>Start MJPEG</button>
+        <button id="webrtc-stream" style="float:left;" disabled>Start WebRTC</button>
+        <div id="wait-settings" style="float:left;" class="loader" title="Waiting for camera settings to load"></div>
+      </div>
+      <div id="content">
+        <div class="hidden" id="sidebar">
+          <input type="checkbox" id="nav-toggle-cb" checked="checked">
+            <nav id="menu">
+              <!-- <h1>Preferences</h1>
+              <div class="input-group" id="preferences-group">
+                <button id="reboot" title="Reboot the camera module">Reboot</button>
+                <button id="save_prefs" title="Save Preferences on camera module">Save</button>
+                <button id="clear_prefs" title="Erase saved Preferences on camera module">Erase</button>
+              </div> -->
+
+              <h1>Experimental</h1>
+              <ul>
+                <li>Changes are not persisted.</li>
+                <li>Use <i>--camera-options</i> to persist CAMERA settings.</li>
+                <li>Use <i>--camera-snapshot.options</i> to persist SNAPSHOT settings.</li>
+                <li>Use <i>--camera-stream.options</i> to persist STREAM settings.</li>
+                <li>Use <i>--camera-video.options</i> to persist VIDEO settings.</li>
+                <li>Restart the <b>camera-streamer</b> service to reset.</li>
+                <li>Some options might crash the process.</li>
+              </ul>
+
+              <h1 id="anchor">Links</h1>
+              <div class="input-group hidden" id="snapshot-group">
+                <label for="snapshot_url">Snapshot</label>
+                <a id="snapshot_url" class="default-action">Unknown</a>
+              </div>
+              <div class="input-group hidden" id="stream-group">
+                <label for="stream_url">Stream</label>
+                <a id="stream_url" class="default-action">Unknown</a>
+              </div>
+              <div class="input-group hidden" id="video-group">
+                <label for="video_url">Video</label>
+                <a id="video_url" class="default-action">Unknown</a>
+              </div>
+              <div class="input-group hidden" id="webrtc-group">
+                <label for="webrtc_url">WebRTC</label>
+                <a id="webrtc_url" class="default-action">Unknown</a>
+              </div>
+              <div class="input-group hidden" id="rtsp-group">
+                <label for="rtsp_url">RTSP</label>
+                <a id="rtsp_url" class="default-action">Unknown</a>
+              </div>
+
+              <h1>Release</h1>
+              <div class="input-group">
+                <label for="git_version">Version</label>
+                <div id="git_version" class="default-action">Unknown</div>
+              </div>
+              <div class="input-group">
+                <label for="git_revision">Stream</label>
+                <div id="git_revision" class="default-action">Unknown</div>
+              </div>
+            </nav>
+        </div>
+        <figure>
+          <div id="stream-container" class="image-container hidden">
+            <div class="close close-rot-none" click="stopStream()">×</div>
+            <img id="stream-view" src="">
+          </div>
+          <div id="video-container" class="image-container hidden">
+            <div class="close close-rot-none" click="stopStream()">×</div>
+            <video id="video-view" controls autoplay muted playsinline src="">
+          </div>
+        </figure>
+      </div>
+    </section>
+  </body>
+
+  <script>
+  document.addEventListener('DOMContentLoaded', function (event) {
+    var streamURL = 'Undefined';
+    var snapshotURL = 'Undefined';
+    var webrtcURL = 'Undefined';
+
+    const header = document.getElementById('logo')
+    const settings = document.getElementById('sidebar')
+    const waitSettings = document.getElementById('wait-settings')
+
+    const hide = el => {
+      el.classList.add('hidden')
+    }
+    const show = el => {
+      el.classList.remove('hidden')
+    }
+    const show2 = (el, status) => {
+      if (status)
+        show(el);
+      else
+        hide(el);
+    }
+
+    const enable = el => {
+      el.classList.remove('disabled')
+      el.disabled = false
+    }
+    const disable = el => {
+      el.classList.add('disabled')
+      el.disabled = true
+    }
+    const enable2 = (el, status) => {
+      if (status)
+        enable(el);
+      else
+        disable(el);
+    }
+
+    document
+      .querySelectorAll('.close')
+      .forEach(el => {
+        el.onclick = () => {
+          hide(el.parentNode)
+        }
+      })
+
+    const configureEndpoints =(state) => {
+      snapshotURL = state.endpoints.snapshot.uri;
+      streamURL = state.endpoints.stream.uri;
+      webrtcURL = state.endpoints.webrtc.uri;
+
+      enable2(document.getElementById('get-still'), state.endpoints.snapshot.enabled);
+      enable2(document.getElementById('mjpeg-stream'), state.endpoints.stream.enabled);
+      enable2(document.getElementById('webrtc-stream'), state.endpoints.webrtc.enabled);
+
+      document.getElementById('git_version').textContent = state.version;
+      document.getElementById('git_revision').textContent = state.revision;
+
+      for (let type of ["snapshot", "stream", "video", "webrtc", "rtsp"]) {
+        if (!state.endpoints[type].enabled)
+          continue;
+        let groupView = document.getElementById(`${type}-group`);
+        let urlView = document.getElementById(`${type}_url`);
+        show(groupView);
+        urlView.href = urlView.innerHTML = state.endpoints[type].uri;
+      }
+    };
+    
+    const sendOptionValue = (device, key, value) => {
+      device = encodeURIComponent(device);
+      key = encodeURIComponent(key);
+      value = encodeURIComponent(value);
+
+      return fetch(`option?device=${device}&key=${key}&value=${value}`, {
+        method: 'POST'
+      }).then(function (response) {
+        return response
+      });
+    };
+
+    const insertControl = (type) => {
+      const node = document.createElement(type);
+      const preferences = document.getElementById("anchor");
+      preferences.parentNode.insertBefore(node, preferences);
+      return node;
+    }
+
+    const createDeviceOption = (device, key, option) => {
+      const id_key = `${device}_${key}`;
+      const groupEl = insertControl("div");
+      groupEl.className = "input-group";
+
+      const labelEl = document.createElement("label");
+      labelEl.setAttribute("for", id_key);
+      labelEl.textContent = option.name;
+      groupEl.appendChild(labelEl);
+
+      switch (option.type) {
+        case "bool":
+          const divEl = document.createElement("div");
+          divEl.className = "switch";
+          groupEl.appendChild(divEl);
+
+          const inputEl = document.createElement("input");
+          inputEl.id = id_key;
+          inputEl.type = "checkbox";
+          inputEl.className = "default-action";
+          divEl.appendChild(inputEl);
+
+          const labelSliderEl = document.createElement("label");
+          labelSliderEl.setAttribute("for", id_key);
+          labelSliderEl.className = "slider";
+          divEl.appendChild(labelSliderEl);
+
+          if (option.value)
+            inputEl.checked = option.value == '1';
+          inputEl.onclick = () => {
+            sendOptionValue(device.name, key, inputEl.checked ? 1 : 0);
+          }
+          break;
+
+        case "integer":
+        case "integer64":
+        case "float":
+          if (option.menu) {
+            const selectEl = document.createElement("select");
+            selectEl.className = "default-action";
+            selectEl.id = id_key;
+            selectEl.value = option.value;
+            groupEl.appendChild(selectEl);
+
+            if (!option.value) {
+              const optionEl = document.createElement("option");
+              optionEl.text = "?";
+              selectEl.add(optionEl);
+            }
+
+            for (var value in option.menu) {
+              const optionEl = document.createElement("option");
+              optionEl.value = value;
+              optionEl.text = option.menu[value];
+              selectEl.add(optionEl);
+
+              if (optionEl.text == option.value)
+                selectEl.value = value;
+            }
+            selectEl.onchange = () => {
+              sendOptionValue(device.name, key, selectEl.value);
+            }
+          } else if (option.description && (!option.elems || option.elems == 1) && (range = option.description.match("^\\[(.*)\\.\\.(.*)\\]$"))) {
+            const minValue = Number(range[1]);
+            const maxValue = Number(range[2]);
+
+            let stepValue = (maxValue - minValue) / 20;
+            if (option.type != "float") {
+              stepValue = Math.round(stepValue);
+              if (stepValue < 1)
+                stepValue = 1;
+            }
+
+            const inputRangeEl = document.createElement("input");
+            inputRangeEl.id = id_key;
+            inputRangeEl.type = "range";
+            inputRangeEl.className = "default-action";
+            inputRangeEl.min = minValue;
+            inputRangeEl.max = maxValue;
+            inputRangeEl.step = stepValue;
+            inputRangeEl.style = "width: 100px";
+            if (option.value)
+              inputRangeEl.value = Number(option.value);
+            else
+              inputRangeEl.value = "?";
+            groupEl.appendChild(inputRangeEl);
+
+            const inputNumberEl = document.createElement("input");
+            inputNumberEl.id = id_key;
+            inputNumberEl.type = "number";
+            //inputNumberEl.className = "default-action";
+            inputNumberEl.className = "range-max";
+            inputNumberEl.style = "width: 20px";
+            inputNumberEl.min = minValue;
+            inputNumberEl.max = maxValue;
+            inputNumberEl.step = stepValue;
+            inputNumberEl.size = "4";
+            if (option.value)
+              inputNumberEl.value = Number(option.value);
+            else
+              inputNumberEl.value = "?";
+            groupEl.appendChild(inputNumberEl);
+
+            inputRangeEl.onchange = () => {
+              sendOptionValue(device.name, key, inputRangeEl.value);
+              inputNumberEl.value = inputRangeEl.value;
+            }
+            inputNumberEl.onchange = () => {
+              sendOptionValue(device.name, key, inputNumberEl.value);
+              inputRangeEl.value = inputNumberEl.value;
+            }
+          } else {
+            const divEl = document.createElement("div");
+            divEl.className = "text";
+            groupEl.appendChild(divEl);
+
+            const inputEl = document.createElement("input");
+            inputEl.id = id_key;
+            inputEl.type = "text";
+            inputEl.className = "default-action";
+            if (option.value)
+              inputEl.value = option.value;
+            else
+              inputEl.value = "?";
+            divEl.appendChild(inputEl);
+
+            if (option.description) {
+              const divDescriptionEl = document.createElement("div");
+              divDescriptionEl.className = "range-max";
+              divDescriptionEl.textContent = option.description;
+              divEl.appendChild(divDescriptionEl);
+            }
+
+            inputEl.onchange = () => {
+              sendOptionValue(device.name, key, inputEl.value);
+            }
+          }
+          break;
+      }
+    }
+
+    const createControls = (state) => {
+      for (var device of state.devices) {
+        const heading = insertControl("h1");
+        heading.textContent = device.name;
+
+        for (var key in device.options) {
+          createDeviceOption(device, key, device.options[key]);
+        }
+      }
+    };
+
+    var rtcPeerConfig = {
+      sdpSemantics: 'unified-plan'
+    };
+
+    rtcPeerConnection = new RTCPeerConnection(rtcPeerConfig);
+
+    // read initial values
+    fetch(`status`)
+      .then(function (response) {
+        return response.json()
+      })
+      .then(function (state) {
+        hide(waitSettings);
+        show(settings);
+        configureEndpoints(state);
+        createControls(state);
+      })
+
+    const streamContainer = document.getElementById("stream-container");
+    const videoContainer = document.getElementById("video-container");
+
+    const stopStream = () => {
+      window.stop();
+      rtcPeerConnection.close();
+      hide(streamContainer);
+      hide(videoContainer);
+    }
+
+    document.getElementById('get-still').onclick = () => {
+      stopStream();
+      const view = document.getElementById("stream-view");
+      view.src = `${snapshotURL}?_cb=${Date.now()}`;
+      view.scrollIntoView(false);
+      show(streamContainer);
+    }
+
+    document.getElementById('mjpeg-stream').onclick = () => {
+      stopStream();
+      const view = document.getElementById("stream-view");
+      view.src = `${streamURL}?_cb=${Date.now()}`;
+      view.scrollIntoView(false);
+      show(streamContainer);
+    }
+
+    document.getElementById('webrtc-stream').onclick = () => {
+      stopStream();
+      show(videoContainer);
+
+      fetch(webrtcURL, {
+        body: JSON.stringify({type: 'request'}),
+        headers: {'Content-Type': 'application/json'},
+        method: 'POST'
+      }).then(function(response) {
+        return response.json();
+      }).then(function(answer) {
+        rtcPeerConnection = new RTCPeerConnection(rtcPeerConfig);
+        rtcPeerConnection.addTransceiver('video', { direction: 'recvonly' });
+        //pc.addTransceiver('audio', {direction: 'recvonly'});
+        rtcPeerConnection.addEventListener('track', function(evt) {
+          console.log("track event " + evt.track.kind);
+          if (evt.track.kind == 'video') {
+            const view = document.getElementById("video-view");
+            view.srcObject = evt.streams[0];
+            view.scrollIntoView(false);
+          }
+        });
+        rtcPeerConnection.remote_pc_id = answer.id;
+        return rtcPeerConnection.setRemoteDescription(answer);
+      }).then(function() {
+        return rtcPeerConnection.createAnswer();
+      }).then(function(answer) {
+        return rtcPeerConnection.setLocalDescription(answer);
+      }).then(function() {
+        // wait for ICE gathering to complete
+        return new Promise(function(resolve) {
+          if (rtcPeerConnection.iceGatheringState === 'complete') {
+            resolve();
+          } else {
+            function checkState() {
+              if (rtcPeerConnection.iceGatheringState === 'complete') {
+                rtcPeerConnection.removeEventListener('icegatheringstatechange', checkState);
+                resolve();
+              }
+            }
+            rtcPeerConnection.addEventListener('icegatheringstatechange', checkState);
+          }
+        });
+      }).then(function(answer) {
+        var offer = rtcPeerConnection.localDescription;
+
+        return fetch(webrtcURL, {
+          body: JSON.stringify({
+            type: offer.type,
+            id: rtcPeerConnection.remote_pc_id,
+            sdp: offer.sdp,
+          }),
+          headers: { 'Content-Type': 'application/json' },
+          method: 'POST'
+        })
+      }).then(function(response) {
+        return response.json();
+      }).catch(function(e) {
+        alert(e);
+      });
+    }
+  })
+  </script>
+</html>

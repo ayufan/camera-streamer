@@ -5,6 +5,8 @@
 - libcamera: expose all options with human readable settings
 - v4l2: expose all options with human readable settings
 - libcamera: do not expose some options that should not be made configurable
+- http: add `/control` to provide simple JS interface to live edit camera settings
+- http: change `/option` to accept `device=`, `key=`, and `value=`
 
 ## Variants
 
