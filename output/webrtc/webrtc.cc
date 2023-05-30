@@ -37,10 +37,6 @@ static std::mutex webrtc_clients_lock;
 static const auto webrtc_client_lock_timeout = 3 * 1000ms;
 static const auto webrtc_client_max_json_body = 10 * 1024;
 static const auto webrtc_client_video_payload_type = 102; // H264
-static const rtc::Configuration webrtc_configuration = {
-  // .iceServers = { rtc::IceServer("stun:stun.l.google.com:19302") },
-  .disableAutoNegotiation = true
-};
 
 struct ClientTrackData
 {
@@ -250,9 +246,30 @@ static void webrtc_h264_capture(buffer_lock_t *buf_lock, buffer_t *buf)
 
 static void http_webrtc_request(http_worker_t *worker, FILE *stream, const nlohmann::json &message)
 {
+  // This is std::moved into the libdatachannel peer connection, so it can be stack allocated.
+  rtc::Configuration webrtc_configuration = {
+    .disableAutoNegotiation = true
+  };
+
+  // Parse the optional list of desired ice servers [STUN or TURN]
+  // Each string in the array must match the format required by libdatachannel
+  // https://github.com/paullouisageneau/libdatachannel/blob/master/DOC.md#rtccreatepeerconnection
+  constexpr auto json_ice_servers_key = "ice_servers";
+  if (message.contains(json_ice_servers_key) && message[json_ice_servers_key].is_array()) {
+    auto& jarray = message[json_ice_servers_key];
+    for (uint32_t i = 0; i < jarray.size(); i++) {
+      if(!jarray.at(i).is_string()) {
+        LOG_INFO(NULL, "WebRTC SDP request ICE server array contained an element that wasn't a string. Ignoring.");
+        continue;
+      }
+      auto str = jarray.at(i).get<std::string>();
+      webrtc_configuration.iceServers.emplace_back(rtc::IceServer(str));
+      LOG_INFO(NULL, "Added ICE server from SDP request json: %s", str.data());
+    }
+  }
+
   auto client = createPeerConnection(webrtc_configuration);
   LOG_INFO(client.get(), "Stream requested.");
-
   client->video = addVideo(client->pc, webrtc_client_video_payload_type, rand(), "video", "");
 
   try {
@@ -312,6 +329,11 @@ static void http_webrtc_offer(http_worker_t *worker, FILE *stream, const nlohman
   }
 
   auto offer = rtc::Description(std::string(message["sdp"]), std::string(message["type"]));
+
+  // This is std::moved into the libdatachannel peer connection, so it can be stack allocated.
+  rtc::Configuration webrtc_configuration = {
+    .disableAutoNegotiation = true
+  };
   auto client = createPeerConnection(webrtc_configuration);
 
   LOG_INFO(client.get(), "Offer received.");
