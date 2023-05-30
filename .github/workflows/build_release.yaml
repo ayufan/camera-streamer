@@ -49,6 +49,8 @@ jobs:
       run: docker create --name deb_make deb_make
     - name: Copy files
       run: 'docker cp deb_make:/deb/. deb/'
+    - name: Fix RELEASE.md version
+      run: sed -i 's|#{GIT_VERSION}|${{ env.GIT_VERSION }}|g' RELEASE.md
     - name: 'Release debian files'
       uses: ncipollo/release-action@v1
       with:
