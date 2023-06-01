@@ -39,3 +39,15 @@ This section contains some advanced explanations that are not complete and might
 ## License
 
 GNU General Public License v3.0
+
+## References
+
+This project uses:
+
+- [WebRTC library libdatachannel](https://github.com/paullouisageneau/libdatachannel)
+- [Raspberry PI libcamera](https://github.com/raspberrypi/libcamera)
+- [RTSP live555](http://www.live555.com)
+- [FFmpeg](https://ffmpeg.org/)
+- [C++ helper magic_enum](https://github.com/Neargye/magic_enum)
+- [C++ JSON nlohmann](https://github.com/nlohmann/json)
+- [HTML from ESP32 Cam WebServer](https://github.com/easytarget/esp32-cam-webserver)
