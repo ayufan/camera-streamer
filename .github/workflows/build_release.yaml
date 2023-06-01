@@ -33,10 +33,10 @@ jobs:
           nextVer="${newVer[*]}"
           nextVer="${nextVer// /.}"
         else
-          nextVer="$majorVer.0"
+          nextVer="v$majorVer.0"
         fi
         echo "MajorVer=$majorVer LastVer=$lastVer NextVer=$nextVer"
-        echo "GIT_VERSION=$nextVer" >> $GITHUB_ENV
+        echo "GIT_VERSION=${nextVer//v/}" >> $GITHUB_ENV
     - name: Set up QEMU
       uses: docker/setup-qemu-action@v2
     - name: Build Dockerfile
@@ -54,7 +54,7 @@ jobs:
     - name: 'Release debian files'
       uses: ncipollo/release-action@v1
       with:
-        tag: ${{ env.GIT_VERSION }}
+        tag: "v${{ env.GIT_VERSION }}"
         artifacts: "deb/*.deb"
         allowUpdates: true
         omitBodyDuringUpdate: true

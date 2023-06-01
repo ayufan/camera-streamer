@@ -21,7 +21,7 @@ if [[ -e /etc/default/raspberrypi-kernel ]]; then
 else
   PACKAGE=camera-streamer-generic_#{GIT_VERSION}.bullseye_$(dpkg --print-architecture).deb
 fi
-wget "https://github.com/ayufan/camera-streamer/releases/download/#{GIT_VERSION}/$PACKAGE"
+wget "https://github.com/ayufan/camera-streamer/releases/download/v#{GIT_VERSION}/$PACKAGE"
 sudo apt install "$PWD/$PACKAGE"
 ```
 
