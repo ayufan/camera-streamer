@@ -7,14 +7,18 @@
 typedef struct buffer_s buffer_t;
 typedef struct buffer_list_s buffer_list_t;
 typedef struct buffer_format_s buffer_format_t;
+typedef struct device_option_s device_option_t;
 typedef struct device_s device_t;
 struct pollfd;
+
+typedef int device_option_fn(device_option_t *option, void *opaque);
 
 typedef struct device_hw_s {
   int (*device_open)(device_t *dev);
   void (*device_close)(device_t *dev);
   int (*device_video_force_key)(device_t *dev);
   void (*device_dump_options)(device_t *dev, FILE *stream);
+  int (*device_dump_options2)(device_t *dev, device_option_fn fn, void *opaque);
   int (*device_set_fps)(device_t *dev, int desired_fps);
   int (*device_set_rotation)(device_t *dev, bool vflip, bool hflip);
   int (*device_set_option)(device_t *dev, const char *key, const char *value);
@@ -55,6 +59,42 @@ typedef struct device_s {
   bool paused;
 } device_t;
 
+typedef enum device_option_type_s {
+  device_option_type_u8, // comp-type
+  device_option_type_u16, // comp-type
+  device_option_type_u32, // comp-type
+  device_option_type_bool,
+  device_option_type_integer,
+  device_option_type_integer64,
+  device_option_type_float,
+  device_option_type_string
+} device_option_type_t;
+
+#define MAX_DEVICE_OPTION_MENU 20
+
+typedef struct device_option_menu_s {
+  int id;
+  char name[64];
+} device_option_menu_t;
+
+typedef struct device_option_s {
+  char name[64];
+  unsigned int control_id;
+
+  device_option_type_t type;
+  int elems;
+  struct {
+    bool read_only : 1;
+    bool invalid : 1;
+  } flags;
+
+  device_option_menu_t menu[MAX_DEVICE_OPTION_MENU];
+  int menu_items;
+
+  char value[256];
+  char description[256];
+} device_option_t;
+
 device_t *device_open(const char *name, const char *path, device_hw_t *hw);
 void device_close(device_t *dev);
 
@@ -68,6 +108,7 @@ int device_set_stream(device_t *dev, bool do_on);
 int device_video_force_key(device_t *dev);
 
 void device_dump_options(device_t *dev, FILE *stream);
+int device_dump_options2(device_t *dev, device_option_fn fn, void *opaque);
 int device_set_fps(device_t *dev, int desired_fps);
 int device_set_rotation(device_t *dev, bool vflip, bool hflip);
 int device_set_option_string(device_t *dev, const char *option, const char *value);

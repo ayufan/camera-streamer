@@ -2,12 +2,14 @@ extern "C" {
 
 #include "util/http/http.h"
 #include "util/opts/fourcc.h"
+#include "util/opts/control.h"
 #include "device/buffer_list.h"
 #include "device/buffer_lock.h"
 #include "device/camera/camera.h"
 #include "output/rtsp/rtsp.h"
 #include "output/webrtc/webrtc.h"
 #include "output/output.h"
+#include "version.h"
 
 extern camera_t *camera;
 extern http_server_options_t http_options;
@@ -17,6 +19,7 @@ extern webrtc_options_t webrtc_options;
 };
 
 #include <nlohmann/json.hpp>
+#include "third_party/magic_enum/include/magic_enum.hpp"
 
 static nlohmann::json serialize_buf_list(buffer_list_t *buf_list)
 {
@@ -53,6 +56,48 @@ static nlohmann::json serialize_buf_lock(buffer_lock_t *buf_lock)
   return output;
 }
 
+static const char *strip_prefix(const char *str, const char *prefix)
+{
+  if (strstr(str, prefix) == str) {
+    return str + strlen(prefix);
+  }
+  return str;
+}
+
+static std::string std_device_option_normalize(std::string key)
+{
+  key.resize(device_option_normalize_name(key.data(), key.data()));
+  return key;
+}
+
+static int device_options_callback(device_option_t *option, void *opaque)
+{
+  auto key = std_device_option_normalize(option->name);
+  nlohmann::json &device = *(nlohmann::json*)opaque;
+  nlohmann::json &node = option->flags.read_only ?
+    device["properties"][key] :
+    device["options"][key];
+
+  node["name"] = option->name;
+  node["type"] = strip_prefix(
+    std::string(magic_enum::enum_name(option->type)).c_str(),
+    "device_option_type_");
+
+  if (option->elems > 0)
+    node["elems"] = option->elems;
+  if (option->description[0])
+    node["description"] = option->description;
+  if (option->value[0])
+    node["value"] = option->value;
+
+  for (int i = 0; i < option->menu_items; i++) {
+    char buf[64];
+    sprintf(buf, "%d", option->menu[i].id);
+    node["menu"][buf] = option->menu[i].name;
+  }
+  return 0;
+}
+
 static nlohmann::json devices_status_json()
 {
   nlohmann::json devices;
@@ -70,6 +115,8 @@ static nlohmann::json devices_status_json()
     for (int j = 0; j < device->n_capture_list; j++) {
       device_json["captures"][j] = serialize_buf_list(device->capture_lists[j]);
     }
+
+    device_dump_options2(device, device_options_callback, &device_json);
     devices += device_json;
   }
 
@@ -121,6 +168,9 @@ static nlohmann::json get_url(bool running, const char *output, const char *prot
 extern "C" void camera_status_json(http_worker_t *worker, FILE *stream)
 {
   nlohmann::json message;
+
+  message["version"] = GIT_VERSION;
+  message["revision"] = GIT_REVISION;
 
   message["outputs"]["snapshot"] = serialize_buf_lock(&snapshot_lock);
   message["outputs"]["stream"] = serialize_buf_lock(&stream_lock);

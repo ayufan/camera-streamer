@@ -85,7 +85,7 @@ int libcamera_buffer_enqueue(buffer_t *buf, const char *who)
   if (camera->queueRequest(buf->libcamera->request.get()) < 0) {
     LOG_ERROR(buf, "Can't queue buffer.");
   }
-  buf->buf_list->dev->libcamera->controls.clear();
+  libcamera_device_apply_controls(buf->buf_list->dev);
   return 0;
 
 error:

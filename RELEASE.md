@@ -1,5 +1,10 @@
 # Release #{GIT_VERSION}
 
+- http: extend `/status` with all options
+- cmd: accept `--camera-options=AfMode=auto` and alike
+- libcamera: expose all options with human readable settings
+- v4l2: expose all options with human readable settings
+
 ## Variants
 
 Download correct version for your platform:
