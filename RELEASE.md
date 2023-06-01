@@ -4,6 +4,7 @@
 - cmd: accept `--camera-options=AfMode=auto` and alike
 - libcamera: expose all options with human readable settings
 - v4l2: expose all options with human readable settings
+- libcamera: do not expose some options that should not be made configurable
 
 ## Variants
 
