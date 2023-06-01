@@ -54,7 +54,7 @@ jobs:
     - name: 'Release debian files'
       uses: ncipollo/release-action@v1
       with:
-        tag: ${{ env.GIT_VERSION }}
+        tag: "v${{ env.GIT_VERSION }}"
         artifacts: "deb/*.deb"
         allowUpdates: true
         omitBodyDuringUpdate: true
