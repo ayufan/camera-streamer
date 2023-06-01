@@ -60,6 +60,11 @@ static std::map<unsigned, libcamera_control_id_t> libcamera_control_ids =
   LIBCAMERA_DRAFT_CONTROL(TestPatternMode)
 };
 
+static std::set<const libcamera::ControlId *> ignored_controls =
+{
+  &libcamera::controls::FrameDurationLimits
+};
+
 static auto control_type_values = control_enum_values<libcamera::ControlType>("ControlType");
 
 static const std::map<unsigned, std::string> *libcamera_find_control_ids(unsigned control_id)
@@ -151,6 +156,10 @@ void libcamera_device_dump_options(device_t *dev, FILE *stream)
 
 static int libcamera_device_dump_control_option(device_option_fn fn, void *opaque, const libcamera::ControlId &control_id, const libcamera::ControlInfo *control_info, const libcamera::ControlValue *control_value, bool read_only)
 {
+  if (ignored_controls.find(&control_id) != ignored_controls.end()) {
+    return 0;
+  }
+
   device_option_t opt = {
     .control_id = control_id.id()
   };
