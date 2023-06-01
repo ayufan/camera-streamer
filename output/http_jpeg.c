@@ -8,7 +8,7 @@
 #include "device/buffer_lock.h"
 
 #define SNAPSHOT_TIMEOUT_MS 3000
-#define SNAPSHOT_DEFAULT_DELAY_PARAM "300"
+#define SNAPSHOT_DEFAULT_DELAY_PARAM 300
 
 #define PART_BOUNDARY "123456789000000000000987654321"
 #define CONTENT_TYPE "image/jpeg"
@@ -47,15 +47,18 @@ int http_snapshot_buf_part(buffer_lock_t *buf_lock, buffer_t *buf, int frame, ht
 
 void http_snapshot(http_worker_t *worker, FILE *stream)
 {
+  int max_delay_value = SNAPSHOT_DEFAULT_DELAY_PARAM;
+
   // passing the max_delay=0 will ensure that frame is capture at this exact moment
-  const char *max_delay = http_get_param(worker, "max_delay");
-  if (!max_delay) {
-    max_delay = SNAPSHOT_DEFAULT_DELAY_PARAM;
+  char *max_delay = http_get_param(worker, "max_delay");
+  if (max_delay) {
+    max_delay_value = atoi(max_delay);
+    free(max_delay);
   }
 
   http_snapshot_t snapshot = {
     .stream = stream,
-    .start_time_us = get_monotonic_time_us(NULL, NULL) - atoi(max_delay) * 1000
+    .start_time_us = get_monotonic_time_us(NULL, NULL) - max_delay_value * 1000
   };
 
   int n = buffer_lock_write_loop(&snapshot_lock, 1, SNAPSHOT_TIMEOUT_MS,

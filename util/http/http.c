@@ -87,12 +87,12 @@ void *http_enum_params(http_worker_t *worker, FILE *stream, http_param_fn fn, vo
 static void *http_get_param_fn(struct http_worker_s *worker, FILE *stream, const char *key, const char *value, void *opaque)
 {
   if (!strcmp(key, opaque))
-    return (void*)value;
+    return (void*)strdup(value);
 
   return NULL;
 }
 
-const char *http_get_param(http_worker_t *worker, const char *key)
+char *http_get_param(http_worker_t *worker, const char *key)
 {
   return http_enum_params(worker, NULL, http_get_param_fn, (void*)key);
 }
