@@ -38,8 +38,8 @@ camera_options_t camera_options = {
       "video_bitrate=2000000" OPTION_VALUE_LIST_SEP
       "repeat_sequence_header=5000000" OPTION_VALUE_LIST_SEP
       "h264_i_frame_period=30" OPTION_VALUE_LIST_SEP
-      "h264_level=11" OPTION_VALUE_LIST_SEP
-      "h264_profile=4" OPTION_VALUE_LIST_SEP
+      "h264_level=4" OPTION_VALUE_LIST_SEP
+      "h264_profile=high" OPTION_VALUE_LIST_SEP
       "h264_minimum_qp_value=16" OPTION_VALUE_LIST_SEP
       "h264_maximum_qp_value=32"
   }

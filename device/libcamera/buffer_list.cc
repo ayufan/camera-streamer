@@ -170,7 +170,7 @@ int libcamera_buffer_list_set_stream(buffer_list_t *buf_list, bool do_on)
       LOG_ERROR(buf_list, "Failed to start camera.");
     }
 
-    buf_list->dev->libcamera->controls.clear();
+    libcamera_device_apply_controls(buf_list->dev);
   } else {
     buf_list->dev->libcamera->camera->requestCompleted.disconnect(
       buf_list->libcamera, &buffer_list_libcamera_t::libcamera_buffer_list_dequeued);
