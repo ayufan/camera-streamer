@@ -8,6 +8,7 @@
 - http: add `/control` to provide simple JS interface to live edit camera settings
 - http: change `/option` to accept `device=`, `key=`, and `value=`
 - device: show stddev estimates to measure frame pacing
+- webrtc: allow to specify ice-servers on command line
 
 ## Variants
 

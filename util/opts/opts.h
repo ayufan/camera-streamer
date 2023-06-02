@@ -26,6 +26,7 @@ typedef struct options_s {
   const char *description;
 } option_t;
 
+#define OPTION_VALUE_LIST_SEP_CHAR ';'
 #define OPTION_VALUE_LIST_SEP ";"
 
 #define OPTION_FORMAT_uint   "%u"
