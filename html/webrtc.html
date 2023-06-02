@@ -51,9 +51,10 @@
             sdpSemantics: 'unified-plan'
         };
 
-        if (document.getElementById('use-stun') && document.getElementById('use-stun').checked) {
-          config.iceServers = [{urls: ['stun:stun.l.google.com:19302']}];
-        }
+        // syntax: https://github.com/paullouisageneau/libdatachannel/blob/master/DOC.md#rtcwebrtc_peer_connection
+        const ice_servers = [
+          // 'stun:stun.l.google.com:19302'
+        ];
 
         pc = new RTCPeerConnection(config);
         pc.addTransceiver('video', {direction: 'recvonly'});
@@ -76,7 +77,8 @@
         fetch(window.location.href, {
           body: JSON.stringify({
               type: 'request',
-              res: params.res
+              res: params.res,
+              ice_servers: ice_servers
           }),
           headers: {
               'Content-Type': 'application/json'
