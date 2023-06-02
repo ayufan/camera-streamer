@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        debian_version: [buster, bullseye]
+        debian_version: [bullseye]
         docker_arch: [amd64, arm32v7, arm64v8]
         build_type: [generic, raspi]
         exclude:
