@@ -9,8 +9,11 @@ extern "C" {
 #include "util/opts/log.h"
 #include "util/opts/fourcc.h"
 #include "util/opts/control.h"
+#include "util/opts/opts.h"
 #include "device/buffer.h"
 };
+
+#include "util/opts/helpers.hh"
 
 #ifdef USE_LIBDATACHANNEL
 
@@ -37,7 +40,7 @@ static std::mutex webrtc_clients_lock;
 static const auto webrtc_client_lock_timeout = 3 * 1000ms;
 static const auto webrtc_client_max_json_body = 10 * 1024;
 static const auto webrtc_client_video_payload_type = 102; // H264
-static const rtc::Configuration webrtc_configuration = {
+static rtc::Configuration webrtc_configuration = {
   // .iceServers = { rtc::IceServer("stun:stun.l.google.com:19302") },
   .disableAutoNegotiation = true
 };
@@ -390,6 +393,10 @@ extern "C" void http_webrtc_offer(http_worker_t *worker, FILE *stream)
 
 extern "C" int webrtc_server(webrtc_options_t *options)
 {
+  for (const auto &ice_server : str_split(options->ice_servers, OPTION_VALUE_LIST_SEP_CHAR)) {
+    webrtc_configuration.iceServers.push_back(rtc::IceServer(ice_server));
+  }
+
   buffer_lock_register_check_streaming(&video_lock, webrtc_h264_needs_buffer);
   buffer_lock_register_notify_buffer(&video_lock, webrtc_h264_capture);
   options->running = true;
