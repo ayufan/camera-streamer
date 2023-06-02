@@ -9,6 +9,7 @@
 - http: change `/option` to accept `device=`, `key=`, and `value=`
 - device: show stddev estimates to measure frame pacing
 - webrtc: allow to specify ice-servers on command line
+- webrtc: accept `ice_servers` provided in `POST /webrtc`
 
 ## Variants
 

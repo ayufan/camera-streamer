@@ -759,8 +759,11 @@
         method: 'POST'
       }).then(function(response) {
         return response.json();
-      }).then(function(answer) {
-        rtcPeerConnection = new RTCPeerConnection(rtcPeerConfig);
+      }).then(function(request) {
+        rtcPeerConnection = new RTCPeerConnection({
+          sdpSemantics: 'unified-plan',
+          iceServers: request.iceServers
+        });
         rtcPeerConnection.addTransceiver('video', { direction: 'recvonly' });
         //pc.addTransceiver('audio', {direction: 'recvonly'});
         rtcPeerConnection.addEventListener('track', function(evt) {
@@ -771,27 +774,27 @@
             view.scrollIntoView(false);
           }
         });
-        rtcPeerConnection.remote_pc_id = answer.id;
-        return rtcPeerConnection.setRemoteDescription(answer);
+        rtcPeerConnection.addEventListener("icecandidate", function(e) {
+          if (e.candidate) {
+            return fetch(webrtcURL, {
+              body: JSON.stringify({
+                type: 'remote_candidate',
+                id: rtcPeerConnection.remote_pc_id,
+                candidates: [e.candidate]
+              }),
+              headers: { 'Content-Type': 'application/json' },
+              method: 'POST'
+            }).catch(function(e) {
+              console.log("Failed to send ICE WebRTC: "+e);
+            });
+          }
+        });
+        rtcPeerConnection.remote_pc_id = request.id;
+        return rtcPeerConnection.setRemoteDescription(request);
       }).then(function() {
         return rtcPeerConnection.createAnswer();
       }).then(function(answer) {
         return rtcPeerConnection.setLocalDescription(answer);
-      }).then(function() {
-        // wait for ICE gathering to complete
-        return new Promise(function(resolve) {
-          if (rtcPeerConnection.iceGatheringState === 'complete') {
-            resolve();
-          } else {
-            function checkState() {
-              if (rtcPeerConnection.iceGatheringState === 'complete') {
-                rtcPeerConnection.removeEventListener('icegatheringstatechange', checkState);
-                resolve();
-              }
-            }
-            rtcPeerConnection.addEventListener('icegatheringstatechange', checkState);
-          }
-        });
       }).then(function(answer) {
         var offer = rtcPeerConnection.localDescription;
 
@@ -807,7 +810,7 @@
       }).then(function(response) {
         return response.json();
       }).catch(function(e) {
-        alert(e);
+        console.log(e);
       });
     }
   })
