@@ -1,5 +1,8 @@
 # Release #{GIT_VERSION}
 
+- webrtc: accept `ice_servers` provided in `POST /webrtc`
+- webrtc: allow to specify ice-servers on command line
+
 ## Variants
 
 Download correct version for your platform:
