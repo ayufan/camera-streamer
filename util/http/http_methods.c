@@ -72,5 +72,5 @@ void http_404(FILE *stream, const char *data)
 
 void http_500(FILE *stream, const char *data)
 {
-  http_write_response(stream, "500 Server Error", NULL, data ? data : "Server Error\n", 0);
+  http_write_response(stream, "500 Server Error", "text/plain", data ? data : "Server Error\n", 0);
 }

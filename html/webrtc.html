@@ -12,73 +12,126 @@
     }
 
     #streamStage {
-      position:fixed;
-      top:0;
-      left:0;
       width:100%;
       height:100%;
-    }
-
-    #streamStage:before {
-      content: '';
-      box-sizing: border-box;
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      width: 2rem;
-      height: 2rem;
-      margin-top: -1rem;
-      margin-left: -1rem;
     }
 
     #stream {
       max-height: 100%;
       max-width: 100%;
       margin: auto;
-      position: absolute;
       top: 0; left: 0; bottom: 0; right: 0;
+    }
+
+    #controls {
+        background-color: #6e6e6e;
+        color: white;
+    }
+
+    #controlItem {
+        padding: 5px;
+    }
+
+    #log {
+        margin: 5px;
+        color:white;
+        padding: 5px;
+        width: 98%;
+        height: 200px;
+        background-color:#3d3636;
     }
   </style>
 </head>
 <body>
+  <div id="controls">
+    <div id="controlItem">
+        <input type="checkbox" id="disableLanConnection" onchange="saveLocalSettings()">
+        <label for="disableLanConnection">Disable LAN Connection (remote local ICE candidates from SDP offer and answer)</label>
+    </div>
+    <div id="controlItem">
+      <input type="checkbox" id="disableStunConnection" onchange="saveLocalSettings()">
+      <label for="disableStunConnection">Disable STUN Connection (remote local STUN candidates from SDP offer and answer)</label>
+  </div>
+    <div id="controlItem">
+        <input type="checkbox" id="autoConnect" onchange="saveLocalSettings()" >
+        <label for="autoConnect">Auto Connect On Page Load</label>
+    </div>
+      <div id="controlItem">
+        <label for="requestUrl" >WebRTC Request URL:</label><br/>
+        <input type="text" id="requestUrl" style="width:200px; margin-top:5px;" onchange="saveLocalSettings()"/>
+    </div>
+    <div id="controlItem">
+        <label for="iceServers" >Ice Servers:</label><br/>
+        <label>Syntax must match the <a target="_blank" href="https://developer.mozilla.org/en-US/docs/Web/API/RTCIceServer/urls" style="color:white;">WebRTC Peer Connection iceServers list.</a></label><br/>
+        <input type="text" id="iceServers" placeholder="Optional comma separated STUN or TURN servers" style="width: 700px; margin-top:5px;" onchange="saveLocalSettings()"/>
+    </div>
+    <div id="controlItem">
+        <button style="padding:5px; width: 200px;" id="connectButton" onclick="startWebRTC();">
+            Connect
+        </button>
+    </div>
+  </div>
+  <div>
+    <textarea id="log" ></textarea>
+  </div>
   <div id="streamtage">
     <video controls autoplay muted playsinline id="stream"></video>
   </div>
 
   <script>
     function startWebRTC() {
-        var config = {
-            sdpSemantics: 'unified-plan'
-        };
-
-        // syntax: https://github.com/paullouisageneau/libdatachannel/blob/master/DOC.md#rtcwebrtc_peer_connection
-        const ice_servers = [
-          // 'stun:stun.l.google.com:19302'
-        ];
-
-        pc = new RTCPeerConnection(config);
-        pc.addTransceiver('video', {direction: 'recvonly'});
-        //pc.addTransceiver('audio', {direction: 'recvonly'});
-        pc.addEventListener('track', function(evt) {
-          console.log("track event " + evt.track.kind);
-            if (evt.track.kind == 'video') {
-                if (document.getElementById('stream')) {
-                  document.getElementById('stream').srcObject = evt.streams[0];
-                }
-            } else {
-                if (document.getElementById('audio'))
-                  document.getElementById('audio').srcObject = evt.streams[0];
-            }
-        });
-
+        var pc = null;
+        const requestUrl = document.getElementById("requestUrl").value;
         const urlSearchParams = new URLSearchParams(window.location.search);
         const params = Object.fromEntries(urlSearchParams.entries());
 
-        fetch(window.location.href, {
+        // Basic singaling flow:
+        //
+        //     Request A WebRTC SDP Offer /webrtc type=request
+        //          Optionally - the client may send a list of ICE servers to use for the connection. This `iceServers` object must match the PeerConnection ice server format.
+        //                Note the server can chose to ingore some ICE servers or add some. The iceServers field returns is what should be set into the PeerConnection.
+        //                Format details: https://developer.mozilla.org/en-US/docs/Web/API/RTCIceServer/urls
+        //          As a response, the request will return a json payload with the following:
+        //                sdp - The offer SDP, this is set into WebRTC using `setRemoteDescription`
+        //                iceServers - A json array of ice servers for the connection. These must be set into the PeerConnection's config on create. PeerConnection({ iceServers : <returned iceServers json array>, ... })
+        //     
+        //     Send Back The WebRTC SDP Answer /webrtc type=answer
+        //          localDescription can be recieved from WebRTC when it's ready, it must be sent in the request.
+        //
+        //     Send Trickle ICE candiates as they are ready
+        //           Using PeerConnection.addEventListener("icecandidate", ...) listen for ICE candiates as they become ready.
+        //           Send them to the server using /webrtc type=remote_candidate
+        //
+        //     That's all! If the connection can be made, 
+        //
+
+        // For debugging, we can optioanlly send a list of ICE servers we want to use.
+        // Remember the server may reject or add it's own ICE servers in the reqeust response.
+        var ice_servers = null;
+        try{ 
+          var ice_servers_str = document.getElementById("iceServers").value;
+          ice_servers = JSON.parse(ice_servers_str)
+        } catch (e) {
+          log("Failed to parse ICE servers. "+e)
+          return;
+        }
+
+        // Ensure the array if valid.
+        if(Array.isArray(ice_servers)) {
+          for(var i = 0; i < ice_servers.length; i++) {            
+            log(`Using ICE Server - url:"${ice_servers[i].url}" username:"${ice_servers[i].username}" credential:"${ice_servers[i].credential}"`)
+          }
+        } else {
+          ice_servers = null;
+        } 
+
+        // Start by requesting the SDP offer from the server.
+        log("Requesting SDP offer from server...")
+        fetch(requestUrl, {
           body: JSON.stringify({
               type: 'request',
               res: params.res,
-              ice_servers: ice_servers
+              iceServers: ice_servers
           }),
           headers: {
               'Content-Type': 'application/json'
@@ -87,31 +140,92 @@
         }).then(function(response) {
           return response.json();
         }).then(function(answer) {
+          // Log the servers we got back.
+          for(var i = 0; i < answer.iceServers.length; i++) {            
+            log(`Received ICE Server From Server - url:"${answer.iceServers[i].url}" username:"${answer.iceServers[i].username}" credential:"${answer.iceServers[i].credential}"`)
+          }
+
+          // Setup the PeerConnection
+          var config = {
+            sdpSemantics: 'unified-plan',
+            iceServers: answer["iceServers"]
+          };
+          pc = new RTCPeerConnection(config);          
+          pc.addTransceiver('video', {direction: 'recvonly'});
           pc.remote_pc_id = answer.id;
+
+          // Add listeners.
+          pc.addEventListener('track', function(evt) {
+              log("track event " + evt.track.kind);
+              if (evt.track.kind == 'video') {
+                  if (document.getElementById('stream')) {
+                    document.getElementById('stream').srcObject = evt.streams[0];
+                  }
+              } else {
+                  if (document.getElementById('audio'))
+                    document.getElementById('audio').srcObject = evt.streams[0];
+              }
+          });
+          pc.addEventListener("connectionstatechange",
+            (e) => {
+              log("Local WebRTC connection state changed: "+pc.connectionState)
+            });
+          pc.addEventListener("icecandidate",
+            (e) => {
+              // Fired when the local WebRTC has a new ICE candiate we need to send to the server.
+              if(!e.candidate) {
+                // If e.candiate is null, the local WebRTC done gathering candidates.
+                log("ICE Candidate Gathering Complete")
+                return;
+              }
+
+              // For debugging, it's helpful to block local or stun connections, since they are prefered over TURN
+              if(e.candidate.candidate.indexOf("host") != -1 && document.getElementById("disableLanConnection").checked)
+              {
+                log("Blocking local ICE LAN candidate due to setting.")
+                return;
+              }
+              if(e.candidate.candidate.indexOf("srflx") != -1 && document.getElementById("disableStunConnection").checked)
+              {
+                log("Blocking local ICE STUN candidate due to setting.")
+                return;
+              }
+
+              // We must send the ICE candidate to the server, to indicate to the server it's a possible connection path.
+              log("ICE Candidate Received: "+ JSON.stringify(e.candidate))
+              return fetch(requestUrl, {
+                body: JSON.stringify({
+                  type: 'remote_candidate',
+                  id: pc.remote_pc_id,
+                  candidate: e.candidate
+                }),
+                headers: {
+                  'Content-Type': 'application/json'
+                },
+                method: 'POST'
+              })
+              .catch(function(e) {
+                  log("Failed to send ICE  WebRTC: "+e)
+              });             
+            }
+          );
+
+          // Set the SDP offer.
+          // For debugging, it's sometimes helpful to prevent the LAN conneciton, which this function will do.
+          answer["sdp"] = removeLocalIceCandidateIfNeeded(answer["sdp"])
+          log("Setting remote SDP offer")
+          log(answer["sdp"])
           return pc.setRemoteDescription(answer);
         }).then(function() {
           return pc.createAnswer();
         }).then(function(answer) {
+          log("Setting local SDP answer")
           return pc.setLocalDescription(answer);
-        }).then(function() {
-            // wait for ICE gathering to complete
-            return new Promise(function(resolve) {
-                if (pc.iceGatheringState === 'complete') {
-                    resolve();
-                } else {
-                    function checkState() {
-                        if (pc.iceGatheringState === 'complete') {
-                            pc.removeEventListener('icegatheringstatechange', checkState);
-                            resolve();
-                        }
-                    }
-                    pc.addEventListener('icegatheringstatechange', checkState);
-                }
-            });
         }).then(function(answer) {
+          log("Sending SDP answer")
           var offer = pc.localDescription;
-
-          return fetch(window.location.href, {
+          log(offer)
+          return fetch(requestUrl, {
             body: JSON.stringify({
                 type: offer.type,
                 id: pc.remote_pc_id,
@@ -123,9 +237,10 @@
             method: 'POST'
           })
         }).then(function(response) {
+            log("SDP answer send complete")
             return response.json();
         }).catch(function(e) {
-            alert(e);
+            log("Failed to init WebRTC: "+e)
         });
     }
 
@@ -137,8 +252,76 @@
   </script>
 
   <script>
+    function getLocalStorageBool(name, defaultValue)
+    {
+        var value = localStorage.getItem(name)
+        if(value == null) return defaultValue;
+        return value == "true";
+    }
+
+    function setLocalStorageBool(name, value)
+    {
+        localStorage.setItem(name, value ? "true" : "false");
+    }
+
+    function loadLocalSettings() {
+        document.getElementById("disableLanConnection").checked = getLocalStorageBool("disableLanConnection", false)
+        document.getElementById("disableStunConnection").checked = getLocalStorageBool("disableStunConnection", false)
+        document.getElementById("autoConnect").checked = getLocalStorageBool("autoConnect", false)
+        document.getElementById("iceServers").value = localStorage.getItem("iceServers") == null ? '[  {"url":"stun:stun.l.google.com:19302"}, {"url":"turn:a.relay.metered.ca:80", "username": "7295a68e2381585126c6a19e", "credential": "zDd3R415oPPXJKQT"}  ]' : localStorage.getItem("iceServers")
+        document.getElementById("requestUrl").value = localStorage.getItem("requestUrl") == null ? "/webrtc" : localStorage.getItem("requestUrl")
+    }
+
+    function saveLocalSettings() {
+        setLocalStorageBool("disableLanConnection", document.getElementById("disableLanConnection").checked)
+        setLocalStorageBool("disableStunConnection", document.getElementById("disableStunConnection").checked)
+        setLocalStorageBool("autoConnect", document.getElementById("autoConnect").checked)
+        localStorage.setItem("iceServers", document.getElementById("iceServers").value)
+        localStorage.setItem("requestUrl", document.getElementById("requestUrl").value)
+    }
+
+    function log(msg) {
+        document.getElementById("log").value += msg + "\n";
+        console.log(msg)
+    }
+
+    function removeLocalIceCandidateIfNeeded(sdp) {
+      if(!document.getElementById("disableLanConnection").checked && !document.getElementById("disableStunConnection").checked) {
+        return sdp
+      }
+
+      var outputSdp = "";
+      var lines = sdp.split("\r\n")
+      for(var i = 0; i < lines.length; i++)
+      {
+        var l = lines[i];
+        if(l.length == 0)
+        {
+          continue;
+        }
+        if(l.startsWith('a=candidate') && l.indexOf("host") != -1 && document.getElementById("disableLanConnection").checked)
+        {
+          log("Removing Local ICE candidate: "+l)
+          continue;
+        }
+        if(l.startsWith('a=candidate') && l.indexOf("srflx") != -1 && document.getElementById("disableStunConnection").checked)
+        {
+          log("Removing STUN ICE candidate: "+l)
+          continue;
+        }
+        outputSdp += l + "\r\n";
+      }
+      return outputSdp;
+    }
+  </script>
+
+  <script>
     window.onload = function() {
-      startWebRTC();
+        loadLocalSettings();
+        if(document.getElementById("autoConnect").checked)
+        {
+            startWebRTC();
+        }
     }
   </script>
 </body>

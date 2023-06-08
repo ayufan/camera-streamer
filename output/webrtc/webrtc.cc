@@ -30,6 +30,7 @@ extern "C" {
 #include <rtc/h264rtppacketizer.hpp>
 #include <rtc/h264packetizationhandler.hpp>
 #include <rtc/rtcpnackresponder.hpp>
+#include <rtc/candidate.hpp>
 
 #include "third_party/magic_enum/include/magic_enum.hpp"
 
@@ -37,14 +38,15 @@ using namespace std::chrono_literals;
 
 class Client;
 
+static const uint32_t signaling_protocol_version = 2;
 static webrtc_options_t *webrtc_options;
 static std::set<std::shared_ptr<Client> > webrtc_clients;
 static std::mutex webrtc_clients_lock;
 static const auto webrtc_client_lock_timeout = 3 * 1000ms;
 static const auto webrtc_client_max_json_body = 10 * 1024;
 static const auto webrtc_client_video_payload_type = 102; // H264
+static const char* webrtc_client_ice_server_json_key = "iceServers"; // This key value matches the JS PeerConnection config option.
 static rtc::Configuration webrtc_configuration = {
-  // .iceServers = { rtc::IceServer("stun:stun.l.google.com:19302") },
   .disableAutoNegotiation = true
 };
 
@@ -134,23 +136,6 @@ public:
     video->track->send(data);
   }
 
-  void describePeerConnection(nlohmann::json &message)
-  {
-    nlohmann::json ice_servers = nlohmann::json::array();
-
-    for (const auto &ice_server : pc->config()->iceServers) {
-      nlohmann::json json;
-
-      json["hostname"] = ice_server.hostname;
-      json["port"] = ice_server.port;
-      json["type"] = std::string(magic_enum::enum_name(ice_server.type));
-      json["relay_type"] = std::string(magic_enum::enum_name(ice_server.relayType));
-      ice_servers.push_back(json);
-    }
-
-    message["ice_servers"] = ice_servers;
-  }
-
 public:
   char *name = NULL;
   std::string id;
@@ -158,6 +143,8 @@ public:
   std::shared_ptr<ClientTrackData> video;
   std::mutex lock;
   std::condition_variable wait_for_complete;
+  std::vector<rtc::Candidate> pending_remote_candidates;
+  bool has_set_sdp_answer = false;
   bool had_key_frame = false;
   bool requested_key_frame = false;
 };
@@ -202,24 +189,49 @@ static std::shared_ptr<ClientTrackData> webrtc_add_video(const std::shared_ptr<r
 static std::shared_ptr<Client> webrtc_peer_connection(rtc::Configuration config, const nlohmann::json &message)
 {
   // Parse the optional list of desired ice servers [STUN or TURN]
-  // Each string in the array must match the format required by libdatachannel
-  // https://github.com/paullouisageneau/libdatachannel/blob/master/DOC.md#rtcwebrtc_peer_connection
-  auto ice_servers = message.find("ice_servers");
-  if (ice_servers != message.end() && ice_servers->is_array()) {
+  // The format of this json is the same as the WebRTC PeerConnection JS config JSON object.
+  // https://developer.mozilla.org/en-US/docs/Web/API/RTCIceServer/urls
+  auto ice_servers = message.find(webrtc_client_ice_server_json_key);
+  if (ice_servers != message.end() && ice_servers->is_array() && ice_servers->size() > 0) {
     for (auto& ice_server : *ice_servers) {
-      if(!ice_server.is_string()) {
-        LOG_VERBOSE(NULL, "WebRTC SDP request ICE server array contained an element that wasn't a string. Ignoring.");
+      auto url = ice_server.find("url");
+      auto username = ice_server.find("username");
+      auto credential = ice_server.find("credential");
+
+      // The URL is required for all servers.
+      if(url == ice_server.end() || !url->is_string() || url->get<std::string>().length() == 0) {
+        LOG_INFO(NULL, "WebRTC SDP request ICE server array contained with no URL string. Ignoring.");
         continue;
       }
 
+      // Ingore all ICE candidates if the CMD option is set.
       if (webrtc_options->disable_client_ice) {
-        LOG_VERBOSE(NULL, "ICE server from SDP request json due to `disable_client_ice`: %s",
-          ice_server.get<std::string>().c_str());
+        LOG_VERBOSE(NULL, "ICE server from SDP request json due to `disable_client_ice`: %s", url->get<std::string>().c_str());
         continue;
       }
 
-      config.iceServers.emplace_back(rtc::IceServer(ice_server.get<std::string>()));
-      LOG_VERBOSE(NULL, "Added ICE server from SDP request json: %s", ice_server.get<std::string>().c_str());
+      // Some servers require crednetials, if they do, they must have a valid username and credentails field.
+      if(username != ice_server.end() && username->is_string() && username->get<std::string>().length() > 0
+         && credential != ice_server.end() && credential->is_string() && credential->get<std::string>().length() > 0) {
+        // If both the username and credentail fields are set, we need to format url as libdatachannel expects it.
+        // https://github.com/paullouisageneau/libdatachannel/blob/master/DOC.md#rtcwebrtc_peer_connection
+        // Ex: turn:<username>:<credentail>@foo.bar.com:80
+        auto url_str = url->get<std::string>();
+        auto colon_pos = url_str.find(':');
+        if(colon_pos == std::string::npos) {
+          LOG_INFO(NULL, "WebRTC SDP request ICE server has credentials, but we fialed to find the : in the url [%s]. Ignoring.", url_str.c_str());
+          continue;
+        }
+        // Move past the : so it stays on the 'turn:' part.
+        colon_pos += 1;
+        auto url_with_creds = url_str.substr(0, colon_pos) + username->get<std::string>() + ":" + credential->get<std::string>() + "@" + url_str.substr(colon_pos, url_str.length() - colon_pos);
+        config.iceServers.emplace_back(rtc::IceServer(url_with_creds));
+        LOG_VERBOSE(NULL, "Added ICE server with creds from SDP request json: %s", url_with_creds.c_str());
+      } else {
+        // This ICE server is only a URL, which means the format is already what libdatachannel is expecting.
+        config.iceServers.emplace_back(rtc::IceServer(url->get<std::string>()));
+        LOG_VERBOSE(NULL, "Added ICE server with no creds from SDP request json: %s", url->get<std::string>().c_str());
+      }
     }
   }
 
@@ -249,7 +261,12 @@ static std::shared_ptr<Client> webrtc_peer_connection(rtc::Configuration config,
     if(auto client = wclient.lock()) {
       LOG_DEBUG(client.get(), "onStateChange: %d", (int)state);
 
-      if (state == rtc::PeerConnection::State::Disconnected ||
+      if(state == rtc::PeerConnection::State::Connected) {
+        // Start streaming once the client is connected, to ensure a keyframe is sent to start the stream.
+        std::unique_lock lock(client->lock);
+        client->video->startStreaming();
+      }
+      else if (state == rtc::PeerConnection::State::Disconnected ||
         state == rtc::PeerConnection::State::Failed ||
         state == rtc::PeerConnection::State::Closed)
       {
@@ -309,13 +326,21 @@ static void http_webrtc_request(http_worker_t *worker, FILE *stream, const nlohm
 
     if (client->pc->gatheringState() == rtc::PeerConnection::GatheringState::Complete) {
       auto description = client->pc->localDescription();
-      nlohmann::json message;
-      message["id"] = client->id;
-      message["type"] = description->typeString();
-      message["sdp"] = std::string(description.value());
-      client->describePeerConnection(message);
-      http_write_response(stream, "200 OK", "application/json", message.dump().c_str(), 0);
-      LOG_VERBOSE(client.get(), "Local SDP Offer: %s", std::string(message["sdp"]).c_str());
+      nlohmann::json outMessage;
+      outMessage["id"] = client->id;
+      outMessage["type"] = description->typeString();
+      outMessage["sdp"] = std::string(description.value());
+      outMessage["signaling_protocol_version"] = signaling_protocol_version;
+      auto ice_servers = message.find(webrtc_client_ice_server_json_key);
+      if(ice_servers != message.end())
+      {
+        // Copy the ICE server config we used from the request to the output.
+        // The server has the right to add or remove ICE candidates, as well as remote streaming systems that
+        // could intercept the request and add ICE candidates such as private TURN servers.
+        outMessage[webrtc_client_ice_server_json_key] = *ice_servers;
+      }
+      http_write_response(stream, "200 OK", "application/json", outMessage.dump().c_str(), 0);
+      LOG_VERBOSE(client.get(), "Local SDP Offer: %s", std::string(outMessage["sdp"]).c_str());
     } else {
       http_500(stream, "Not complete");
     }
@@ -337,11 +362,71 @@ static void http_webrtc_answer(http_worker_t *worker, FILE *stream, const nlohma
     LOG_VERBOSE(client.get(), "Remote SDP Answer: %s", std::string(message["sdp"]).c_str());
 
     try {
-      auto answer = rtc::Description(std::string(message["sdp"]), std::string(message["type"]));
-      client->pc->setRemoteDescription(answer);
-      client->video->startStreaming();
+      {
+        std::unique_lock lock(client->lock);
+        auto answer = rtc::Description(std::string(message["sdp"]), std::string(message["type"]));
+        client->pc->setRemoteDescription(answer);
+        client->has_set_sdp_answer = true;
+
+        // If there are any pending candidates that make it in before the answer request, add them now.
+        for(auto c : client->pending_remote_candidates) {
+          client->pc->addRemoteCandidate(c);
+        }
+        client->pending_remote_candidates.clear();
+      }
       http_write_response(stream, "200 OK", "application/json", "{}", 0);
     } catch(const std::exception &e) {
+      http_500(stream, e.what());
+      webrtc_remove_client(client, e.what());
+    }
+  } else {
+    http_404(stream, "No client found");
+  }
+}
+
+static void http_webrtc_remote_candidate(http_worker_t *worker, FILE *stream, const nlohmann::json &message)
+{
+  if (!message.contains("candidate") || !message.contains("id")) {
+    http_400(stream, "no candidate or id");
+    return;
+  }
+
+  if (auto client = webrtc_find_client(message["id"])) {
+    auto candidate = *(message.find("candidate"));
+    auto candidate_str = candidate.find("candidate");
+    auto sdpMid = candidate.find("sdpMid");
+    if(candidate_str == candidate.end())
+    {
+      LOG_INFO(client.get(), "Remote ICE candidate received but there was no candidate string.");
+      http_400(stream, "No candidate.candidate string.");
+      return;
+    }
+    if(sdpMid == candidate.end())
+    {
+      LOG_INFO(client.get(), "Remote ICE candidate received but there was no sdpMid string.");
+      http_400(stream, "No candidate.sdpMid string.");
+      return;
+    }
+
+    LOG_INFO(client.get(), "Remote ICE candidate received.");
+    LOG_VERBOSE(client.get(), "Remote ICE candidate received: %s", candidate_str->get<std::string>().c_str());
+
+    try {
+      {
+        std::unique_lock lock(client->lock);
+        auto candidate = rtc::Candidate(candidate_str->get<std::string>(), sdpMid->get<std::string>());
+        // The ICE candidate http requests can race the sdp answer http request and win. But it's invalid to set the ICE
+        // candidates before the SDP answer is set.
+        if(client->has_set_sdp_answer) {
+          client->pc->addRemoteCandidate(candidate);
+        } else {
+          LOG_INFO(client.get(), "Queueing ICE candidate received until SDP answer is received.");
+          client->pending_remote_candidates.emplace_back(std::move(candidate));
+        }
+      }
+      http_write_response(stream, "200 OK", "application/json", "{}", 0);
+    } catch(const std::exception &e) {
+      LOG_INFO(client.get(), "Failed to handle remote ICE candidate: %s.", e.what());
       http_500(stream, e.what());
       webrtc_remove_client(client, e.what());
     }
@@ -365,8 +450,6 @@ static void http_webrtc_offer(http_worker_t *worker, FILE *stream, const nlohman
 
   try {
     client->video = webrtc_add_video(client->pc, webrtc_client_video_payload_type, rand(), "video", "");
-    client->video->startStreaming();
-
     {
       std::unique_lock lock(client->lock);
       client->pc->setRemoteDescription(offer);
@@ -379,7 +462,7 @@ static void http_webrtc_offer(http_worker_t *worker, FILE *stream, const nlohman
       nlohmann::json message;
       message["type"] = description->typeString();
       message["sdp"] = std::string(description.value());
-      client->describePeerConnection(message);
+      message["signaling_protocol_version"] = signaling_protocol_version;
       http_write_response(stream, "200 OK", "application/json", message.dump().c_str(), 0);
 
       LOG_VERBOSE(client.get(), "Local SDP Answer: %s", std::string(message["sdp"]).c_str());
@@ -411,6 +494,8 @@ extern "C" void http_webrtc_offer(http_worker_t *worker, FILE *stream)
     http_webrtc_answer(worker, stream, message);
   } else if (type == "offer") {
     http_webrtc_offer(worker, stream, message);
+  } else if (type == "remote_candidate") {
+    http_webrtc_remote_candidate(worker, stream, message);
   } else {
     http_400(stream, (std::string("Not expected: " + type)).c_str());
   }
