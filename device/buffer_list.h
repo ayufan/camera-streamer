@@ -24,6 +24,11 @@ typedef struct buffer_format_s {
 
 typedef struct buffer_stats_s {
   int frames, dropped;
+
+  int frames_since_reset;
+  uint64_t max_dequeued_us;
+  float avg_dequeued_us;
+  float stddev_dequeued_us;
 } buffer_stats_t;
 
 #define MAX_BUFFER_QUEUE 4

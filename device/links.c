@@ -425,12 +425,15 @@ static void links_refresh_stats(link_t *all_links, uint64_t *last_refresh_us)
       buffer_stats_t *now = &capture_list->stats;
       buffer_stats_t *prev = &capture_list->stats_last;
 
-      printf(" [%8s %2d FPS/%2d D/%3dms/%3dms/%c/Q%d:O%d:C%d]",
+      printf(" [%8s %2d FPS/%2d D/%3dms/%3dms/Dev%3.fms/%c/Q%d:O%d:C%d]",
         capture_list->dev->name,
         (now->frames - prev->frames) / log_options.stats,
         (now->dropped - prev->dropped) / log_options.stats,
         capture_list->last_capture_time_us > 0 ? capture_list->last_capture_time_us / 1000 : -1,
         capture_list->last_in_queue_time_us > 0 ? capture_list->last_in_queue_time_us / 1000 : -1,
+        // (float)(now->max_dequeued_us / 1000),
+        // (float)(now->avg_dequeued_us / 1000),
+        (float)(now->stddev_dequeued_us / 1000),
         capture_list->streaming ? (capture_list->dev->paused ? 'P' : 'S') : 'X',
         capture_list->dev->output_list ? capture_list->dev->output_list->n_queued_bufs : 0,
         capture_list->dev->output_list ? buffer_list_count_enqueued(capture_list->dev->output_list) : 0,
@@ -445,6 +448,11 @@ static void links_refresh_stats(link_t *all_links, uint64_t *last_refresh_us)
   for (int i = 0; all_links[i].capture_list; i++) {
     buffer_list_t *capture_list = all_links[i].capture_list;
     capture_list->stats_last = capture_list->stats;
+
+    capture_list->stats.max_dequeued_us = 0;
+    capture_list->stats.avg_dequeued_us = 0;
+    capture_list->stats.stddev_dequeued_us = 0;
+    capture_list->stats.frames_since_reset = 0;
 
     if (now_us - capture_list->last_dequeued_us > 1000) {
       capture_list->last_capture_time_us = 0;

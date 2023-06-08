@@ -171,6 +171,10 @@ buffer_t *buffer_list_dequeue(buffer_list_t *buf_list)
     goto error;
   }
 
+  uint64_t dequeued_us = 0;
+  if (buf_list->last_dequeued_us > 0)
+    dequeued_us = get_monotonic_time_us(NULL, NULL) - buf_list->last_dequeued_us;
+
   buf_list->last_dequeued_us = get_monotonic_time_us(NULL, NULL);
   buf_list->last_capture_time_us = buf_list->last_dequeued_us - buf->captured_time_us;
   buf_list->last_in_queue_time_us = buf_list->last_dequeued_us - buf->enqueue_time_us;
@@ -203,6 +207,18 @@ buffer_t *buffer_list_dequeue(buffer_list_t *buf_list)
   }
 
   buf_list->stats.frames++;
+
+  float old_average = buf_list->stats.avg_dequeued_us;
+  float old_sum = buf_list->stats.avg_dequeued_us * buf_list->stats.frames_since_reset;
+  float old_stddev_sum = buf_list->stats.stddev_dequeued_us * buf_list->stats.stddev_dequeued_us * buf_list->stats.frames_since_reset;
+
+  buf_list->stats.frames_since_reset++;
+  if (dequeued_us > buf_list->stats.max_dequeued_us)
+    buf_list->stats.max_dequeued_us = dequeued_us;
+  buf_list->stats.avg_dequeued_us = (float)(old_sum + dequeued_us) / buf_list->stats.frames_since_reset;
+  buf_list->stats.stddev_dequeued_us = sqrt(
+    ( old_stddev_sum + (dequeued_us - old_average) * (dequeued_us - buf_list->stats.avg_dequeued_us)
+    ) / buf_list->stats.frames_since_reset);
   return buf;
 
 error:
