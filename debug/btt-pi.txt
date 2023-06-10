@@ -1,0 +1,380 @@
+++ cat /sys/firmware/devicetree/base/model
+++ tr -d '\0'
++ echo BQ-H616
+BQ-H616
++ uname -a
+Linux vzbot 5.16.17-sun50iw9 #2.3.2 SMP Fri Mar 3 17:05:59 HKT 2023 aarch64 GNU/Linux
++ v4l2-ctl --list-devices
+v4l2-ctl | C922 Pro Stream Webcam (usb-5101000.usb-1):
+v4l2-ctl | 	/dev/video0
+v4l2-ctl | 	/dev/video1
+v4l2-ctl | 	/dev/media0
+v4l2-ctl | 
++ libcamera-hello --list-cameras
+./dump_cameras.sh: line 17: libcamera-hello: command not found
+====================================
+DEVICE: /dev/video0
+====================================
++ v4l2-ctl -d /dev/video0 --info --list-formats-ext --list-fields --list-formats-out --list-fields-out --list-ctrls
+/dev/video0 | Driver Info:
+/dev/video0 | 	Driver name      : uvcvideo
+/dev/video0 | 	Card type        : C922 Pro Stream Webcam
+/dev/video0 | 	Bus info         : usb-5101000.usb-1
+/dev/video0 | 	Driver version   : 5.16.17
+/dev/video0 | 	Capabilities     : 0x84a00001
+/dev/video0 | 		Video Capture
+/dev/video0 | 		Metadata Capture
+/dev/video0 | 		Streaming
+/dev/video0 | 		Extended Pix Format
+/dev/video0 | 		Device Capabilities
+/dev/video0 | 	Device Caps      : 0x04200001
+/dev/video0 | 		Video Capture
+/dev/video0 | 		Streaming
+/dev/video0 | 		Extended Pix Format
+/dev/video0 | Media Driver Info:
+/dev/video0 | 	Driver name      : uvcvideo
+/dev/video0 | 	Model            : C922 Pro Stream Webcam
+/dev/video0 | 	Serial           : 5A3A22DF
+/dev/video0 | 	Bus info         : usb-5101000.usb-1
+/dev/video0 | 	Media version    : 5.16.17
+/dev/video0 | 	Hardware revision: 0x00000016 (22)
+/dev/video0 | 	Driver version   : 5.16.17
+/dev/video0 | Interface Info:
+/dev/video0 | 	ID               : 0x03000002
+/dev/video0 | 	Type             : V4L Video
+/dev/video0 | Entity Info:
+/dev/video0 | 	ID               : 0x00000001 (1)
+/dev/video0 | 	Name             : C922 Pro Stream Webcam
+/dev/video0 | 	Function         : V4L2 I/O
+/dev/video0 | 	Flags         : default
+/dev/video0 | 	Pad 0x01000007   : 0: Sink
+/dev/video0 | 	  Link 0x0200001f: from remote pad 0x100000a of entity 'Processing 3': Data, Enabled, Immutable
+/dev/video0 | 
+/dev/video0 | User Controls
+/dev/video0 | 
+/dev/video0 |                      brightness 0x00980900 (int)    : min=0 max=255 step=1 default=128 value=128
+/dev/video0 |                        contrast 0x00980901 (int)    : min=0 max=255 step=1 default=128 value=128
+/dev/video0 |                      saturation 0x00980902 (int)    : min=0 max=255 step=1 default=128 value=128
+/dev/video0 |         white_balance_automatic 0x0098090c (bool)   : default=1 value=1
+/dev/video0 |                            gain 0x00980913 (int)    : min=0 max=255 step=1 default=0 value=0
+/dev/video0 |            power_line_frequency 0x00980918 (menu)   : min=0 max=2 default=2 value=2
+/dev/video0 |       white_balance_temperature 0x0098091a (int)    : min=2000 max=6500 step=1 default=4000 value=4000 flags=inactive
+/dev/video0 |                       sharpness 0x0098091b (int)    : min=0 max=255 step=1 default=128 value=128
+/dev/video0 |          backlight_compensation 0x0098091c (int)    : min=0 max=1 step=1 default=0 value=0
+/dev/video0 | 
+/dev/video0 | Camera Controls
+/dev/video0 | 
+/dev/video0 |                   auto_exposure 0x009a0901 (menu)   : min=0 max=3 default=3 value=3
+/dev/video0 |          exposure_time_absolute 0x009a0902 (int)    : min=3 max=2047 step=1 default=250 value=250 flags=inactive
+/dev/video0 |      exposure_dynamic_framerate 0x009a0903 (bool)   : default=0 value=1
+/dev/video0 |                    pan_absolute 0x009a0908 (int)    : min=-36000 max=36000 step=3600 default=0 value=0
+/dev/video0 |                   tilt_absolute 0x009a0909 (int)    : min=-36000 max=36000 step=3600 default=0 value=0
+/dev/video0 |                  focus_absolute 0x009a090a (int)    : min=0 max=250 step=5 default=0 value=0 flags=inactive
+/dev/video0 |      focus_automatic_continuous 0x009a090c (bool)   : default=1 value=1
+/dev/video0 |                   zoom_absolute 0x009a090d (int)    : min=100 max=500 step=1 default=100 value=100
+/dev/video0 | ioctl: VIDIOC_ENUM_FMT
+/dev/video0 | 	Type: Video Capture
+/dev/video0 | 
+/dev/video0 | 	[0]: 'YUYV' (YUYV 4:2:2)
+/dev/video0 | 		Size: Discrete 640x480
+/dev/video0 | 			Interval: Discrete 0.033s (30.000 fps)
+/dev/video0 | 			Interval: Discrete 0.042s (24.000 fps)
+/dev/video0 | 			Interval: Discrete 0.050s (20.000 fps)
+/dev/video0 | 			Interval: Discrete 0.067s (15.000 fps)
+/dev/video0 | 			Interval: Discrete 0.100s (10.000 fps)
+/dev/video0 | 			Interval: Discrete 0.133s (7.500 fps)
+/dev/video0 | 			Interval: Discrete 0.200s (5.000 fps)
+/dev/video0 | 		Size: Discrete 160x90
+/dev/video0 | 			Interval: Discrete 0.033s (30.000 fps)
+/dev/video0 | 			Interval: Discrete 0.042s (24.000 fps)
+/dev/video0 | 			Interval: Discrete 0.050s (20.000 fps)
+/dev/video0 | 			Interval: Discrete 0.067s (15.000 fps)
+/dev/video0 | 			Interval: Discrete 0.100s (10.000 fps)
+/dev/video0 | 			Interval: Discrete 0.133s (7.500 fps)
+/dev/video0 | 			Interval: Discrete 0.200s (5.000 fps)
+/dev/video0 | 		Size: Discrete 160x120
+/dev/video0 | 			Interval: Discrete 0.033s (30.000 fps)
+/dev/video0 | 			Interval: Discrete 0.042s (24.000 fps)
+/dev/video0 | 			Interval: Discrete 0.050s (20.000 fps)
+/dev/video0 | 			Interval: Discrete 0.067s (15.000 fps)
+/dev/video0 | 			Interval: Discrete 0.100s (10.000 fps)
+/dev/video0 | 			Interval: Discrete 0.133s (7.500 fps)
+/dev/video0 | 			Interval: Discrete 0.200s (5.000 fps)
+/dev/video0 | 		Size: Discrete 176x144
+/dev/video0 | 			Interval: Discrete 0.033s (30.000 fps)
+/dev/video0 | 			Interval: Discrete 0.042s (24.000 fps)
+/dev/video0 | 			Interval: Discrete 0.050s (20.000 fps)
+/dev/video0 | 			Interval: Discrete 0.067s (15.000 fps)
+/dev/video0 | 			Interval: Discrete 0.100s (10.000 fps)
+/dev/video0 | 			Interval: Discrete 0.133s (7.500 fps)
+/dev/video0 | 			Interval: Discrete 0.200s (5.000 fps)
+/dev/video0 | 		Size: Discrete 320x180
+/dev/video0 | 			Interval: Discrete 0.033s (30.000 fps)
+/dev/video0 | 			Interval: Discrete 0.042s (24.000 fps)
+/dev/video0 | 			Interval: Discrete 0.050s (20.000 fps)
+/dev/video0 | 			Interval: Discrete 0.067s (15.000 fps)
+/dev/video0 | 			Interval: Discrete 0.100s (10.000 fps)
+/dev/video0 | 			Interval: Discrete 0.133s (7.500 fps)
+/dev/video0 | 			Interval: Discrete 0.200s (5.000 fps)
+/dev/video0 | 		Size: Discrete 320x240
+/dev/video0 | 			Interval: Discrete 0.033s (30.000 fps)
+/dev/video0 | 			Interval: Discrete 0.042s (24.000 fps)
+/dev/video0 | 			Interval: Discrete 0.050s (20.000 fps)
+/dev/video0 | 			Interval: Discrete 0.067s (15.000 fps)
+/dev/video0 | 			Interval: Discrete 0.100s (10.000 fps)
+/dev/video0 | 			Interval: Discrete 0.133s (7.500 fps)
+/dev/video0 | 			Interval: Discrete 0.200s (5.000 fps)
+/dev/video0 | 		Size: Discrete 352x288
+/dev/video0 | 			Interval: Discrete 0.033s (30.000 fps)
+/dev/video0 | 			Interval: Discrete 0.042s (24.000 fps)
+/dev/video0 | 			Interval: Discrete 0.050s (20.000 fps)
+/dev/video0 | 			Interval: Discrete 0.067s (15.000 fps)
+/dev/video0 | 			Interval: Discrete 0.100s (10.000 fps)
+/dev/video0 | 			Interval: Discrete 0.133s (7.500 fps)
+/dev/video0 | 			Interval: Discrete 0.200s (5.000 fps)
+/dev/video0 | 		Size: Discrete 432x240
+/dev/video0 | 			Interval: Discrete 0.033s (30.000 fps)
+/dev/video0 | 			Interval: Discrete 0.042s (24.000 fps)
+/dev/video0 | 			Interval: Discrete 0.050s (20.000 fps)
+/dev/video0 | 			Interval: Discrete 0.067s (15.000 fps)
+/dev/video0 | 			Interval: Discrete 0.100s (10.000 fps)
+/dev/video0 | 			Interval: Discrete 0.133s (7.500 fps)
+/dev/video0 | 			Interval: Discrete 0.200s (5.000 fps)
+/dev/video0 | 		Size: Discrete 640x360
+/dev/video0 | 			Interval: Discrete 0.033s (30.000 fps)
+/dev/video0 | 			Interval: Discrete 0.042s (24.000 fps)
+/dev/video0 | 			Interval: Discrete 0.050s (20.000 fps)
+/dev/video0 | 			Interval: Discrete 0.067s (15.000 fps)
+/dev/video0 | 			Interval: Discrete 0.100s (10.000 fps)
+/dev/video0 | 			Interval: Discrete 0.133s (7.500 fps)
+/dev/video0 | 			Interval: Discrete 0.200s (5.000 fps)
+/dev/video0 | 		Size: Discrete 800x448
+/dev/video0 | 			Interval: Discrete 0.033s (30.000 fps)
+/dev/video0 | 			Interval: Discrete 0.042s (24.000 fps)
+/dev/video0 | 			Interval: Discrete 0.050s (20.000 fps)
+/dev/video0 | 			Interval: Discrete 0.067s (15.000 fps)
+/dev/video0 | 			Interval: Discrete 0.100s (10.000 fps)
+/dev/video0 | 			Interval: Discrete 0.133s (7.500 fps)
+/dev/video0 | 			Interval: Discrete 0.200s (5.000 fps)
+/dev/video0 | 		Size: Discrete 800x600
+/dev/video0 | 			Interval: Discrete 0.042s (24.000 fps)
+/dev/video0 | 			Interval: Discrete 0.050s (20.000 fps)
+/dev/video0 | 			Interval: Discrete 0.067s (15.000 fps)
+/dev/video0 | 			Interval: Discrete 0.100s (10.000 fps)
+/dev/video0 | 			Interval: Discrete 0.133s (7.500 fps)
+/dev/video0 | 			Interval: Discrete 0.200s (5.000 fps)
+/dev/video0 | 		Size: Discrete 864x480
+/dev/video0 | 			Interval: Discrete 0.042s (24.000 fps)
+/dev/video0 | 			Interval: Discrete 0.050s (20.000 fps)
+/dev/video0 | 			Interval: Discrete 0.067s (15.000 fps)
+/dev/video0 | 			Interval: Discrete 0.100s (10.000 fps)
+/dev/video0 | 			Interval: Discrete 0.133s (7.500 fps)
+/dev/video0 | 			Interval: Discrete 0.200s (5.000 fps)
+/dev/video0 | 		Size: Discrete 960x720
+/dev/video0 | 			Interval: Discrete 0.067s (15.000 fps)
+/dev/video0 | 			Interval: Discrete 0.100s (10.000 fps)
+/dev/video0 | 			Interval: Discrete 0.133s (7.500 fps)
+/dev/video0 | 			Interval: Discrete 0.200s (5.000 fps)
+/dev/video0 | 		Size: Discrete 1024x576
+/dev/video0 | 			Interval: Discrete 0.067s (15.000 fps)
+/dev/video0 | 			Interval: Discrete 0.100s (10.000 fps)
+/dev/video0 | 			Interval: Discrete 0.133s (7.500 fps)
+/dev/video0 | 			Interval: Discrete 0.200s (5.000 fps)
+/dev/video0 | 		Size: Discrete 1280x720
+/dev/video0 | 			Interval: Discrete 0.100s (10.000 fps)
+/dev/video0 | 			Interval: Discrete 0.133s (7.500 fps)
+/dev/video0 | 			Interval: Discrete 0.200s (5.000 fps)
+/dev/video0 | 		Size: Discrete 1600x896
+/dev/video0 | 			Interval: Discrete 0.133s (7.500 fps)
+/dev/video0 | 			Interval: Discrete 0.200s (5.000 fps)
+/dev/video0 | 		Size: Discrete 1920x1080
+/dev/video0 | 			Interval: Discrete 0.200s (5.000 fps)
+/dev/video0 | 		Size: Discrete 2304x1296
+/dev/video0 | 			Interval: Discrete 0.500s (2.000 fps)
+/dev/video0 | 		Size: Discrete 2304x1536
+/dev/video0 | 			Interval: Discrete 0.500s (2.000 fps)
+/dev/video0 | 	[1]: 'MJPG' (Motion-JPEG, compressed)
+/dev/video0 | 		Size: Discrete 640x480
+/dev/video0 | 			Interval: Discrete 0.033s (30.000 fps)
+/dev/video0 | 			Interval: Discrete 0.042s (24.000 fps)
+/dev/video0 | 			Interval: Discrete 0.050s (20.000 fps)
+/dev/video0 | 			Interval: Discrete 0.067s (15.000 fps)
+/dev/video0 | 			Interval: Discrete 0.100s (10.000 fps)
+/dev/video0 | 			Interval: Discrete 0.133s (7.500 fps)
+/dev/video0 | 			Interval: Discrete 0.200s (5.000 fps)
+/dev/video0 | 		Size: Discrete 160x90
+/dev/video0 | 			Interval: Discrete 0.033s (30.000 fps)
+/dev/video0 | 			Interval: Discrete 0.042s (24.000 fps)
+/dev/video0 | 			Interval: Discrete 0.050s (20.000 fps)
+/dev/video0 | 			Interval: Discrete 0.067s (15.000 fps)
+/dev/video0 | 			Interval: Discrete 0.100s (10.000 fps)
+/dev/video0 | 			Interval: Discrete 0.133s (7.500 fps)
+/dev/video0 | 			Interval: Discrete 0.200s (5.000 fps)
+/dev/video0 | 		Size: Discrete 160x120
+/dev/video0 | 			Interval: Discrete 0.033s (30.000 fps)
+/dev/video0 | 			Interval: Discrete 0.042s (24.000 fps)
+/dev/video0 | 			Interval: Discrete 0.050s (20.000 fps)
+/dev/video0 | 			Interval: Discrete 0.067s (15.000 fps)
+/dev/video0 | 			Interval: Discrete 0.100s (10.000 fps)
+/dev/video0 | 			Interval: Discrete 0.133s (7.500 fps)
+/dev/video0 | 			Interval: Discrete 0.200s (5.000 fps)
+/dev/video0 | 		Size: Discrete 176x144
+/dev/video0 | 			Interval: Discrete 0.033s (30.000 fps)
+/dev/video0 | 			Interval: Discrete 0.042s (24.000 fps)
+/dev/video0 | 			Interval: Discrete 0.050s (20.000 fps)
+/dev/video0 | 			Interval: Discrete 0.067s (15.000 fps)
+/dev/video0 | 			Interval: Discrete 0.100s (10.000 fps)
+/dev/video0 | 			Interval: Discrete 0.133s (7.500 fps)
+/dev/video0 | 			Interval: Discrete 0.200s (5.000 fps)
+/dev/video0 | 		Size: Discrete 320x180
+/dev/video0 | 			Interval: Discrete 0.033s (30.000 fps)
+/dev/video0 | 			Interval: Discrete 0.042s (24.000 fps)
+/dev/video0 | 			Interval: Discrete 0.050s (20.000 fps)
+/dev/video0 | 			Interval: Discrete 0.067s (15.000 fps)
+/dev/video0 | 			Interval: Discrete 0.100s (10.000 fps)
+/dev/video0 | 			Interval: Discrete 0.133s (7.500 fps)
+/dev/video0 | 			Interval: Discrete 0.200s (5.000 fps)
+/dev/video0 | 		Size: Discrete 320x240
+/dev/video0 | 			Interval: Discrete 0.033s (30.000 fps)
+/dev/video0 | 			Interval: Discrete 0.042s (24.000 fps)
+/dev/video0 | 			Interval: Discrete 0.050s (20.000 fps)
+/dev/video0 | 			Interval: Discrete 0.067s (15.000 fps)
+/dev/video0 | 			Interval: Discrete 0.100s (10.000 fps)
+/dev/video0 | 			Interval: Discrete 0.133s (7.500 fps)
+/dev/video0 | 			Interval: Discrete 0.200s (5.000 fps)
+/dev/video0 | 		Size: Discrete 352x288
+/dev/video0 | 			Interval: Discrete 0.033s (30.000 fps)
+/dev/video0 | 			Interval: Discrete 0.042s (24.000 fps)
+/dev/video0 | 			Interval: Discrete 0.050s (20.000 fps)
+/dev/video0 | 			Interval: Discrete 0.067s (15.000 fps)
+/dev/video0 | 			Interval: Discrete 0.100s (10.000 fps)
+/dev/video0 | 			Interval: Discrete 0.133s (7.500 fps)
+/dev/video0 | 			Interval: Discrete 0.200s (5.000 fps)
+/dev/video0 | 		Size: Discrete 432x240
+/dev/video0 | 			Interval: Discrete 0.033s (30.000 fps)
+/dev/video0 | 			Interval: Discrete 0.042s (24.000 fps)
+/dev/video0 | 			Interval: Discrete 0.050s (20.000 fps)
+/dev/video0 | 			Interval: Discrete 0.067s (15.000 fps)
+/dev/video0 | 			Interval: Discrete 0.100s (10.000 fps)
+/dev/video0 | 			Interval: Discrete 0.133s (7.500 fps)
+/dev/video0 | 			Interval: Discrete 0.200s (5.000 fps)
+/dev/video0 | 		Size: Discrete 640x360
+/dev/video0 | 			Interval: Discrete 0.033s (30.000 fps)
+/dev/video0 | 			Interval: Discrete 0.042s (24.000 fps)
+/dev/video0 | 			Interval: Discrete 0.050s (20.000 fps)
+/dev/video0 | 			Interval: Discrete 0.067s (15.000 fps)
+/dev/video0 | 			Interval: Discrete 0.100s (10.000 fps)
+/dev/video0 | 			Interval: Discrete 0.133s (7.500 fps)
+/dev/video0 | 			Interval: Discrete 0.200s (5.000 fps)
+/dev/video0 | 		Size: Discrete 800x448
+/dev/video0 | 			Interval: Discrete 0.033s (30.000 fps)
+/dev/video0 | 			Interval: Discrete 0.042s (24.000 fps)
+/dev/video0 | 			Interval: Discrete 0.050s (20.000 fps)
+/dev/video0 | 			Interval: Discrete 0.067s (15.000 fps)
+/dev/video0 | 			Interval: Discrete 0.100s (10.000 fps)
+/dev/video0 | 			Interval: Discrete 0.133s (7.500 fps)
+/dev/video0 | 			Interval: Discrete 0.200s (5.000 fps)
+/dev/video0 | 		Size: Discrete 800x600
+/dev/video0 | 			Interval: Discrete 0.033s (30.000 fps)
+/dev/video0 | 			Interval: Discrete 0.042s (24.000 fps)
+/dev/video0 | 			Interval: Discrete 0.050s (20.000 fps)
+/dev/video0 | 			Interval: Discrete 0.067s (15.000 fps)
+/dev/video0 | 			Interval: Discrete 0.100s (10.000 fps)
+/dev/video0 | 			Interval: Discrete 0.133s (7.500 fps)
+/dev/video0 | 			Interval: Discrete 0.200s (5.000 fps)
+/dev/video0 | 		Size: Discrete 864x480
+/dev/video0 | 			Interval: Discrete 0.033s (30.000 fps)
+/dev/video0 | 			Interval: Discrete 0.042s (24.000 fps)
+/dev/video0 | 			Interval: Discrete 0.050s (20.000 fps)
+/dev/video0 | 			Interval: Discrete 0.067s (15.000 fps)
+/dev/video0 | 			Interval: Discrete 0.100s (10.000 fps)
+/dev/video0 | 			Interval: Discrete 0.133s (7.500 fps)
+/dev/video0 | 			Interval: Discrete 0.200s (5.000 fps)
+/dev/video0 | 		Size: Discrete 960x720
+/dev/video0 | 			Interval: Discrete 0.033s (30.000 fps)
+/dev/video0 | 			Interval: Discrete 0.042s (24.000 fps)
+/dev/video0 | 			Interval: Discrete 0.050s (20.000 fps)
+/dev/video0 | 			Interval: Discrete 0.067s (15.000 fps)
+/dev/video0 | 			Interval: Discrete 0.100s (10.000 fps)
+/dev/video0 | 			Interval: Discrete 0.133s (7.500 fps)
+/dev/video0 | 			Interval: Discrete 0.200s (5.000 fps)
+/dev/video0 | 		Size: Discrete 1024x576
+/dev/video0 | 			Interval: Discrete 0.033s (30.000 fps)
+/dev/video0 | 			Interval: Discrete 0.042s (24.000 fps)
+/dev/video0 | 			Interval: Discrete 0.050s (20.000 fps)
+/dev/video0 | 			Interval: Discrete 0.067s (15.000 fps)
+/dev/video0 | 			Interval: Discrete 0.100s (10.000 fps)
+/dev/video0 | 			Interval: Discrete 0.133s (7.500 fps)
+/dev/video0 | 			Interval: Discrete 0.200s (5.000 fps)
+/dev/video0 | 		Size: Discrete 1280x720
+/dev/video0 | 			Interval: Discrete 0.017s (60.000 fps)
+/dev/video0 | 			Interval: Discrete 0.033s (30.000 fps)
+/dev/video0 | 			Interval: Discrete 0.042s (24.000 fps)
+/dev/video0 | 			Interval: Discrete 0.050s (20.000 fps)
+/dev/video0 | 			Interval: Discrete 0.067s (15.000 fps)
+/dev/video0 | 			Interval: Discrete 0.100s (10.000 fps)
+/dev/video0 | 			Interval: Discrete 0.133s (7.500 fps)
+/dev/video0 | 			Interval: Discrete 0.200s (5.000 fps)
+/dev/video0 | 		Size: Discrete 1600x896
+/dev/video0 | 			Interval: Discrete 0.033s (30.000 fps)
+/dev/video0 | 			Interval: Discrete 0.042s (24.000 fps)
+/dev/video0 | 			Interval: Discrete 0.050s (20.000 fps)
+/dev/video0 | 			Interval: Discrete 0.067s (15.000 fps)
+/dev/video0 | 			Interval: Discrete 0.100s (10.000 fps)
+/dev/video0 | 			Interval: Discrete 0.133s (7.500 fps)
+/dev/video0 | 			Interval: Discrete 0.200s (5.000 fps)
+/dev/video0 | 		Size: Discrete 1920x1080
+/dev/video0 | 			Interval: Discrete 0.033s (30.000 fps)
+/dev/video0 | 			Interval: Discrete 0.042s (24.000 fps)
+/dev/video0 | 			Interval: Discrete 0.050s (20.000 fps)
+/dev/video0 | 			Interval: Discrete 0.067s (15.000 fps)
+/dev/video0 | 			Interval: Discrete 0.100s (10.000 fps)
+/dev/video0 | 			Interval: Discrete 0.133s (7.500 fps)
+/dev/video0 | 			Interval: Discrete 0.200s (5.000 fps)
+/dev/video0 | Supported Video Fields:
+/dev/video0 | 	None
+/dev/video0 | ioctl: VIDIOC_ENUM_FMT
+/dev/video0 | 	Type: Video Output
+/dev/video0 | 
+
+====================================
+DEVICE: /dev/video1
+====================================
++ v4l2-ctl -d /dev/video1 --info --list-formats-ext --list-fields --list-formats-out --list-fields-out --list-ctrls
+/dev/video1 | Driver Info:
+/dev/video1 | 	Driver name      : uvcvideo
+/dev/video1 | 	Card type        : C922 Pro Stream Webcam
+/dev/video1 | 	Bus info         : usb-5101000.usb-1
+/dev/video1 | 	Driver version   : 5.16.17
+/dev/video1 | 	Capabilities     : 0x84a00001
+/dev/video1 | 		Video Capture
+/dev/video1 | 		Metadata Capture
+/dev/video1 | 		Streaming
+/dev/video1 | 		Extended Pix Format
+/dev/video1 | 		Device Capabilities
+/dev/video1 | 	Device Caps      : 0x04a00000
+/dev/video1 | 		Metadata Capture
+/dev/video1 | 		Streaming
+/dev/video1 | 		Extended Pix Format
+/dev/video1 | Media Driver Info:
+/dev/video1 | 	Driver name      : uvcvideo
+/dev/video1 | 	Model            : C922 Pro Stream Webcam
+/dev/video1 | 	Serial           : 5A3A22DF
+/dev/video1 | 	Bus info         : usb-5101000.usb-1
+/dev/video1 | 	Media version    : 5.16.17
+/dev/video1 | 	Hardware revision: 0x00000016 (22)
+/dev/video1 | 	Driver version   : 5.16.17
+/dev/video1 | Interface Info:
+/dev/video1 | 	ID               : 0x03000005
+/dev/video1 | 	Type             : V4L Video
+/dev/video1 | Entity Info:
+/dev/video1 | 	ID               : 0x00000004 (4)
+/dev/video1 | 	Name             : C922 Pro Stream Webcam
+/dev/video1 | 	Function         : V4L2 I/O
+/dev/video1 | ioctl: VIDIOC_ENUM_FMT
+/dev/video1 | 	Type: Video Capture
+/dev/video1 | 
+/dev/video1 | ioctl: VIDIOC_ENUM_FMT
+/dev/video1 | 	Type: Video Output
+/dev/video1 | 
+
