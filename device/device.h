@@ -56,6 +56,7 @@ typedef struct device_s {
     struct device_v4l2_s *v4l2;
     struct device_dummy_s *dummy;
     struct device_libcamera_s *libcamera;
+    struct device_sw_t *sw;
   };
 
   bool paused;
@@ -123,3 +124,4 @@ int device_capture_enqueued(device_t *dev, int *max);
 device_t *device_v4l2_open(const char *name, const char *path);
 device_t *device_libcamera_open(const char *name, const char *path);
 device_t *device_dummy_open(const char *name, const char *path);
+device_t *device_sw_open(const char *name);

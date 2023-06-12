@@ -139,10 +139,12 @@ int buffer_list_set_stream(buffer_list_t *buf_list, bool do_on)
     return 0;
   }
 
+  buf_list->streaming = do_on;
+
   if (buf_list->dev->hw->buffer_list_set_stream(buf_list, do_on) < 0) {
+    buf_list->streaming = !do_on;
     goto error;
   }
-  buf_list->streaming = do_on;
 
   if (do_on) {
     buf_list->last_enqueued_us = get_monotonic_time_us(NULL, NULL);

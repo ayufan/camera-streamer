@@ -30,16 +30,25 @@ static unsigned decoder_formats[] =
 buffer_list_t *camera_configure_decoder(camera_t *camera, buffer_list_t *src_capture)
 {
   unsigned chosen_format = 0;
-  device_info_t *device = device_list_find_m2m_formats(camera->device_list, src_capture->fmt.format, decoder_formats, &chosen_format);
 
-  if (!device) {
+  if (!getenv("CAMERA_FORCE_SWDECODER")) {
+    device_info_t *device = device_list_find_m2m_formats(camera->device_list, src_capture->fmt.format, decoder_formats, &chosen_format);
+    if (device) {
+      camera->decoder = device_v4l2_open("DECODER", device->path);
+    }
+  }
+
+  if (!camera->decoder) {
+    camera->decoder = device_sw_open("SWDECODER");
+    chosen_format = V4L2_PIX_FMT_YUYV;
+  }
+
+  if (!camera->decoder) {
     LOG_INFO(camera, "Cannot find '%s' decoder", fourcc_to_string(src_capture->fmt.format).buf);
     return NULL;
   }
 
   device_video_force_key(camera->camera);
-
-  camera->decoder = device_v4l2_open("DECODER", device->path);
 
   buffer_list_t *decoder_output = device_open_buffer_list_output(
     camera->decoder, src_capture);

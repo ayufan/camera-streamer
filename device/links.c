@@ -360,8 +360,14 @@ static int links_step(link_t *all_links, bool force_active, int timeout_now_ms, 
       buf_list->dev->paused);
 
     if (pool.fds[i].revents & POLLIN) {
-      if (links_enqueue_from_capture_list(capture_list, link) < 0) {
-        return -1;
+      if (capture_list) {
+        if (links_enqueue_from_capture_list(capture_list, link) < 0) {
+          return -1;
+        }
+      } else if (output_list) {
+        if (links_dequeue_from_output_list(output_list) < 0) {
+          return -1;
+        }
       }
     }
 

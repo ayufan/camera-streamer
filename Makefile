@@ -29,6 +29,7 @@ USE_HW_H264 ?= 1
 USE_FFMPEG ?= $(shell pkg-config libavutil libavformat libavcodec && echo 1)
 USE_LIBCAMERA ?= $(shell pkg-config libcamera && echo 1)
 USE_RTSP ?= $(shell pkg-config live555 && echo 1)
+USE_LIBJPEG ?= $(shell pkg-config libjpeg && echo 1)
 USE_LIBDATACHANNEL ?= $(shell [ -e $(LIBDATACHANNEL_PATH)/CMakeLists.txt ] && echo 1)
 
 ifeq (1,$(DEBUG))
@@ -52,6 +53,11 @@ endif
 ifeq (1,$(USE_RTSP))
 CFLAGS += -DUSE_RTSP $(shell pkg-config --cflags live555)
 LDLIBS += $(shell pkg-config --libs live555)
+endif
+
+ifeq (1,$(USE_LIBJPEG))
+CFLAGS += -DUSE_LIBJPEG $(shell pkg-config --cflags libjpeg)
+LDLIBS += $(shell pkg-config --libs libjpeg)
 endif
 
 ifeq (1,$(USE_LIBDATACHANNEL))
