@@ -28,7 +28,6 @@ The camera-streamer implements RTSP server via `live555`. Enable it with:
 - adding `--rtsp-port`: will enable RTSP server on 8554
 - adding `--rtsp-port=1111`: will enable RTSP server on custom port
 
-The camera-streamer will expose two stream (if low res mode is enabled):
+The camera-streamer will expose single video stream:
 
-- `rtsp://<ip>:8554/stream.h264` - high resolution stream (always enabled if H264 stream is available directly or via encoding)
-- `rtsp://<ip>:8554/stream_low_res.h264` - low resolution stream if low res mode is configured via `-camera-low_res_factor`
+- `rtsp://<ip>:8554/stream.h264` - the resolution is configured with `--camera-video.height`
