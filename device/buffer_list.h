@@ -51,6 +51,7 @@ typedef struct buffer_list_s {
   union {
     struct buffer_list_v4l2_s *v4l2;
     struct buffer_list_dummy_s *dummy;
+    struct buffer_list_sw_s *sw;
     struct buffer_list_libcamera_s *libcamera;
   };
 
