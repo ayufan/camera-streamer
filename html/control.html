@@ -472,9 +472,9 @@
 
   <script>
   document.addEventListener('DOMContentLoaded', function (event) {
-    var streamURL = 'Undefined';
-    var snapshotURL = 'Undefined';
-    var webrtcURL = 'Undefined';
+    var streamURL = 'stream';
+    var snapshotURL = 'snapshot';
+    var webrtcURL = 'webrtc';
 
     const header = document.getElementById('logo')
     const settings = document.getElementById('sidebar')
@@ -517,10 +517,6 @@
       })
 
     const configureEndpoints =(state) => {
-      snapshotURL = state.endpoints.snapshot.uri;
-      streamURL = state.endpoints.stream.uri;
-      webrtcURL = state.endpoints.webrtc.uri;
-
       enable2(document.getElementById('get-still'), state.endpoints.snapshot.enabled);
       enable2(document.getElementById('mjpeg-stream'), state.endpoints.stream.enabled);
       enable2(document.getElementById('webrtc-stream'), state.endpoints.webrtc.enabled);
