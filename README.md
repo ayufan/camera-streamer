@@ -16,6 +16,11 @@ Take into account that this is a draft project, and is nowhere as complete
 and well supported as [awesome ustreamer](https://github.com/pikvm/ustreamer).
 This project was inspired by mentioned ustreamer.
 
+## Requirements
+
+1. Debian Bullseye, with at least 5.15 kernel
+1. Best: Raspberry PI for hardware acceleration
+
 ## Install
 
 1. [Use precompiled debian package](https://github.com/ayufan/camera-streamer/releases/latest) (recommended)
