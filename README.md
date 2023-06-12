@@ -1,5 +1,7 @@
 # camera-streamer
 
+> Use `main` branch for semi-stable changes, or `develop` for experimental changes.
+
 There's a number of great projects doing an UVC/CSI camera streaming
 on SBC (like Raspberry PI's).
 
