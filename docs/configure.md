@@ -2,12 +2,18 @@
 
 ## Resolution
 
-Camera capture and resolution exposed is controlled by threee parameters:
+Camera capture and resolution exposed is controlled by three parameters:
 
 - `--camera-width` and `--camera-height` define the camera capture resolution
 - `--camera-snapshot.height` - define height for an aspect ratio scaled resolution for `/snapshot` (JPEG) output - this might require rescaller and might not always work
-- `--camera-stream.height` - define height for an aspect ratio scaled resolution for `/stream` (MJPEG) output - this might require rescaller and might not always work
-- `--camera-video.height` - define height for an aspect ratio scaled resolution for `/video` and `/webrtc` (H264) output - this might require rescaller and might not always work
+- `--camera-video.height` - define height for an aspect ratio scaled resolution for `/video` and `/webrtc` (H264) output - this might require rescaller and might not always work, this is no larger than `--camera-snapshot.height`
+- `--camera-stream.height` - define height for an aspect ratio scaled resolution for `/stream` (MJPEG) output - this might require rescaller and might not always work, this is no larger than `--camera-video.height`
+
+The resolution scaling is following the `snapshot >= video >= stream`:
+
+- `snapshot` provides a high quality image for the purpose of timelapses (3Mbps-10Mbps)
+- `video` is an efficient high-quality H264 video stream (3-10Mbps)
+- `stream` is an inefficient MJPEG stream requiring significant amount of bandwidth (10-100Mbps)
 
 ### Example: Raspberry PI v3 Camera (best)
 
@@ -26,7 +32,7 @@ needs to be configured with the native resolution of camera sensor, only then th
 can be downscaled.
 
 ```text
---camera-width=2304 --camera-height=1296 --camera-snapshot.height=1080 --camera-video.height=720 --camera-snapshot.height=480
+--camera-width=2304 --camera-height=1296 --camera-snapshot.height=1080 --camera-video.height=720 --camera-stream.height=480
 ```
 
 This will result in:
@@ -34,14 +40,14 @@ This will result in:
 - camera will capture `2304x1296` a full sensor
 - `snapshot` be ~1920x1080
 - `video` be ~1280x720
-- `snapshot` be ~640x480
+- `stream` be ~640x480
 
 ### Example: Raspberry PI v3 Camera with cropped output (bad)
 
 If the camera capture is not configured properly the result image will be cropped.
 
 ```text
---camera-width=1920 --camera-height=1080 --camera-snapshot.height=1080 --camera-video.height=720 --camera-snapshot.height=480
+--camera-width=1920 --camera-height=1080 --camera-snapshot.height=1080 --camera-video.height=720 --camera-stream.height=480
 ```
 
 This will result in:
@@ -49,7 +55,7 @@ This will result in:
 - camera will capture the middle `1920x1080` from the `2304x1296`
 - `snapshot` be ~1920x1080
 - `video` be ~1280x720
-- `snapshot` be ~640x480
+- `stream` be ~640x480
 
 ## List all available controls
 
@@ -90,7 +96,7 @@ v4l2-ctl -d /dev/video0 --list-formats-ext
 Some of them might be specified to streamer:
 
 ```bash
-tools/*_camera.sh --camera-format=RG10 # Bayer 10 packet
+tools/*_camera.sh --camera-format=RG10 # Bayer 10 packed
 tools/*_camera.sh --camera-format=YUYV
 tools/*_camera.sh --camera-format=MJPEG
 tools/*_camera.sh --camera-format=H264 # This is unstable due to h264 key frames support
