@@ -143,7 +143,9 @@ public:
 
       std::string url;
 
-      if (ice_server.type == rtc::IceServer::Type::Turn) {
+      if (ice_server.type == rtc::IceServer::Type::Turn &&
+          ice_server.username.size() > 0 &&
+          ice_server.password.size() > 0) {
         json["username"] = ice_server.username;
         json["credential"] = ice_server.password;
         url = ice_server.relayType == rtc::IceServer::RelayType::TurnTls ? "turns:" : "turn:";
@@ -210,7 +212,7 @@ static std::shared_ptr<ClientTrackData> webrtc_add_video(const std::shared_ptr<r
   return std::shared_ptr<ClientTrackData>(new ClientTrackData{track, srReporter});
 }
 
-static void webrtc_parse_ice_servers(rtc::Configuration config, const nlohmann::json &message)
+static void webrtc_parse_ice_servers(rtc::Configuration& config, const nlohmann::json &message)
 {
   auto ice_servers = message.find("ice_servers");
   if (ice_servers == message.end() || !ice_servers->is_array())
@@ -234,7 +236,9 @@ static void webrtc_parse_ice_servers(rtc::Configuration config, const nlohmann::
 
       for (const auto& url : urls) {
         auto iceServer = rtc::IceServer(url.get<std::string>());
-        if (iceServer.type == rtc::IceServer::Type::Turn) {
+        if (iceServer.type == rtc::IceServer::Type::Turn &&
+            ice_server.find("username") != ice_server.end() &&
+            ice_server.find("credential") != ice_server.end()) {
           iceServer.username = ice_server["username"].get<std::string>();
           iceServer.password = ice_server["credential"].get<std::string>();
         }
@@ -252,6 +256,10 @@ static void webrtc_parse_ice_servers(rtc::Configuration config, const nlohmann::
 
 static std::shared_ptr<Client> webrtc_peer_connection(rtc::Configuration config, const nlohmann::json &message)
 {
+  if(log_options.debug) {
+    rtcInitLogger(RTC_LOG_DEBUG, NULL);
+  }
+
   webrtc_parse_ice_servers(config, message);
 
   auto pc = std::make_shared<rtc::PeerConnection>(config);
@@ -451,7 +459,7 @@ static void http_webrtc_remote_candidate(http_worker_t *worker, FILE *stream, co
       auto remoteCandidate = rtc::Candidate(
         entry["candidate"].get<std::string>(),
         entry["sdpMid"].get<std::string>());
-  
+
       std::unique_lock lock(client->lock);
       // The ICE candidate http requests can race the sdp answer http request and win. But it's invalid to set the ICE
       // candidates before the SDP answer is set.
