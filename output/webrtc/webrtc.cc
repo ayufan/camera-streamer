@@ -212,7 +212,7 @@ static std::shared_ptr<ClientTrackData> webrtc_add_video(const std::shared_ptr<r
 
 static void webrtc_parse_ice_servers(rtc::Configuration &config, const nlohmann::json &message)
 {
-  auto ice_servers = message.find("ice_servers");
+  auto ice_servers = message.find("iceServers");
   if (ice_servers == message.end() || !ice_servers->is_array())
     return;
 

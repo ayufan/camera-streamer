@@ -47,10 +47,8 @@
 
   <script>
     function startWebRTC() {
-        // syntax: https://github.com/paullouisageneau/libdatachannel/blob/master/DOC.md#rtcwebrtc_peer_connection
-        const ice_servers = [
-          // 'stun:stun.l.google.com:19302',
-          //'turn://7295a68e2381585126c6a19e:zDd3R415oPPXJKQT@a.relay.metered.ca:80'
+        const iceServers = [
+          [ { urls: ['stun:stun.l.google.com:19302'] } ]
         ];
 
         var pc = null;
@@ -62,7 +60,7 @@
           body: JSON.stringify({
               type: 'request',
               res: params.res,
-              ice_servers: ice_servers
+              iceServers: iceServers
           }),
           headers: {
               'Content-Type': 'application/json'
