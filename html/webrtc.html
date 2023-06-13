@@ -47,28 +47,13 @@
 
   <script>
     function startWebRTC() {
-        var config = {
-            sdpSemantics: 'unified-plan'
-        };
+        // syntax: https://github.com/paullouisageneau/libdatachannel/blob/master/DOC.md#rtcwebrtc_peer_connection
+        const ice_servers = [
+          // 'stun:stun.l.google.com:19302',
+          //'turn://7295a68e2381585126c6a19e:zDd3R415oPPXJKQT@a.relay.metered.ca:80'
+        ];
 
-        if (document.getElementById('use-stun') && document.getElementById('use-stun').checked) {
-          config.iceServers = [{urls: ['stun:stun.l.google.com:19302']}];
-        }
-
-        pc = new RTCPeerConnection(config);
-        pc.addTransceiver('video', {direction: 'recvonly'});
-        //pc.addTransceiver('audio', {direction: 'recvonly'});
-        pc.addEventListener('track', function(evt) {
-          console.log("track event " + evt.track.kind);
-            if (evt.track.kind == 'video') {
-                if (document.getElementById('stream')) {
-                  document.getElementById('stream').srcObject = evt.streams[0];
-                }
-            } else {
-                if (document.getElementById('audio'))
-                  document.getElementById('audio').srcObject = evt.streams[0];
-            }
-        });
+        var pc = null;
 
         const urlSearchParams = new URLSearchParams(window.location.search);
         const params = Object.fromEntries(urlSearchParams.entries());
@@ -76,7 +61,8 @@
         fetch(window.location.href, {
           body: JSON.stringify({
               type: 'request',
-              res: params.res
+              res: params.res,
+              ice_servers: ice_servers
           }),
           headers: {
               'Content-Type': 'application/json'
@@ -84,54 +70,62 @@
           method: 'POST'
         }).then(function(response) {
           return response.json();
-        }).then(function(answer) {
-          pc.remote_pc_id = answer.id;
-          return pc.setRemoteDescription(answer);
+        }).then(function(request) {
+          pc = new RTCPeerConnection({
+            sdpSemantics: 'unified-plan',
+            iceServers: request.iceServers
+          });
+          pc.remote_pc_id = request.id;
+          pc.addTransceiver('video', { direction: 'recvonly' });
+          pc.addEventListener('track', function(evt) {
+            if (document.getElementById('stream'))
+              document.getElementById('stream').srcObject = evt.streams[0];
+          });
+          pc.addEventListener("icecandidate", function(e) {
+            if (e.candidate) {
+              return fetch(window.location.href, {
+                body: JSON.stringify({
+                  type: 'remote_candidate',
+                  id: pc.remote_pc_id,
+                  candidates: [e.candidate]
+                }),
+                headers: { 'Content-Type': 'application/json' },
+                method: 'POST'
+              }).catch(function(e) {
+                console.log("Failed to send ICE WebRTC: "+e);
+              });
+            }
+          });
+
+          return pc.setRemoteDescription(request);
         }).then(function() {
           return pc.createAnswer();
         }).then(function(answer) {
           return pc.setLocalDescription(answer);
         }).then(function() {
-            // wait for ICE gathering to complete
-            return new Promise(function(resolve) {
-                if (pc.iceGatheringState === 'complete') {
-                    resolve();
-                } else {
-                    function checkState() {
-                        if (pc.iceGatheringState === 'complete') {
-                            pc.removeEventListener('icegatheringstatechange', checkState);
-                            resolve();
-                        }
-                    }
-                    pc.addEventListener('icegatheringstatechange', checkState);
-                }
-            });
-        }).then(function(answer) {
           var offer = pc.localDescription;
 
           return fetch(window.location.href, {
             body: JSON.stringify({
-                type: offer.type,
-                id: pc.remote_pc_id,
-                sdp: offer.sdp,
+              type: offer.type,
+              id: pc.remote_pc_id,
+              sdp: offer.sdp,
             }),
-            headers: {
-                'Content-Type': 'application/json'
-            },
+            headers: { 'Content-Type': 'application/json' },
             method: 'POST'
           })
         }).then(function(response) {
-            return response.json();
+          return response.json();
         }).catch(function(e) {
-            alert(e);
+          console.log(e);
         });
     }
 
     function stopWebRTC() {
-        setTimeout(function() {
-            pc.close();
-        }, 500);
-      }
+      setTimeout(function() {
+        pc.close();
+      }, 500);
+    }
   </script>
 
   <script>

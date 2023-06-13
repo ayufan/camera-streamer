@@ -10,6 +10,7 @@ typedef struct webrtc_options_s {
   bool running;
   bool disabled;
   char ice_servers[WEBRTC_OPTIONS_LENGTH];
+  bool disable_client_ice;
 } webrtc_options_t;
 
 // WebRTC
