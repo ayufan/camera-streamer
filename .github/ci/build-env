@@ -1,17 +1,20 @@
 #!/bin/bash
 
-if [[ $# -gt 2 ]]; then
-  echo "usage: $0 <buster|bullseye> <amd64|arm32v7|arm64v8>"
+if [[ $# -lt 3 ]]; then
+  echo "usage: $0 <generic|raspi> <buster|bullseye> <amd64|arm32v7|arm64v8>"
   exit 1
 fi
 
 docker_image="camera_streamer_build_env"
 
+build_type="raspi"
+[[ -n "$1" ]] && build_type="$1"
+
 debian_version="bullseye"
-[[ -n "$1" ]] && debian_version="$1" && docker_image="${docker_image}_${1}"
+[[ -n "$2" ]] && debian_version="$2" && docker_image="${docker_image}_${2}"
 
 docker_arch=""
-[[ -n "$2" ]] && docker_arch="$2/" && docker_image="${docker_image}_${2}"
+[[ -n "$3" ]] && docker_arch="$3/" && docker_image="${docker_image}_${3}"
 
 PWD=$(pwd)
 ROOT=$(cd -- "$( dirname -- "${BASH_SOURCE[0]}" )/../.." &> /dev/null && pwd)
@@ -21,7 +24,7 @@ set -xeo pipefail
 docker build -t "$docker_image" \
   --build-arg "DOCKER_ARCH=$docker_arch" \
   --build-arg "DEBIAN_VERSION=$debian_version" \
-  --build-arg BUILD_TYPE \
+  --build-arg "BUILD_TYPE=$build_type" \
   --target build_env - < .github/ci/Dockerfile
 
 exec docker run --rm -it -u "$UID" -v "$ROOT:$ROOT" -w "$ROOT" "$docker_image"

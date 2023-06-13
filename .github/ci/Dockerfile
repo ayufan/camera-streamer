@@ -13,7 +13,9 @@ RUN [ "$BUILD_TYPE" != "raspi" ] || \
     echo "deb http://archive.raspberrypi.org/debian/ $DEBIAN_VERSION main" > /etc/apt/sources.list.d/raspi.list && \
     apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 9165938D90FDDD2E 82B129927FA3303E && \
     apt-get -y update && \
-    apt-get -y install libcamera-dev liblivemedia-dev \
+    apt-get -y install libcamera-dev liblivemedia-dev && \
+    # Temporary workaround to RPI arm32 bug
+    ( [ "$(dpkg --print-architecture)" != "armhf" ] || apt-get --allow-downgrades -y install libssl1.1=1.1.1n-0+deb11u4+rpt1 ) \
   )
 
 # Default packages
