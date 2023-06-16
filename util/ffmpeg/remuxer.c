@@ -94,7 +94,8 @@ int ffmpeg_remuxer_open(ffmpeg_remuxer_t *remuxer)
   if (remuxer->packet)
     return 0;
 
-  AVInputFormat *input_format = av_find_input_format(remuxer->input_format);
+  const AVInputFormat *input_format = av_find_input_format(remuxer->input_format);
+
   if (!input_format)
     return AVERROR(EINVAL);
 
