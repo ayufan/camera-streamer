@@ -754,11 +754,11 @@
       show(videoContainer);
 
       const iceServers = [
-        [ { urls: ['stun:stun.l.google.com:19302'] } ]
+        { urls: ['stun:stun.l.google.com:19302'] }
       ];
 
       fetch(webrtcURL, {
-        body: JSON.stringify({type: 'request'}),
+        body: JSON.stringify({type: 'request', iceServers: iceServers}),
         headers: {'Content-Type': 'application/json'},
         method: 'POST'
       }).then(function(response) {
