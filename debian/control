@@ -23,6 +23,9 @@ Rules-Requires-Root: no
 
 Package: camera-streamer-raspi
 Provides: camera-streamer
+Breaks: camera-streamer (<< 0.2)
+Conflicts: camera-streamer (<< 0.2)
+Replaces: camera-streamer (<< 0.2)
 Build-Profiles: <raspi>
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
