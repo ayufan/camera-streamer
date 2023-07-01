@@ -10,13 +10,13 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        debian_version: [bullseye]
+        debian_version: [bullseye, bookworm]
         docker_arch: [amd64, arm32v7, arm64v8]
         build_type: [generic, raspi]
         exclude:
           - docker_arch: amd64
             build_type: raspi
-          - debian_version: buster
+          - debian_version: bookworm
             build_type: raspi
     steps:
     - name: Checkout
