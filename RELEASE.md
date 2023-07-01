@@ -1,15 +1,9 @@
 # Release #{GIT_VERSION}
 
-- http: extend `/status` with all options
-- cmd: accept `--camera-options=AfMode=auto` and alike
-- libcamera: expose all options with human readable settings
-- v4l2: expose all options with human readable settings
-- libcamera: do not expose some options that should not be made configurable
-- http: add `/control` to provide simple JS interface to live edit camera settings
-- http: change `/option` to accept `device=`, `key=`, and `value=`
-- device: show stddev estimates to measure frame pacing
-- webrtc: allow to specify `--webrtc-ice_servers=` on command line
-- webrtc: accept `iceServers:[{urls:[],username:,password:}]` provided in `POST /webrtc`
+- html: fix syntax problem in iceServers (#77)
+- debian: add Breaks/Conflicts/Replaces to overwrite old version of `camera-streamer` (#79)
+- http: add `--http-listen=<ip4>`, and listen by default on `127.0.0.1` (#81) (breaking change)
+- ffmpeg: remuxer: fix "initialization discards 'const' qualifier from pointer target type" (#80)
 
 ## Variants
 
