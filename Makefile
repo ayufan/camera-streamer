@@ -9,6 +9,10 @@ GIT_REVISION ?= $(shell git rev-parse --short HEAD)
 CFLAGS := -Werror -Wall -g -I$(CURDIR) -D_GNU_SOURCE
 LDLIBS := -lpthread -lstdc++
 
+# libdatachannel deprecations on bookworm
+# error: 'HMAC_Init_ex' is deprecated: Since OpenSSL 3.0
+CFLAGS += -Wno-error=deprecated-declarations
+
 ifneq (x,x$(shell which ccache))
 CCACHE ?= ccache
 endif
