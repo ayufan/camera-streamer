@@ -26,6 +26,7 @@ typedef struct http_method_s {
 } http_method_t;
 
 typedef struct http_server_options_s {
+  char listen[512];
   unsigned port;
   unsigned maxcons;
 } http_server_options_t;

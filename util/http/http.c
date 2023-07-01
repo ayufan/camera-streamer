@@ -19,19 +19,23 @@
 #define HEADER_USER_AGENT "User-Agent:"
 #define HEADER_HOST "Host:"
 
-static int http_listen(int port, int maxcons)
+static int http_listen(char *addr4, int port, int maxcons)
 {
   struct sockaddr_in server = {0};
   int listenfd = -1;
+  char listen_addr[INET_ADDRSTRLEN];
 
   // getaddrinfo for host
   server.sin_family = AF_INET;
-  server.sin_addr.s_addr = INADDR_ANY;
+  if (inet_pton(server.sin_family, addr4, &server.sin_addr) != 1) {
+    perror("inet_pton");
+    return -1;
+  }
   server.sin_port = htons(port);
 
-  listenfd = socket(AF_INET, SOCK_STREAM, 0);
+  listenfd = socket(server.sin_family, SOCK_STREAM, 0);
   if (listenfd < 0) {
-    perror("socket");
+    LOG_INFO(NULL, "Invalid HTTP listen address: %s", addr4);
     return -1;
   }
 
@@ -47,6 +51,13 @@ static int http_listen(int port, int maxcons)
     perror("listen");
     goto error;
   }
+
+  if (inet_ntop(server.sin_family, &server.sin_addr, listen_addr, sizeof(listen_addr)) == NULL) {
+    perror("inet_ntop");
+    goto error;
+  }
+
+  LOG_INFO(NULL, "HTTP listening on %s:%d.", listen_addr, port);
 
   return listenfd;
 error:
@@ -240,7 +251,7 @@ error:
 
 int http_server(http_server_options_t *options, http_method_t *methods)
 {
-  int listen_fd = http_listen(options->port, options->maxcons);
+  int listen_fd = http_listen(options->listen, options->port, options->maxcons);
   if (listen_fd < 0) {
     return -1;
   }

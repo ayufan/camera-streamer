@@ -46,6 +46,7 @@ camera_options_t camera_options = {
 };
 
 http_server_options_t http_options = {
+  .listen = "127.0.0.1",
   .port = 8080,
   .maxcons = 10
 };
@@ -126,6 +127,7 @@ option_t all_options[] = {
 
   DEFINE_OPTION_DEFAULT(camera, list_options, bool, "1", "List all available options and exit."),
 
+  DEFINE_OPTION_PTR(http, listen, string, "Set the IP address the HTTP web-server will bind to. Set to 0.0.0.0 to listen on all interfaces."),
   DEFINE_OPTION(http, port, uint, "Set the HTTP web-server port."),
   DEFINE_OPTION(http, maxcons, uint, "Set maximum number of concurrent HTTP connections."),
 
