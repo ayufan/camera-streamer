@@ -31,10 +31,11 @@ FROM build as deb_make
 ARG GIT_VERSION
 ARG BUILD_TYPE="generic"
 ENV DEB_BUILD_PROFILES="$BUILD_TYPE"
+ARG DEB_REVISION="1"
 
 RUN apt-get build-dep -y $PWD
 RUN . /etc/os-release && \
-  export RELEASE_SUFFIX="$VERSION_CODENAME" && \
+  export RELEASE_SUFFIX="$VERSION_CODENAME-$DEB_REVISION" && \
   dpkg-buildpackage -us -uc -b
 
 RUN mkdir -p /deb && mv ../*.deb /deb/
