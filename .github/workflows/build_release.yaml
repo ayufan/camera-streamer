@@ -49,8 +49,6 @@ jobs:
       run: docker create --name deb_make deb_make
     - name: Copy files
       run: 'docker cp deb_make:/deb/. deb/'
-    - name: Fix RELEASE.md version
-      run: sed -i 's|#{GIT_VERSION}|${{ env.GIT_VERSION }}|g' RELEASE.md
     - name: 'Release debian files'
       uses: ncipollo/release-action@v1
       with:
@@ -60,6 +58,42 @@ jobs:
         omitBodyDuringUpdate: true
         omitNameDuringUpdate: true
         updateOnlyUnreleased: true
-        prerelease: true
+        draft: true
+
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    needs: [build]
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+        submodules: recursive
+    - name: Set GIT_VERSION
+      shell: bash
+      run: |
+        majorVer=$(cat VERSION)
+        lastVer=$(git tag --sort version:refname --list "v$majorVer.*" | tail -n1)
+        if [[ -n "$lastVer" ]]; then
+          newVer=(${lastVer//./ })
+          newVer[-1]="$((${newVer[-1]}+1))"
+          nextVer="${newVer[*]}"
+          nextVer="${nextVer// /.}"
+        else
+          nextVer="v$majorVer.0"
+        fi
+        echo "MajorVer=$majorVer LastVer=$lastVer NextVer=$nextVer"
+        echo "GIT_VERSION=${nextVer//v/}" >> $GITHUB_ENV
+    - name: Fix RELEASE.md version
+      run: sed -i 's|#{GIT_VERSION}|${{ env.GIT_VERSION }}|g' RELEASE.md
+    - name: 'Release debian files'
+      uses: ncipollo/release-action@v1
+      with:
+        tag: "v${{ env.GIT_VERSION }}"
+        allowUpdates: true
+        updateOnlyUnreleased: true
         generateReleaseNotes: true
+        prerelease: true
         bodyFile: RELEASE.md
