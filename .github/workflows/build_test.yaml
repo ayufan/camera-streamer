@@ -4,6 +4,7 @@ on:
       - '.github/workflows/build_test.yaml'
       - 'RELEASE.md'
   pull_request:
+  workflow_dispatch:
 
 jobs:
   build:
