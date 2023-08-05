@@ -73,6 +73,14 @@
             sdpSemantics: 'unified-plan',
             iceServers: request.iceServers
           });
+
+          pc.addEventListener('datachannel', function(e) {
+            const dc = e.channel;
+            dc.addEventListener('message', function(e) {
+              dc.send('pong');
+            });
+          });
+
           pc.remote_pc_id = request.id;
           pc.addTransceiver('video', { direction: 'recvonly' });
           pc.addEventListener('track', function(evt) {
