@@ -37,6 +37,7 @@ using namespace std::chrono_literals;
 
 class Client;
 
+static pthread_t heartbeat_thread;
 static webrtc_options_t *webrtc_options;
 static std::set<std::shared_ptr<Client> > webrtc_clients;
 static std::mutex webrtc_clients_lock;
@@ -95,6 +96,8 @@ public:
     }
     id = "rtc-" + id;
     name = strdup(id.c_str());
+    dc = pc->createDataChannel("pingpong");
+    last_heartbeat_s = get_monotonic_time_us(NULL, NULL) / 1000 / 1000;
   }
 
   ~Client()
@@ -164,6 +167,7 @@ public:
   char *name = NULL;
   std::string id;
   std::shared_ptr<rtc::PeerConnection> pc;
+  std::shared_ptr<rtc::DataChannel> dc;
   std::shared_ptr<ClientTrackData> video;
   std::mutex lock;
   std::condition_variable wait_for_complete;
@@ -171,6 +175,7 @@ public:
   bool has_set_sdp_answer = false;
   bool had_key_frame = false;
   bool requested_key_frame = false;
+  uint64_t last_heartbeat_s;
 };
 
 std::shared_ptr<Client> webrtc_find_client(std::string id)
@@ -259,6 +264,20 @@ static std::shared_ptr<Client> webrtc_peer_connection(rtc::Configuration config,
   auto pc = std::make_shared<rtc::PeerConnection>(config);
   auto client = std::make_shared<Client>(pc);
   auto wclient = std::weak_ptr(client);
+
+  client->dc->onOpen([wclient]() {
+    if(auto client = wclient.lock()) {
+      LOG_DEBUG(client.get(), "data channel onOpen");
+    }
+  });
+
+  client->dc->onMessage([wclient](auto message) {
+    auto client = wclient.lock();
+    if(client && std::holds_alternative<rtc::string>(message)) {
+      LOG_DEBUG(client.get(), "data channel onMessage: %s", std::get<std::string>(message).c_str());
+      client->last_heartbeat_s = get_monotonic_time_us(NULL, NULL) / 1000 / 1000;
+    }
+  });
 
   pc->onTrack([wclient](std::shared_ptr<rtc::Track> track) {
     if(auto client = wclient.lock()) {
@@ -471,6 +490,38 @@ static void http_webrtc_remote_candidate(http_worker_t *worker, FILE *stream, co
   http_write_response(stream, "200 OK", "application/json", "{}", 0);
 }
 
+static void *heartbeat_checker(void *)
+{
+  uint64_t disconnect = 10;
+  while (true) {
+    {
+      uint64_t now_s = get_monotonic_time_us(NULL, NULL) / 1000 / 1000;
+      std::unique_lock lk(webrtc_clients_lock);
+      auto it = webrtc_clients.begin();
+      while (it != webrtc_clients.end()) {
+        auto client = *it;
+        if (!client) {
+          continue;
+        }
+
+        uint64_t heartbeat_detla = now_s - client->last_heartbeat_s;
+        if (heartbeat_detla >= disconnect) {
+          LOG_INFO(client.get(), "No heartbeat from client, removing.");
+          it = webrtc_clients.erase(it);
+        } else {
+          if (heartbeat_detla > disconnect / 2) {
+            LOG_DEBUG(client.get(), "Checking if client still alive.");
+            client->dc->send("ping");
+          }
+          it++;
+        }
+      }
+    }
+    sleep(1);
+  }
+  return NULL;
+}
+
 extern "C" void http_webrtc_offer(http_worker_t *worker, FILE *stream)
 {
   auto message = http_parse_json_body(worker, stream, webrtc_client_max_json_body);
@@ -507,6 +558,8 @@ extern "C" int webrtc_server(webrtc_options_t *options)
 
   buffer_lock_register_check_streaming(&video_lock, webrtc_h264_needs_buffer);
   buffer_lock_register_notify_buffer(&video_lock, webrtc_h264_capture);
+
+  pthread_create(&heartbeat_thread, NULL, heartbeat_checker, NULL);
   options->running = true;
   return 0;
 }
