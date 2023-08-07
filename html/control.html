@@ -555,7 +555,7 @@
     }
 
     const createDeviceOption = (device, key, option) => {
-      const id_key = `${device}_${key}`;
+      const id_key = `${device.name}_${key}`;
       const groupEl = insertControl("div");
       groupEl.className = "input-group";
 
