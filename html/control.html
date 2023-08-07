@@ -472,9 +472,10 @@
 
   <script>
   document.addEventListener('DOMContentLoaded', function (event) {
-    var streamURL = 'stream';
-    var snapshotURL = 'snapshot';
-    var webrtcURL = 'webrtc';
+    const streamURL = 'stream';
+    const snapshotURL = 'snapshot';
+    const webrtcURL = 'webrtc';
+    const baseURL = '';
 
     const header = document.getElementById('logo')
     const settings = document.getElementById('sidebar')
@@ -539,7 +540,7 @@
       key = encodeURIComponent(key);
       value = encodeURIComponent(value);
 
-      return fetch(`option?device=${device}&key=${key}&value=${value}`, {
+      return fetch(`${baseURL}option?device=${device}&key=${key}&value=${value}`, {
         method: 'POST'
       }).then(function (response) {
         return response
@@ -603,7 +604,7 @@
               selectEl.add(optionEl);
             }
 
-            for (var value in option.menu) {
+            for (let value in option.menu) {
               const optionEl = document.createElement("option");
               optionEl.value = value;
               optionEl.text = option.menu[value];
@@ -695,24 +696,24 @@
     }
 
     const createControls = (state) => {
-      for (var device of state.devices) {
+      for (let device of state.devices) {
         const heading = insertControl("h1");
         heading.textContent = device.name;
 
-        for (var key in device.options) {
+        for (let key in device.options) {
           createDeviceOption(device, key, device.options[key]);
         }
       }
     };
 
-    var rtcPeerConfig = {
+    const rtcPeerConfig = {
       sdpSemantics: 'unified-plan'
     };
 
-    rtcPeerConnection = new RTCPeerConnection(rtcPeerConfig);
+    let rtcPeerConnection = new RTCPeerConnection(rtcPeerConfig);
 
     // read initial values
-    fetch(`status`)
+    fetch(`${baseURL}status`)
       .then(function (response) {
         return response.json()
       })
@@ -757,7 +758,7 @@
         { urls: ['stun:stun.l.google.com:19302'] }
       ];
 
-      fetch(webrtcURL, {
+      fetch(baseURL + webrtcURL, {
         body: JSON.stringify({type: 'request', iceServers: iceServers}),
         headers: {'Content-Type': 'application/json'},
         method: 'POST'
@@ -780,7 +781,7 @@
         });
         rtcPeerConnection.addEventListener("icecandidate", function(e) {
           if (e.candidate) {
-            return fetch(webrtcURL, {
+            return fetch(baseURL + webrtcURL, {
               body: JSON.stringify({
                 type: 'remote_candidate',
                 id: rtcPeerConnection.remote_pc_id,
@@ -800,9 +801,9 @@
       }).then(function(answer) {
         return rtcPeerConnection.setLocalDescription(answer);
       }).then(function(answer) {
-        var offer = rtcPeerConnection.localDescription;
+        const offer = rtcPeerConnection.localDescription;
 
-        return fetch(webrtcURL, {
+        return fetch(baseURL + webrtcURL, {
           body: JSON.stringify({
             type: offer.type,
             id: rtcPeerConnection.remote_pc_id,
