@@ -1,9 +1,6 @@
 # Release #{GIT_VERSION}
 
-- html: fix syntax problem in iceServers (#77)
-- debian: add Breaks/Conflicts/Replaces to overwrite old version of `camera-streamer` (#79)
-- http: add `--http-listen=<ip4>`, and listen by default on `127.0.0.1` (#81) (breaking change)
-- ffmpeg: remuxer: fix "initialization discards 'const' qualifier from pointer target type" (#80)
+- debian: support bookworm compilation
 
 ## Variants
 
@@ -12,6 +9,7 @@ Download correct version for your platform:
 - Variant: **raspi**: Raspberry PI compatible build with USB, CSI, WebRTC, RTSP support
 - Variant: **generic**: All other platforms with USB and MJPEG support only for time being
 - System: **bullseye**: Debian Bullseye (11) compatible build
+- System: **bookworm**: Debian Bookworm (12) compatible build
 - Platform: **amd64**: x86/64 compatible build
 - Platform: **arm32**: ARM 32-bit kernel: PIs 0.2W, 2B, and higher, Orange PIs, Rock64, etc. No support for RPI0.
 - Platform: **arm64**: ARM 64-bit kernel: PIs 0.2W, 3B, and higher, Orange PIs, Rock64, etc. No support for RPI0 and RPI2B.
@@ -21,11 +19,7 @@ Download correct version for your platform:
 Copy the below and paste into terminal:
 
 ```bash
-if [[ -e /etc/default/raspberrypi-kernel ]]; then
-  PACKAGE=camera-streamer-raspi_#{GIT_VERSION}.bullseye_$(dpkg --print-architecture).deb
-else
-  PACKAGE=camera-streamer-generic_#{GIT_VERSION}.bullseye_$(dpkg --print-architecture).deb
-fi
+PACKAGE=camera-streamer-$(test -e /etc/default/raspberrypi-kernel && echo raspi || echo generic)_#{GIT_VERSION}.$(. /etc/os-release; echo $VERSION_CODENAME)_$(dpkg --print-architecture).deb
 wget "https://github.com/ayufan/camera-streamer/releases/download/v#{GIT_VERSION}/$PACKAGE"
 sudo apt install "$PWD/$PACKAGE"
 ```
