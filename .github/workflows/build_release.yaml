@@ -84,8 +84,14 @@ jobs:
         fi
         echo "MajorVer=$majorVer LastVer=$lastVer NextVer=$nextVer"
         echo "GIT_VERSION=${nextVer//v/}" >> $GITHUB_ENV
-    - name: Fix RELEASE.md version
-      run: sed -i 's|#{GIT_VERSION}|${{ env.GIT_VERSION }}|g' RELEASE.md
+    - name: Generate RELEASE details
+      run: |
+        echo "# Release ${{ env.GIT_VERSION }}" > RELEASE.tmp
+        echo "" >> RELEASE.tmp
+        lastReleasedVer=$(git tag --sort version:refname --list "v$majorVer.*" | tail -n1)
+        git log --pretty="- %s (%h)" "$lastReleasedVer..HEAD" >> RELEASE.tmp
+        echo "" >> RELEASE.tmp
+        cat RELEASE.md >> RELEASE.tmp
     - name: 'Release debian files'
       uses: ncipollo/release-action@v1
       with:
@@ -94,4 +100,4 @@ jobs:
         updateOnlyUnreleased: true
         generateReleaseNotes: true
         prerelease: true
-        bodyFile: RELEASE.md
+        bodyFile: RELEASE.tmp

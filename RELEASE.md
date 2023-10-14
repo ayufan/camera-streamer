@@ -1,7 +1,3 @@
-# Release #{GIT_VERSION}
-
-- debian: support bookworm compilation
-
 ## Variants
 
 Download correct version for your platform:
