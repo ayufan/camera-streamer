@@ -56,7 +56,9 @@ static std::map<unsigned, libcamera_control_id_t> libcamera_control_ids =
   LIBCAMERA_DRAFT_CONTROL(AeState),
   LIBCAMERA_DRAFT_CONTROL(AwbState),
   LIBCAMERA_DRAFT_CONTROL(LensShadingMapMode),
+#if LIBCAMERA_VERSION_MAJOR == 0 && LIBCAMERA_VERSION_MINOR < 1 // Support RasPI bullseye
   LIBCAMERA_DRAFT_CONTROL(SceneFlicker),
+#endif
   LIBCAMERA_DRAFT_CONTROL(TestPatternMode)
 };
 
