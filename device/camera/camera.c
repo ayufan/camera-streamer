@@ -99,7 +99,15 @@ void camera_capture_add_callbacks(camera_t *camera, buffer_list_t *capture, link
 int camera_set_params(camera_t *camera)
 {
   device_set_fps(camera->camera, camera->options.fps);
-  device_set_option_list(camera->camera, camera->options.options);
+
+  // HACK:
+  // Some cameras require to be in streaming to apply settings
+  // This applies twice to avoid ordering issues (auto-focus vs focus value)
+  if (camera->camera->n_capture_list > 0)
+    buffer_list_set_stream(camera->camera->capture_lists[0], true);
+  if (device_set_option_list(camera->camera, camera->options.options) < 0)
+    device_set_option_list(camera->camera, camera->options.options);
+
   device_set_option_list(camera->isp, camera->options.isp.options);
 
   if (camera->options.auto_focus) {

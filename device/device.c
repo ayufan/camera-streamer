@@ -250,22 +250,26 @@ int device_set_option_string(device_t *dev, const char *key, const char *value)
   return -1;
 }
 
-void device_set_option_list(device_t *dev, const char *option_list)
+int device_set_option_list(device_t *dev, const char *option_list)
 {
   if (!dev || !option_list || !option_list[0]) {
-    return;
+    return 0;
   }
 
   char *start = strdup(option_list);
   char *string = start;
   char *option;
+  bool err = false;
+  int count = 0;
 
   while ((option = strsep(&string, OPTION_VALUE_LIST_SEP)) != NULL) {
     char *value = option;
     char *key = strsep(&value, "=");
 
     if (value) {
-      device_set_option_string(dev, key, value);
+      if (device_set_option_string(dev, key, value) < 0) {
+        err = true;
+      }
     } else {
       LOG_INFO(dev, "Missing 'key=value' for '%s'", option);
       continue;
@@ -273,9 +277,13 @@ void device_set_option_list(device_t *dev, const char *option_list)
 
     // consume all separators
     while (strsep(&value, "="));
+
+    count++;
   }
 
   free(start);
+
+  return err ? -count : count;
 }
 
 int device_output_enqueued(device_t *dev)
