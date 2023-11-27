@@ -61,6 +61,7 @@ endif
 
 HTML_SRC = $(addsuffix .c,$(HTML))
 OBJS = $(patsubst %.cc,%.o,$(patsubst %.c,%.o,$(SRC) $(HTML_SRC)))
+TARGET_OBJS = $(filter-out third_party/%, $(filter-out tests/%, $(OBJS)))
 
 all: version
 	+make $(TARGET)
@@ -73,11 +74,16 @@ endif
 
 .PHONY: version
 version:
-	echo "#define GIT_VERSION \"$(GIT_VERSION)\"\n#define GIT_REVISION \"$(GIT_REVISION)\"" > version.h.tmp; \
-		diff -u version.h version.h.tmp || mv version.h.tmp version.h; \
-		rm -f version.h.tmp
+	echo "#define GIT_VERSION \"$(GIT_VERSION)\"\n#define GIT_REVISION \"$(GIT_REVISION)\"" > version.h.tmp
+	if $(CXX) $(CFLAGS) -o /dev/null -c tests/libcamera/orientation.cc 2>/dev/null; then \
+		echo "#define LIBCAMERA_USES_ORIENTATION" >> version.h.tmp; \
+	else \
+		echo "#define LIBCAMERA_USES_TRANSFORM" >> version.h.tmp; \
+	fi
+	diff -u version.h version.h.tmp || mv version.h.tmp version.h
+	-rm -f version.h.tmp
 
-%: cmd/% $(filter-out third_party/%, $(OBJS))
+%: cmd/% $(TARGET_OBJS)
 	$(CCACHE) $(CXX) $(CFLAGS) -o $@ $(filter-out cmd/%, $^) $(filter $</%, $^) $(LDLIBS)
 
 install: $(TARGET)

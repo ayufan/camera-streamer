@@ -7,6 +7,7 @@ extern "C" {
 #include <stdint.h>
 #include <stdlib.h>
 
+#include "version.h"
 #include "device/device.h"
 #include "device/buffer_list.h"
 #include "device/buffer.h"
@@ -29,7 +30,11 @@ extern "C" {
 #include <libcamera/request.h>
 #include <libcamera/stream.h>
 #include <libcamera/formats.h>
+#ifdef LIBCAMERA_USES_ORIENTATION
+#include <libcamera/orientation.h>
+#else // LIBCAMERA_USES_ORIENTATION
 #include <libcamera/transform.h>
+#endif // LIBCAMERA_USES_ORIENTATION
 
 typedef struct buffer_s buffer_t;
 typedef struct buffer_list_s buffer_list_t;

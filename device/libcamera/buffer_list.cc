@@ -99,6 +99,15 @@ int libcamera_buffer_list_open(buffer_list_t *buf_list)
   if (configurations->validate() == libcamera::CameraConfiguration::Invalid) {
     LOG_ERROR(buf_list, "Camera configuration invalid");
   }
+#ifdef LIBCAMERA_USES_ORIENTATION
+  if (buf_list->dev->libcamera->vflip && buf_list->dev->libcamera->hflip) {
+    configurations->orientation = libcamera::Orientation::Rotate180;
+  } else if (buf_list->dev->libcamera->vflip) {
+    configurations->orientation = libcamera::Orientation::Rotate180Mirror;
+  } else if (buf_list->dev->libcamera->hflip) {
+    configurations->orientation = libcamera::Orientation::Rotate0Mirror;
+  }
+#else // LIBCAMERA_USES_ORIENTATION
   if (buf_list->dev->libcamera->vflip) {
     configurations->transform |= libcamera::Transform::VFlip;
   }
@@ -108,6 +117,7 @@ int libcamera_buffer_list_open(buffer_list_t *buf_list)
   if (!!(configurations->transform & libcamera::Transform::Transpose)) {
     LOG_ERROR(buf_list, "Transformation requiring transpose not supported");
   }
+#endif // LIBCAMERA_USES_ORIENTATION
 
   if (buf_list->dev->libcamera->camera->configure(configurations.get()) < 0) {
     LOG_ERROR(buf_list, "Failed to configure camera");
