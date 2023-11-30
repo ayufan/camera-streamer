@@ -86,7 +86,7 @@ version:
 %: cmd/% $(TARGET_OBJS)
 	$(CCACHE) $(CXX) $(CFLAGS) -o $@ $(filter-out cmd/%, $^) $(filter $</%, $^) $(LDLIBS)
 
-install: $(TARGET)
+install: version $(TARGET)
 	install $(TARGET) $(DESTDIR)/usr/local/bin/
 
 clean:
