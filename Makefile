@@ -83,10 +83,10 @@ version:
 	diff -u version.h version.h.tmp || mv version.h.tmp version.h
 	-rm -f version.h.tmp
 
-%: cmd/% $(TARGET_OBJS)
+%: version cmd/% $(TARGET_OBJS)
 	$(CCACHE) $(CXX) $(CFLAGS) -o $@ $(filter-out cmd/%, $^) $(filter $</%, $^) $(LDLIBS)
 
-install: version $(TARGET)
+install: $(TARGET)
 	install $(TARGET) $(DESTDIR)/usr/local/bin/
 
 clean:
