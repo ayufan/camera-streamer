@@ -66,16 +66,23 @@ TARGET_OBJS = $(filter-out third_party/%, $(filter-out tests/%, $(OBJS)))
 all: version
 	+make $(TARGET)
 
+install: version
+	+make $(TARGET)
+	install $(TARGET) $(DESTDIR)/usr/local/bin/
+
 .SUFFIXES:
 
 ifeq (1,$(USE_LIBDATACHANNEL))
 camera-streamer: $(LIBDATACHANNEL_PATH)/build/libdatachannel-static.a
 endif
 
+camera-streamer: $(filter-out cmd/%, $(TARGET_OBJS)) $(filter cmd/camera-streamer/%, $(TARGET_OBJS))
+	$(CCACHE) $(CXX) $(CFLAGS) -o $@ $^ $(LDLIBS)
+
 .PHONY: version
 version:
 	echo "#define GIT_VERSION \"$(GIT_VERSION)\"\n#define GIT_REVISION \"$(GIT_REVISION)\"" > version.h.tmp
-	if $(CXX) $(CFLAGS) -o /dev/null -c tests/libcamera/orientation.cc 2>/dev/null; then \
+	if $(CCACHE) $(CXX) $(CFLAGS) -o tests/libcamera/orientation.o -c tests/libcamera/orientation.cc 2>/dev/null; then \
 		echo "#define LIBCAMERA_USES_ORIENTATION" >> version.h.tmp; \
 	else \
 		echo "#define LIBCAMERA_USES_TRANSFORM" >> version.h.tmp; \
@@ -83,14 +90,8 @@ version:
 	diff -u version.h version.h.tmp || mv version.h.tmp version.h
 	-rm -f version.h.tmp
 
-%: cmd/% $(TARGET_OBJS)
-	$(CCACHE) $(CXX) $(CFLAGS) -o $@ $(filter-out cmd/%, $^) $(filter $</%, $^) $(LDLIBS)
-
-install: $(TARGET)
-	install $(TARGET) $(DESTDIR)/usr/local/bin/
-
 clean:
-	rm -f .depend $(OBJS) $(OBJS:.o=.d) $(HTML_SRC) $(TARGET)
+	rm -f .depend $(OBJS) $(OBJS:.o=.d) $(HTML_SRC) $(TARGET) version.h
 
 headers:
 	find -name '*.h' | xargs -n1 $(CCACHE) $(CC) $(CFLAGS) -std=gnu17 -Wno-error -c -o /dev/null
@@ -104,6 +105,7 @@ headers:
 %.o: %.cc
 	$(CCACHE) $(CXX) -std=c++17 -MMD $(CFLAGS) -c -o $@ $<
 
+.PRECIOUS: html/%.c
 html/%.c: html/%
 	xxd -i $< > $@.tmp
 	mv $@.tmp $@
