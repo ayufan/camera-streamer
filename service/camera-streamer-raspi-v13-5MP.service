@@ -8,20 +8,20 @@ ConditionPathExists=/sys/bus/i2c/drivers/ov5647/10-0036/video4linux
 
 [Service]
 ExecStart=/usr/bin/camera-streamer \
-  -camera-type=libcamera \
-  -camera-format=YUV420 \
-  -camera-width=2592 -camera-height=1944 \
-  -camera-fps=30 \
+  --camera-type=libcamera \
+  --camera-format=YUV420 \
+  --camera-width=2592 --camera-height=1944 \
+  --camera-fps=30 \
   ; use two memory buffers to optimise usage
-  -camera-nbufs=2 \
+  --camera-nbufs=2 \
   ; the snapshot is 1920x1080
-  -camera-snapshot.height=1080 \
+  --camera-snapshot.height=1080 \
   ; the video/webrtc is 1296x972
-  -camera-video.height=972 \
+  --camera-video.height=972 \
   ; the stream is 640x480
-  -camera-stream.height=480 \
+  --camera-stream.height=480 \
   ; bump brightness slightly
-  -camera-options=brightness=0.1 \
+  --camera-options=brightness=0.1 \
   --http-listen=0.0.0.0 \
   --http-port=8080 \
   --rtsp-port
