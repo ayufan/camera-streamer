@@ -16,6 +16,10 @@ Take into account that this is a draft project, and is nowhere as complete
 and well supported as [awesome ustreamer](https://github.com/pikvm/ustreamer).
 This project was inspired by mentioned ustreamer.
 
+To clone this repository be sure to use the following command:
+
+	git clone --recurse-submodules https://github.com/ayufan/camera-streamer.git
+
 ## Requirements
 
 1. Debian Bullseye, with at least 5.15 kernel
