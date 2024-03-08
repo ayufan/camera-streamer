@@ -92,6 +92,8 @@ int libcamera_buffer_list_open(buffer_list_t *buf_list)
   }
   if (buf_list->fmt.bytesperline > 0) {
     configuration.stride = buf_list->fmt.bytesperline;
+  } else {
+    configuration.stride = 0;
   }
   if (buf_list->fmt.nbufs > 0) {
     configuration.bufferCount = buf_list->fmt.nbufs;
