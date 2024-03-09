@@ -9,24 +9,24 @@ ConditionPathExists=/sys/bus/i2c/drivers/imx219/10-0010/video4linux
 
 [Service]
 ExecStart=/usr/local/bin/camera-streamer \
-  -camera-path=/base/soc/i2c0mux/i2c@1/imx219@10 \
-  -camera-type=libcamera \
-  -camera-format=YUYV \
-  -camera-width=3280 -camera-height=2464 \
-  -camera-fps=30 \
+  --camera-path=/base/soc/i2c0mux/i2c@1/imx219@10 \
+  --camera-type=libcamera \
+  --camera-format=YUYV \
+  --camera-width=3280 --camera-height=2464 \
+  --camera-fps=30 \
   ; use two memory buffers to optimise usage
-  -camera-nbufs=2 \
+  --camera-nbufs=2 \
   ; the snapshot is 1438x1080
-  -camera-snapshot.height=1080 \
+  --camera-snapshot.height=1080 \
   ; the video/webrtc is 958x720
-  -camera-video.height=720 \
+  --camera-video.height=720 \
   ; the stream is 639x480
-  -camera-stream.height=480 \
+  --camera-stream.height=480 \
   ; bump brightness slightly
-  -camera-options=brightness=0.1 \
+  --camera-options=brightness=0.1 \
   --http-listen=0.0.0.0 \
   --http-port=8080 \
-  -rtsp-port
+  --rtsp-port
 
 DynamicUser=yes
 SupplementaryGroups=video i2c
