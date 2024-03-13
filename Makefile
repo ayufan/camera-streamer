@@ -81,11 +81,11 @@ camera-streamer: $(filter-out cmd/%, $(TARGET_OBJS)) $(filter cmd/camera-streame
 
 .PHONY: version
 version:
-	echo "#define GIT_VERSION \"$(GIT_VERSION)\"\n#define GIT_REVISION \"$(GIT_REVISION)\"" > version.h.tmp
+	printf "#define GIT_VERSION \"$(GIT_VERSION)\"\n#define GIT_REVISION \"$(GIT_REVISION)\"\n" > version.h.tmp
 	if $(CCACHE) $(CXX) $(CFLAGS) -o tests/libcamera/orientation.o -c tests/libcamera/orientation.cc 2>/dev/null; then \
-		echo "#define LIBCAMERA_USES_ORIENTATION" >> version.h.tmp; \
+		printf "#define LIBCAMERA_USES_ORIENTATION\n" >> version.h.tmp; \
 	else \
-		echo "#define LIBCAMERA_USES_TRANSFORM" >> version.h.tmp; \
+		printf "#define LIBCAMERA_USES_TRANSFORM\n" >> version.h.tmp; \
 	fi
 	diff -u version.h version.h.tmp || mv version.h.tmp version.h
 	-rm -f version.h.tmp
