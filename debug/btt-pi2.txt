@@ -1,0 +1,882 @@
+++ cat /sys/firmware/devicetree/base/model
+++ tr -d '\0'
++ echo 'biqu RK3566-ROC-PC HDMI(Linux)'
+biqu RK3566-ROC-PC HDMI(Linux)
++ uname -a
+Linux BTT-CB2 4.19.232-bigtree-cb2 #2 SMP Mon Apr 8 18:40:16 CST 2024 aarch64 GNU/Linux
++ v4l2-ctl --list-devices
+v4l2-ctl | rkisp-statistics (platform: rkisp):
+v4l2-ctl | 	/dev/video7
+v4l2-ctl | 	/dev/video8
+v4l2-ctl | 
+v4l2-ctl | rkisp_mainpath (platform:rkisp-vir0):
+v4l2-ctl | 	/dev/video0
+v4l2-ctl | 	/dev/video1
+v4l2-ctl | 	/dev/video2
+v4l2-ctl | 	/dev/video3
+v4l2-ctl | 	/dev/video4
+v4l2-ctl | 	/dev/video5
+v4l2-ctl | 	/dev/video6
+v4l2-ctl | 	/dev/media0
+v4l2-ctl | 
+v4l2-ctl | 3DO USB CAMERA: 3DO USB CAMERA (usb-fd880000.usb-1):
+v4l2-ctl | 	/dev/video9
+v4l2-ctl | 	/dev/video10
+v4l2-ctl | 	/dev/media1
+v4l2-ctl | 
++ libcamera-hello --list-cameras
+./dump_cameras.sh: line 17: libcamera-hello: command not found
+====================================
+DEVICE: /dev/video0
+====================================
++ v4l2-ctl -d /dev/video0 --info --list-formats-ext --list-fields --list-formats-out --list-fields-out --list-ctrls
+/dev/video0 | Driver Info:
+/dev/video0 | 	Driver name      : rkisp_v5
+/dev/video0 | 	Card type        : rkisp_mainpath
+/dev/video0 | 	Bus info         : platform:rkisp-vir0
+/dev/video0 | 	Driver version   : 1.8.0
+/dev/video0 | 	Capabilities     : 0x84201000
+/dev/video0 | 		Video Capture Multiplanar
+/dev/video0 | 		Streaming
+/dev/video0 | 		Extended Pix Format
+/dev/video0 | 		Device Capabilities
+/dev/video0 | 	Device Caps      : 0x04201000
+/dev/video0 | 		Video Capture Multiplanar
+/dev/video0 | 		Streaming
+/dev/video0 | 		Extended Pix Format
+/dev/video0 | Media Driver Info:
+/dev/video0 | 	Driver name      : rkisp-vir0
+/dev/video0 | 	Model            : rkisp0
+/dev/video0 | 	Serial           : 
+/dev/video0 | 	Bus info         : 
+/dev/video0 | 	Media version    : 4.19.255
+/dev/video0 | 	Hardware revision: 0x00000000 (0)
+/dev/video0 | 	Driver version   : 4.19.255
+/dev/video0 | Interface Info:
+/dev/video0 | 	ID               : 0x0300000e
+/dev/video0 | 	Type             : V4L Video
+/dev/video0 | Entity Info:
+/dev/video0 | 	ID               : 0x0000000d (13)
+/dev/video0 | 	Name             : rkisp_mainpath
+/dev/video0 | 	Function         : V4L2 I/O
+/dev/video0 | 	Pad 0x01000010   : 0: Sink
+/dev/video0 | 	  Link 0x02000011: from remote pad 0x1000004 of entity 'rkisp-isp-subdev': Data, Enabled
+/dev/video0 | ioctl: VIDIOC_ENUM_FMT
+/dev/video0 | 	Type: Video Capture Multiplanar
+/dev/video0 | 
+/dev/video0 | 	[0]: 'UYVY' (UYVY 4:2:2)
+/dev/video0 | 		Size: Stepwise 32x16 - 800x600 with step 8/8
+/dev/video0 | 	[1]: '422P' (Planar YUV 4:2:2)
+/dev/video0 | 		Size: Stepwise 32x16 - 800x600 with step 8/8
+/dev/video0 | 	[2]: 'NV16' (Y/CbCr 4:2:2)
+/dev/video0 | 		Size: Stepwise 32x16 - 800x600 with step 8/8
+/dev/video0 | 	[3]: 'NV61' (Y/CrCb 4:2:2)
+/dev/video0 | 		Size: Stepwise 32x16 - 800x600 with step 8/8
+/dev/video0 | 	[4]: 'YM16' (Planar YUV 4:2:2 (N-C))
+/dev/video0 | 		Size: Stepwise 32x16 - 800x600 with step 8/8
+/dev/video0 | 	[5]: 'NV21' (Y/CrCb 4:2:0)
+/dev/video0 | 		Size: Stepwise 32x16 - 800x600 with step 8/8
+/dev/video0 | 	[6]: 'NV12' (Y/CbCr 4:2:0)
+/dev/video0 | 		Size: Stepwise 32x16 - 800x600 with step 8/8
+/dev/video0 | 	[7]: 'NM21' (Y/CrCb 4:2:0 (N-C))
+/dev/video0 | 		Size: Stepwise 32x16 - 800x600 with step 8/8
+/dev/video0 | 	[8]: 'NM12' (Y/CbCr 4:2:0 (N-C))
+/dev/video0 | 		Size: Stepwise 32x16 - 800x600 with step 8/8
+/dev/video0 | 	[9]: 'YU12' (Planar YUV 4:2:0)
+/dev/video0 | 		Size: Stepwise 32x16 - 800x600 with step 8/8
+/dev/video0 | 	[10]: 'YM24' (Planar YUV 4:4:4 (N-C))
+/dev/video0 | 		Size: Stepwise 32x16 - 800x600 with step 8/8
+/dev/video0 | 	[11]: 'RGGB' (8-bit Bayer RGRG/GBGB)
+/dev/video0 | 		Size: Stepwise 32x16 - 800x600 with step 8/8
+/dev/video0 | 	[12]: 'GRBG' (8-bit Bayer GRGR/BGBG)
+/dev/video0 | 		Size: Stepwise 32x16 - 800x600 with step 8/8
+/dev/video0 | 	[13]: 'GBRG' (8-bit Bayer GBGB/RGRG)
+/dev/video0 | 		Size: Stepwise 32x16 - 800x600 with step 8/8
+/dev/video0 | 	[14]: 'BA81' (8-bit Bayer BGBG/GRGR)
+/dev/video0 | 		Size: Stepwise 32x16 - 800x600 with step 8/8
+/dev/video0 | 	[15]: 'RG10' (10-bit Bayer RGRG/GBGB)
+/dev/video0 | 		Size: Stepwise 32x16 - 800x600 with step 8/8
+/dev/video0 | 	[16]: 'BA10' (10-bit Bayer GRGR/BGBG)
+/dev/video0 | 		Size: Stepwise 32x16 - 800x600 with step 8/8
+/dev/video0 | 	[17]: 'GB10' (10-bit Bayer GBGB/RGRG)
+/dev/video0 | 		Size: Stepwise 32x16 - 800x600 with step 8/8
+/dev/video0 | 	[18]: 'BG10' (10-bit Bayer BGBG/GRGR)
+/dev/video0 | 		Size: Stepwise 32x16 - 800x600 with step 8/8
+/dev/video0 | 	[19]: 'RG12' (12-bit Bayer RGRG/GBGB)
+/dev/video0 | 		Size: Stepwise 32x16 - 800x600 with step 8/8
+/dev/video0 | 	[20]: 'BA12' (12-bit Bayer GRGR/BGBG)
+/dev/video0 | 		Size: Stepwise 32x16 - 800x600 with step 8/8
+/dev/video0 | 	[21]: 'GB12' (12-bit Bayer GBGB/RGRG)
+/dev/video0 | 		Size: Stepwise 32x16 - 800x600 with step 8/8
+/dev/video0 | 	[22]: 'BG12' (12-bit Bayer BGBG/GRGR)
+/dev/video0 | 		Size: Stepwise 32x16 - 800x600 with step 8/8
+/dev/video0 | Supported Video Fields:
+/dev/video0 | ioctl: VIDIOC_ENUM_FMT
+/dev/video0 | 	Type: Video Output Multiplanar
+/dev/video0 | 
+
+====================================
+DEVICE: /dev/video1
+====================================
++ v4l2-ctl -d /dev/video1 --info --list-formats-ext --list-fields --list-formats-out --list-fields-out --list-ctrls
+/dev/video1 | Driver Info:
+/dev/video1 | 	Driver name      : rkisp_v5
+/dev/video1 | 	Card type        : rkisp_selfpath
+/dev/video1 | 	Bus info         : platform:rkisp-vir0
+/dev/video1 | 	Driver version   : 1.8.0
+/dev/video1 | 	Capabilities     : 0x84201000
+/dev/video1 | 		Video Capture Multiplanar
+/dev/video1 | 		Streaming
+/dev/video1 | 		Extended Pix Format
+/dev/video1 | 		Device Capabilities
+/dev/video1 | 	Device Caps      : 0x04201000
+/dev/video1 | 		Video Capture Multiplanar
+/dev/video1 | 		Streaming
+/dev/video1 | 		Extended Pix Format
+/dev/video1 | Media Driver Info:
+/dev/video1 | 	Driver name      : rkisp-vir0
+/dev/video1 | 	Model            : rkisp0
+/dev/video1 | 	Serial           : 
+/dev/video1 | 	Bus info         : 
+/dev/video1 | 	Media version    : 4.19.255
+/dev/video1 | 	Hardware revision: 0x00000000 (0)
+/dev/video1 | 	Driver version   : 4.19.255
+/dev/video1 | Interface Info:
+/dev/video1 | 	ID               : 0x03000014
+/dev/video1 | 	Type             : V4L Video
+/dev/video1 | Entity Info:
+/dev/video1 | 	ID               : 0x00000013 (19)
+/dev/video1 | 	Name             : rkisp_selfpath
+/dev/video1 | 	Function         : V4L2 I/O
+/dev/video1 | 	Pad 0x01000016   : 0: Sink
+/dev/video1 | 	  Link 0x02000017: from remote pad 0x1000004 of entity 'rkisp-isp-subdev': Data, Enabled
+/dev/video1 | ioctl: VIDIOC_ENUM_FMT
+/dev/video1 | 	Type: Video Capture Multiplanar
+/dev/video1 | 
+/dev/video1 | 	[0]: 'UYVY' (UYVY 4:2:2)
+/dev/video1 | 		Size: Stepwise 32x16 - 800x600 with step 8/8
+/dev/video1 | 	[1]: '422P' (Planar YUV 4:2:2)
+/dev/video1 | 		Size: Stepwise 32x16 - 800x600 with step 8/8
+/dev/video1 | 	[2]: 'NV16' (Y/CbCr 4:2:2)
+/dev/video1 | 		Size: Stepwise 32x16 - 800x600 with step 8/8
+/dev/video1 | 	[3]: 'NV61' (Y/CrCb 4:2:2)
+/dev/video1 | 		Size: Stepwise 32x16 - 800x600 with step 8/8
+/dev/video1 | 	[4]: 'YM16' (Planar YUV 4:2:2 (N-C))
+/dev/video1 | 		Size: Stepwise 32x16 - 800x600 with step 8/8
+/dev/video1 | 	[5]: 'NV21' (Y/CrCb 4:2:0)
+/dev/video1 | 		Size: Stepwise 32x16 - 800x600 with step 8/8
+/dev/video1 | 	[6]: 'NV12' (Y/CbCr 4:2:0)
+/dev/video1 | 		Size: Stepwise 32x16 - 800x600 with step 8/8
+/dev/video1 | 	[7]: 'NM21' (Y/CrCb 4:2:0 (N-C))
+/dev/video1 | 		Size: Stepwise 32x16 - 800x600 with step 8/8
+/dev/video1 | 	[8]: 'NM12' (Y/CbCr 4:2:0 (N-C))
+/dev/video1 | 		Size: Stepwise 32x16 - 800x600 with step 8/8
+/dev/video1 | 	[9]: 'YU12' (Planar YUV 4:2:0)
+/dev/video1 | 		Size: Stepwise 32x16 - 800x600 with step 8/8
+/dev/video1 | 	[10]: 'YM24' (Planar YUV 4:4:4 (N-C))
+/dev/video1 | 		Size: Stepwise 32x16 - 800x600 with step 8/8
+/dev/video1 | 	[11]: 'GREY' (8-bit Greyscale)
+/dev/video1 | 		Size: Stepwise 32x16 - 800x600 with step 8/8
+/dev/video1 | 	[12]: 'XR24' (32-bit BGRX 8-8-8-8)
+/dev/video1 | 		Size: Stepwise 32x16 - 800x600 with step 8/8
+/dev/video1 | 	[13]: 'RGBP' (16-bit RGB 5-6-5)
+/dev/video1 | 		Size: Stepwise 32x16 - 800x600 with step 8/8
+/dev/video1 | 	[14]: 'FBCG' (Rockchip fbc gain, compressed)
+/dev/video1 | 		Size: Stepwise 32x16 - 800x600 with step 8/8
+/dev/video1 | Supported Video Fields:
+/dev/video1 | ioctl: VIDIOC_ENUM_FMT
+/dev/video1 | 	Type: Video Output Multiplanar
+/dev/video1 | 
+
+====================================
+DEVICE: /dev/video10
+====================================
++ v4l2-ctl -d /dev/video10 --info --list-formats-ext --list-fields --list-formats-out --list-fields-out --list-ctrls
+/dev/video10 | Driver Info:
+/dev/video10 | 	Driver name      : uvcvideo
+/dev/video10 | 	Card type        : 3DO USB CAMERA: 3DO USB CAMERA
+/dev/video10 | 	Bus info         : usb-fd880000.usb-1
+/dev/video10 | 	Driver version   : 4.19.255
+/dev/video10 | 	Capabilities     : 0x84a00001
+/dev/video10 | 		Video Capture
+/dev/video10 | 		Metadata Capture
+/dev/video10 | 		Streaming
+/dev/video10 | 		Extended Pix Format
+/dev/video10 | 		Device Capabilities
+/dev/video10 | 	Device Caps      : 0x04a00000
+/dev/video10 | 		Metadata Capture
+/dev/video10 | 		Streaming
+/dev/video10 | 		Extended Pix Format
+/dev/video10 | Media Driver Info:
+/dev/video10 | 	Driver name      : uvcvideo
+/dev/video10 | 	Model            : 3DO USB CAMERA: 3DO USB CAMERA
+/dev/video10 | 	Serial           : 01.00.00
+/dev/video10 | 	Bus info         : usb-fd880000.usb-1
+/dev/video10 | 	Media version    : 4.19.255
+/dev/video10 | 	Hardware revision: 0x00000328 (808)
+/dev/video10 | 	Driver version   : 4.19.255
+/dev/video10 | Interface Info:
+/dev/video10 | 	ID               : 0x03000005
+/dev/video10 | 	Type             : V4L Video
+/dev/video10 | Entity Info:
+/dev/video10 | 	ID               : 0x00000004 (4)
+/dev/video10 | 	Name             : 3DO USB CAMERA: 3DO USB CAMERA
+/dev/video10 | 	Function         : V4L2 I/O
+/dev/video10 | ioctl: VIDIOC_ENUM_FMT
+/dev/video10 | 	Type: Video Capture
+/dev/video10 | 
+/dev/video10 | ioctl: VIDIOC_ENUM_FMT
+/dev/video10 | 	Type: Video Output
+/dev/video10 | 
+
+====================================
+DEVICE: /dev/video2
+====================================
++ v4l2-ctl -d /dev/video2 --info --list-formats-ext --list-fields --list-formats-out --list-fields-out --list-ctrls
+/dev/video2 | Driver Info:
+/dev/video2 | 	Driver name      : rkisp_v5
+/dev/video2 | 	Card type        : rkisp_rawwr0
+/dev/video2 | 	Bus info         : platform:rkisp-vir0
+/dev/video2 | 	Driver version   : 1.8.0
+/dev/video2 | 	Capabilities     : 0x84201000
+/dev/video2 | 		Video Capture Multiplanar
+/dev/video2 | 		Streaming
+/dev/video2 | 		Extended Pix Format
+/dev/video2 | 		Device Capabilities
+/dev/video2 | 	Device Caps      : 0x04201000
+/dev/video2 | 		Video Capture Multiplanar
+/dev/video2 | 		Streaming
+/dev/video2 | 		Extended Pix Format
+/dev/video2 | Media Driver Info:
+/dev/video2 | 	Driver name      : rkisp-vir0
+/dev/video2 | 	Model            : rkisp0
+/dev/video2 | 	Serial           : 
+/dev/video2 | 	Bus info         : 
+/dev/video2 | 	Media version    : 4.19.255
+/dev/video2 | 	Hardware revision: 0x00000000 (0)
+/dev/video2 | 	Driver version   : 4.19.255
+/dev/video2 | Interface Info:
+/dev/video2 | 	ID               : 0x0300001a
+/dev/video2 | 	Type             : V4L Video
+/dev/video2 | Entity Info:
+/dev/video2 | 	ID               : 0x00000019 (25)
+/dev/video2 | 	Name             : rkisp_rawwr0
+/dev/video2 | 	Function         : V4L2 I/O
+/dev/video2 | 	Pad 0x0100001c   : 0: Sink
+/dev/video2 | 	  Link 0x0200001d: from remote pad 0x1000009 of entity 'rkisp-csi-subdev': Data, Enabled
+/dev/video2 | ioctl: VIDIOC_ENUM_FMT
+/dev/video2 | 	Type: Video Capture Multiplanar
+/dev/video2 | 
+/dev/video2 | 	[0]: 'RGGB' (8-bit Bayer RGRG/GBGB)
+/dev/video2 | 		Size: Stepwise 32x16 - 0x0 with step 8/8
+/dev/video2 | 	[1]: 'GRBG' (8-bit Bayer GRGR/BGBG)
+/dev/video2 | 		Size: Stepwise 32x16 - 0x0 with step 8/8
+/dev/video2 | 	[2]: 'GBRG' (8-bit Bayer GBGB/RGRG)
+/dev/video2 | 		Size: Stepwise 32x16 - 0x0 with step 8/8
+/dev/video2 | 	[3]: 'BA81' (8-bit Bayer BGBG/GRGR)
+/dev/video2 | 		Size: Stepwise 32x16 - 0x0 with step 8/8
+/dev/video2 | 	[4]: 'GREY' (8-bit Greyscale)
+/dev/video2 | 		Size: Stepwise 32x16 - 0x0 with step 8/8
+/dev/video2 | 	[5]: 'RG10' (10-bit Bayer RGRG/GBGB)
+/dev/video2 | 		Size: Stepwise 32x16 - 0x0 with step 8/8
+/dev/video2 | 	[6]: 'BA10' (10-bit Bayer GRGR/BGBG)
+/dev/video2 | 		Size: Stepwise 32x16 - 0x0 with step 8/8
+/dev/video2 | 	[7]: 'GB10' (10-bit Bayer GBGB/RGRG)
+/dev/video2 | 		Size: Stepwise 32x16 - 0x0 with step 8/8
+/dev/video2 | 	[8]: 'BG10' (10-bit Bayer BGBG/GRGR)
+/dev/video2 | 		Size: Stepwise 32x16 - 0x0 with step 8/8
+/dev/video2 | 	[9]: 'Y10 ' (10-bit Greyscale)
+/dev/video2 | 		Size: Stepwise 32x16 - 0x0 with step 8/8
+/dev/video2 | 	[10]: 'RG12' (12-bit Bayer RGRG/GBGB)
+/dev/video2 | 		Size: Stepwise 32x16 - 0x0 with step 8/8
+/dev/video2 | 	[11]: 'BA12' (12-bit Bayer GRGR/BGBG)
+/dev/video2 | 		Size: Stepwise 32x16 - 0x0 with step 8/8
+/dev/video2 | 	[12]: 'GB12' (12-bit Bayer GBGB/RGRG)
+/dev/video2 | 		Size: Stepwise 32x16 - 0x0 with step 8/8
+/dev/video2 | 	[13]: 'BG12' (12-bit Bayer BGBG/GRGR)
+/dev/video2 | 		Size: Stepwise 32x16 - 0x0 with step 8/8
+/dev/video2 | 	[14]: 'Y12 ' (12-bit Greyscale)
+/dev/video2 | 		Size: Stepwise 32x16 - 0x0 with step 8/8
+/dev/video2 | 	[15]: 'YUYV' (YUYV 4:2:2)
+/dev/video2 | 		Size: Stepwise 32x16 - 0x0 with step 8/8
+/dev/video2 | 	[16]: 'YVYU' (YVYU 4:2:2)
+/dev/video2 | 		Size: Stepwise 32x16 - 0x0 with step 8/8
+/dev/video2 | 	[17]: 'UYVY' (UYVY 4:2:2)
+/dev/video2 | 		Size: Stepwise 32x16 - 0x0 with step 8/8
+/dev/video2 | 	[18]: 'VYUY' (VYUY 4:2:2)
+/dev/video2 | 		Size: Stepwise 32x16 - 0x0 with step 8/8
+/dev/video2 | 	[19]: 'EBD8' (Embedded data 8-bit, compressed)
+/dev/video2 | 		Size: Stepwise 32x16 - 0x0 with step 8/8
+/dev/video2 | 	[20]: 'SPD6' (Shield pix data 16-bit, compressed)
+/dev/video2 | 		Size: Stepwise 32x16 - 0x0 with step 8/8
+/dev/video2 | Supported Video Fields:
+/dev/video2 | ioctl: VIDIOC_ENUM_FMT
+/dev/video2 | 	Type: Video Output Multiplanar
+/dev/video2 | 
+
+====================================
+DEVICE: /dev/video3
+====================================
++ v4l2-ctl -d /dev/video3 --info --list-formats-ext --list-fields --list-formats-out --list-fields-out --list-ctrls
+/dev/video3 | Driver Info:
+/dev/video3 | 	Driver name      : rkisp_v5
+/dev/video3 | 	Card type        : rkisp_rawwr2
+/dev/video3 | 	Bus info         : platform:rkisp-vir0
+/dev/video3 | 	Driver version   : 1.8.0
+/dev/video3 | 	Capabilities     : 0x84201000
+/dev/video3 | 		Video Capture Multiplanar
+/dev/video3 | 		Streaming
+/dev/video3 | 		Extended Pix Format
+/dev/video3 | 		Device Capabilities
+/dev/video3 | 	Device Caps      : 0x04201000
+/dev/video3 | 		Video Capture Multiplanar
+/dev/video3 | 		Streaming
+/dev/video3 | 		Extended Pix Format
+/dev/video3 | Media Driver Info:
+/dev/video3 | 	Driver name      : rkisp-vir0
+/dev/video3 | 	Model            : rkisp0
+/dev/video3 | 	Serial           : 
+/dev/video3 | 	Bus info         : 
+/dev/video3 | 	Media version    : 4.19.255
+/dev/video3 | 	Hardware revision: 0x00000000 (0)
+/dev/video3 | 	Driver version   : 4.19.255
+/dev/video3 | Interface Info:
+/dev/video3 | 	ID               : 0x03000020
+/dev/video3 | 	Type             : V4L Video
+/dev/video3 | Entity Info:
+/dev/video3 | 	ID               : 0x0000001f (31)
+/dev/video3 | 	Name             : rkisp_rawwr2
+/dev/video3 | 	Function         : V4L2 I/O
+/dev/video3 | 	Pad 0x01000022   : 0: Sink
+/dev/video3 | 	  Link 0x02000023: from remote pad 0x100000b of entity 'rkisp-csi-subdev': Data, Enabled
+/dev/video3 | ioctl: VIDIOC_ENUM_FMT
+/dev/video3 | 	Type: Video Capture Multiplanar
+/dev/video3 | 
+/dev/video3 | 	[0]: 'RGGB' (8-bit Bayer RGRG/GBGB)
+/dev/video3 | 		Size: Stepwise 32x16 - 0x0 with step 8/8
+/dev/video3 | 	[1]: 'GRBG' (8-bit Bayer GRGR/BGBG)
+/dev/video3 | 		Size: Stepwise 32x16 - 0x0 with step 8/8
+/dev/video3 | 	[2]: 'GBRG' (8-bit Bayer GBGB/RGRG)
+/dev/video3 | 		Size: Stepwise 32x16 - 0x0 with step 8/8
+/dev/video3 | 	[3]: 'BA81' (8-bit Bayer BGBG/GRGR)
+/dev/video3 | 		Size: Stepwise 32x16 - 0x0 with step 8/8
+/dev/video3 | 	[4]: 'GREY' (8-bit Greyscale)
+/dev/video3 | 		Size: Stepwise 32x16 - 0x0 with step 8/8
+/dev/video3 | 	[5]: 'RG10' (10-bit Bayer RGRG/GBGB)
+/dev/video3 | 		Size: Stepwise 32x16 - 0x0 with step 8/8
+/dev/video3 | 	[6]: 'BA10' (10-bit Bayer GRGR/BGBG)
+/dev/video3 | 		Size: Stepwise 32x16 - 0x0 with step 8/8
+/dev/video3 | 	[7]: 'GB10' (10-bit Bayer GBGB/RGRG)
+/dev/video3 | 		Size: Stepwise 32x16 - 0x0 with step 8/8
+/dev/video3 | 	[8]: 'BG10' (10-bit Bayer BGBG/GRGR)
+/dev/video3 | 		Size: Stepwise 32x16 - 0x0 with step 8/8
+/dev/video3 | 	[9]: 'Y10 ' (10-bit Greyscale)
+/dev/video3 | 		Size: Stepwise 32x16 - 0x0 with step 8/8
+/dev/video3 | 	[10]: 'RG12' (12-bit Bayer RGRG/GBGB)
+/dev/video3 | 		Size: Stepwise 32x16 - 0x0 with step 8/8
+/dev/video3 | 	[11]: 'BA12' (12-bit Bayer GRGR/BGBG)
+/dev/video3 | 		Size: Stepwise 32x16 - 0x0 with step 8/8
+/dev/video3 | 	[12]: 'GB12' (12-bit Bayer GBGB/RGRG)
+/dev/video3 | 		Size: Stepwise 32x16 - 0x0 with step 8/8
+/dev/video3 | 	[13]: 'BG12' (12-bit Bayer BGBG/GRGR)
+/dev/video3 | 		Size: Stepwise 32x16 - 0x0 with step 8/8
+/dev/video3 | 	[14]: 'Y12 ' (12-bit Greyscale)
+/dev/video3 | 		Size: Stepwise 32x16 - 0x0 with step 8/8
+/dev/video3 | 	[15]: 'YUYV' (YUYV 4:2:2)
+/dev/video3 | 		Size: Stepwise 32x16 - 0x0 with step 8/8
+/dev/video3 | 	[16]: 'YVYU' (YVYU 4:2:2)
+/dev/video3 | 		Size: Stepwise 32x16 - 0x0 with step 8/8
+/dev/video3 | 	[17]: 'UYVY' (UYVY 4:2:2)
+/dev/video3 | 		Size: Stepwise 32x16 - 0x0 with step 8/8
+/dev/video3 | 	[18]: 'VYUY' (VYUY 4:2:2)
+/dev/video3 | 		Size: Stepwise 32x16 - 0x0 with step 8/8
+/dev/video3 | 	[19]: 'EBD8' (Embedded data 8-bit, compressed)
+/dev/video3 | 		Size: Stepwise 32x16 - 0x0 with step 8/8
+/dev/video3 | 	[20]: 'SPD6' (Shield pix data 16-bit, compressed)
+/dev/video3 | 		Size: Stepwise 32x16 - 0x0 with step 8/8
+/dev/video3 | Supported Video Fields:
+/dev/video3 | ioctl: VIDIOC_ENUM_FMT
+/dev/video3 | 	Type: Video Output Multiplanar
+/dev/video3 | 
+
+====================================
+DEVICE: /dev/video4
+====================================
++ v4l2-ctl -d /dev/video4 --info --list-formats-ext --list-fields --list-formats-out --list-fields-out --list-ctrls
+/dev/video4 | Driver Info:
+/dev/video4 | 	Driver name      : rkisp_v5
+/dev/video4 | 	Card type        : rkisp_rawwr3
+/dev/video4 | 	Bus info         : platform:rkisp-vir0
+/dev/video4 | 	Driver version   : 1.8.0
+/dev/video4 | 	Capabilities     : 0x84201000
+/dev/video4 | 		Video Capture Multiplanar
+/dev/video4 | 		Streaming
+/dev/video4 | 		Extended Pix Format
+/dev/video4 | 		Device Capabilities
+/dev/video4 | 	Device Caps      : 0x04201000
+/dev/video4 | 		Video Capture Multiplanar
+/dev/video4 | 		Streaming
+/dev/video4 | 		Extended Pix Format
+/dev/video4 | Media Driver Info:
+/dev/video4 | 	Driver name      : rkisp-vir0
+/dev/video4 | 	Model            : rkisp0
+/dev/video4 | 	Serial           : 
+/dev/video4 | 	Bus info         : 
+/dev/video4 | 	Media version    : 4.19.255
+/dev/video4 | 	Hardware revision: 0x00000000 (0)
+/dev/video4 | 	Driver version   : 4.19.255
+/dev/video4 | Interface Info:
+/dev/video4 | 	ID               : 0x03000026
+/dev/video4 | 	Type             : V4L Video
+/dev/video4 | Entity Info:
+/dev/video4 | 	ID               : 0x00000025 (37)
+/dev/video4 | 	Name             : rkisp_rawwr3
+/dev/video4 | 	Function         : V4L2 I/O
+/dev/video4 | 	Pad 0x01000028   : 0: Sink
+/dev/video4 | 	  Link 0x02000029: from remote pad 0x100000c of entity 'rkisp-csi-subdev': Data, Enabled
+/dev/video4 | ioctl: VIDIOC_ENUM_FMT
+/dev/video4 | 	Type: Video Capture Multiplanar
+/dev/video4 | 
+/dev/video4 | 	[0]: 'RGGB' (8-bit Bayer RGRG/GBGB)
+/dev/video4 | 		Size: Stepwise 32x16 - 0x0 with step 8/8
+/dev/video4 | 	[1]: 'GRBG' (8-bit Bayer GRGR/BGBG)
+/dev/video4 | 		Size: Stepwise 32x16 - 0x0 with step 8/8
+/dev/video4 | 	[2]: 'GBRG' (8-bit Bayer GBGB/RGRG)
+/dev/video4 | 		Size: Stepwise 32x16 - 0x0 with step 8/8
+/dev/video4 | 	[3]: 'BA81' (8-bit Bayer BGBG/GRGR)
+/dev/video4 | 		Size: Stepwise 32x16 - 0x0 with step 8/8
+/dev/video4 | 	[4]: 'GREY' (8-bit Greyscale)
+/dev/video4 | 		Size: Stepwise 32x16 - 0x0 with step 8/8
+/dev/video4 | 	[5]: 'RG10' (10-bit Bayer RGRG/GBGB)
+/dev/video4 | 		Size: Stepwise 32x16 - 0x0 with step 8/8
+/dev/video4 | 	[6]: 'BA10' (10-bit Bayer GRGR/BGBG)
+/dev/video4 | 		Size: Stepwise 32x16 - 0x0 with step 8/8
+/dev/video4 | 	[7]: 'GB10' (10-bit Bayer GBGB/RGRG)
+/dev/video4 | 		Size: Stepwise 32x16 - 0x0 with step 8/8
+/dev/video4 | 	[8]: 'BG10' (10-bit Bayer BGBG/GRGR)
+/dev/video4 | 		Size: Stepwise 32x16 - 0x0 with step 8/8
+/dev/video4 | 	[9]: 'Y10 ' (10-bit Greyscale)
+/dev/video4 | 		Size: Stepwise 32x16 - 0x0 with step 8/8
+/dev/video4 | 	[10]: 'RG12' (12-bit Bayer RGRG/GBGB)
+/dev/video4 | 		Size: Stepwise 32x16 - 0x0 with step 8/8
+/dev/video4 | 	[11]: 'BA12' (12-bit Bayer GRGR/BGBG)
+/dev/video4 | 		Size: Stepwise 32x16 - 0x0 with step 8/8
+/dev/video4 | 	[12]: 'GB12' (12-bit Bayer GBGB/RGRG)
+/dev/video4 | 		Size: Stepwise 32x16 - 0x0 with step 8/8
+/dev/video4 | 	[13]: 'BG12' (12-bit Bayer BGBG/GRGR)
+/dev/video4 | 		Size: Stepwise 32x16 - 0x0 with step 8/8
+/dev/video4 | 	[14]: 'Y12 ' (12-bit Greyscale)
+/dev/video4 | 		Size: Stepwise 32x16 - 0x0 with step 8/8
+/dev/video4 | 	[15]: 'YUYV' (YUYV 4:2:2)
+/dev/video4 | 		Size: Stepwise 32x16 - 0x0 with step 8/8
+/dev/video4 | 	[16]: 'YVYU' (YVYU 4:2:2)
+/dev/video4 | 		Size: Stepwise 32x16 - 0x0 with step 8/8
+/dev/video4 | 	[17]: 'UYVY' (UYVY 4:2:2)
+/dev/video4 | 		Size: Stepwise 32x16 - 0x0 with step 8/8
+/dev/video4 | 	[18]: 'VYUY' (VYUY 4:2:2)
+/dev/video4 | 		Size: Stepwise 32x16 - 0x0 with step 8/8
+/dev/video4 | 	[19]: 'EBD8' (Embedded data 8-bit, compressed)
+/dev/video4 | 		Size: Stepwise 32x16 - 0x0 with step 8/8
+/dev/video4 | 	[20]: 'SPD6' (Shield pix data 16-bit, compressed)
+/dev/video4 | 		Size: Stepwise 32x16 - 0x0 with step 8/8
+/dev/video4 | Supported Video Fields:
+/dev/video4 | ioctl: VIDIOC_ENUM_FMT
+/dev/video4 | 	Type: Video Output Multiplanar
+/dev/video4 | 
+
+====================================
+DEVICE: /dev/video5
+====================================
++ v4l2-ctl -d /dev/video5 --info --list-formats-ext --list-fields --list-formats-out --list-fields-out --list-ctrls
+/dev/video5 | Driver Info:
+/dev/video5 | 	Driver name      : rkisp_v5
+/dev/video5 | 	Card type        : rkisp_rawrd0_m
+/dev/video5 | 	Bus info         : platform:rkisp-vir0
+/dev/video5 | 	Driver version   : 1.8.0
+/dev/video5 | 	Capabilities     : 0x84202000
+/dev/video5 | 		Video Output Multiplanar
+/dev/video5 | 		Streaming
+/dev/video5 | 		Extended Pix Format
+/dev/video5 | 		Device Capabilities
+/dev/video5 | 	Device Caps      : 0x04202000
+/dev/video5 | 		Video Output Multiplanar
+/dev/video5 | 		Streaming
+/dev/video5 | 		Extended Pix Format
+/dev/video5 | Media Driver Info:
+/dev/video5 | 	Driver name      : rkisp-vir0
+/dev/video5 | 	Model            : rkisp0
+/dev/video5 | 	Serial           : 
+/dev/video5 | 	Bus info         : 
+/dev/video5 | 	Media version    : 4.19.255
+/dev/video5 | 	Hardware revision: 0x00000000 (0)
+/dev/video5 | 	Driver version   : 4.19.255
+/dev/video5 | Interface Info:
+/dev/video5 | 	ID               : 0x0300002c
+/dev/video5 | 	Type             : V4L Video
+/dev/video5 | Entity Info:
+/dev/video5 | 	ID               : 0x0000002b (43)
+/dev/video5 | 	Name             : rkisp_rawrd0_m
+/dev/video5 | 	Function         : V4L2 I/O
+/dev/video5 | 	Pad 0x0100002e   : 0: Source
+/dev/video5 | 	  Link 0x0200002f: to remote pad 0x1000002 of entity 'rkisp-isp-subdev': Data
+/dev/video5 | ioctl: VIDIOC_ENUM_FMT
+/dev/video5 | 	Type: Video Capture Multiplanar
+/dev/video5 | 
+/dev/video5 | ioctl: VIDIOC_ENUM_FMT
+/dev/video5 | 	Type: Video Output Multiplanar
+/dev/video5 | 
+/dev/video5 | 	[0]: 'RGGB' (8-bit Bayer RGRG/GBGB)
+/dev/video5 | 	[1]: 'GRBG' (8-bit Bayer GRGR/BGBG)
+/dev/video5 | 	[2]: 'GBRG' (8-bit Bayer GBGB/RGRG)
+/dev/video5 | 	[3]: 'BA81' (8-bit Bayer BGBG/GRGR)
+/dev/video5 | 	[4]: 'GREY' (8-bit Greyscale)
+/dev/video5 | 	[5]: 'RG10' (10-bit Bayer RGRG/GBGB)
+/dev/video5 | 	[6]: 'BA10' (10-bit Bayer GRGR/BGBG)
+/dev/video5 | 	[7]: 'GB10' (10-bit Bayer GBGB/RGRG)
+/dev/video5 | 	[8]: 'BG10' (10-bit Bayer BGBG/GRGR)
+/dev/video5 | 	[9]: 'Y10 ' (10-bit Greyscale)
+/dev/video5 | 	[10]: 'RG12' (12-bit Bayer RGRG/GBGB)
+/dev/video5 | 	[11]: 'BA12' (12-bit Bayer GRGR/BGBG)
+/dev/video5 | 	[12]: 'GB12' (12-bit Bayer GBGB/RGRG)
+/dev/video5 | 	[13]: 'BG12' (12-bit Bayer BGBG/GRGR)
+/dev/video5 | 	[14]: 'Y12 ' (12-bit Greyscale)
+/dev/video5 | 	[15]: 'YUYV' (YUYV 4:2:2)
+/dev/video5 | 	[16]: 'YVYU' (YVYU 4:2:2)
+/dev/video5 | 	[17]: 'UYVY' (UYVY 4:2:2)
+/dev/video5 | 	[18]: 'VYUY' (VYUY 4:2:2)
+/dev/video5 | Supported Video Output Fields:
+
+====================================
+DEVICE: /dev/video6
+====================================
++ v4l2-ctl -d /dev/video6 --info --list-formats-ext --list-fields --list-formats-out --list-fields-out --list-ctrls
+/dev/video6 | Driver Info:
+/dev/video6 | 	Driver name      : rkisp_v5
+/dev/video6 | 	Card type        : rkisp_rawrd2_s
+/dev/video6 | 	Bus info         : platform:rkisp-vir0
+/dev/video6 | 	Driver version   : 1.8.0
+/dev/video6 | 	Capabilities     : 0x84202000
+/dev/video6 | 		Video Output Multiplanar
+/dev/video6 | 		Streaming
+/dev/video6 | 		Extended Pix Format
+/dev/video6 | 		Device Capabilities
+/dev/video6 | 	Device Caps      : 0x04202000
+/dev/video6 | 		Video Output Multiplanar
+/dev/video6 | 		Streaming
+/dev/video6 | 		Extended Pix Format
+/dev/video6 | Media Driver Info:
+/dev/video6 | 	Driver name      : rkisp-vir0
+/dev/video6 | 	Model            : rkisp0
+/dev/video6 | 	Serial           : 
+/dev/video6 | 	Bus info         : 
+/dev/video6 | 	Media version    : 4.19.255
+/dev/video6 | 	Hardware revision: 0x00000000 (0)
+/dev/video6 | 	Driver version   : 4.19.255
+/dev/video6 | Interface Info:
+/dev/video6 | 	ID               : 0x03000032
+/dev/video6 | 	Type             : V4L Video
+/dev/video6 | Entity Info:
+/dev/video6 | 	ID               : 0x00000031 (49)
+/dev/video6 | 	Name             : rkisp_rawrd2_s
+/dev/video6 | 	Function         : V4L2 I/O
+/dev/video6 | 	Pad 0x01000034   : 0: Source
+/dev/video6 | 	  Link 0x02000035: to remote pad 0x1000002 of entity 'rkisp-isp-subdev': Data
+/dev/video6 | ioctl: VIDIOC_ENUM_FMT
+/dev/video6 | 	Type: Video Capture Multiplanar
+/dev/video6 | 
+/dev/video6 | ioctl: VIDIOC_ENUM_FMT
+/dev/video6 | 	Type: Video Output Multiplanar
+/dev/video6 | 
+/dev/video6 | 	[0]: 'RGGB' (8-bit Bayer RGRG/GBGB)
+/dev/video6 | 	[1]: 'GRBG' (8-bit Bayer GRGR/BGBG)
+/dev/video6 | 	[2]: 'GBRG' (8-bit Bayer GBGB/RGRG)
+/dev/video6 | 	[3]: 'BA81' (8-bit Bayer BGBG/GRGR)
+/dev/video6 | 	[4]: 'GREY' (8-bit Greyscale)
+/dev/video6 | 	[5]: 'RG10' (10-bit Bayer RGRG/GBGB)
+/dev/video6 | 	[6]: 'BA10' (10-bit Bayer GRGR/BGBG)
+/dev/video6 | 	[7]: 'GB10' (10-bit Bayer GBGB/RGRG)
+/dev/video6 | 	[8]: 'BG10' (10-bit Bayer BGBG/GRGR)
+/dev/video6 | 	[9]: 'Y10 ' (10-bit Greyscale)
+/dev/video6 | 	[10]: 'RG12' (12-bit Bayer RGRG/GBGB)
+/dev/video6 | 	[11]: 'BA12' (12-bit Bayer GRGR/BGBG)
+/dev/video6 | 	[12]: 'GB12' (12-bit Bayer GBGB/RGRG)
+/dev/video6 | 	[13]: 'BG12' (12-bit Bayer BGBG/GRGR)
+/dev/video6 | 	[14]: 'Y12 ' (12-bit Greyscale)
+/dev/video6 | 	[15]: 'YUYV' (YUYV 4:2:2)
+/dev/video6 | 	[16]: 'YVYU' (YVYU 4:2:2)
+/dev/video6 | 	[17]: 'UYVY' (UYVY 4:2:2)
+/dev/video6 | 	[18]: 'VYUY' (VYUY 4:2:2)
+/dev/video6 | Supported Video Output Fields:
+
+====================================
+DEVICE: /dev/video7
+====================================
++ v4l2-ctl -d /dev/video7 --info --list-formats-ext --list-fields --list-formats-out --list-fields-out --list-ctrls
+/dev/video7 | Driver Info:
+/dev/video7 | 	Driver name      : rkisp_v5
+/dev/video7 | 	Card type        : rkisp-statistics
+/dev/video7 | 	Bus info         : platform: rkisp
+/dev/video7 | 	Driver version   : 1.8.0
+/dev/video7 | 	Capabilities     : 0x84a00000
+/dev/video7 | 		Metadata Capture
+/dev/video7 | 		Streaming
+/dev/video7 | 		Extended Pix Format
+/dev/video7 | 		Device Capabilities
+/dev/video7 | 	Device Caps      : 0x04a00000
+/dev/video7 | 		Metadata Capture
+/dev/video7 | 		Streaming
+/dev/video7 | 		Extended Pix Format
+/dev/video7 | Media Driver Info:
+/dev/video7 | 	Driver name      : rkisp-vir0
+/dev/video7 | 	Model            : rkisp0
+/dev/video7 | 	Serial           : 
+/dev/video7 | 	Bus info         : 
+/dev/video7 | 	Media version    : 4.19.255
+/dev/video7 | 	Hardware revision: 0x00000000 (0)
+/dev/video7 | 	Driver version   : 4.19.255
+/dev/video7 | Interface Info:
+/dev/video7 | 	ID               : 0x03000039
+/dev/video7 | 	Type             : V4L Video
+/dev/video7 | Entity Info:
+/dev/video7 | 	ID               : 0x00000037 (55)
+/dev/video7 | 	Name             : rkisp-statistics
+/dev/video7 | 	Function         : V4L2 I/O
+/dev/video7 | 	Pad 0x01000038   : 0: Sink
+/dev/video7 | 	  Link 0x0200003b: from remote pad 0x1000005 of entity 'rkisp-isp-subdev': Data, Enabled
+/dev/video7 | ioctl: VIDIOC_ENUM_FMT
+/dev/video7 | 	Type: Video Capture
+/dev/video7 | 
+/dev/video7 | ioctl: VIDIOC_ENUM_FMT
+/dev/video7 | 	Type: Video Output
+/dev/video7 | 
+
+====================================
+DEVICE: /dev/video8
+====================================
++ v4l2-ctl -d /dev/video8 --info --list-formats-ext --list-fields --list-formats-out --list-fields-out --list-ctrls
+/dev/video8 | Driver Info:
+/dev/video8 | 	Driver name      : rkisp_v5
+/dev/video8 | 	Card type        : rkisp-input-params
+/dev/video8 | 	Bus info         : platform: rkisp
+/dev/video8 | 	Driver version   : 1.8.0
+/dev/video8 | 	Capabilities     : 0x8c200000
+/dev/video8 | 		Metadata Output
+/dev/video8 | 		Streaming
+/dev/video8 | 		Extended Pix Format
+/dev/video8 | 		Device Capabilities
+/dev/video8 | 	Device Caps      : 0x0c200000
+/dev/video8 | 		Metadata Output
+/dev/video8 | 		Streaming
+/dev/video8 | 		Extended Pix Format
+/dev/video8 | Media Driver Info:
+/dev/video8 | 	Driver name      : rkisp-vir0
+/dev/video8 | 	Model            : rkisp0
+/dev/video8 | 	Serial           : 
+/dev/video8 | 	Bus info         : 
+/dev/video8 | 	Media version    : 4.19.255
+/dev/video8 | 	Hardware revision: 0x00000000 (0)
+/dev/video8 | 	Driver version   : 4.19.255
+/dev/video8 | Interface Info:
+/dev/video8 | 	ID               : 0x0300003f
+/dev/video8 | 	Type             : V4L Video
+/dev/video8 | Entity Info:
+/dev/video8 | 	ID               : 0x0000003d (61)
+/dev/video8 | 	Name             : rkisp-input-params
+/dev/video8 | 	Function         : V4L2 I/O
+/dev/video8 | 	Pad 0x0100003e   : 0: Source
+/dev/video8 | 	  Link 0x02000041: to remote pad 0x1000003 of entity 'rkisp-isp-subdev': Data, Enabled
+/dev/video8 | ioctl: VIDIOC_ENUM_FMT
+/dev/video8 | 	Type: Video Capture
+/dev/video8 | 
+/dev/video8 | ioctl: VIDIOC_ENUM_FMT
+/dev/video8 | 	Type: Video Output
+/dev/video8 | 
+
+====================================
+DEVICE: /dev/video9
+====================================
++ v4l2-ctl -d /dev/video9 --info --list-formats-ext --list-fields --list-formats-out --list-fields-out --list-ctrls
+/dev/video9 | Driver Info:
+/dev/video9 | 	Driver name      : uvcvideo
+/dev/video9 | 	Card type        : 3DO USB CAMERA: 3DO USB CAMERA
+/dev/video9 | 	Bus info         : usb-fd880000.usb-1
+/dev/video9 | 	Driver version   : 4.19.255
+/dev/video9 | 	Capabilities     : 0x84a00001
+/dev/video9 | 		Video Capture
+/dev/video9 | 		Metadata Capture
+/dev/video9 | 		Streaming
+/dev/video9 | 		Extended Pix Format
+/dev/video9 | 		Device Capabilities
+/dev/video9 | 	Device Caps      : 0x04200001
+/dev/video9 | 		Video Capture
+/dev/video9 | 		Streaming
+/dev/video9 | 		Extended Pix Format
+/dev/video9 | Media Driver Info:
+/dev/video9 | 	Driver name      : uvcvideo
+/dev/video9 | 	Model            : 3DO USB CAMERA: 3DO USB CAMERA
+/dev/video9 | 	Serial           : 01.00.00
+/dev/video9 | 	Bus info         : usb-fd880000.usb-1
+/dev/video9 | 	Media version    : 4.19.255
+/dev/video9 | 	Hardware revision: 0x00000328 (808)
+/dev/video9 | 	Driver version   : 4.19.255
+/dev/video9 | Interface Info:
+/dev/video9 | 	ID               : 0x03000002
+/dev/video9 | 	Type             : V4L Video
+/dev/video9 | Entity Info:
+/dev/video9 | 	ID               : 0x00000001 (1)
+/dev/video9 | 	Name             : 3DO USB CAMERA: 3DO USB CAMERA
+/dev/video9 | 	Function         : V4L2 I/O
+/dev/video9 | 	Flags         : default
+/dev/video9 | 	Pad 0x01000007   : 0: Sink
+/dev/video9 | 	  Link 0x02000013: from remote pad 0x100000a of entity 'Extension 4': Data, Enabled, Immutable
+/dev/video9 |                      brightness 0x00980900 (int)    : min=-64 max=64 step=1 default=-15 value=-15
+/dev/video9 |                        contrast 0x00980901 (int)    : min=0 max=95 step=1 default=4 value=2
+/dev/video9 |                      saturation 0x00980902 (int)    : min=0 max=100 step=1 default=70 value=70
+/dev/video9 |                             hue 0x00980903 (int)    : min=-2000 max=2000 step=1 default=0 value=0
+/dev/video9 |  white_balance_temperature_auto 0x0098090c (bool)   : default=1 value=1
+/dev/video9 |                           gamma 0x00980910 (int)    : min=100 max=300 step=1 default=115 value=115
+/dev/video9 |            power_line_frequency 0x00980918 (menu)   : min=0 max=2 default=1 value=1
+/dev/video9 |       white_balance_temperature 0x0098091a (int)    : min=2800 max=6500 step=1 default=4600 value=4600 flags=inactive
+/dev/video9 |                       sharpness 0x0098091b (int)    : min=1 max=7 step=1 default=1 value=2
+/dev/video9 |          backlight_compensation 0x0098091c (int)    : min=0 max=1 step=1 default=0 value=0
+/dev/video9 |                   exposure_auto 0x009a0901 (menu)   : min=0 max=3 default=3 value=3
+/dev/video9 |               exposure_absolute 0x009a0902 (int)    : min=3 max=2047 step=1 default=166 value=166 flags=inactive
+/dev/video9 |                  focus_absolute 0x009a090a (int)    : min=0 max=1023 step=1 default=0 value=0 flags=inactive
+/dev/video9 |                      focus_auto 0x009a090c (bool)   : default=0 value=1
+/dev/video9 | ioctl: VIDIOC_ENUM_FMT
+/dev/video9 | 	Type: Video Capture
+/dev/video9 | 
+/dev/video9 | 	[0]: 'MJPG' (Motion-JPEG, compressed)
+/dev/video9 | 		Size: Discrete 1920x1080
+/dev/video9 | 			Interval: Discrete 0.017s (60.000 fps)
+/dev/video9 | 			Interval: Discrete 0.033s (30.000 fps)
+/dev/video9 | 		Size: Discrete 3840x2160
+/dev/video9 | 			Interval: Discrete 0.033s (30.000 fps)
+/dev/video9 | 		Size: Discrete 640x480
+/dev/video9 | 			Interval: Discrete 0.017s (60.000 fps)
+/dev/video9 | 			Interval: Discrete 0.033s (30.000 fps)
+/dev/video9 | 		Size: Discrete 160x120
+/dev/video9 | 			Interval: Discrete 0.017s (60.000 fps)
+/dev/video9 | 			Interval: Discrete 0.033s (30.000 fps)
+/dev/video9 | 		Size: Discrete 176x144
+/dev/video9 | 			Interval: Discrete 0.017s (60.000 fps)
+/dev/video9 | 			Interval: Discrete 0.033s (30.000 fps)
+/dev/video9 | 		Size: Discrete 320x180
+/dev/video9 | 			Interval: Discrete 0.017s (60.000 fps)
+/dev/video9 | 			Interval: Discrete 0.033s (30.000 fps)
+/dev/video9 | 		Size: Discrete 320x240
+/dev/video9 | 			Interval: Discrete 0.017s (60.000 fps)
+/dev/video9 | 			Interval: Discrete 0.033s (30.000 fps)
+/dev/video9 | 		Size: Discrete 352x288
+/dev/video9 | 			Interval: Discrete 0.017s (60.000 fps)
+/dev/video9 | 			Interval: Discrete 0.033s (30.000 fps)
+/dev/video9 | 		Size: Discrete 340x340
+/dev/video9 | 			Interval: Discrete 0.017s (60.000 fps)
+/dev/video9 | 			Interval: Discrete 0.033s (30.000 fps)
+/dev/video9 | 		Size: Discrete 424x240
+/dev/video9 | 			Interval: Discrete 0.017s (60.000 fps)
+/dev/video9 | 			Interval: Discrete 0.033s (30.000 fps)
+/dev/video9 | 		Size: Discrete 440x440
+/dev/video9 | 			Interval: Discrete 0.017s (60.000 fps)
+/dev/video9 | 			Interval: Discrete 0.033s (30.000 fps)
+/dev/video9 | 		Size: Discrete 480x270
+/dev/video9 | 			Interval: Discrete 0.017s (60.000 fps)
+/dev/video9 | 			Interval: Discrete 0.033s (30.000 fps)
+/dev/video9 | 		Size: Discrete 640x360
+/dev/video9 | 			Interval: Discrete 0.033s (30.000 fps)
+/dev/video9 | 		Size: Discrete 800x448
+/dev/video9 | 			Interval: Discrete 0.017s (60.000 fps)
+/dev/video9 | 			Interval: Discrete 0.033s (30.000 fps)
+/dev/video9 | 		Size: Discrete 800x600
+/dev/video9 | 			Interval: Discrete 0.017s (60.000 fps)
+/dev/video9 | 			Interval: Discrete 0.033s (30.000 fps)
+/dev/video9 | 		Size: Discrete 848x480
+/dev/video9 | 			Interval: Discrete 0.017s (60.000 fps)
+/dev/video9 | 			Interval: Discrete 0.033s (30.000 fps)
+/dev/video9 | 		Size: Discrete 960x540
+/dev/video9 | 			Interval: Discrete 0.017s (60.000 fps)
+/dev/video9 | 			Interval: Discrete 0.033s (30.000 fps)
+/dev/video9 | 		Size: Discrete 1024x576
+/dev/video9 | 			Interval: Discrete 0.017s (60.000 fps)
+/dev/video9 | 			Interval: Discrete 0.033s (30.000 fps)
+/dev/video9 | 		Size: Discrete 1280x720
+/dev/video9 | 			Interval: Discrete 0.017s (60.000 fps)
+/dev/video9 | 			Interval: Discrete 0.033s (30.000 fps)
+/dev/video9 | 		Size: Discrete 1600x896
+/dev/video9 | 			Interval: Discrete 0.017s (60.000 fps)
+/dev/video9 | 			Interval: Discrete 0.033s (30.000 fps)
+/dev/video9 | 		Size: Discrete 2560x1440
+/dev/video9 | 			Interval: Discrete 0.033s (30.000 fps)
+/dev/video9 | 		Size: Discrete 3840x3104
+/dev/video9 | 			Interval: Discrete 0.033s (30.000 fps)
+/dev/video9 | 		Size: Discrete 3264x2448
+/dev/video9 | 			Interval: Discrete 0.033s (30.000 fps)
+/dev/video9 | 		Size: Discrete 2592x1944
+/dev/video9 | 			Interval: Discrete 0.033s (30.000 fps)
+/dev/video9 | 		Size: Discrete 2048x1536
+/dev/video9 | 			Interval: Discrete 0.033s (30.000 fps)
+/dev/video9 | 		Size: Discrete 1600x1200
+/dev/video9 | 			Interval: Discrete 0.033s (30.000 fps)
+/dev/video9 | 		Size: Discrete 1024x768
+/dev/video9 | 			Interval: Discrete 0.017s (60.000 fps)
+/dev/video9 | 			Interval: Discrete 0.033s (30.000 fps)
+/dev/video9 | 	[1]: 'YUYV' (YUYV 4:2:2)
+/dev/video9 | 		Size: Discrete 1920x1080
+/dev/video9 | 			Interval: Discrete 0.200s (5.000 fps)
+/dev/video9 | 		Size: Discrete 3840x2160
+/dev/video9 | 			Interval: Discrete 1.000s (1.000 fps)
+/dev/video9 | 		Size: Discrete 640x480
+/dev/video9 | 			Interval: Discrete 0.033s (30.000 fps)
+/dev/video9 | 		Size: Discrete 160x120
+/dev/video9 | 			Interval: Discrete 0.033s (30.000 fps)
+/dev/video9 | 		Size: Discrete 176x144
+/dev/video9 | 			Interval: Discrete 0.033s (30.000 fps)
+/dev/video9 | 		Size: Discrete 320x180
+/dev/video9 | 			Interval: Discrete 0.033s (30.000 fps)
+/dev/video9 | 		Size: Discrete 320x240
+/dev/video9 | 			Interval: Discrete 0.033s (30.000 fps)
+/dev/video9 | 		Size: Discrete 352x288
+/dev/video9 | 			Interval: Discrete 0.033s (30.000 fps)
+/dev/video9 | 		Size: Discrete 340x340
+/dev/video9 | 			Interval: Discrete 0.033s (30.000 fps)
+/dev/video9 | 		Size: Discrete 424x240
+/dev/video9 | 			Interval: Discrete 0.033s (30.000 fps)
+/dev/video9 | 		Size: Discrete 440x440
+/dev/video9 | 			Interval: Discrete 0.033s (30.000 fps)
+/dev/video9 | 		Size: Discrete 480x270
+/dev/video9 | 			Interval: Discrete 0.033s (30.000 fps)
+/dev/video9 | 		Size: Discrete 640x360
+/dev/video9 | 			Interval: Discrete 0.033s (30.000 fps)
+/dev/video9 | 		Size: Discrete 800x448
+/dev/video9 | 			Interval: Discrete 0.033s (30.000 fps)
+/dev/video9 | 		Size: Discrete 800x600
+/dev/video9 | 			Interval: Discrete 0.100s (10.000 fps)
+/dev/video9 | 		Size: Discrete 848x480
+/dev/video9 | 			Interval: Discrete 0.033s (30.000 fps)
+/dev/video9 | 		Size: Discrete 960x540
+/dev/video9 | 			Interval: Discrete 0.100s (10.000 fps)
+/dev/video9 | 		Size: Discrete 1024x576
+/dev/video9 | 			Interval: Discrete 0.100s (10.000 fps)
+/dev/video9 | 		Size: Discrete 1280x720
+/dev/video9 | 			Interval: Discrete 0.100s (10.000 fps)
+/dev/video9 | 		Size: Discrete 1600x896
+/dev/video9 | 			Interval: Discrete 0.200s (5.000 fps)
+/dev/video9 | 		Size: Discrete 2560x1440
+/dev/video9 | 			Interval: Discrete 1.000s (1.000 fps)
+/dev/video9 | 		Size: Discrete 3840x3104
+/dev/video9 | 			Interval: Discrete 1.000s (1.000 fps)
+/dev/video9 | 		Size: Discrete 3264x2448
+/dev/video9 | 			Interval: Discrete 1.000s (1.000 fps)
+/dev/video9 | 		Size: Discrete 2592x1944
+/dev/video9 | 			Interval: Discrete 1.000s (1.000 fps)
+/dev/video9 | 		Size: Discrete 2048x1536
+/dev/video9 | 			Interval: Discrete 1.000s (1.000 fps)
+/dev/video9 | 		Size: Discrete 1600x1200
+/dev/video9 | 			Interval: Discrete 1.000s (1.000 fps)
+/dev/video9 | 		Size: Discrete 1024x768
+/dev/video9 | 			Interval: Discrete 0.100s (10.000 fps)
+/dev/video9 | Supported Video Fields:
+/dev/video9 | 	None
+/dev/video9 | ioctl: VIDIOC_ENUM_FMT
+/dev/video9 | 	Type: Video Output
+/dev/video9 | 
