@@ -1,0 +1,46 @@
+;
+; Arducam NOIR 5MP Camera sensor based on OV5647
+; https://thepihut.com/products/5mp-motorosed-ir-cut-ov5647-camera-for-raspberry-pi
+;
+[Unit]
+Description=camera-streamer web camera for Arducam NOIR 5MP on Raspberry PI
+After=network.target
+ConditionPathExists=/sys/bus/i2c/drivers/ov5647/10-0036/video4linux
+
+[Service]
+ExecStart=/usr/local/bin/camera-streamer \
+  -camera-path=/base/soc/i2c0mux/i2c@1/ov5647@36 \
+  -camera-type=libcamera \
+  -camera-format=YUYV \
+  -camera-width=2592 -camera-height=1944 \
+  -camera-fps=30 \
+  ; use two memory buffers to optimise usage
+  -camera-nbufs=2 \
+  ; the snapshot is 2592x1944
+  -camera-snapshot.height=2592 \
+  ; the video/webrtc is 1920x1080
+  -camera-video.height=1080 \
+  ; the stream is 1920x1080
+  -camera-stream.height=1080 \
+  ; enable long autoexposure
+  -camera-options=AeEnable=1 \
+  -camera-options=AeExposureMode=2 \
+  -camera-options=AwbEnable=1 \
+  -camera-options=AwbMode=1 \
+  --http-listen=0.0.0.0 \
+  --http-port=8080 \
+  -rtsp-port
+
+DynamicUser=yes
+SupplementaryGroups=video i2c
+Restart=always
+RestartSec=10
+Nice=10
+IOSchedulingClass=idle
+IOSchedulingPriority=7
+CPUWeight=20
+AllowedCPUs=1-2
+MemoryMax=250M
+
+[Install]
+WantedBy=multi-user.target
