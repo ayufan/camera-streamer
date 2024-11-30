@@ -222,6 +222,9 @@ static int libcamera_device_dump_control_option(device_option_fn fn, void *opaqu
     opt.type = device_option_type_float;
     opt.elems = 2;
     break;
+
+  default:
+    throw std::runtime_error("ControlType unsupported or not implemented");
   }
 
   auto named_values = libcamera_find_control_ids(control_id.id());
@@ -467,6 +470,9 @@ int libcamera_device_set_option(device_t *dev, const char *keyp, const char *val
       libcamera_parse_control_value<libcamera::Point>(
         control_value, value, libcamera_parse_point);
       break;
+
+    default:
+      throw std::runtime_error("ControlType unsupported or not implemented");
     }
 
     if (control_value.isNone()) {
