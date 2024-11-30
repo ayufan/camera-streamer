@@ -218,10 +218,12 @@ static int libcamera_device_dump_control_option(device_option_fn fn, void *opaqu
     opt.type = device_option_type_string;
     break;
 
+#if LIBCAMERA_VERSION_MAJOR == 0 && LIBCAMERA_VERSION_MINOR > 3 && LIBCAMERA_VERSION_PATCH >= 2 // Support for older libcamera versions
   case libcamera::ControlTypePoint:
     opt.type = device_option_type_float;
     opt.elems = 2;
     break;
+#endif
 
   default:
     throw std::runtime_error("ControlType unsupported or not implemented");
