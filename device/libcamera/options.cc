@@ -465,7 +465,7 @@ int libcamera_device_set_option(device_t *dev, const char *keyp, const char *val
 
     case libcamera::ControlTypeString:
       break;
-    
+
     case libcamera::ControlTypePoint:
       libcamera_parse_control_value<libcamera::Point>(
         control_value, value, libcamera_parse_point);
