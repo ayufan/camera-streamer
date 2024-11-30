@@ -359,6 +359,7 @@ static libcamera::Size libcamera_parse_size(const char *value)
   return libcamera::Size();
 }
 
+#if LIBCAMERA_VERSION_MAJOR == 0 && LIBCAMERA_VERSION_MINOR > 3 && LIBCAMERA_VERSION_PATCH >= 2 // Support for older libcamera versions
 static libcamera::Point libcamera_parse_point(const char *value)
 {
   static const char *POINT_PATTERNS[] =
@@ -379,6 +380,7 @@ static libcamera::Point libcamera_parse_point(const char *value)
 
   return libcamera::Point();
 }
+#endif
 
 template<typename T, typename F>
 static bool libcamera_parse_control_value(libcamera::ControlValue &control_value, const char *value, const F &fn)
