@@ -50,7 +50,11 @@ static std::map<unsigned, libcamera_control_id_t> libcamera_control_ids =
   LIBCAMERA_CONTROL(AfSpeed, "AfSpeed"),
   LIBCAMERA_CONTROL(AfTrigger, "AfTrigger"),
   LIBCAMERA_CONTROL(AfState, "AfState"),
+#if LIBCAMERA_VERSION_MAJOR == 0 && LIBCAMERA_VERSION_MINOR >= 5 // Support for older libcamera versions
   LIBCAMERA_CONTROL(AeState, "AeState"),
+#else
+  LIBCAMERA_DRAFT_CONTROL(AeState),
+#endif
   LIBCAMERA_DRAFT_CONTROL(AePrecaptureTrigger),
   LIBCAMERA_DRAFT_CONTROL(NoiseReductionMode),
   LIBCAMERA_DRAFT_CONTROL(ColorCorrectionAberrationMode),
