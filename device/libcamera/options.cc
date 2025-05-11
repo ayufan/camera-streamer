@@ -390,21 +390,31 @@ template<typename T, typename F>
 static bool libcamera_parse_control_value(libcamera::ControlValue &control_value, const char *value, const F &fn)
 {
   std::vector<T> parsed;
+  std::string current_value;
+  int parentheses_level = 0;
 
   while (value && *value) {
-    std::string current_value;
-
-    if (const char *next = strchr(value, ',')) {
-      current_value.assign(value, next);
-      value = &next[1];
-    } else {
-      current_value.assign(value);
-      value = NULL;
+    if (*value == '(') {
+      parentheses_level++;
+    } else if (*value == ')') {
+      if (parentheses_level > 0)
+        parentheses_level--;
+    } else if (*value == ',' && parentheses_level == 0) {
+      // Split here when outside parentheses
+      if (!current_value.empty()) {
+        parsed.push_back(fn(current_value.c_str()));
+        current_value.clear();
+      }
+      value++;
+      continue;
     }
 
-    if (current_value.empty())
-      continue;
+    current_value += *value;
+    value++;
+  }
 
+  // Add the last parsed value
+  if (!current_value.empty()) {
     parsed.push_back(fn(current_value.c_str()));
   }
 
