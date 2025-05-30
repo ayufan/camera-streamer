@@ -136,9 +136,9 @@ void libcamera_device_dump_options(device_t *dev, FILE *stream)
     auto control_key = libcamera_device_option_normalize(control_id->name());
     auto control_info = control.second;
 
-    fprintf(stream, "- available option: %s (%08x, type=%s): %s\n",
+    fprintf(stream, "- available option: %s (%08x, type=%s%s): %s\n",
       control_id->name().c_str(), control_id->id(),
-      control_type_values[control_id->type()].c_str(),
+      control_type_values[control_id->type()].c_str(), control_id->isArray() ? " Array" : "",
       control_info.toString().c_str());
 
     auto named_values = libcamera_find_control_ids(control_id->id());
@@ -350,7 +350,7 @@ static libcamera::Size libcamera_parse_size(const char *value)
 }
 
 template<typename T, typename F>
-static bool libcamera_parse_control_value(libcamera::ControlValue &control_value, const char *value, const F &fn)
+static bool libcamera_parse_control_value(libcamera::ControlValue &control_value, const char *value, const bool control_array, const F &fn)
 {
   std::vector<T> parsed;
   std::string current_value;
@@ -385,7 +385,7 @@ static bool libcamera_parse_control_value(libcamera::ControlValue &control_value
     return false;
   }
 
-  if (parsed.size() > 1) {
+  if (control_array) {
     control_value.set<libcamera::Span<T> >(parsed);
   } else {
     control_value.set<T>(parsed[0]);
@@ -406,6 +406,7 @@ int libcamera_device_set_option(device_t *dev, const char *keyp, const char *val
       continue;
 
     libcamera::ControlValue control_value;
+    bool control_array = control_id->isArray();
 
     switch (control_id->type()) {
     case libcamera::ControlTypeNone:
@@ -416,32 +417,32 @@ int libcamera_device_set_option(device_t *dev, const char *keyp, const char *val
       break;
 
     case libcamera::ControlTypeByte:
-      libcamera_parse_control_value<unsigned char>(control_value, value,
+      libcamera_parse_control_value<unsigned char>(control_value, value, control_array,
         [control_id](const char *value) { return libcamera_find_control_id_named_value(control_id->id(), value); });
       break;
 
     case libcamera::ControlTypeInteger32:
-      libcamera_parse_control_value<int32_t>(control_value, value,
+      libcamera_parse_control_value<int32_t>(control_value, value, control_array,
         [control_id](const char *value) { return libcamera_find_control_id_named_value(control_id->id(), value); });
       break;
 
     case libcamera::ControlTypeInteger64:
-      libcamera_parse_control_value<int64_t>(control_value, value,
+      libcamera_parse_control_value<int64_t>(control_value, value, control_array,
         [control_id](const char *value) { return libcamera_find_control_id_named_value(control_id->id(), value); });
       break;
 
     case libcamera::ControlTypeFloat:
-      libcamera_parse_control_value<float>(control_value, value, atof);
+      libcamera_parse_control_value<float>(control_value, value, control_array, atof);
       break;
 
     case libcamera::ControlTypeRectangle:
       libcamera_parse_control_value<libcamera::Rectangle>(
-        control_value, value, libcamera_parse_rectangle);
+        control_value, value, control_array, libcamera_parse_rectangle);
       break;
 
     case libcamera::ControlTypeSize:
       libcamera_parse_control_value<libcamera::Size>(
-        control_value, value, libcamera_parse_size);
+        control_value, value, control_array, libcamera_parse_size);
       break;
 
     case libcamera::ControlTypeString:
