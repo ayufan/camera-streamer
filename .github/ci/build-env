@@ -27,4 +27,4 @@ DOCKER_BUILDKIT=1 docker build -t "$docker_image" \
   --build-arg "BUILD_TYPE=$build_type" \
   --target build_env - < .github/ci/Dockerfile
 
-exec docker run --rm -it -u "$UID" -v "$ROOT:$ROOT" -w "$ROOT" "$docker_image"
+exec docker run --rm -it -u "$UID" -e "CCACHE_DIR=$ROOT/tmp/ccache" -v "$ROOT:$ROOT" -w "$ROOT" "$docker_image"
