@@ -23,11 +23,38 @@ static void http_once(FILE *stream, void (*fn)(FILE *stream, const char *data), 
   }
 }
 
+// Helper function to decode percent-encoded strings
+char *url_decode(const char *str) {
+  if (!str) return NULL;
+
+  size_t len = strlen(str);
+  char *decoded = malloc(len + 1);
+  if (!decoded) return NULL;
+
+  char *p = decoded;
+  for (size_t i = 0; i < len; i++) {
+    if (str[i] == '%' && i + 2 < len && isxdigit(str[i + 1]) && isxdigit(str[i + 2])) {
+      char hex[3] = {str[i + 1], str[i + 2], '\0'};
+      *p++ = (char)strtol(hex, NULL, 16);
+      i += 2;
+    } else if (str[i] == '+') {
+      *p++ = ' ';
+    } else {
+      *p++ = str[i];
+    }
+  }
+  *p = '\0';
+  return decoded;
+}
+
 static void camera_post_option(http_worker_t *worker, FILE *stream)
 {
   char *device_name = http_get_param(worker, "device");
-  char *key = http_get_param(worker, "key");
-  char *value = http_get_param(worker, "value");
+  char *raw_key = http_get_param(worker, "key");
+  char *raw_value = http_get_param(worker, "value");
+
+  char *key = url_decode(raw_key);
+  char *value = url_decode(raw_value);
 
   if (!key || !value) {
     http_400(stream, "");
@@ -65,6 +92,8 @@ static void camera_post_option(http_worker_t *worker, FILE *stream)
 
 cleanup:
   free(device_name);
+  free(raw_key);
+  free(raw_value);
   free(key);
   free(value);
 }
