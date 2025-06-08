@@ -145,7 +145,13 @@ void libcamera_device_dump_options(device_t *dev, FILE *stream)
 
     fprintf(stream, "- available option: %s (%08x, type=%s%s): %s\n",
       control_id->name().c_str(), control_id->id(),
-      control_type_values[control_id->type()].c_str(), control_id->isArray() ? " Array" : "",
+      control_type_values[control_id->type()].c_str(),
+#if LIBCAMERA_VERSION_MAJOR == 0 && LIBCAMERA_VERSION_MINOR < 4
+      false
+#else
+      control_id->isArray()
+#endif
+      ? " Array" : "",
       control_info.toString().c_str());
 
     auto named_values = libcamera_find_control_ids(control_id->id());
@@ -440,7 +446,11 @@ int libcamera_device_set_option(device_t *dev, const char *keyp, const char *val
       continue;
 
     libcamera::ControlValue control_value;
+#if LIBCAMERA_VERSION_MAJOR == 0 && LIBCAMERA_VERSION_MINOR < 4
+    bool control_array = false;
+#else
     bool control_array = control_id->isArray();
+#endif
 
     switch (control_id->type()) {
     case libcamera::ControlTypeNone:
