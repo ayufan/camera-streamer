@@ -38,7 +38,7 @@ jobs:
     - name: Copy files
       run: docker cp deb_make:/deb/. deb/
     - name: 'Upload debian files'
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ matrix.debian_version }}-${{ matrix.docker_arch }}-${{ matrix.build_type }}.zip
         path: deb/
