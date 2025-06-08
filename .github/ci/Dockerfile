@@ -1,6 +1,7 @@
 ARG DOCKER_ARCH
 ARG DEBIAN_VERSION
-FROM ${DOCKER_ARCH}debian:${DEBIAN_VERSION} as build_env
+ARG DOCKER_REPO
+FROM --platform=linux/${DOCKER_ARCH} ${DOCKER_REPO}debian:${DEBIAN_VERSION} as build_env
 
 RUN apt-get -y update && apt-get -y install gnupg2
 

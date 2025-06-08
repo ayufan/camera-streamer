@@ -1,26 +1,24 @@
 ;
-; Official Raspberry Pi v2.1 8MP camera based on the Sony IMX219 chip
-; https://www.raspberrypi.com/products/camera-module-v2/
+; Official Raspberry Pi Camera Board v1.3 (5MP, 1080p)
 ;
 [Unit]
-Description=camera-streamer web camera for Pi Camera v2.1 8MP on Raspberry PI
+Description=camera-streamer web camera for Pi Camera v1 5MP on Raspberry PI
 After=network.target
-ConditionPathExists=/sys/bus/i2c/drivers/imx219/10-0010/video4linux
+ConditionPathExists=/sys/bus/i2c/drivers/ov5647/10-0036/video4linux
 
 [Service]
-ExecStart=/usr/local/bin/camera-streamer \
-  --camera-path=/base/soc/i2c0mux/i2c@1/imx219@10 \
+ExecStart=/usr/bin/camera-streamer \
   --camera-type=libcamera \
-  --camera-format=YUYV \
-  --camera-width=3280 --camera-height=2464 \
+  --camera-format=YUV420 \
+  --camera-width=2592 --camera-height=1944 \
   --camera-fps=30 \
   ; use two memory buffers to optimise usage
   --camera-nbufs=2 \
-  ; the snapshot is 1438x1080
+  ; the snapshot is 1920x1080
   --camera-snapshot.height=1080 \
-  ; the video/webrtc is 958x720
-  --camera-video.height=720 \
-  ; the stream is 639x480
+  ; the video/webrtc is 1296x972
+  --camera-video.height=972 \
+  ; the stream is 640x480
   --camera-stream.height=480 \
   ; bump brightness slightly
   --camera-options=brightness=0.1 \

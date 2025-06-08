@@ -1,7 +1,7 @@
 #!/bin/bash
 
 if [[ $# -lt 3 ]]; then
-  echo "usage: $0 <generic|raspi> <buster|bullseye> <amd64|arm32v7|arm64v8>"
+  echo "usage: $0 <generic|raspi> <bullseye|bookworm> <amd64|arm32v7|arm64v8>"
   exit 1
 fi
 
@@ -10,18 +10,18 @@ docker_image="camera_streamer_build_env"
 build_type="raspi"
 [[ -n "$1" ]] && build_type="$1"
 
-debian_version="bullseye"
+debian_version="bookworm"
 [[ -n "$2" ]] && debian_version="$2" && docker_image="${docker_image}_${2}"
 
 docker_arch=""
-[[ -n "$3" ]] && docker_arch="$3/" && docker_image="${docker_image}_${3}"
+[[ -n "$3" ]] && docker_arch="$3" && docker_image="${docker_image}_${3}"
 
 PWD=$(pwd)
 ROOT=$(cd -- "$( dirname -- "${BASH_SOURCE[0]}" )/../.." &> /dev/null && pwd)
 
 set -xeo pipefail
 
-docker build -t "$docker_image" \
+DOCKER_BUILDKIT=1 docker build -t "$docker_image" \
   --build-arg "DOCKER_ARCH=$docker_arch" \
   --build-arg "DEBIAN_VERSION=$debian_version" \
   --build-arg "BUILD_TYPE=$build_type" \

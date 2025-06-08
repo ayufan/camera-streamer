@@ -5,17 +5,30 @@ on:
       - 'RELEASE.md'
   pull_request:
   workflow_dispatch:
+  schedule:
+    - cron: '0 15 * * 2'  # Runs at 15:00 (3pm) UTC every Tuesday
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.arch.runner }}
     strategy:
+      fail-fast: false
       matrix:
         debian_version: [bullseye, bookworm]
-        docker_arch: [amd64, arm32v7, arm64v8]
+        arch:
+          - docker: amd64
+            variant: amd64
+            runner: ubuntu-24.04
+          - docker: arm/v7
+            variant: arm32v7
+            runner: ubuntu-24.04
+          - docker: arm64/v8
+            variant: arm64v8
+            runner: ubuntu-24.04-arm
         build_type: [generic, raspi]
         exclude:
-          - docker_arch: amd64
+          - arch:
+              docker: amd64
             build_type: raspi
     steps:
     - name: Checkout
@@ -28,18 +41,28 @@ jobs:
     - name: Set up QEMU
       uses: docker/setup-qemu-action@v2
     - name: Build Dockerfile
-      run: docker build --target deb_make --tag deb_make --file .github/ci/Dockerfile --build-arg GIT_VERSION --build-arg DOCKER_ARCH --build-arg DEBIAN_VERSION --build-arg BUILD_TYPE .
+      run: |
+        docker build \
+          --target deb_make \
+          --tag deb_make \
+          --file .github/ci/Dockerfile \
+          --build-arg GIT_VERSION \
+          --build-arg DOCKER_ARCH \
+          --build-arg DEBIAN_VERSION \
+          --build-arg BUILD_TYPE \
+          .
       env:
         DEBIAN_VERSION: ${{ matrix.debian_version }}
-        DOCKER_ARCH: ${{ matrix.docker_arch }}/
+        DOCKER_ARCH: ${{ matrix.arch.docker }}
         BUILD_TYPE: ${{ matrix.build_type }}
+        DOCKER_BUILDKIT: 1
     - name: Create container
       run: docker create --name deb_make deb_make
     - name: Copy files
       run: docker cp deb_make:/deb/. deb/
     - name: 'Upload debian files'
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
-        name: ${{ matrix.debian_version }}-${{ matrix.docker_arch }}-${{ matrix.build_type }}.zip
+        name: ${{ matrix.debian_version }}-${{ matrix.arch.variant }}-${{ matrix.build_type }}.zip
         path: deb/
         retention-days: 14

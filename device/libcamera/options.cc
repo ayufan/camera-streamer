@@ -50,10 +50,14 @@ static std::map<unsigned, libcamera_control_id_t> libcamera_control_ids =
   LIBCAMERA_CONTROL(AfSpeed, "AfSpeed"),
   LIBCAMERA_CONTROL(AfTrigger, "AfTrigger"),
   LIBCAMERA_CONTROL(AfState, "AfState"),
+#if LIBCAMERA_VERSION_MAJOR == 0 && LIBCAMERA_VERSION_MINOR >= 5 // Support for older libcamera versions
+  LIBCAMERA_CONTROL(AeState, "AeState"),
+#else
+  LIBCAMERA_DRAFT_CONTROL(AeState),
+#endif
   LIBCAMERA_DRAFT_CONTROL(AePrecaptureTrigger),
   LIBCAMERA_DRAFT_CONTROL(NoiseReductionMode),
   LIBCAMERA_DRAFT_CONTROL(ColorCorrectionAberrationMode),
-  LIBCAMERA_DRAFT_CONTROL(AeState),
   LIBCAMERA_DRAFT_CONTROL(AwbState),
   LIBCAMERA_DRAFT_CONTROL(LensShadingMapMode),
 #if LIBCAMERA_VERSION_MAJOR == 0 && LIBCAMERA_VERSION_MINOR < 1 // Support RasPI bullseye
@@ -217,6 +221,16 @@ static int libcamera_device_dump_control_option(device_option_fn fn, void *opaqu
   case libcamera::ControlTypeString:
     opt.type = device_option_type_string;
     break;
+
+#if LIBCAMERA_VERSION_MAJOR == 0 && LIBCAMERA_VERSION_MINOR > 3 && LIBCAMERA_VERSION_PATCH >= 2 // Support for older libcamera versions
+  case libcamera::ControlTypePoint:
+    opt.type = device_option_type_float;
+    opt.elems = 2;
+    break;
+#endif
+
+  default:
+    throw std::runtime_error("ControlType unsupported or not implemented");
   }
 
   auto named_values = libcamera_find_control_ids(control_id.id());
@@ -349,6 +363,29 @@ static libcamera::Size libcamera_parse_size(const char *value)
   return libcamera::Size();
 }
 
+#if LIBCAMERA_VERSION_MAJOR == 0 && LIBCAMERA_VERSION_MINOR > 3 && LIBCAMERA_VERSION_PATCH >= 2 // Support for older libcamera versions
+static libcamera::Point libcamera_parse_point(const char *value)
+{
+  static const char *POINT_PATTERNS[] =
+  {
+    "(%d,%d)",
+    "%d,%d",
+    NULL
+  };
+
+  for (int i = 0; POINT_PATTERNS[i]; i++) {
+    libcamera::Point point;
+
+    if (2 == sscanf(value, POINT_PATTERNS[i],
+      &point.x, &point.y)) {
+      return point;
+    }
+  }
+
+  return libcamera::Point();
+}
+#endif
+
 template<typename T, typename F>
 static bool libcamera_parse_control_value(libcamera::ControlValue &control_value, const char *value, const bool control_array, const F &fn)
 {
@@ -447,6 +484,16 @@ int libcamera_device_set_option(device_t *dev, const char *keyp, const char *val
 
     case libcamera::ControlTypeString:
       break;
+
+#if LIBCAMERA_VERSION_MAJOR == 0 && LIBCAMERA_VERSION_MINOR > 3 && LIBCAMERA_VERSION_PATCH >= 2 // Support for older libcamera versions
+    case libcamera::ControlTypePoint:
+      libcamera_parse_control_value<libcamera::Point>(
+        control_value, value, libcamera_parse_point);
+      break;
+#endif
+
+    default:
+      throw std::runtime_error("ControlType unsupported or not implemented");
     }
 
     if (control_value.isNone()) {

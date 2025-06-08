@@ -5,21 +5,21 @@ ConditionPathExistsGlob=/dev/v4l/by-id/usb-*-video-index0
 
 [Service]
 ExecStart=/usr/local/bin/camera-streamer \
-  -camera-path=/dev/video0 \
-  -camera-format=JPEG \
-  -camera-width=1920 -camera-height=1080 \
-  -camera-fps=30 \
+  --camera-path=/dev/video0 \
+  --camera-format=JPEG \
+  --camera-width=1920 --camera-height=1080 \
+  --camera-fps=30 \
   ; use two memory buffers to optimise usage
-  -camera-nbufs=3 \
+  --camera-nbufs=3 \
   ; the high-res is 1920x1080
-  -camera-snapshot.height=1080 \
+  --camera-snapshot.height=1080 \
   ; the video/webrtc is 1280x720
-  -camera-video.height=720 \
+  --camera-video.height=720 \
   ; the stream is 853x480
-  -camera-stream.height=480 \
+  --camera-stream.height=480 \
   --http-listen=0.0.0.0 \
   --http-port=8080 \
-  -rtsp-port
+  --rtsp-port
 
 DynamicUser=yes
 SupplementaryGroups=video i2c
