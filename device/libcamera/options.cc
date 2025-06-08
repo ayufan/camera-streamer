@@ -82,19 +82,20 @@ static const std::map<unsigned, std::string> *libcamera_find_control_ids(unsigne
   return &iter->second.enum_values;
 }
 
-static long long libcamera_find_control_id_named_value(unsigned control_id, const char **value)
+static std::pair<long long, const char*> libcamera_find_control_id_named_value(unsigned control_id, const char *value)
 {
   auto named_values = libcamera_find_control_ids(control_id);
   if (named_values) {
     for (const auto & named_value : *named_values) {
-      if (device_option_is_equal(named_value.second.c_str(), *value)) {
-        *value += named_value.second.length();
-        return named_value.first;
+      if (device_option_is_equal(named_value.second.c_str(), value)) {
+        return std::make_pair(named_value.first, value + named_value.second.length());
       }
     }
   }
 
-  return strtoll(*value, (char**)value, 10);
+  char *endptr = NULL;
+  auto res = strtoll(value, &endptr, 10);
+  return std::make_pair(res, endptr);
 }
 
 static libcamera::ControlInfoMap::Map libcamera_control_list(device_t *dev)
@@ -323,12 +324,14 @@ int libcamera_device_dump_options2(device_t *dev, device_option_fn fn, void *opa
   return n;
 }
 
-static float libcamera_parse_float(const char **value)
+static std::pair<float, const char*> libcamera_parse_float(const char *value)
 {
-  return strtof(*value, (char**)value);
+  char *endptr = NULL;
+  auto res = strtof(value, &endptr);
+  return std::make_pair(res, endptr);
 }
 
-static libcamera::Rectangle libcamera_parse_rectangle(const char **value)
+static std::pair<libcamera::Rectangle, const char*> libcamera_parse_rectangle(const char *value)
 {
   static const char *RECTANGLE_PATTERNS[] =
   {
@@ -341,19 +344,17 @@ static libcamera::Rectangle libcamera_parse_rectangle(const char **value)
     libcamera::Rectangle rectangle;
     int read = 0;
 
-    if (4 == sscanf(*value, RECTANGLE_PATTERNS[i],
+    if (4 == sscanf(value, RECTANGLE_PATTERNS[i],
       &rectangle.x, &rectangle.y,
       &rectangle.width, &rectangle.height, &read)) {
-      *value += read;
-      return rectangle;
+      return std::make_pair(rectangle, value + read);
     }
   }
 
-  value = NULL;
-  return libcamera::Rectangle();
+  return std::make_pair(libcamera::Rectangle(), (const char*)NULL);
 }
 
-static libcamera::Size libcamera_parse_size(const char **value)
+static std::pair<libcamera::Size, const char*> libcamera_parse_size(const char *value)
 {
   static const char *SIZE_PATTERNS[] =
   {
@@ -366,18 +367,16 @@ static libcamera::Size libcamera_parse_size(const char **value)
     libcamera::Size size;
     int read = 0;
 
-    if (2 == sscanf(*value, SIZE_PATTERNS[i], &size.width, &size.height, &read)) {
-      *value += read;
-      return size;
+    if (2 == sscanf(value, SIZE_PATTERNS[i], &size.width, &size.height, &read)) {
+      return std::make_pair(size, value + read);
     }
   }
 
-  *value = NULL;
-  return libcamera::Size();
+  return std::make_pair(libcamera::Size(), (const char*)NULL);
 }
 
 #if LIBCAMERA_VERSION_MAJOR == 0 && LIBCAMERA_VERSION_MINOR > 3 && LIBCAMERA_VERSION_PATCH >= 2 // Support for older libcamera versions
-static libcamera::Point libcamera_parse_point(const char **value)
+static libcamera::Point libcamera_parse_point(const char *value)
 {
   static const char *POINT_PATTERNS[] =
   {
@@ -390,32 +389,32 @@ static libcamera::Point libcamera_parse_point(const char **value)
     libcamera::Point point;
     int read = 0;
 
-    if (2 == sscanf(*value, POINT_PATTERNS[i],
+    if (2 == sscanf(value, POINT_PATTERNS[i],
       &point.x, &point.y, &read)) {
-      *value += read;
-      return point;
+      return std::make_pair(point, value + read);
     }
   }
 
-  *value = NULL;
-  return libcamera::Point();
+  return std::make_pair(libcamera::Point(), NULL);
 }
 #endif
 
-template<typename T>
-static bool libcamera_parse_control_value(libcamera::ControlValue &control_value, bool control_array, const char *value, const std::function<T(const char**)>& fn)
+template<typename T, typename F>
+static bool libcamera_parse_control_value(libcamera::ControlValue &control_value, bool control_array, const char *value, const F& fn)
 {
   std::vector<T> items;
 
   while (value && *value) {
-    items.push_back(fn(&value));
-    if (!value)
+    auto [item, next] = fn(value);
+    if (!next)
       return false; // failed to parse
-    else if (!*value)
+    items.push_back(item);
+
+    if (!*next)
       break; // reached end of elements
-    else if (*value != ',')
+    if (*next != ',')
       return false; // expected comma to split items
-    value++;
+    value = next;
   }
 
   if (items.empty()) {
@@ -456,17 +455,17 @@ int libcamera_device_set_option(device_t *dev, const char *keyp, const char *val
 
     case libcamera::ControlTypeByte:
       libcamera_parse_control_value<unsigned char>(control_value, control_array, value,
-        [control_id](const char **value) { return libcamera_find_control_id_named_value(control_id->id(), value); });
+        [control_id](const char *value) { return libcamera_find_control_id_named_value(control_id->id(), value); });
       break;
 
     case libcamera::ControlTypeInteger32:
       libcamera_parse_control_value<int32_t>(control_value, control_array, value,
-        [control_id](const char **value) { return libcamera_find_control_id_named_value(control_id->id(), value); });
+        [control_id](const char *value) { return libcamera_find_control_id_named_value(control_id->id(), value); });
       break;
 
     case libcamera::ControlTypeInteger64:
       libcamera_parse_control_value<int64_t>(control_value, control_array, value,
-        [control_id](const char **value) { return libcamera_find_control_id_named_value(control_id->id(), value); });
+        [control_id](const char *value) { return libcamera_find_control_id_named_value(control_id->id(), value); });
       break;
 
     case libcamera::ControlTypeFloat:
