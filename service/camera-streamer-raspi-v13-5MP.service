@@ -1,0 +1,41 @@
+;
+; Official Raspberry Pi Camera Board v1.3 (5MP, 1080p)
+;
+[Unit]
+Description=camera-streamer web camera for Pi Camera v1 5MP on Raspberry PI
+After=network.target
+ConditionPathExists=/sys/bus/i2c/drivers/ov5647/10-0036/video4linux
+
+[Service]
+ExecStart=/usr/bin/camera-streamer \
+  --camera-type=libcamera \
+  --camera-format=YUV420 \
+  --camera-width=2592 --camera-height=1944 \
+  --camera-fps=30 \
+  ; use two memory buffers to optimise usage
+  --camera-nbufs=2 \
+  ; the snapshot is 1920x1080
+  --camera-snapshot.height=1080 \
+  ; the video/webrtc is 1296x972
+  --camera-video.height=972 \
+  ; the stream is 640x480
+  --camera-stream.height=480 \
+  ; bump brightness slightly
+  --camera-options=brightness=0.1 \
+  --http-listen=0.0.0.0 \
+  --http-port=8080 \
+  --rtsp-port
+
+DynamicUser=yes
+SupplementaryGroups=video i2c
+Restart=always
+RestartSec=10
+Nice=10
+IOSchedulingClass=idle
+IOSchedulingPriority=7
+CPUWeight=20
+AllowedCPUs=1-2
+MemoryMax=250M
+
+[Install]
+WantedBy=multi-user.target
