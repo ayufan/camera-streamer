@@ -420,7 +420,7 @@ static bool libcamera_parse_control_value(libcamera::ControlValue &control_value
       break; // reached end of elements
     if (*next != ',')
       return false; // expected comma to split items
-    value = next;
+    value = ++next;
   }
 
   if (items.empty()) {
