@@ -60,7 +60,8 @@
           body: JSON.stringify({
               type: 'request',
               res: params.res,
-              iceServers: iceServers
+              iceServers: iceServers,
+              keepAlive: true
           }),
           headers: {
               'Content-Type': 'application/json'

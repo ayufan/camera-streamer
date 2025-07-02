@@ -759,7 +759,11 @@
       ];
 
       fetch(baseURL + webrtcURL, {
-        body: JSON.stringify({type: 'request', iceServers: iceServers}),
+        body: JSON.stringify({
+          type: 'request',
+          iceServers: iceServers,
+          keepAlive: true
+        }),
         headers: {'Content-Type': 'application/json'},
         method: 'POST'
       }).then(function(response) {
@@ -768,6 +772,12 @@
         rtcPeerConnection = new RTCPeerConnection({
           sdpSemantics: 'unified-plan',
           iceServers: request.iceServers
+        });
+        rtcPeerConnection.addEventListener('datachannel', function(e) {
+          const dc = e.channel;
+          dc.addEventListener('message', function(e) {
+            dc.send('pong');
+          });
         });
         rtcPeerConnection.addTransceiver('video', { direction: 'recvonly' });
         //pc.addTransceiver('audio', {direction: 'recvonly'});
