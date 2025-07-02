@@ -17,10 +17,12 @@ extern "C" {
 #include "util/http/json.hh"
 
 #define DEFAULT_PING_INTERVAL_US        (1 * 1000 * 1000)
-#define DEFAULT_DISCONNECT_INTERVAL_US  (30 * 1000 * 1000)
+#define DEFAULT_PONG_INTERVAL_US        (30 * 1000 * 1000)
+#define DEFAULT_TIMEOUT_S               (60 * 60)
 
 #ifdef USE_LIBDATACHANNEL
 
+#include <inttypes.h>
 #include <string>
 #include <memory>
 #include <optional>
@@ -122,10 +124,15 @@ public:
 
   bool keepAlive()
   {
+    uint64_t now_us = get_monotonic_time_us(NULL, NULL);
+
+    if (deadline_us > 0 && now_us > deadline_us) {
+      LOG_INFO(this, "The stream reached the deadline.");
+      return false;
+    }
+  
     if (!dc_keepAlive)
       return true;
-
-    uint64_t now_us = get_monotonic_time_us(NULL, NULL);
 
     if (dc_keepAlive->isOpen() && now_us - last_ping_us >= DEFAULT_PING_INTERVAL_US) {
       LOG_DEBUG(this, "Checking if client still alive.");
@@ -133,7 +140,7 @@ public:
       last_ping_us = now_us;
     }
 
-    if (now_us - last_pong_us >= DEFAULT_DISCONNECT_INTERVAL_US) {
+    if (now_us - last_pong_us >= DEFAULT_PONG_INTERVAL_US) {
       LOG_INFO(this, "No heartbeat from client.");
       return false;
     }
@@ -213,6 +220,7 @@ public:
   bool requested_key_frame = false;
   uint64_t last_ping_us = 0;
   uint64_t last_pong_us = 0;
+  uint64_t deadline_us = 0;
 };
 
 std::shared_ptr<Client> webrtc_find_client(std::string id)
@@ -322,6 +330,12 @@ static std::shared_ptr<Client> webrtc_peer_connection(rtc::Configuration config,
     });
   } else {
     LOG_INFO(client.get(), "Client does not support Keep-Alives. This might result in stale streams.");
+  }
+
+  int64_t timeout_s = message.value("timeout_s", DEFAULT_TIMEOUT_S);
+  if (timeout_s > 0) {
+    LOG_INFO(client.get(), "The stream will auto-close in %" PRId64 "s.", timeout_s);
+    client->deadline_us = get_monotonic_time_us(NULL, NULL) + timeout_s * 1000 * 1000;
   }
 
   pc->onTrack([wclient](std::shared_ptr<rtc::Track> track) {
