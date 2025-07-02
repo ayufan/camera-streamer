@@ -14,6 +14,13 @@ extern "C" {
 };
 
 #ifdef USE_RTSP
+#if !__has_include(<RTSPServerSupportingHTTPStreaming.hh>)
+#undef USE_RTSP
+#warning "Missing RTSPServerSupportingHTTPStreaming.hh header. The RTSP support will be missing."
+#endif // RTSPServerSupportingHTTPStreaming.hh
+#endif // USE_RTSP
+
+#ifdef USE_RTSP
 
 #include <string>
 #include <memory>
