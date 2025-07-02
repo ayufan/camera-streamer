@@ -10,6 +10,7 @@ on:
 
 jobs:
   build:
+    if: github.event_name != 'push' || github.event.pull_request == null
     runs-on: ${{ matrix.arch.runner }}
     strategy:
       fail-fast: false
