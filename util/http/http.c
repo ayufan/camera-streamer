@@ -103,9 +103,31 @@ static void *http_get_param_fn(struct http_worker_s *worker, FILE *stream, const
   return NULL;
 }
 
+// Helper function to decode percent-encoded strings
+static void http_url_decode(const char *in, char *out)
+{
+  while (*in) {
+    if (*in == '%' && isxdigit(in[1]) && isxdigit(in[2])) {
+      char hex[3] = {in[1], in[2], '\0'};
+      *out++ = (char)strtoul(hex, NULL, 16);
+      in += 3;
+    } else if (*in == '+') {
+      *out++ = ' ';
+      in++;
+    } else {
+      *out++ = *in++;
+    }
+  }
+  *out = '\0';
+}
+
 char *http_get_param(http_worker_t *worker, const char *key)
 {
-  return http_enum_params(worker, NULL, http_get_param_fn, (void*)key);
+  char *param = http_enum_params(worker, NULL, http_get_param_fn, (void*)key);
+  if (param) {
+    http_url_decode(param, param);
+  }
+  return param;
 }
 
 static void http_process(http_worker_t *worker, FILE *stream)
