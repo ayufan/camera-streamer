@@ -9,6 +9,9 @@ GIT_REVISION ?= $(shell git rev-parse --short HEAD)
 CFLAGS := -Werror -Wall -g -I$(CURDIR) -D_GNU_SOURCE
 LDLIBS := -lpthread -lstdc++
 
+# Print #warnings
+CFLAGS += -Wno-error=cpp
+
 # libdatachannel deprecations on bookworm
 # error: 'HMAC_Init_ex' is deprecated: Since OpenSSL 3.0
 CFLAGS += -Wno-error=deprecated-declarations
