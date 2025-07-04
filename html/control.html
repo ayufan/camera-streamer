@@ -775,9 +775,11 @@
         });
         rtcPeerConnection.addEventListener('datachannel', function(e) {
           const dc = e.channel;
-          dc.addEventListener('message', function(e) {
-            dc.send('pong');
-          });
+          if (dc.label === 'keepalive') {
+            dc.addEventListener('message', function(e) {
+              dc.send('pong');
+            });
+          }
         });
         rtcPeerConnection.addTransceiver('video', { direction: 'recvonly' });
         //pc.addTransceiver('audio', {direction: 'recvonly'});
