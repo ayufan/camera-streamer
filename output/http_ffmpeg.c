@@ -49,7 +49,7 @@ static int http_ffmpeg_read_from_buf(void *opaque, uint8_t *buf, int buf_size)
   return buf_size;
 }
 
-static int http_ffmpeg_write_to_stream(void *opaque, uint8_t *buf, int buf_size)
+static int http_ffmpeg_write_to_stream(void *opaque, const uint8_t *buf, int buf_size)
 {
   http_ffmpeg_status_t *status = opaque;
   if (!status->stream)

@@ -10,15 +10,16 @@
 #define FFMPEG_DATA_PACKET_EOF -1
 #endif
 
-typedef int (*ffmpeg_data_packet)(void *opaque, uint8_t *buf, int buf_size);
+typedef int (*ffmpeg_read_packet)(void *opaque, uint8_t *buf, int buf_size);
+typedef int (*ffmpeg_write_packet)(void *opaque, const uint8_t *buf, int buf_size);
 
 typedef struct ffmpeg_remuxer_s {
   const char *name;
   const char *input_format;
   const char *video_format;
   void *opaque;
-  ffmpeg_data_packet read_packet;
-  ffmpeg_data_packet write_packet;
+  ffmpeg_read_packet read_packet;
+  ffmpeg_write_packet write_packet;
   unsigned read_buffer_size;
   unsigned write_buffer_size;
 
