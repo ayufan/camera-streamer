@@ -22,8 +22,12 @@ To clone this repository be sure to use the following command:
 
 ## Requirements
 
-1. Debian Bullseye, with at least 5.15 kernel
+1. Debian Bookworm, with at least 6.1 kernel
 1. Best: Raspberry PI for hardware acceleration
+
+Older systems:
+
+1. Debian Bullseye. Use version `v0.3.x` from [stable-0.3](https://github.com/ayufan/camera-streamer/tree/stable-0.3).
 
 ## Install
 

@@ -4,8 +4,8 @@ Download correct version for your platform:
 
 - Variant: **raspi**: Raspberry PI compatible build with USB, CSI, WebRTC, RTSP support
 - Variant: **generic**: All other platforms with USB and MJPEG support only for time being
-- System: **bullseye**: Debian Bullseye (11) compatible build
 - System: **bookworm**: Debian Bookworm (12) compatible build
+- System: **trixie**: Debian Trixie (13) compatible build
 - Platform: **amd64**: x86/64 compatible build
 - Platform: **arm32**: ARM 32-bit kernel: PIs 0.2W, 2B, and higher, Orange PIs, Rock64, etc. No support for RPI0.
 - Platform: **arm64**: ARM 64-bit kernel: PIs 0.2W, 3B, and higher, Orange PIs, Rock64, etc. No support for RPI0 and RPI2B.

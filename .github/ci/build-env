@@ -1,7 +1,7 @@
 #!/bin/bash
 
-if [[ $# -lt 3 ]]; then
-  echo "usage: $0 <generic|raspi> <bullseye|bookworm> <amd64|arm32v7|arm64v8>"
+if [[ $# -lt 2 ]]; then
+  echo "usage: $0 <generic|raspi> <bookworm|trixie> [amd64|arm32v7|arm64v8] [cmdline args]"
   exit 1
 fi
 
@@ -9,12 +9,36 @@ docker_image="camera_streamer_build_env"
 
 build_type="raspi"
 [[ -n "$1" ]] && build_type="$1"
+shift
 
 debian_version="bookworm"
-[[ -n "$2" ]] && debian_version="$2" && docker_image="${docker_image}_${2}"
+[[ -n "$1" ]] && debian_version="$1" && docker_image="${docker_image}_${1}"
+shift
 
-docker_arch=""
-[[ -n "$3" ]] && docker_arch="$3" && docker_image="${docker_image}_${3}"
+arch=${1:-$(dpkg --print-architecture)}
+shift
+
+case "$arch" in
+  amd64)
+    docker_arch="amd64"
+    docker_repo="amd64/"
+    ;;
+
+  armhf|arm32v7)
+    docker_arch="arm/v7"
+    docker_repo="arm32v7/"
+    ;;
+
+  arm64|arm64v8)
+    docker_arch="arm64/v8"
+    docker_repo="arm64v8/"
+    ;;
+
+  *)
+    echo "Unsupported architecture: $arch"
+    exit 1
+    ;;
+esac
 
 PWD=$(pwd)
 ROOT=$(cd -- "$( dirname -- "${BASH_SOURCE[0]}" )/../.." &> /dev/null && pwd)
@@ -23,8 +47,9 @@ set -xeo pipefail
 
 DOCKER_BUILDKIT=1 docker build -t "$docker_image" \
   --build-arg "DOCKER_ARCH=$docker_arch" \
+  --build-arg "DOCKER_REPO=$docker_repo" \
   --build-arg "DEBIAN_VERSION=$debian_version" \
   --build-arg "BUILD_TYPE=$build_type" \
   --target build_env - < .github/ci/Dockerfile
 
-exec docker run --rm -it -u "$UID" -e "CCACHE_DIR=$ROOT/tmp/ccache" -v "$ROOT:$ROOT" -w "$ROOT" "$docker_image"
+exec docker run --rm -it -u "$UID" -e "CCACHE_DIR=$ROOT/tmp/ccache" -v "$ROOT:$ROOT" -w "$ROOT" "$docker_image" "$@"

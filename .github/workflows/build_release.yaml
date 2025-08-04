@@ -8,7 +8,7 @@ jobs:
       contents: write
     strategy:
       matrix:
-        debian_version: [bullseye, bookworm]
+        debian_version: [bookworm, trixie]
         arch:
           - docker: amd64
             runner: ubuntu-24.04
