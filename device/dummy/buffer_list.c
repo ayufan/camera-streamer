@@ -4,6 +4,7 @@
 #include "util/opts/log.h"
 
 #include <stdlib.h>
+#include <inttypes.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 
@@ -36,12 +37,12 @@ int dummy_buffer_list_open(buffer_list_t *buf_list)
 
   buf_list->dummy->data = malloc(st.st_size);
   if (!buf_list->dummy->data) {
-		LOG_ERROR(buf_list, "Can't allocate %ld bytes for %s", st.st_size, buf_list->dev->path);
+		LOG_ERROR(buf_list, "Can't allocate %" PRId64 " bytes for %s", (off64_t)st.st_size, buf_list->dev->path);
   }
 
   buf_list->dummy->length = read(fd, buf_list->dummy->data, st.st_size);
   if (!buf_list->dummy->data) {
-		LOG_ERROR(buf_list, "Can't read %ld bytes for %s. Only read %zu.", st.st_size, buf_list->dev->path, buf_list->dummy->length);
+		LOG_ERROR(buf_list, "Can't read %" PRId64 " bytes for %s. Only read %zu.", (off64_t)st.st_size, buf_list->dev->path, buf_list->dummy->length);
   }
 
   close(fd);

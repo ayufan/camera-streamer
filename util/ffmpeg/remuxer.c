@@ -7,6 +7,12 @@
 static AVRational time_base = {1, 1000LL * 1000LL};
 static unsigned avio_ctx_buffer_size = 4096;
 
+#if LIBAVFORMAT_VERSION_MAJOR < 61
+typedef int (*ffmpeg_write_nonconst_packet)(void *opaque, uint8_t *buf, int buf_size);
+#else // LIBAVFORMAT_VERSION_MAJOR < 61
+#define ffmpeg_write_nonconst_packet ffmpeg_write_packet
+#endif // LIBAVFORMAT_VERSION_MAJOR < 61
+
 static int ffmpeg_remuxer_init_avcontext(AVFormatContext **context, ffmpeg_remuxer_t *remuxer, int output, ffmpeg_write_packet packet_out, ffmpeg_read_packet packet_in)
 {
   uint8_t *buffer = NULL;
@@ -20,7 +26,7 @@ static int ffmpeg_remuxer_init_avcontext(AVFormatContext **context, ffmpeg_remux
   buffer = av_malloc(buffer_size);
   if (!buffer)
     return AVERROR(ENOMEM);
-  avio = avio_alloc_context(buffer, buffer_size, output, remuxer->opaque, packet_in, packet_out, NULL);
+  avio = avio_alloc_context(buffer, buffer_size, output, remuxer->opaque, packet_in, (ffmpeg_write_nonconst_packet)packet_out, NULL);
   if (!avio)
     goto error;
   if (output && (ret = avformat_alloc_output_context2(context, NULL, remuxer->video_format, NULL)) < 0)
