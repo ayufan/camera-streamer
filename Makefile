@@ -14,6 +14,7 @@ CFLAGS += -Wno-error=cpp
 
 # LOG_*(this, ...)
 CFLAGS += -Wno-error=nonnull-compare
+CFLAGS += -Wno-nonnull-compare
 
 # libdatachannel deprecations on bookworm
 # error: 'HMAC_Init_ex' is deprecated: Since OpenSSL 3.0

@@ -1,0 +1,6 @@
+#!/bin/bash
+
+apt install -y g{cc,++}-arm-linux-gnueabihf
+export CC=arm-linux-gnueabihf-gcc
+export CXX=arm-linux-gnueabihf-g++
+exec "$@"
