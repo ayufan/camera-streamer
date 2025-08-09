@@ -14,13 +14,6 @@ extern "C" {
 };
 
 #ifdef USE_RTSP
-#if !__has_include(<RTSPServerSupportingHTTPStreaming.hh>)
-#undef USE_RTSP
-#warning "Missing RTSPServerSupportingHTTPStreaming.hh header. The RTSP support will be missing."
-#endif // RTSPServerSupportingHTTPStreaming.hh
-#endif // USE_RTSP
-
-#ifdef USE_RTSP
 
 #include <string>
 #include <memory>
@@ -32,7 +25,7 @@ extern "C" {
 #include <set>
 
 #include <BasicUsageEnvironment.hh>
-#include <RTSPServerSupportingHTTPStreaming.hh>
+#include <RTSPServer.hh>
 #include <OnDemandServerMediaSubsession.hh>
 #include <H264VideoStreamFramer.hh>
 #include <H264VideoRTPSink.hh>
@@ -188,23 +181,24 @@ public:
   }
 };
 
-class DynamicRTSPServer: public RTSPServerSupportingHTTPStreaming
+class DynamicRTSPServer: public RTSPServer
 {
 public:
   static DynamicRTSPServer* createNew(UsageEnvironment& env, Port ourPort,
-				      UserAuthenticationDatabase* authDatabase,
-				      unsigned reclamationTestSeconds = 65)
+                                      UserAuthenticationDatabase* authDatabase,
+                                      unsigned reclamationSeconds = 65)
   {
-    int ourSocket = setUpOurSocket(env, ourPort);
-    if (ourSocket == -1) return NULL;
+    int ourSocketIPv4 = setUpOurSocket(env, ourPort, AF_INET);
+    int ourSocketIPv6 = setUpOurSocket(env, ourPort, AF_INET6);
+    if (ourSocketIPv4 < 0 && ourSocketIPv6 < 0) return NULL;
 
-    return new DynamicRTSPServer(env, ourSocket, ourPort, authDatabase, reclamationTestSeconds);
+    return new DynamicRTSPServer(env, ourSocketIPv4, ourSocketIPv6, ourPort, authDatabase, reclamationSeconds);
   }
 
 protected:
-  DynamicRTSPServer(UsageEnvironment& env, int ourSocket, Port ourPort,
-		    UserAuthenticationDatabase* authDatabase, unsigned reclamationTestSeconds)
-    : RTSPServerSupportingHTTPStreaming(env, ourSocket, ourPort, authDatabase, reclamationTestSeconds)
+  DynamicRTSPServer(UsageEnvironment& env, int ourSocketIPv4, int ourSocketIPv6, Port ourPort,
+                    UserAuthenticationDatabase* authDatabase, unsigned reclamationSeconds)
+    : RTSPServer(env, ourSocketIPv4, ourSocketIPv6, ourPort, authDatabase, reclamationSeconds)
   {
   }
 
@@ -214,31 +208,56 @@ protected:
   }
 
 protected: // redefined virtual functions
-  virtual ServerMediaSession* lookupServerMediaSession(char const* streamName, Boolean isFirstLookupInSession)
+  virtual void lookupServerMediaSession(char const* streamName,
+                                        lookupServerMediaSessionCompletionFunc* completionFunc,
+                                        void* completionClientData,
+                                        Boolean isFirstLookupInSession = True)
   {
     if (strcmp(streamName, stream_name) == 0) {
       LOG_INFO(NULL, "Requesting %s stream...", streamName);
     } else {
       LOG_INFO(NULL, "No stream available: '%s'", streamName);
-      return NULL;
+      (*completionFunc)(completionClientData, NULL);
+      return;
     }
 
-    auto sms = RTSPServer::lookupServerMediaSession(streamName);
+    struct Ctx {
+      DynamicRTSPServer* self;
+      char* name;
+      lookupServerMediaSessionCompletionFunc* cb;
+      void* cbData;
+      Boolean first;
+    };
 
-    if (sms && isFirstLookupInSession) { 
-      // Remove the existing "ServerMediaSession" and create a new one, in case the underlying
-      // file has changed in some way:
-      removeServerMediaSession(sms); 
-      sms = NULL;
-    }
+    auto* ctx = new Ctx{ this, strdup(streamName), completionFunc, completionClientData, isFirstLookupInSession };
 
-    sms = ServerMediaSession::createNew(envir(), streamName, streamName, "streamed by the LIVE555 Media Server");;
-    OutPacketBuffer::maxSize = 2000000; // allow for some possibly large H.264 frames
+    auto thunk = [](void* cd, ServerMediaSession* sms) {
+      std::unique_ptr<Ctx> w{ static_cast<Ctx*>(cd) };
+      DynamicRTSPServer* self = w->self;
 
-    auto subsession = new DynamicH264VideoFileServerMediaSubsession(envir(), false);
-    sms->addSubsession(subsession);
-    addServerMediaSession(sms);
-    return sms;
+      if (sms && w->first) {
+        // Remove the existing "ServerMediaSession" and create a new one, in case the underlying
+        // file has changed in some way:
+        self->removeServerMediaSession(sms);
+        sms = NULL;
+      }
+
+      if (!sms) {
+        sms = ServerMediaSession::createNew(self->envir(),
+                                            w->name, w->name,
+                                            "streamed by the LIVE555 Media Server");
+        OutPacketBuffer::maxSize = 2000000; // allow for some possibly large H.264 frames
+
+        auto* subsession =
+          new DynamicH264VideoFileServerMediaSubsession(self->envir(), False);
+        sms->addSubsession(subsession);
+        self->addServerMediaSession(sms);
+      }
+
+      (*w->cb)(w->cbData, sms);
+    };
+
+    RTSPServer::lookupServerMediaSession(streamName, thunk, ctx, isFirstLookupInSession);
   }
 };
 
