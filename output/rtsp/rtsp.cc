@@ -223,13 +223,12 @@ protected: // redefined virtual functions
 
     struct Ctx {
       DynamicRTSPServer* self;
-      char* name;
       lookupServerMediaSessionCompletionFunc* cb;
       void* cbData;
       Boolean first;
     };
 
-    auto* ctx = new Ctx{ this, strdup(streamName), completionFunc, completionClientData, isFirstLookupInSession };
+    auto* ctx = new Ctx{ this, completionFunc, completionClientData, isFirstLookupInSession };
 
     auto thunk = [](void* cd, ServerMediaSession* sms) {
       std::unique_ptr<Ctx> w{ static_cast<Ctx*>(cd) };
@@ -244,7 +243,7 @@ protected: // redefined virtual functions
 
       if (!sms) {
         sms = ServerMediaSession::createNew(self->envir(),
-                                            w->name, w->name,
+                                            stream_name, stream_name,
                                             "streamed by the LIVE555 Media Server");
         OutPacketBuffer::maxSize = 2000000; // allow for some possibly large H.264 frames
 
