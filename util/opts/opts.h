@@ -14,6 +14,7 @@ typedef struct options_s {
   union {
     unsigned *value;
     unsigned *value_uint;
+    unsigned long *value_ulong;
     unsigned *value_hex;
     bool *value_bool;
     float *value_float;
@@ -30,6 +31,7 @@ typedef struct options_s {
 #define OPTION_VALUE_LIST_SEP ";"
 
 #define OPTION_FORMAT_uint   "%u"
+#define OPTION_FORMAT_ulong   "%lu"
 #define OPTION_FORMAT_hex    "%08x"
 #define OPTION_FORMAT_bool   "%d"
 #define OPTION_FORMAT_float  "%f"

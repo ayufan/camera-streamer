@@ -57,11 +57,18 @@
         const params = Object.fromEntries(urlSearchParams.entries());
 
         fetch(window.location.href, {
-          body: JSON.stringify({
+          body: JSON.stringify(
+              params.hasOwnProperty('timeout_s')? {
               type: 'request',
               res: params.res,
               iceServers: iceServers,
-              keepAlive: true
+              keepAlive: true,
+              timeout_s: parseInt(params.timeout_s)
+          } : {
+              type: 'request',
+              res: params.res,
+              iceServers: iceServers,
+              keepAlive: true,
           }),
           headers: {
               'Content-Type': 'application/json'

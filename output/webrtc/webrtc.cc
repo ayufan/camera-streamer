@@ -18,7 +18,6 @@ extern "C" {
 
 #define DEFAULT_PING_INTERVAL_US        (1 * 1000 * 1000)
 #define DEFAULT_PONG_INTERVAL_US        (30 * 1000 * 1000)
-#define DEFAULT_TIMEOUT_S               (60 * 60)
 
 #ifdef USE_LIBDATACHANNEL
 
@@ -332,7 +331,7 @@ static std::shared_ptr<Client> webrtc_peer_connection(rtc::Configuration config,
     LOG_INFO(client.get(), "Client does not support Keep-Alives. This might result in stale streams.");
   }
 
-  int64_t timeout_s = message.value("timeout_s", DEFAULT_TIMEOUT_S);
+  int64_t timeout_s = message.value("timeout_s", webrtc_options->timeout_s);
   if (timeout_s > 0) {
     LOG_INFO(client.get(), "The stream will auto-close in %" PRId64 "s.", timeout_s);
     client->deadline_us = get_monotonic_time_us(NULL, NULL) + timeout_s * 1000 * 1000;
