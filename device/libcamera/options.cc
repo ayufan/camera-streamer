@@ -384,7 +384,7 @@ static std::pair<libcamera::Size, const char*> libcamera_parse_size(const char *
 }
 
 #if LIBCAMERA_VERSION_MAJOR == 0 && LIBCAMERA_VERSION_MINOR > 3 && LIBCAMERA_VERSION_PATCH >= 2 // Support for older libcamera versions
-static libcamera::Point libcamera_parse_point(const char *value)
+static std::pair<libcamera::Point, const char*> libcamera_parse_point(const char *value)
 {
   static const char *POINT_PATTERNS[] =
   {
@@ -403,7 +403,7 @@ static libcamera::Point libcamera_parse_point(const char *value)
     }
   }
 
-  return std::make_pair(libcamera::Point(), NULL);
+  return std::make_pair(libcamera::Point(), (const char*)NULL);
 }
 #endif
 
