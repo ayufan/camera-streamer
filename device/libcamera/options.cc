@@ -233,8 +233,8 @@ static int libcamera_device_dump_control_option(device_option_fn fn, void *opaqu
     opt.type = device_option_type_string;
     break;
 
-#if LIBCAMERA_VERSION_MAJOR > 0 ||
-    LIBCAMERA_VERSION_MAJOR == 0 && LIBCAMERA_VERSION_MINOR > 3 ||
+#if LIBCAMERA_VERSION_MAJOR > 0 || \
+    LIBCAMERA_VERSION_MAJOR == 0 && LIBCAMERA_VERSION_MINOR > 3 || \
     LIBCAMERA_VERSION_MAJOR == 0 && LIBCAMERA_VERSION_MINOR == 3 && LIBCAMERA_VERSION_PATCH >= 2 // Support for older libcamera versions
   case libcamera::ControlTypePoint:
     opt.type = device_option_type_float;
@@ -385,8 +385,8 @@ static std::pair<libcamera::Size, const char*> libcamera_parse_size(const char *
   return std::make_pair(libcamera::Size(), (const char*)NULL);
 }
 
-#if LIBCAMERA_VERSION_MAJOR > 0 ||
-    LIBCAMERA_VERSION_MAJOR == 0 && LIBCAMERA_VERSION_MINOR > 3 ||
+#if LIBCAMERA_VERSION_MAJOR > 0 || \
+    LIBCAMERA_VERSION_MAJOR == 0 && LIBCAMERA_VERSION_MINOR > 3 || \
     LIBCAMERA_VERSION_MAJOR == 0 && LIBCAMERA_VERSION_MINOR == 3 && LIBCAMERA_VERSION_PATCH >= 2 // Support for older libcamera versions
 {
   static const char *POINT_PATTERNS[] =
@@ -496,8 +496,8 @@ int libcamera_device_set_option(device_t *dev, const char *keyp, const char *val
     case libcamera::ControlTypeString:
       break;
 
-#if LIBCAMERA_VERSION_MAJOR > 0 ||
-    LIBCAMERA_VERSION_MAJOR == 0 && LIBCAMERA_VERSION_MINOR > 3 ||
+#if LIBCAMERA_VERSION_MAJOR > 0 || \
+    LIBCAMERA_VERSION_MAJOR == 0 && LIBCAMERA_VERSION_MINOR > 3 || \
     LIBCAMERA_VERSION_MAJOR == 0 && LIBCAMERA_VERSION_MINOR == 3 && LIBCAMERA_VERSION_PATCH >= 2 // Support for older libcamera versions
     case libcamera::ControlTypePoint:
       libcamera_parse_control_value<libcamera::Point>(
