@@ -388,6 +388,7 @@ static std::pair<libcamera::Size, const char*> libcamera_parse_size(const char *
 #if LIBCAMERA_VERSION_MAJOR > 0 || \
     LIBCAMERA_VERSION_MAJOR == 0 && LIBCAMERA_VERSION_MINOR > 3 || \
     LIBCAMERA_VERSION_MAJOR == 0 && LIBCAMERA_VERSION_MINOR == 3 && LIBCAMERA_VERSION_PATCH >= 2 // Support for older libcamera versions
+static libcamera::Point libcamera_parse_point(const char *value)
 {
   static const char *POINT_PATTERNS[] =
   {
