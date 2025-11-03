@@ -18,8 +18,7 @@ void http_write_response(
   fprintf(stream, "Content-Type: %s\r\n", content_type ? content_type : "text/plain");
   if (content_length > 0)
     fprintf(stream, "Content-Length: %d\r\n", content_length);
-  if (!status || strstr(status, "200 OK") == status)
-    fprintf(stream, "Access-Control-Allow-Origin: *\r\n");
+  fprintf(stream, "Access-Control-Allow-Origin: *\r\n");
   fprintf(stream, "\r\n");
   if (body) {
     fwrite(body, 1, content_length, stream);
