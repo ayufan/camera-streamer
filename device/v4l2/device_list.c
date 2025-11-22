@@ -1,4 +1,5 @@
 #include "v4l2.h"
+#include "device/device.h"
 #include "device/device_list.h"
 #include "util/opts/log.h"
 
@@ -59,6 +60,7 @@ static bool device_list_read_dev(device_info_t *info, const char *name)
   device_list_read_formats(fd, &info->output_formats, V4L2_BUF_TYPE_VIDEO_OUTPUT_MPLANE);
   close(fd);
 
+  info->open = device_v4l2_open;
   return true;
 
 error:

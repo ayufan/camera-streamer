@@ -3,6 +3,7 @@
 #ifdef USE_MPP
 
 #include "mpp.h"
+#include "device/device.h"
 #include "util/opts/log.h"
 
 #include <stdlib.h>
@@ -60,37 +61,26 @@ static bool mpp_is_available(void)
   return true;
 }
 
-static void add_format_if_missing(device_info_formats_t *formats, unsigned format)
+device_info_t *mpp_add_conversion(device_list_t *list, int mode, mpp_conversion_t *conv)
 {
-  for (int i = 0; i < formats->n; i++) {
-    if (formats->formats[i] == format) {
-      return;
-    }
-  }
+  device_info_t info = {NULL};
 
-  formats->n++;
-  formats->formats = realloc(formats->formats, sizeof(formats->formats[0]) * formats->n);
-  formats->formats[formats->n - 1] = format;
-}
-
-static device_info_t *find_or_create_mpp_device(device_list_t *list, const char *name)
-{
-  for (int i = 0; i < list->ndevices; i++) {
-    if (list->devices[i].path && strncmp(list->devices[i].path, "mpp://", 6) == 0) {
-      if (strcmp(list->devices[i].name, name) == 0) {
-        return &list->devices[i];
-      }
-    }
-  }
+  info.name = strdup(conv->name);
+  asprintf(&info.path, "%d:%d:%d", mode, conv->output_format, conv->capture_format);
+  info.m2m = true;
+  info.output_formats.formats = calloc(1, sizeof(unsigned));
+  info.output_formats.formats[0] = conv->output_format;
+  info.output_formats.n = 1;
+  info.capture_formats.formats = calloc(1, sizeof(unsigned));
+  info.capture_formats.formats[0] = conv->capture_format;
+  info.capture_formats.n = 1;
+  info.open = device_mpp_open;
 
   list->ndevices++;
-  list->devices = realloc(list->devices, sizeof(device_info_t) * list->ndevices);
-  device_info_t *info = &list->devices[list->ndevices - 1];
-  memset(info, 0, sizeof(*info));
-  info->name = strdup(name);
-  info->m2m = true;
+  list->devices = realloc(list->devices, sizeof(info) * list->ndevices);
+  list->devices[list->ndevices-1] = info;
 
-  return info;
+  return &list->devices[list->ndevices-1];
 }
 #endif
 
@@ -108,26 +98,12 @@ void device_list_mpp(device_list_t *list)
 
   for (int i = 0; mpp_decoder_conversions[i].name; i++) {
     mpp_conversion_t *conv = &mpp_decoder_conversions[i];
-    device_info_t *info = find_or_create_mpp_device(list, conv->name);
-
-    if (!info->path) {
-      info->path = strdup("mpp://decoder");
-    }
-
-    add_format_if_missing(&info->output_formats, conv->output_format);
-    add_format_if_missing(&info->capture_formats, conv->capture_format);
+    mpp_add_conversion(list, 0, conv);
   }
 
   for (int i = 0; mpp_encoder_conversions[i].name; i++) {
     mpp_conversion_t *conv = &mpp_encoder_conversions[i];
-    device_info_t *info = find_or_create_mpp_device(list, conv->name);
-
-    if (!info->path) {
-      info->path = strdup("mpp://encoder");
-    }
-
-    add_format_if_missing(&info->output_formats, conv->output_format);
-    add_format_if_missing(&info->capture_formats, conv->capture_format);
+    mpp_add_conversion(list, 1, conv);
   }
 
   LOG_INFO(NULL, "Rockchip MPP devices added to device list");

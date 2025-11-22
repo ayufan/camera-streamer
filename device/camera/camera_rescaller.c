@@ -69,7 +69,7 @@ buffer_list_t *camera_try_rescaller(camera_t *camera, buffer_list_t *src_capture
   char name2[256];
   sprintf(name2, "RESCALLER:%s", name);
 
-  device_t *device = device_v4l2_open(name2, device_info->path);
+  device_t *device = device_info->open(name2, device_info->path);
 
   buffer_list_t *rescaller_output = device_open_buffer_list_output(
     device, src_capture);

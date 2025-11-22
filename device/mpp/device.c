@@ -84,17 +84,110 @@ MppCodingType v4l2_to_mpp_coding(unsigned v4l2_fmt)
   }
 }
 
+
+static int mpp_init_decoder(device_t *dev, unsigned input_format, unsigned output_format)
+{
+  MPP_RET ret;
+
+  dev->mpp->codec_type = MPP_CODEC_TYPE_DECODER;
+  dev->mpp->coding_type = v4l2_to_mpp_coding(input_format);
+  dev->mpp->frame_fmt = v4l2_to_mpp_format(output_format);
+  dev->mpp->input_format = input_format;
+  dev->mpp->output_format = output_format;
+
+  if (dev->mpp->coding_type == MPP_VIDEO_CodingUnused) {
+    LOG_INFO(dev, "Unsupported input format for decoder");
+    return -1;
+  }
+
+  ret = mpp_create(&dev->mpp->ctx, &dev->mpp->mpi);
+  if (ret != MPP_OK) {
+    LOG_INFO(dev, "mpp_create failed: %d", ret);
+    return -1;
+  }
+
+  ret = mpp_init(dev->mpp->ctx, MPP_CTX_DEC, dev->mpp->coding_type);
+  if (ret != MPP_OK) {
+    LOG_INFO(dev, "mpp_init decoder failed: %d", ret);
+    return -1;
+  }
+
+  MppDecCfg cfg = NULL;
+  mpp_dec_cfg_init(&cfg);
+  mpp_dec_cfg_set_u32(cfg, "base:split_parse", 1);
+  ret = dev->mpp->mpi->control(dev->mpp->ctx, MPP_DEC_SET_CFG, cfg);
+  mpp_dec_cfg_deinit(cfg);
+
+  if (ret != MPP_OK) {
+    LOG_INFO(dev, "Failed to set decoder config: %d", ret);
+    return -1;
+  }
+
+  dev->mpp->initialized = true;
+  LOG_INFO(dev, "MPP decoder initialized");
+  return 0;
+}
+
+static int mpp_init_encoder(device_t *dev, unsigned input_format, unsigned output_format)
+{
+  MPP_RET ret;
+
+  dev->mpp->codec_type = MPP_CODEC_TYPE_ENCODER;
+  dev->mpp->coding_type = v4l2_to_mpp_coding(output_format);
+  dev->mpp->frame_fmt = v4l2_to_mpp_format(input_format);
+  dev->mpp->input_format = input_format;
+  dev->mpp->output_format = output_format;
+
+  if (dev->mpp->coding_type == MPP_VIDEO_CodingUnused) {
+    LOG_INFO(dev, "Unsupported output format for encoder");
+    return -1;
+  }
+
+  ret = mpp_create(&dev->mpp->ctx, &dev->mpp->mpi);
+  if (ret != MPP_OK) {
+    LOG_INFO(dev, "mpp_create failed: %d", ret);
+    return -1;
+  }
+
+  ret = mpp_init(dev->mpp->ctx, MPP_CTX_ENC, dev->mpp->coding_type);
+  if (ret != MPP_OK) {
+    LOG_INFO(dev, "mpp_init encoder failed: %d", ret);
+    return -1;
+  }
+
+  dev->mpp->initialized = true;
+  LOG_INFO(dev, "MPP encoder initialized (config will be set on buffer list open)");
+  return 0;
+}
+
 int mpp_device_open(device_t *dev)
 {
   dev->mpp = calloc(1, sizeof(device_mpp_t));
   if (!dev->mpp) {
     LOG_ERROR(dev, "Failed to allocate MPP device structure");
-    goto error;
   }
 
   dev->mpp->initialized = false;
   dev->mpp->fps = 30;
   dev->mpp->bitrate = 4000000;
+
+  int mode, input_format, output_format;
+  if (sscanf(dev->path, "%d:%d:%d", &mode, &input_format, &output_format) != 3) {
+    LOG_ERROR(dev, "Invalid MPP device path format: %s", dev->path);
+  }
+
+  switch (mode) {
+  case 0:
+    if (mpp_init_decoder(dev, input_format, output_format) < 0) {
+      LOG_ERROR(dev, "Failed to initialize MPP decoder");
+    }
+    break;
+  case 1:
+    if (mpp_init_encoder(dev, input_format, output_format) < 0) {
+      LOG_ERROR(dev, "Failed to initialize MPP encoder");
+    }
+    break;
+  }
 
   LOG_INFO(dev, "MPP device opened: %s", dev->path);
   return 0;
@@ -232,113 +325,9 @@ static device_hw_t hw_mpp = {
   .buffer_list_set_stream = mpp_buffer_list_set_stream,
 };
 
-static int mpp_init_decoder(device_t *dev, unsigned input_format, unsigned output_format)
+device_t *device_mpp_open(const char *name, const char *path)
 {
-  MPP_RET ret;
-
-  dev->mpp->codec_type = MPP_CODEC_TYPE_DECODER;
-  dev->mpp->coding_type = v4l2_to_mpp_coding(input_format);
-  dev->mpp->frame_fmt = v4l2_to_mpp_format(output_format);
-  dev->mpp->input_format = input_format;
-  dev->mpp->output_format = output_format;
-
-  if (dev->mpp->coding_type == MPP_VIDEO_CodingUnused) {
-    LOG_INFO(dev, "Unsupported input format for decoder");
-    return -1;
-  }
-
-  ret = mpp_create(&dev->mpp->ctx, &dev->mpp->mpi);
-  if (ret != MPP_OK) {
-    LOG_INFO(dev, "mpp_create failed: %d", ret);
-    return -1;
-  }
-
-  ret = mpp_init(dev->mpp->ctx, MPP_CTX_DEC, dev->mpp->coding_type);
-  if (ret != MPP_OK) {
-    LOG_INFO(dev, "mpp_init decoder failed: %d", ret);
-    return -1;
-  }
-
-  MppDecCfg cfg = NULL;
-  mpp_dec_cfg_init(&cfg);
-  mpp_dec_cfg_set_u32(cfg, "base:split_parse", 1);
-  ret = dev->mpp->mpi->control(dev->mpp->ctx, MPP_DEC_SET_CFG, cfg);
-  mpp_dec_cfg_deinit(cfg);
-
-  if (ret != MPP_OK) {
-    LOG_INFO(dev, "Failed to set decoder config: %d", ret);
-    return -1;
-  }
-
-  dev->mpp->initialized = true;
-  LOG_INFO(dev, "MPP decoder initialized");
-  return 0;
-}
-
-static int mpp_init_encoder(device_t *dev, unsigned input_format, unsigned output_format)
-{
-  MPP_RET ret;
-
-  dev->mpp->codec_type = MPP_CODEC_TYPE_ENCODER;
-  dev->mpp->coding_type = v4l2_to_mpp_coding(output_format);
-  dev->mpp->frame_fmt = v4l2_to_mpp_format(input_format);
-  dev->mpp->input_format = input_format;
-  dev->mpp->output_format = output_format;
-
-  if (dev->mpp->coding_type == MPP_VIDEO_CodingUnused) {
-    LOG_INFO(dev, "Unsupported output format for encoder");
-    return -1;
-  }
-
-  ret = mpp_create(&dev->mpp->ctx, &dev->mpp->mpi);
-  if (ret != MPP_OK) {
-    LOG_INFO(dev, "mpp_create failed: %d", ret);
-    return -1;
-  }
-
-  ret = mpp_init(dev->mpp->ctx, MPP_CTX_ENC, dev->mpp->coding_type);
-  if (ret != MPP_OK) {
-    LOG_INFO(dev, "mpp_init encoder failed: %d", ret);
-    return -1;
-  }
-
-  dev->mpp->initialized = true;
-  LOG_INFO(dev, "MPP encoder initialized (config will be set on buffer list open)");
-  return 0;
-}
-
-device_t *device_mpp_decoder_open(const char *name, unsigned input_format, unsigned output_format)
-{
-  char path[64];
-  snprintf(path, sizeof(path), "mpp://decoder/%s", name);
-
-  device_t *dev = device_open(name, path, &hw_mpp);
-  if (!dev)
-    return NULL;
-
-  if (mpp_init_decoder(dev, input_format, output_format) < 0) {
-    device_close(dev);
-    return NULL;
-  }
-
-  return dev;
-}
-
-device_t *device_mpp_encoder_open(const char *name, unsigned input_format, unsigned output_format)
-{
-  char path[64];
-  snprintf(path, sizeof(path), "mpp://encoder/%s", name);
-
-  device_t *dev = device_open(name, path, &hw_mpp);
-  if (!dev)
-    return NULL;
-
-  if (mpp_init_encoder(dev, input_format, output_format) < 0) {
-    device_close(dev);
-    return NULL;
-  }
-
-  return dev;
+  return device_open(name, path, &hw_mpp);
 }
 
 #endif

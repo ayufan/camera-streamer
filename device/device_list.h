@@ -2,6 +2,8 @@
 
 #include <stdbool.h>
 
+typedef struct device_s device_t;
+
 typedef struct device_info_formats_s {
   unsigned *formats;
   unsigned n;
@@ -16,6 +18,8 @@ typedef struct device_info_s {
 
   device_info_formats_t output_formats;
   device_info_formats_t capture_formats;
+
+  device_t *(*open)(const char *name, const char *path);
 } device_info_t;
 
 typedef struct device_list_s {
