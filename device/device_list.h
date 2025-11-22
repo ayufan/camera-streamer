@@ -2,6 +2,8 @@
 
 #include <stdbool.h>
 
+typedef struct device_s device_t;
+
 typedef struct device_info_formats_s {
   unsigned *formats;
   unsigned n;
@@ -16,6 +18,8 @@ typedef struct device_info_s {
 
   device_info_formats_t output_formats;
   device_info_formats_t capture_formats;
+
+  device_t *(*open)(const char *name, const char *path);
 } device_info_t;
 
 typedef struct device_list_s {
@@ -23,7 +27,8 @@ typedef struct device_list_s {
   int ndevices;
 } device_list_t;
 
-device_list_t *device_list_v4l2();
+void device_list_v4l2(device_list_t *list);
+void device_list_mpp(device_list_t *list);
 bool device_info_has_format(device_info_t *info, bool capture, unsigned format);
 device_info_t *device_list_find_m2m_format(device_list_t *list, unsigned output, unsigned capture);
 device_info_t *device_list_find_m2m_formats(device_list_t *list, unsigned output, unsigned capture_formats[], unsigned *found_format);

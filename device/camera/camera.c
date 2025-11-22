@@ -13,7 +13,9 @@ camera_t *camera_open(camera_options_t *options)
   camera_t *camera = calloc(1, sizeof(camera_t));
   camera->name = "CAMERA";
   camera->options = *options;
-  camera->device_list = device_list_v4l2();
+  camera->device_list = calloc(1, sizeof(device_list_t));
+  device_list_v4l2(camera->device_list);
+  device_list_mpp(camera->device_list);
 
   if (camera_configure_input(camera) < 0) {
     goto error;

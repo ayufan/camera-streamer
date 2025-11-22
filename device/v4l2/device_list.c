@@ -1,4 +1,5 @@
 #include "v4l2.h"
+#include "device/device.h"
 #include "device/device_list.h"
 #include "util/opts/log.h"
 
@@ -59,6 +60,7 @@ static bool device_list_read_dev(device_info_t *info, const char *name)
   device_list_read_formats(fd, &info->output_formats, V4L2_BUF_TYPE_VIDEO_OUTPUT_MPLANE);
   close(fd);
 
+  info->open = device_v4l2_open;
   return true;
 
 error:
@@ -68,14 +70,13 @@ error:
   return false;
 }
 
-device_list_t *device_list_v4l2()
+void device_list_v4l2(device_list_t *list)
 {
   DIR *dev = opendir("/dev");
   if (!dev) {
-    return NULL;
+    return;
   }
 
-  device_list_t *list = calloc(1, sizeof(device_list_t));
   struct dirent *ent;
 
   while ((ent = readdir(dev)) != NULL) {
@@ -92,6 +93,4 @@ device_list_t *device_list_v4l2()
   }
 
   closedir(dev);
-
-  return list;
 }

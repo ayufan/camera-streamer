@@ -30,11 +30,14 @@ jobs:
           - docker: arm64/v8
             variant: arm64v8
             runner: ubuntu-24.04-arm
-        build_type: [generic, raspi]
+        build_type: [generic, raspi, mpp]
         exclude:
           - arch:
               docker: amd64
             build_type: raspi
+          - arch:
+              docker: amd64
+            build_type: mpp
     steps:
     - name: Checkout
       uses: actions/checkout@v3

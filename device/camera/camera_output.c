@@ -153,7 +153,7 @@ int camera_configure_output(camera_t *camera, buffer_list_t *camera_capture, con
     return -1;
   }
 
-  *device = device_v4l2_open(name, device_info->path);
+  *device = device_info->open(name, device_info->path);
 
   buffer_list_t *output = device_open_buffer_list_output(*device, src_capture);
   buffer_list_t *capture = device_open_buffer_list_capture2(*device, NULL, output, chosen_format, true);
