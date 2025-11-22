@@ -1,5 +1,8 @@
 on:
   push:
+    branches:
+      - main
+      - develop
     paths-ignore:
       - '.github/workflows/build_test.yaml'
       - 'RELEASE.md'
