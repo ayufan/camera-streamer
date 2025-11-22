@@ -68,14 +68,13 @@ error:
   return false;
 }
 
-device_list_t *device_list_v4l2()
+void device_list_v4l2(device_list_t *list)
 {
   DIR *dev = opendir("/dev");
   if (!dev) {
-    return NULL;
+    return;
   }
 
-  device_list_t *list = calloc(1, sizeof(device_list_t));
   struct dirent *ent;
 
   while ((ent = readdir(dev)) != NULL) {
@@ -92,6 +91,4 @@ device_list_t *device_list_v4l2()
   }
 
   closedir(dev);
-
-  return list;
 }

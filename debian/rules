@@ -22,11 +22,19 @@ export USE_HW_H264 = 1
 export USE_LIBDATACHANNEL = 1
 export USE_LIBCAMERA = 1
 export USE_RTSP = 1
+export USE_MPP = 0
+else ifneq ($(filter mpp,$(DEB_BUILD_PROFILES)),)
+export USE_HW_H264 = 1
+export USE_LIBDATACHANNEL = 1
+export USE_LIBCAMERA = 0
+export USE_RTSP = 1
+export USE_MPP = 1
 else ifneq ($(filter generic,$(DEB_BUILD_PROFILES)),)
 export USE_HW_H264 = 0
 export USE_LIBCAMERA = 0
+export USE_MPP = 0
 else
-$(error Use DEB_BUILD_PROFILES=raspi or DEB_BUILD_PROFILES=generic)
+$(error Use DEB_BUILD_PROFILES=raspi, mpp or generic)
 endif
 
 %:

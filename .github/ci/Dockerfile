@@ -34,6 +34,8 @@ ARG GIT_VERSION
 ARG BUILD_TYPE="generic"
 ENV DEB_BUILD_PROFILES="$BUILD_TYPE"
 
+RUN [ "$BUILD_TYPE" != "mpp" ] || ./tools/compile_mpp.sh
+
 RUN apt-get build-dep -y $PWD
 RUN . /etc/os-release && \
   export RELEASE_SUFFIX="$VERSION_CODENAME" && \

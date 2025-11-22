@@ -23,7 +23,8 @@ typedef struct device_list_s {
   int ndevices;
 } device_list_t;
 
-device_list_t *device_list_v4l2();
+void device_list_v4l2(device_list_t *list);
+void device_list_mpp(device_list_t *list);
 bool device_info_has_format(device_info_t *info, bool capture, unsigned format);
 device_info_t *device_list_find_m2m_format(device_list_t *list, unsigned output, unsigned capture);
 device_info_t *device_list_find_m2m_formats(device_list_t *list, unsigned output, unsigned capture_formats[], unsigned *found_format);

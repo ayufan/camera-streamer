@@ -5,3 +5,6 @@
 [submodule "third_party/magic_enum"]
 	path = third_party/magic_enum
 	url = https://github.com/Neargye/magic_enum.git
+[submodule "third_party/mpp"]
+	path = third_party/mpp
+	url = https://github.com/rockchip-linux/mpp.git
