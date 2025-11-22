@@ -3,6 +3,7 @@ on:
     branches:
       - main
       - develop
+      - 'stable-*'
     paths-ignore:
       - '.github/workflows/build_test.yaml'
       - 'RELEASE.md'
