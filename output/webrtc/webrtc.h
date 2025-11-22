@@ -11,6 +11,7 @@ typedef struct webrtc_options_s {
   bool disabled;
   char ice_servers[WEBRTC_OPTIONS_LENGTH];
   bool disable_client_ice;
+  unsigned long timeout_s;
 } webrtc_options_t;
 
 // WebRTC
