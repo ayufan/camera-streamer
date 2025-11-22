@@ -56,20 +56,18 @@
         const urlSearchParams = new URLSearchParams(window.location.search);
         const params = Object.fromEntries(urlSearchParams.entries());
 
+        const body = {
+          type: 'request',
+          res: params.res,
+          iceServers: iceServers,
+          keepAlive: true
+        };
+        if (typeof timeout_s === 'number') {
+          body.timeout_s = timeout_s;
+        }
+
         fetch(window.location.href, {
-          body: JSON.stringify(
-              params.hasOwnProperty('timeout_s')? {
-              type: 'request',
-              res: params.res,
-              iceServers: iceServers,
-              keepAlive: true,
-              timeout_s: parseInt(params.timeout_s)
-          } : {
-              type: 'request',
-              res: params.res,
-              iceServers: iceServers,
-              keepAlive: true,
-          }),
+          body: JSON.stringify(body),
           headers: {
               'Content-Type': 'application/json'
           },
