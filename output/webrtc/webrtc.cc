@@ -416,7 +416,7 @@ static void http_webrtc_request(http_worker_t *worker, FILE *stream, const nlohm
   auto client = webrtc_peer_connection(webrtc_configuration, message);
   LOG_INFO(client.get(), "Stream requested.");
 
-  client->video = webrtc_add_video(client->pc, webrtc_client_video_payload_type, rand(), "video", "");
+  client->video = webrtc_add_video(client->pc, webrtc_client_video_payload_type, rand(), "video", "stream");
 
   try {
     {
@@ -489,7 +489,7 @@ static void http_webrtc_offer(http_worker_t *worker, FILE *stream, const nlohman
   LOG_VERBOSE(client.get(), "Remote SDP Offer: %s", std::string(message["sdp"]).c_str());
 
   try {
-    client->video = webrtc_add_video(client->pc, webrtc_client_video_payload_type, rand(), "video", "");
+    client->video = webrtc_add_video(client->pc, webrtc_client_video_payload_type, rand(), "video", "stream");
 
     {
       std::unique_lock lock(client->lock);
