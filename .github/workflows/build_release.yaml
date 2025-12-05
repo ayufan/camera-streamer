@@ -13,7 +13,7 @@ jobs:
           - docker: amd64
             runner: ubuntu-24.04
           - docker: arm/v7
-            runner: ubuntu-24.04
+            runner: ubuntu-24.04-arm
           - docker: arm64/v8
             runner: ubuntu-24.04-arm
         build_type: [generic, raspi]

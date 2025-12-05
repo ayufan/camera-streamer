@@ -26,7 +26,7 @@ jobs:
             runner: ubuntu-24.04
           - docker: arm/v7
             variant: arm32v7
-            runner: ubuntu-24.04
+            runner: ubuntu-24.04-arm
           - docker: arm64/v8
             variant: arm64v8
             runner: ubuntu-24.04-arm
