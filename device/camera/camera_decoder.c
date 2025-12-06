@@ -39,7 +39,7 @@ buffer_list_t *camera_configure_decoder(camera_t *camera, buffer_list_t *src_cap
 
   device_video_force_key(camera->camera);
 
-  camera->decoder = device_v4l2_open("DECODER", device->path);
+  camera->decoder = device->open("DECODER", device->path);
 
   buffer_list_t *decoder_output = device_open_buffer_list_output(
     camera->decoder, src_capture);

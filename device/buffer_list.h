@@ -48,6 +48,7 @@ typedef struct buffer_list_s {
     struct buffer_list_v4l2_s *v4l2;
     struct buffer_list_dummy_s *dummy;
     struct buffer_list_libcamera_s *libcamera;
+    struct buffer_list_mpp_s *mpp;
   };
 
   buffer_t *queued_bufs[MAX_BUFFER_QUEUE];

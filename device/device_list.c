@@ -64,5 +64,7 @@ void device_list_free(device_list_t *list)
     free(info->capture_formats.formats);
   }
 
-  free(list);
+  free(list->devices);
+  list->devices = NULL;
+  list->ndevices = 0;
 }

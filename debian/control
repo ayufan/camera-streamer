@@ -32,6 +32,17 @@ Depends: ${shlibs:Depends}, ${misc:Depends}
 Description: camera-streamer with CSI and USB camera,
   RTSP, WebRTC, and H264 support
 
+Package: camera-streamer-mpp
+Provides: camera-streamer
+Breaks: camera-streamer (<< 0.2)
+Conflicts: camera-streamer (<< 0.2)
+Replaces: camera-streamer (<< 0.2)
+Build-Profiles: <mpp>
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: camera-streamer with CSI and USB camera,
+  RTSP, WebRTC, and H264 support using MPP hardware acceleration
+
 Package: camera-streamer-generic
 Provides: camera-streamer
 Build-Profiles: <!raspi>

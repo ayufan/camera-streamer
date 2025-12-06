@@ -24,6 +24,10 @@ ifneq (x,x$(shell which ccache))
 CCACHE ?= ccache
 endif
 
+ifneq (x,x$(wildcard $(CURDIR)/tmp/deps/lib/pkgconfig))
+export PKG_CONFIG_PATH := $(CURDIR)/tmp/deps/lib/pkgconfig:$(PKG_CONFIG_PATH)
+endif
+
 LIBDATACHANNEL_PATH ?= third_party/libdatachannel
 LIBDATACHANNEL_VERSION ?= $(LIBDATACHANNEL_PATH)/v0.23.222529eb2c8ae44
 
@@ -32,6 +36,7 @@ USE_FFMPEG ?= $(shell pkg-config libavutil libavformat libavcodec && echo 1)
 USE_LIBCAMERA ?= $(shell pkg-config libcamera && echo 1)
 USE_RTSP ?= $(shell pkg-config live555 && echo 1)
 USE_LIBDATACHANNEL ?= $(shell [ -e $(LIBDATACHANNEL_PATH)/CMakeLists.txt ] && echo 1)
+USE_MPP ?= $(shell pkg-config rockchip_mpp && echo 1)
 
 ifeq (1,$(DEBUG))
 CFLAGS += -g
@@ -65,6 +70,11 @@ LDLIBS += -L$(LIBDATACHANNEL_PATH)/build/deps/usrsctp/usrsctplib -lusrsctp
 LDLIBS += -L$(LIBDATACHANNEL_PATH)/build/deps/libsrtp -lsrtp2
 LDLIBS += -L$(LIBDATACHANNEL_PATH)/build/deps/libjuice -ljuice-static
 LDLIBS += -lcrypto -lssl
+endif
+
+ifeq (1,$(USE_MPP))
+CFLAGS += -DUSE_MPP $(shell pkg-config --cflags rockchip_mpp)
+LDLIBS += $(shell pkg-config --libs rockchip_mpp)
 endif
 
 HTML_SRC = $(addsuffix .c,$(HTML))

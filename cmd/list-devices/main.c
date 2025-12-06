@@ -26,12 +26,14 @@ void print_formats(const char *type, device_info_formats_t *formats)
 
 int main(int argc, const char *argv[])
 {
-  device_list_t *list = device_list_v4l2();
+  device_list_t *list = calloc(1, sizeof(device_list_t));
+  device_list_v4l2(list);
+  device_list_mpp(list);
 
   printf("Found %d devices\n", list->ndevices);
 
   for (int i = 0; i < list->ndevices; i++) {
-    device_info_t * info = &list->devices[i];
+    device_info_t *info = &list->devices[i];
 
     printf("Device %d: %s / %s / camera: %d, m2m: %d\n", i, info->name, info->path, info->camera, info->m2m);
     print_formats("Output / IN", &info->output_formats);
@@ -39,5 +41,6 @@ int main(int argc, const char *argv[])
   }
 
   device_list_free(list);
+  free(list);
   return 0;
 }
