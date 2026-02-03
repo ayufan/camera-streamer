@@ -1,0 +1,71 @@
+#!/bin/bash
+
+if [[ $# -lt 2 ]]; then
+  echo "usage: $0 <generic|raspi> <bookworm|trixie> [amd64|arm32v7|arm64v8]"
+  exit 1
+fi
+
+docker_image="deb_make"
+
+export BUILD_TYPE="raspi"
+if [[ -n "$1" ]]; then
+  export BUILD_TYPE="$1"
+fi
+shift
+
+export DEBIAN_VERSION="bookworm"
+if [[ -n "$1" ]]; then
+  DEBIAN_VERSION="$1"
+  docker_image="${docker_image}_${1}"
+fi
+shift
+
+arch=${1:-$(dpkg --print-architecture)}
+shift
+
+case "$arch" in
+  amd64)
+    export DOCKER_ARCH="amd64"
+    export DOCKER_REPO="amd64/"
+    ;;
+
+  armhf|arm32v7)
+    export DOCKER_ARCH="arm/v7"
+    export DOCKER_REPO="arm32v7/"
+    ;;
+
+  arm64|arm64v8)
+    export DOCKER_ARCH="arm64/v8"
+    export DOCKER_REPO="arm64v8/"
+    ;;
+
+  *)
+    echo "Unsupported architecture: $arch"
+    exit 1
+    ;;
+esac
+
+PWD=$(pwd)
+ROOT=$(cd -- "$( dirname -- "${BASH_SOURCE[0]}" )/../.." &> /dev/null && pwd)
+
+set -xeo pipefail
+
+if [[ -z "$GIT_VERSION" ]]; then
+  GIT_VERSION=$(git describe --tags)
+fi
+
+DOCKER_BUILDKIT=1 docker build \
+  --tag "$docker_image" \
+  --target deb_make \
+  --file .github/ci/Dockerfile \
+  --build-arg DOCKER_ARCH \
+  --build-arg DOCKER_REPO \
+  --build-arg DEBIAN_VERSION \
+  --build-arg BUILD_TYPE \
+  --build-arg GIT_VERSION \
+  .
+
+docker rm -f "$docker_image" || true
+docker create --name "$docker_image" "$docker_image"
+trap 'docker rm -f "$docker_image" || true' EXIT
+docker cp "$docker_image":/deb/. deb/
