@@ -13,7 +13,7 @@ RUN [ "$BUILD_TYPE" != "raspi" ] || \
     ( [ "$(dpkg --print-architecture)" != "armhf" ] || echo "deb http://raspbian.raspberrypi.org/raspbian/ $DEBIAN_VERSION main contrib non-free rpi" > /etc/apt/sources.list ) && \
     gpg --keyserver keyserver.ubuntu.com --recv-keys 9165938D90FDDD2E 82B129927FA3303E && \
     gpg --export 9165938D90FDDD2E 82B129927FA3303E > /etc/apt/trusted.gpg.d/raspi.gpg && \
-    echo "deb http://archive.raspberrypi.org/debian/ $DEBIAN_VERSION main" > /etc/apt/sources.list.d/raspi.list && \
+    echo "deb [trusted=yes] http://archive.raspberrypi.org/debian/ $DEBIAN_VERSION main" > /etc/apt/sources.list.d/raspi.list && \
     apt-get -y update && \
     apt-get -y install libcamera-dev liblivemedia-dev \
   )
