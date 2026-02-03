@@ -96,7 +96,7 @@ static bool links_enqueue_capture_buffers(buffer_list_t *capture_list, int *time
   buffer_t *capture_buf = NULL;
   uint64_t now_us = get_monotonic_time_us(NULL, NULL);
 
-  if (now_us - capture_list->last_enqueued_us > STALE_TIMEOUT_US && capture_list->dev->output_list == NULL) {
+  if (now_us - capture_list->last_enqueued_us > STALE_TIMEOUT_US && buffer_list_count_enqueued(capture_list) > 0 && capture_list->dev->output_list == NULL) {
     LOG_INFO(capture_list, "Stale detected. Restarting streaming...");
     buffer_list_set_stream(capture_list, false);
     buffer_list_set_stream(capture_list, true);
