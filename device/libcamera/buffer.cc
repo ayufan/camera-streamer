@@ -80,7 +80,12 @@ int libcamera_buffer_enqueue(buffer_t *buf, const char *who)
   auto const &camera = buf->buf_list->dev->libcamera->camera;
 
   request->reuse(libcamera::Request::ReuseBuffers);
-  request->controls() = std::move(buf->buf_list->dev->libcamera->controls);
+  auto &request_controls = request->controls();
+  auto &device_controls = buf->buf_list->dev->libcamera->controls;
+  for (auto &control : device_controls) {
+    request_controls.set(control.first, control.second);
+  }
+  device_controls.clear();
 
   if (camera->queueRequest(buf->libcamera->request.get()) < 0) {
     LOG_ERROR(buf, "Can't queue buffer.");
