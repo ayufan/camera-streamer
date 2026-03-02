@@ -34,7 +34,7 @@ typedef struct buffer_lock_s {
 } buffer_lock_t;
 
 #define DEFAULT_BUFFER_LOCK_TIMEOUT 16 // ~60fps
-#define DEFAULT_BUFFER_LOCK_GET_TIMEOUT 2000 // 2s
+#define DEFAULT_BUFFER_LOCK_GET_TIMEOUT 3000 // 3s
 
 #define DEFINE_BUFFER_LOCK(_name, _timeout_ms) buffer_lock_t _name = { \
     .name = #_name, \
