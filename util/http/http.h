@@ -6,7 +6,7 @@
 #include <string.h>
 #include <ctype.h>
 #include <pthread.h>
-#include <netinet/ip.h>
+#include <netinet/in.h>
 
 typedef struct buffer_s buffer_t;
 typedef struct http_worker_s http_worker_t;
@@ -41,7 +41,7 @@ typedef struct http_worker_s {
 
   int client_fd;
   int content_length;
-  struct sockaddr_in client_addr;
+  struct sockaddr_in6 client_addr;
   char *client_host;
   char client_method[BUFSIZE];
   char range_header[BUFSIZE];
