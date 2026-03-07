@@ -19,28 +19,37 @@
 #define HEADER_USER_AGENT "User-Agent:"
 #define HEADER_HOST "Host:"
 
-static int http_listen(char *addr4, int port, int maxcons)
+static int http_listen(char *addr, int port, int maxcons)
 {
-  struct sockaddr_in server = {0};
+  struct sockaddr_in6 server = {0};
   int listenfd = -1;
-  char listen_addr[INET_ADDRSTRLEN];
+  char listen_addr[INET6_ADDRSTRLEN];
+  char mapped[INET6_ADDRSTRLEN];
 
-  // getaddrinfo for host
-  server.sin_family = AF_INET;
-  if (inet_pton(server.sin_family, addr4, &server.sin_addr) != 1) {
+  server.sin6_family = AF_INET6;
+
+  // If an IPv4 address is given, convert to IPv4-mapped IPv6 address
+  // e.g. "0.0.0.0" -> "::ffff:0.0.0.0", so we can use a single AF_INET6 socket for both
+  if (strchr(addr, ':') == NULL) {
+    snprintf(mapped, sizeof(mapped), "::ffff:%s", addr);
+    addr = mapped;
+  }
+
+  if (inet_pton(server.sin6_family, addr, &server.sin6_addr) != 1) {
     perror("inet_pton");
     return -1;
   }
-  server.sin_port = htons(port);
+  server.sin6_port = htons(port);
 
-  listenfd = socket(server.sin_family, SOCK_STREAM, 0);
+  listenfd = socket(server.sin6_family, SOCK_STREAM, 0);
   if (listenfd < 0) {
-    LOG_INFO(NULL, "Invalid HTTP listen address: %s", addr4);
+    LOG_INFO(NULL, "Invalid HTTP listen address: %s", addr);
     return -1;
   }
 
   int optval = 1;
   setsockopt(listenfd, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(int));
+  setsockopt(listenfd, IPPROTO_IPV6, IPV6_V6ONLY, &(int){0}, sizeof(int));
 
   if (bind(listenfd, (struct sockaddr *)&server, sizeof(server)) < 0) {
     perror("bind");
@@ -52,7 +61,7 @@ static int http_listen(char *addr4, int port, int maxcons)
     goto error;
   }
 
-  if (inet_ntop(server.sin_family, &server.sin_addr, listen_addr, sizeof(listen_addr)) == NULL) {
+  if (inet_ntop(server.sin6_family, &server.sin6_addr, listen_addr, sizeof(listen_addr)) == NULL) {
     perror("inet_ntop");
     goto error;
   }
@@ -223,7 +232,12 @@ static void http_process(http_worker_t *worker, FILE *stream)
 
 static void http_client(http_worker_t *worker)
 {
-  worker->client_host = inet_ntoa(worker->client_addr.sin_addr);
+  char client_addr_str[INET6_ADDRSTRLEN];
+  inet_ntop(AF_INET6, &worker->client_addr.sin6_addr, client_addr_str, sizeof(client_addr_str));
+  // Strip IPv4-mapped prefix "::ffff:" for cleaner logging of IPv4 clients
+  worker->client_host = strncmp(client_addr_str, "::ffff:", 7) == 0
+    ? client_addr_str + 7
+    : client_addr_str;
   LOG_INFO(worker, "Client connected %s (fd=%d).", worker->client_host, worker->client_fd);
 
   struct timeval tv;
