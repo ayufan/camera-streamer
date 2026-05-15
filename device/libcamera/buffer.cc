@@ -81,8 +81,7 @@ int libcamera_buffer_enqueue(buffer_t *buf, const char *who)
 
   request->reuse(libcamera::Request::ReuseBuffers);
   request->controls().merge(
-    buf->buf_list->dev->libcamera->controls,
-    libcamera::ControlList::MergePolicy::OverwriteExisting
+    buf->buf_list->dev->libcamera->controls
   );
 
   if (camera->queueRequest(buf->libcamera->request.get()) < 0) {
