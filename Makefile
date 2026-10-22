@@ -103,7 +103,7 @@ clean:
 
 headers:
 	find -name '*.h' | xargs -n1 $(CCACHE) $(CC) $(CFLAGS) -std=gnu17 -Wno-error -c -o /dev/null
-	find -name '*.hh' | xargs -n1 $(CCACHE) $(CXX) $(CFLAGS) -std=c++17 -Wno-error -c -o /dev/null
+	find -name '*.hh' | xargs -n1 $(CCACHE) $(CXX) $(CFLAGS) -std=c++20 -Wno-error -c -o /dev/null
 
 -include $(OBJS:.o=.d)
 
@@ -111,7 +111,7 @@ headers:
 	$(CCACHE) $(CC) -std=gnu17 -MMD $(CFLAGS) -c -o $@ $<
 
 %.o: %.cc
-	$(CCACHE) $(CXX) -std=c++17 -MMD $(CFLAGS) -c -o $@ $<
+	$(CCACHE) $(CXX) -std=c++20 -MMD $(CFLAGS) -c -o $@ $<
 
 .PRECIOUS: html/%.c
 html/%.c: html/%

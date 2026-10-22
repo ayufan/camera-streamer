@@ -1,5 +1,6 @@
 #ifdef USE_LIBCAMERA
 #include "libcamera.hh"
+#include <libcamera/base/span.h>
 
 void libcamera_print_cameras(device_t *dev)
 {

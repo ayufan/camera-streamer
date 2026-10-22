@@ -1,6 +1,7 @@
 #ifdef USE_LIBCAMERA
 #include "libcamera.hh"
 #include "third_party/magic_enum/include/magic_enum.hpp"
+#include <libcamera/base/span.h>
 
 static std::string libcamera_device_option_normalize(std::string key)
 {
